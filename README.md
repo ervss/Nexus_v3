@@ -1,59 +1,93 @@
-# Nexus Gallery a Nexus Deck na Windows
+# Nexus v3
 
-Projekt je v tomto priečinku na ploche. Galéria používa existujúci lokálny Nexus LITE server a jeho databázu; Deck je rozšírenie pre Brave/Chrome v `extensions/Nexus_Deck`.
+Lokálna multimediálna knižnica, vyhľadávač a správa zdrojov postavená na **FastAPI + SQLite (FTS5) + Alpine.js + esbuild** v dizajne **Obsidian Glass**.
 
-## Orientácia v projekte
+---
 
-- `app/`: Python server, HTML šablóny a zdrojové CSS/JavaScript súbory.
-- `app/static/main.js`: zdroj hlavného dashboardu. `npm run build` vytvorí používaný `app/static/main.min.js` a balíky video enhancera. Šablóna `app/templates/index.html` načítava práve `main.min.js`; ostatné dashboard skripty a CSS načítava samostatne.
-- `extensions/`: samostatné rozšírenia prehliadača. [Prehľad rozšírení](docs/extensions.md) uvádza ich priečinky a verzie.
-- `extension/filester_search/`: samostatný Filester Discovery Bridge s vlastným README.
-- `tests/`, `scripts/`, `requirements/`: testy, pomocné nástroje a Python závislosti.
-- `data/`, `logs/`, `.venv/`, `node_modules/`: lokálny stav a závislosti; nepatria do Gitu. História načítaných playlistov je v `data/playlist_fetches/` a pri prvom použití sa skopíruje zo starého `app/playlist_fetches/`, ak tam existuje.
+## Hlavné funkcie
 
-Výskumné podklady zostávajú v koreňovom priečinku a `docs/`, aby sa nezneplatnili existujúce odkazy. Verziované knižnice vo vnútri rozšírení sú súčasťou ich samostatne načítateľných balíkov.
+- **Galéria & Split-Screen Prehrávač**
+  - Mriežkový (**Grid**) a plynulý vertikálny (**Quantum Flow**) pohľad s 3 výkonovými režimami skla (*Vyvážené / Plné / Bez bluru*) a motívmi *Obsidian Dark* / *Frosted Light*.
+  - Prehrávač s rozbaľovacím `#player-drawer`, podporou **HLS (`hls.js`)**, **JIT obnovou expirovaných streamov**, **Split-Screenom** pre dve videá vedľa seba a automatickou voľbou zrkadiel.
+- **Local Vault (`/vault`)**
+  - Rýchle lokálne FTS5 vyhľadávanie naprieč knižnicou, Telegram indexom, fórami, Filesterom a MEGA priečinkami s pushdown filtrami, deduplikáciou a prehrávaním priamo v trezore.
+- **Quantum Search & QS Mega Links**
+  - Hĺbkové vyhľadávanie naprieč Telegram kanálmi, fórami a webmi (vrátane lokálneho SearXNG dorkingu).
+  - **Pack / Link Harvester** s pravým slide-over **Harvester Inspectorom**: lokálne dekódovanie `link-to.net/.../dynamic?r=...` bez HTTP volaní, viacodkazová extrakcia z `rentry.org`, cache rozbalených odkazov (`ResolvedLinkCache`), podpora **MEGA, Bunkr, Gofile, Pixeldrain, Cyberdrop, Erome, Filester**, rebríček kvality kanálov (**Top kanály** s pripínaním) a prepínateľný rotátor bypass služieb.
+- **MEGA Hub**
+  - Overovanie a prehliadanie verejných MEGA priečinkov a súborov, výber konkrétnych videí do knižnice, podpora Tor / vlastnej proxy a integrácia s userscriptom `userscripts/mega-hub-capture.user.js`.
+- **Zdroje & Huby**
+  - **Discovery & Huby:** Camwhores, SxyPrn, Faphouse (`/faphouse`), Fusion Hub, Forum Hub (`/forum`), Creator Radar, Webshare a lokálne priečinky.
+  - **Diagnostika:** Link Tester (`/tester`), Test webov (`/sources-test`), Štatistiky (`/stats`) a Príkazová paleta (`Ctrl+Shift+P`).
 
-## Spustenie galérie
+---
 
-V PowerShelli alebo CMD prejdi do koreňového priečinka projektu a spusti:
+## Rýchle spustenie (Windows)
+
+Najspoľahlivejší spôsob je použiť priložené spúšťacie skripty s automatickým dohľadom (`/_nexus/live`):
 
 ```powershell
-npm start
+# Spustenie hlavného servera (classic mód na porte 8000)
+.\START_NEXUS_CLASSIC.bat
+
+# Zastavenie servera aj dohľadu
+.\STOP_NEXUS.bat
 ```
 
-Príkaz spustí existujúci `run_lite.py` na porte 8000. Ak už Nexus LITE na tomto porte beží, oznámi jeho adresu. Okno servera nechaj otvorené. Galéria je na <http://127.0.0.1:8000/> a stav API na <http://127.0.0.1:8000/api/health>. Dáta ostávajú v existujúcej lokálnej databáze projektu.
+Po spustení otvor v prehliadači:
+- **Hlavná galéria:** <http://127.0.0.1:8000/>
+- **Local Vault:** <http://127.0.0.1:8000/vault>
+- **Forum Hub:** <http://127.0.0.1:8000/forum>
+- **Link Tester:** <http://127.0.0.1:8000/tester>
+- **Stav servera:** <http://127.0.0.1:8000/_nexus/live>
 
-## MEGA Hub
+---
 
-Otvor **MEGA Hub** v dashboarde a vlož verejný odkaz na priečinok alebo video. Pod **Odosielanie z prehliadača** nájdeš dva userscripty pre Tampermonkey. **MEGA Link Capture** ponúkne overenie odkazov na stránke. **MEGA Helper** pridá tlačidlo **Poslať do MEGA Hubu** priamo do otvoreného MEGA priečinka. Ak je v Nexuse nastavený `NEXUS_BRIDGE_TOKEN`, zadaj ho cez menu príslušného userscriptu.
+## Vývoj, build a testy
 
-Odoslané položky sa ukladajú do Hubu. Videá môžeš prehrať v dashboarde a pridať do hlavnej galérie cez **Uložiť vybrané do galérie**.
+### Požiadavky
+- Python 3.12+ (`.venv` v koreňovom priečinku)
+- Node.js 20+ (`npm install`)
+- Voliteľne: `ffmpeg` (náhľady/remux), `aria2c` (Download Manager), lokálny `SearXNG` (`scripts/start_searxng.ps1`)
 
-Proxy pre prehrávanie a sťahovanie z MEGA sa nastavuje v `.env`. `MEGA_PROXY_MODE=tor` použije lokálny Tor, ktorý Nexus spustí podľa potreby, a oddelí okruhy podľa videa. Pri limite prenosu alebo prerušení Nexus skúsi nový Tor okruh a pokračuje od prvého ešte neodoslaného bajtu. `MEGA_PROXY_URL` môže určiť vlastnú HTTP, HTTPS alebo SOCKS5 proxy a má prednosť. Po zmene reštartuj Nexus. IDM preberá lokálnu adresu Nexusu aj pri zachytení videa zo Split Screenu. Pri vyčerpaní pokusov Nexus oznámi chybu. Pri oboch prázdnych hodnotách používa MEGA bežné pripojenie.
+### Build frontendových balíkov
 
-## Správca sťahovania (aria2)
+Po úpravách v `app/static/main.js`, `app/static/dashboard.css` alebo `extensions/shared/` spusti:
 
-Na Windows nainštaluj aria2 cez `winget install --id aria2.aria2 -e` a reštartuj Nexus, aby `aria2c.exe` bolo dostupné v `PATH`. Ak je aria2 nainštalované inde, nastav pred spustením servera premennú `ARIA2C_PATH` na úplnú cestu k `aria2c.exe`. Správca sa spustí automaticky a jeho chránené JSON-RPC rozhranie počúva iba na localhost. Fronta sa obnovuje z `data/download-manager/aria2.session`; predvolené umiestnenie súborov je `data/downloads`. Cieľový priečinok a paralelizmus možno upraviť v paneli **Download Manager**.
+```powershell
+npm run build
+```
 
-## Brave: načítanie a obnovenie Decku
+Tým sa vygenerujú `app/static/main.min.js`, `app/static/dashboard.min.css`, enhancer balíky a zosynchronizujú sa zdieľané knižnice rozšírení.
 
-1. Otvor `brave://extensions`.
-2. Zapni **Režim vývojára** a vyber **Načítať rozbalené**.
-3. Vyber priečinok `extensions/Nexus_Deck`, v ktorom je `manifest.json`.
-4. Po úprave súborov klikni pri rozšírení na **Obnoviť** a znova otvor jeho bočný panel.
+### Testy
 
-V nastaveniach Decku použi adresu dashboardu `http://127.0.0.1:8000` a tlačidlo **Otestovať**. Starú lokálnu adresu s predchádzajúcim portom Deck pri načítaní automaticky prepíše. Ak bola uložená iná adresa, zmeň ju priamo v nastaveniach Decku.
+```powershell
+# Python backend & regresné testy
+.venv\Scripts\python.exe -m pytest tests/test_smoke_regressions.py tests/test_telegram_mega_links.py tests/test_mega_hub.py tests/test_vault_search.py -v
 
-Deck posiela odkazy do `/api/lite/quick-import`, číta videá a stav z lokálneho API a prehráva cez lokálny stream endpoint. Nie je potrebný cloud ani ďalší databázový server.
+# Frontend UI kontraktné testy
+node --test tests/phase1_phase2_ui_contracts.test.mjs tests/phase3_phase4_ui_contracts.test.mjs tests/unified_glass_vault_ui.test.mjs
+```
 
-## Prehrávač Decku
+---
 
-Na karte **Prehrať** otvor video z poradia. Obraz prepína **FIT/FILL**, koliesko nad videom mení zoom, ťahanie posúva výrez a dvojklik ho obnoví. Tlačidlo **Ovládanie** rozbalí rýchlosť, hlasitosť, kvalitu HLS, slučku, úsek A–B, otočenie, zrkadlenie a úpravy obrazu vrátane FX ostrosti (ak zdroj povoľuje CORS). Tlačidlo **⛶** zväčší prehrávač v paneli; Esc ho zavrie. Video ovládajú aj Space, J/L, šípky, Home/End a A/S/D na ľavý/stredný/pravý výrez. Položky v poradí možno potiahnuť, odobrať, vyprázdniť alebo obnoviť tlačidlom **Obnoviť poradie**; história uchová poslednú pozíciu. **Stiahnuť** zaradí priamy súbor do lokálneho aria2 Download Managera. HLS playlist sa cez tlačidlo Decku nesťahuje.
+## Štruktúra projektu
 
-## Stabilny start a automaticka obnova servera
+| Priečinok / Súbor | Popis |
+| :--- | :--- |
+| `app/` | FastAPI backend, SQLAlchemy modely, extraktory, routery a Jinja2 šablóny |
+| `app/static/` | Frontend JS/CSS moduly (`main.js`, `search.js`, `obsidian_glass.css`, `tokens.css`) |
+| `app/templates/` | HTML šablóny (`index.html`, `vault.html`, `partials/nx_rail.html`, lazy modály v `partials/modals/`) |
+| `extensions/` | Prehliadačové rozšírenia pre Chrome/Brave (`camwhores-url-fixer`, `Nexus_Gallery`, `nexus-video-selector`, …) |
+| `userscripts/` | Tampermonkey userscripty (`mega-hub-capture.user.js`, split-screen a ďalšie) |
+| `scripts/` | Spúšťacie, dohľadové a pomocné skripty (`nexus_server.py`, `start_nexus.ps1`, `stop_nexus.ps1`) |
+| `tests/` | Pytest a Node.js kontraktné testy |
+| `.env.example` | Vzor konfigurácie prostredia (lokálny `.env`, databázy, session a cookies sú v `.gitignore`) |
 
-`START_NEXUS.bat` a `START_NEXUS_CLASSIC.bat` spustaju classic server cez projektovy Python bez hot reloadu. `START_NEXUS_LITE.bat` pouziva rovnaky dohled pre lite rezim. Launcher caka na skutocnu HTTP odpoved; obsadeny port nepovazuje za funkcny server.
+---
 
-Samostatny dohled kontroluje `/_nexus/live` kazdych 5 sekund (timeout 2 sekundy). Po troch zlyhaniach alebo pade worker procesu obnovi svoj vlastny strom procesov. Startup ma 120-sekundovu toleranciu. Najviac 5 zlyhani za 10 minut, s odstupom 2 az 30 sekund, zabrani nekonecnej restartovacej slucke. Pri vypadku sa rozpracovana praca v pamati moze prerusit; dohled nie je nahradou perzistentnej fronty.
+## Konfigurácia (`.env`)
 
-`STOP_NEXUS.bat` najprv zastavi dohled, aby server po umyselnom zastaveni znovu nenastartoval. Diagnostika: `logs/server/supervisor-launch-8000.log`, `supervisor-8000.log`, `stacks-8000.log` a samostatne serverove logy. Stack dump sa aktivuje pri chybajucom heartbeat; neobsahuje lokalne hodnoty premennych. Playwright browser runtime pre projekt: `.venv\Scripts\python.exe -m playwright install chromium`.
+1. Skopíruj `.env.example` ako `.env` a doplň vlastné hodnoty (databáza, prihlasovacie údaje, Telegram API, prípadne `MEGA_PROXY_MODE=tor` alebo `MEGA_PROXY_URL`).
+2. Lokálne súbory (`.env`, `*.db`, `*.session`, `*_cookies.txt`, `data/`, `logs/`) nie sú verzované v Gite.
