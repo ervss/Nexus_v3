@@ -1,0 +1,846 @@
+{
+  "manifest_version": 3,
+  "name": "Nexus PWC Fresh 3",
+  "version": "2.41.20",
+  "description": "Premium media explorer and bulk importer. Seamlessly extract and sync videos to your self-hosted Nexus Vault.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "cookies",
+    "contextMenus",
+    "tabs",
+    "notifications",
+    "webRequest",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "downloads",
+    "alarms"
+  ],
+  "host_permissions": [
+    "http://localhost/*",
+    "http://localhost:*/*",
+    "http://127.0.0.1/*",
+    "http://127.0.0.1:*/*",
+    "https://turbo.cr/*",
+    "https://*.turbo.cr/*",
+    "https://*.turbocdn.st/*",
+    "https://*.scdn.st/*",
+    "https://fapfolder.club/*",
+    "https://*.fapfolder.club/*",
+    "https://*.freeuseporn.com/*",
+    "https://*.freepornfun.com/*",
+    "https://*.baddiehub.com/*",
+    "https://api.gofile.io/*",
+    "https://gofile.io/*",
+    "https://*.pornhub.com/*",
+    "https://porntrex.com/*",
+    "https://www.porntrex.com/*",
+    "https://*.porntrex.com/*",
+    "https://beeg.com/*",
+    "https://www.beeg.com/*",
+    "https://*.beeg.com/*",
+    "https://video.beeg.com/*",
+    "https://pornhat.com/*",
+    "https://www.pornhat.com/*",
+    "https://*.pornhat.com/*",
+    "https://noodlemagazine.com/*",
+    "https://*.noodlemagazine.com/*",
+    "https://*.phncdn.com/*",
+    "https://pornone.com/*",
+    "https://*.pornone.com/*",
+    "https://pornhd.com/*",
+    "https://*.pornhd.com/*",
+    "https://sxyprn.com/*",
+    "https://*.sxyprn.com/*",
+    "https://sxyprn.net/*",
+    "https://*.sxyprn.net/*",
+    "https://fullporner.com/*",
+    "https://*.fullporner.com/*",
+    "https://bunkr.site/*",
+    "https://*.bunkr.site/*",
+    "https://bunkr.si/*",
+    "https://*.bunkr.si/*",
+    "https://bunkr.cr/*",
+    "https://bunkr.red/*",
+    "https://bunkr.media/*",
+    "https://bunkr.black/*",
+    "https://bunkr.is/*",
+    "https://bunkr.la/*",
+    "https://bunkr.ws/*",
+    "https://bunkr.fi/*",
+    "https://bunkr.ph/*",
+    "https://bunkr.pk/*",
+    "https://bunkr.ps/*",
+    "https://bunkr.sk/*",
+    "https://bunkr.ac/*",
+    "https://bunkr.ci/*",
+    "https://apidl.bunkr.ru/*",
+    "https://get.bunkrr.su/*",
+    "https://bunkrr.pics/*",
+    "https://*.bunkrr.pics/*",
+    "https://filester.me/*",
+    "https://*.filester.me/*",
+    "https://filester.gg/*",
+    "https://*.filester.gg/*",
+    "https://filester.net/*",
+    "https://*.filester.net/*",
+    "https://filester.co/*",
+    "https://*.filester.co/*",
+    "https://filester.org/*",
+    "https://*.filester.org/*",
+    "https://filester.io/*",
+    "https://*.filester.io/*",
+    "https://fileditchfiles.st/*",
+    "https://*.fileditchfiles.st/*",
+    "https://fileditchfiles.me/*",
+    "https://*.fileditchfiles.me/*",
+    "https://fileditch.st/*",
+    "https://*.fileditch.st/*",
+    "https://fileditchvids.st/*",
+    "https://*.fileditchvids.st/*",
+    "https://theditch.st/*",
+    "https://*.theditch.st/*",
+    "https://freakingfileditch.me/*",
+    "https://*.freakingfileditch.me/*",
+    "https://blehpooffileditchvidsstuff.org/*",
+    "https://*.blehpooffileditchvidsstuff.org/*",
+    "https://donotsharethesetemplinksyouidiot.st/*",
+    "https://*.donotsharethesetemplinksyouidiot.st/*",
+    "https://*.xvideos.com/*",
+    "https://*.xvideos.red/*",
+    "https://*.xhamster.com/*",
+    "https://*.xhamster-fr.com/*",
+    "https://*.xhamster.desi/*",
+    "https://pornhoarder.io/*",
+    "https://*.pornhoarder.io/*",
+    "https://pornhoarder.net/*",
+    "https://*.pornhoarder.net/*",
+    "https://pornhoarder.pictures/*",
+    "https://*.pornhoarder.pictures/*",
+    "https://pornhoarder.tv/*",
+    "https://*.pornhoarder.tv/*",
+    "https://archivebate.com/*",
+    "https://www.archivebate.com/*",
+    "https://cdn.archivebate.com/*",
+    "https://leakporner.com/*",
+    "https://*.leakporner.com/*",
+    "https://w12.leakporner.com/*",
+    "https://*.w12.leakporner.com/*",
+    "https://rec-ur-bate.com/*",
+    "https://www.rec-ur-bate.com/*",
+    "https://*.rec-ur-bate.com/*",
+    "https://recurbate.com/*",
+    "https://www.recurbate.com/*",
+    "https://*.recurbate.com/*",
+    "https://recu.me/*",
+    "https://*.recu.me/*",
+    "https://recu.me/performer/ukranian_baby/popular*",
+    "https://luluvids.top/*",
+    "https://*.luluvids.top/*",
+    "https://luluvids.com/*",
+    "https://*.luluvids.com/*",
+    "https://bxcdn.net/*",
+    "https://*.bxcdn.net/*",
+    "https://bysezoxexe.com/*",
+    "https://*.bysezoxexe.com/*",
+    "https://398fitus.com/*",
+    "https://*.398fitus.com/*",
+    "https://58img.top/*",
+    "https://*.58img.top/*",
+    "https://thots.tv/*",
+    "https://www.thots.tv/*",
+    "https://camwhores.tv/*",
+    "https://www.camwhores.tv/*",
+    "https://*.camwhores.tv/*",
+    "https://fullporner.net/*",
+    "https://*.fullporner.net/*",
+    "https://djav.org/*",
+    "https://*.djav.org/*",
+    "https://hornysimp.com/*",
+    "https://www.hornysimp.com/*",
+    "https://*.hornysimp.com/*",
+    "https://*.hornysimp.com.lv/*",
+    "https://*.hornysimp.net/*",
+    "https://*.hornysimp.org/*",
+    "https://*.hornysimp.tv/*",
+    "https://nsfwclips.co/*",
+    "https://*.nsfwclips.co/*",
+    "https://xmoviesforyou.com/*",
+    "https://*.xmoviesforyou.com/*",
+    "https://cyberleaks.top/*",
+    "https://erome.com/*",
+    "https://*.erome.com/*",
+    "https://fpo.xxx/*",
+    "https://www.fpo.xxx/*",
+    "https://*.fpo.xxx/*",
+    "https://faphouse.com/*",
+    "https://www.faphouse.com/*",
+    "https://*.faphouse.com/*",
+    "https://*.flixcdn.com/*",
+    "https://coomerfans.com/*",
+    "https://www.coomerfans.com/*",
+    "https://*.coomerfans.com/*",
+    "https://1porn.tv/*",
+    "https://www.1porn.tv/*",
+    "https://*.1porn.tv/*",
+    "https://fuq.com/*",
+    "https://www.fuq.com/*",
+    "https://*.fuq.com/*",
+    "https://xxxdbx.com/*",
+    "https://www.xxxdbx.com/*",
+    "https://*.xxxdbx.com/*",
+    "https://d.v1d30.com/*",
+    "https://*.v1d30.com/*",
+    "https://epalovo.com/*",
+    "https://web.epalovo.com/*",
+    "https://*.epalovo.com/*",
+    "https://img.ebacdn.com/*",
+    "https://*.ebacdn.com/*",
+    "https://pxp.cool/*",
+    "https://*.pxp.cool/*",
+    "https://porn-xp.eu/*",
+    "https://*.porn-xp.eu/*",
+    "https://*.pornxp.sh/*",
+    "https://internetchicks.com/*",
+    "https://www.internetchicks.com/*",
+    "https://*.internetchicks.com/*",
+    "https://leakedzone.com/*",
+    "https://www.leakedzone.com/*",
+    "https://*.leakedzone.com/*",
+    "https://cyberfile.me/*",
+    "https://*.cyberfile.me/*",
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "strip_corp_headers",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  },
+  "action": {
+    "default_icon": {
+      "16": "icon16.png",
+      "32": "icon32.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://fapfolder.club/*",
+        "https://*.fapfolder.club/*",
+        "https://fap.onl/*",
+        "https://*.fap.onl/*",
+        "https://*.freeuseporn.com/*",
+        "https://*.freepornfun.com/*",
+        "https://*.eporner.com/*",
+        "https://*.porntrex.com/*",
+        "https://*.whoreshub.com/*",
+        "https://*.leakporner.com/*",
+        "https://*.pornhub.com/*",
+        "https://*.xvideos.com/*",
+        "https://*.xvideos.red/*",
+        "https://*.xhamster.com/*",
+        "https://*.xhamster.desi/*",
+        "https://*.spankbang.com/*",
+        "https://*.pornone.com/*",
+        "https://*.tnaflix.com/*",
+        "https://*.beeg.com/*",
+        "https://*.pornhat.com/*",
+        "https://*.noodlemagazine.com/*",
+        "https://*.thisvid.com/*",
+        "https://*.camwhores.tv/*",
+        "https://*.fpo.xxx/*",
+        "https://*.1porn.tv/*",
+        "https://*.hornysimp.com/*",
+        "https://*.erome.com/*",
+        "https://*.redgifs.com/*",
+        "https://*.ixxx.com/*",
+        "https://*.fullporner.com/*",
+        "https://*.fullporner.net/*",
+        "https://*.thots.tv/*",
+        "https://*.recurbate.com/*",
+        "https://*.rec-ur-bate.com/*",
+        "https://*.archivebate.com/*",
+        "https://*.pornhoarder.tv/*",
+        "https://*.pornhoarder.io/*",
+        "https://*.pornhoarder.net/*",
+        "https://*.coomerfans.com/*",
+        "https://*.hornysimp.net/*",
+        "https://*.nsfw247.to/*",
+        "https://*.nsfw247.xxx/*",
+        "https://*.bigporn.com/*",
+        "https://*.baddiehub.com/*",
+        "https://*.epalovo.com/*",
+        "https://*.internetchicks.com/*",
+        "https://internetchicks.com/*",
+        "https://www.internetchicks.com/*",
+        "https://*.leakedzone.com/*",
+        "https://leakedzone.com/*",
+        "https://www.leakedzone.com/*"
+      ],
+      "js": [
+        "radar_content.js"
+      ],
+      "css": [
+        "radar_content.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://turbo.cr/*",
+        "https://*.turbo.cr/*"
+      ],
+      "js": [
+        "turbo_grid_importer.js"
+      ],
+      "css": [
+        "turbo_grid_importer.css"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "https://www.xvideos.com/*",
+        "https://xvideos.com/*",
+        "https://*.xvideos.com/*",
+        "https://www.xvideos.red/*",
+        "https://xvideos.red/*",
+        "https://*.xvideos.red/*"
+      ],
+      "js": [
+        "xvideos_import_panel.js"
+      ],
+      "css": [
+        "xvideos_import_panel.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "exclude_matches": [
+        "https://webk.telegram.org/*",
+        "https://web.telegram.org/*",
+        "https://k.telegram.org/*"
+      ],
+      "js": [
+        "turbo_simpcity_content.js"
+      ],
+      "css": [
+        "turbo_simpcity_content.css"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "https://gofile.io/d/*",
+        "https://filester.me/f/*",
+        "https://filester.me/d/*",
+        "https://filester.gg/f/*",
+        "https://filester.gg/d/*",
+        "https://filester.net/f/*",
+        "https://filester.net/d/*",
+        "https://filester.co/f/*",
+        "https://filester.co/d/*",
+        "https://filester.org/f/*",
+        "https://filester.org/d/*",
+        "https://filester.io/f/*",
+        "https://filester.io/d/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ]
+    },
+    {
+      "matches": [
+        "https://filester.me/manager*",
+        "https://filester.gg/manager*",
+        "https://filester.net/manager*",
+        "https://filester.co/manager*",
+        "https://filester.org/manager*",
+        "https://filester.io/manager*"
+      ],
+      "js": [
+        "filester_manager_scanner.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://pornhoarder.io/watch/*",
+        "https://pornhoarder.net/watch/*",
+        "https://pornhoarder.pictures/watch/*",
+        "https://pornhoarder.tv/watch/*",
+        "https://*.pornhoarder.tv/watch/*",
+        "https://pornhoarder.io/pornvideo/*",
+        "https://pornhoarder.net/pornvideo/*",
+        "https://pornhoarder.pictures/pornvideo/*",
+        "https://pornhoarder.tv/pornvideo/*",
+        "https://*.pornhoarder.tv/pornvideo/*",
+        "https://fullporner.com/watch/*",
+        "https://*.fullporner.com/watch/*"
+      ],
+      "js": [
+        "pornhoarder_interceptor.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://pornhoarder.io/player_t.php*",
+        "https://pornhoarder.io/player.php*",
+        "https://pornhoarder.net/player_t.php*",
+        "https://pornhoarder.net/player.php*",
+        "https://pornhoarder.pictures/player_t.php*",
+        "https://pornhoarder.pictures/player.php*",
+        "https://pornhoarder.tv/player_t.php*",
+        "https://pornhoarder.tv/player.php*",
+        "https://*.pornhoarder.tv/player_t.php*",
+        "https://*.pornhoarder.tv/player.php*",
+        "https://filemoon.sx/e/*",
+        "https://*.filemoon.sx/e/*",
+        "https://filemoon.to/e/*",
+        "https://*.filemoon.to/e/*",
+        "https://filemoon.la/e/*",
+        "https://*.filemoon.la/e/*",
+        "https://filemoon.nl/e/*",
+        "https://*.filemoon.nl/e/*",
+        "https://filemoon.me/e/*",
+        "https://*.filemoon.me/e/*",
+        "https://filemoon.info/e/*",
+        "https://*.filemoon.info/e/*",
+        "https://dood.re/e/*",
+        "https://dood.wf/e/*",
+        "https://dood.cx/e/*",
+        "https://dood.sh/e/*",
+        "https://dood.pm/e/*",
+        "https://dood.yt/e/*",
+        "https://dood.ws/e/*",
+        "https://dood.la/e/*",
+        "https://dood.to/e/*",
+        "https://dood.so/e/*",
+        "https://dood.li/e/*",
+        "https://dood.watch/e/*",
+        "https://dood.work/e/*",
+        "https://dood.stream/e/*",
+        "https://doodstream.com/e/*",
+        "https://doodstream.co/e/*",
+        "https://doodstream.io/e/*",
+        "https://dooood.com/e/*",
+        "https://ds2play.com/e/*",
+        "https://ds2video.com/e/*",
+        "https://d0o0d.com/e/*",
+        "https://d000d.com/e/*",
+        "https://d0000d.com/e/*",
+        "https://vide0.net/e/*",
+        "https://doodcdn.co/e/*",
+        "https://all3do.com/e/*",
+        "https://do0od.com/e/*",
+        "https://doply.net/e/*",
+        "https://voe.sx/e/*",
+        "https://voe.to/e/*",
+        "https://voe.la/e/*",
+        "https://voe-unblock.com/e/*",
+        "https://streamtape.com/e/*",
+        "https://*.streamtape.com/e/*",
+        "https://streamtape.to/e/*",
+        "https://*.streamtape.to/e/*",
+        "https://streamtape.net/e/*",
+        "https://*.streamtape.net/e/*",
+        "https://vtbe.to/*",
+        "https://*.vtbe.to/*",
+        "https://streamplay.to/e/*",
+        "https://*.streamplay.to/e/*",
+        "https://*.lulustream.com/e/*",
+        "https://luluvdo.com/e/*",
+        "https://*.luluvdo.com/e/*",
+        "https://luluvid.com/e/*",
+        "https://*.luluvid.com/e/*",
+        "https://lulu.stream/e/*",
+        "https://*.lulu.stream/e/*",
+        "https://luluvids.com/e/*",
+        "https://*.luluvids.com/e/*",
+        "https://luluvids.top/e/*",
+        "https://*.luluvids.top/e/*",
+        "https://netu.ac/e/*",
+        "https://*.netu.ac/e/*",
+        "https://bigwarp.io/e/*",
+        "https://398fitus.com/*",
+        "https://vcdn.fullporner.net/video/*",
+        "https://*.fullporner.net/video/*"
+      ],
+      "js": [
+        "pornhoarder_player_interceptor.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://bunkr.pk/*",
+        "https://*.bunkr.pk/*",
+        "https://bunkr.cr/*",
+        "https://*.bunkr.cr/*",
+        "https://bunkr.ph/*",
+        "https://*.bunkr.ph/*",
+        "https://bunkr.si/*",
+        "https://*.bunkr.si/*",
+        "https://bunkr.ac/*",
+        "https://*.bunkr.ac/*",
+        "https://bunkr.ru/*",
+        "https://bunkr.black/*",
+        "https://bunkr.media/*",
+        "https://bunkr.site/*",
+        "https://bunkr.red/*",
+        "https://bunkr.is/*",
+        "https://bunkr.la/*",
+        "https://bunkr.ws/*",
+        "https://bunkr.fi/*",
+        "https://bunkr.ps/*",
+        "https://bunkr.sk/*",
+        "https://bunkr.ci/*",
+        "https://bunkrr.pics/*",
+        "https://*.bunkrr.pics/*"
+      ],
+      "js": [
+        "bunkr_ad_guard.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://bunkr-albums.io/*",
+        "https://balbums.st/*",
+        "https://balbums.io/*",
+        "https://bunkr.ph/*",
+        "https://bunkr.cr/*",
+        "https://bunkr.si/*",
+        "https://bunkr.ac/*",
+        "https://bunkr.ru/*",
+        "https://bunkr.black/*",
+        "https://bunkr.media/*",
+        "https://bunkr.pk/*",
+        "https://*.bunkr.ph/*",
+        "https://*.bunkr.cr/*",
+        "https://bunkrr.pics/*",
+        "https://*.bunkrr.pics/*"
+      ],
+      "js": [
+        "bunkr_bridge_content.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://vkvideo.ru/*",
+        "https://vk.com/*",
+        "https://vk.ru/*"
+      ],
+      "js": [
+        "vk_playlist_content.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://bunkr-albums.io/*",
+        "https://balbums.st/*",
+        "https://balbums.io/*",
+        "https://bunkr.ph/*",
+        "https://bunkr.cr/*",
+        "https://bunkr.si/*",
+        "https://bunkr.ac/*",
+        "https://bunkr.ru/*",
+        "https://bunkr.black/*",
+        "https://bunkr.media/*",
+        "https://bunkr.pk/*",
+        "https://*.bunkr.ph/*",
+        "https://*.bunkr.cr/*",
+        "https://bunkrr.pics/*",
+        "https://*.bunkrr.pics/*"
+      ],
+      "js": [
+        "bunkr_album_importer.js"
+      ],
+      "css": [
+        "bunkr_album_importer.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://faphouse.com/*",
+        "https://www.faphouse.com/*",
+        "https://*.faphouse.com/*"
+      ],
+      "js": [
+        "faphouse_grid_importer.js"
+      ],
+      "css": [
+        "faphouse_grid_importer.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://fapfolder.club/*",
+        "https://*.fapfolder.club/*"
+      ],
+      "js": [
+        "fapfolder_grid_importer.js"
+      ],
+      "css": [
+        "fapfolder_grid_importer.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://fapfolder.club/"
+      ],
+      "js": [
+        "fapfolder_feed_gallery.js"
+      ],
+      "css": [
+        "fapfolder_feed_gallery.css"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://www.erome.com/*",
+        "https://erome.com/*"
+      ],
+      "js": [
+        "erome_scanner.js"
+      ],
+      "css": [
+        "erome_scanner.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.redgifs.com/*",
+        "https://redgifs.com/*"
+      ],
+      "js": [
+        "redgifs_grid_importer.js"
+      ],
+      "css": [
+        "redgifs_grid_importer.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.xfree.com/*",
+        "https://xfree.com/*"
+      ],
+      "js": [
+        "xfree_card_metadata.js"
+      ],
+      "css": [
+        "xfree_card_metadata.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.eporner.com/*",
+        "https://eporner.com/*"
+      ],
+      "js": [
+        "vendor/hls.min.js",
+        "whoreshub-player.js",
+        "listing-player-sites.js",
+        "eporner_playlist_mix_shared.js",
+        "eporner_grid_importer.js",
+        "eporner_playlist_studio.js",
+        "listing-player-bootstrap.js"
+      ],
+      "css": [
+        "eporner_grid_importer.css",
+        "eporner_playlist_studio.css",
+        "listing-player.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://drtuber.com/*",
+        "https://www.drtuber.com/*",
+        "https://*.drtuber.com/*"
+      ],
+      "js": [
+        "drtuber_grid_importer.js"
+      ],
+      "css": [
+        "drtuber_grid_importer.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.redtube.com/*",
+        "https://redtube.com/*",
+        "https://*.redtube.com/*"
+      ],
+      "js": [
+        "redtube_grid_importer.js"
+      ],
+      "css": [
+        "redtube_grid_importer.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://xxxdbx.com/*",
+        "https://www.xxxdbx.com/*"
+      ],
+      "js": [
+        "xxxdbx_grid_importer.js"
+      ],
+      "css": [
+        "xxxdbx_grid_importer.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://69tubed.com/*",
+        "https://www.69tubed.com/*",
+        "https://*.69tubed.com/*",
+        "https://*.69tubed.live/*"
+      ],
+      "js": [
+        "tubed69_grid_importer.js"
+      ],
+      "css": [
+        "tubed69_grid_importer.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://coomerfans.com/u/*",
+        "https://www.coomerfans.com/u/*",
+        "https://coomerfans.com/post-search*",
+        "https://www.coomerfans.com/post-search*",
+        "https://coomerfans.com/posts*",
+        "https://www.coomerfans.com/posts*",
+        "https://coomerfans.com/?*",
+        "https://www.coomerfans.com/?*"
+      ],
+      "js": [
+        "coomerfans_scanner.js"
+      ],
+      "css": [
+        "coomerfans_scanner.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.sxyprn.com/*/blog/*",
+        "https://*.sxyprn.net/*/blog/*",
+        "https://*.sxyprn.com/blog/*",
+        "https://*.sxyprn.net/blog/*"
+      ],
+      "js": [
+        "sxyprn_blog_importer.js"
+      ],
+      "css": [
+        "sxyprn_blog_importer.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://epalovo.com/*",
+        "https://web.epalovo.com/*",
+        "https://*.epalovo.com/*"
+      ],
+      "js": [
+        "epalovo_grid_importer.js"
+      ],
+      "css": [
+        "epalovo_grid_importer.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "exclude_matches": [
+        "https://fapfolder.club/*",
+        "https://*.fapfolder.club/*",
+        "https://sxyprn.com/*",
+        "https://*.sxyprn.com/*",
+        "https://sxyprn.net/*",
+        "https://*.sxyprn.net/*",
+        "https://faphouse.com/*",
+        "https://www.faphouse.com/*",
+        "https://*.faphouse.com/*",
+        "https://webk.telegram.org/*",
+        "https://web.telegram.org/*",
+        "https://k.telegram.org/*"
+      ],
+      "js": [
+        "hls.min.js",
+        "universal_importer.js"
+      ],
+      "css": [
+        "universal_importer.css"
+      ],
+      "run_at": "document_end",
+      "all_frames": true
+    },
+    {
+      "matches": [
+        "https://embedindia.st/embed/oktagon-94-eckerlin-vs-kozma-29462*"
+      ],
+      "js": [
+        "vlc_capture.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "hls.min.js",
+        "popup.html"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}

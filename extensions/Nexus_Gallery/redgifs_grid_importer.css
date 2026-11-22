@@ -1,0 +1,145 @@
+.nexus-rg-toolbar {
+    position: fixed;
+    top: 88px;
+    right: 20px;
+    z-index: 2147483647;
+    width: min(420px, calc(100vw - 28px));
+    background: rgba(10, 15, 23, 0.88);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.45);
+    color: #fff;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.nexus-rg-toolbar[data-busy="1"] {
+    opacity: 0.88;
+}
+
+.nexus-rg-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #10b981;
+}
+
+.nexus-rg-stats {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #cbd5e1;
+}
+
+.nexus-rg-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.nexus-rg-actions button {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.nexus-rg-actions button.primary {
+    border-color: rgba(16, 185, 129, 0.35);
+    background: rgba(16, 185, 129, 0.16);
+    color: #d1fae5;
+}
+
+.nexus-rg-actions button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.nexus-rg-check {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 2147483645;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nexus-rg-check input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    cursor: pointer;
+}
+
+.nexus-rg-check span {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    background: rgba(7, 12, 20, 0.84);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.nexus-rg-check input:checked + span {
+    background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.nexus-rg-meta {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    z-index: 2147483645;
+    padding: 6px 8px;
+    border-radius: 10px;
+    background: rgba(7, 12, 20, 0.78);
+    color: #e2e8f0;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.35;
+    pointer-events: none;
+}
+
+.nexus-rg-toolbar button[data-role="refresh"] {
+    border-color: rgba(59, 130, 246, 0.35);
+    background: rgba(59, 130, 246, 0.12);
+    color: #dbeafe;
+}
+
+.nexus-rg-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 2147483647;
+    background: rgba(10, 15, 23, 0.92);
+    color: #fff;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.18s ease;
+    pointer-events: none;
+    max-width: min(420px, calc(100vw - 24px));
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.nexus-rg-toast.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.nexus-rg-toast[data-error="1"] {
+    border-color: rgba(239, 68, 68, 0.45);
+}

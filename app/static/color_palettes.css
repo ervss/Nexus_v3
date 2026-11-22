@@ -1,0 +1,367 @@
+/* The same tokens paint the dashboard and the swatch for each palette. */
+[data-nx-palette="original"] {
+    --palette-bg: #0a0d15;
+    --palette-panel: #161c2c;
+    --palette-raised: #242d43;
+    --palette-accent: #a855f7;
+    --palette-secondary: #22d3ee;
+}
+
+[data-nx-palette="red-hot"] {
+    --palette-bg: #111114;
+    --palette-panel: #1d1d21;
+    --palette-raised: #2b292e;
+    --palette-accent: #ff5d68;
+    --palette-secondary: #ff936a;
+    --palette-text: #f7f2f3;
+    --palette-muted: #bfb3b9;
+    --palette-glow-strength: 16%;
+}
+
+[data-nx-palette="arctic-pulse"] {
+    --palette-bg: #081421;
+    --palette-panel: #102437;
+    --palette-raised: #19324a;
+    --palette-accent: #58d9ff;
+    --palette-secondary: #8dafff;
+    --palette-text: #edf9ff;
+    --palette-muted: #a9c2d5;
+    --palette-glow-strength: 24%;
+}
+
+[data-nx-palette="emerald-vault"] {
+    --palette-bg: #091813;
+    --palette-panel: #102820;
+    --palette-raised: #18372d;
+    --palette-accent: #59e9a9;
+    --palette-secondary: #a9e778;
+    --palette-text: #effcf6;
+    --palette-muted: #accabd;
+    --palette-glow-strength: 17%;
+}
+
+[data-nx-palette="copper-noir"] {
+    --palette-bg: #1a120d;
+    --palette-panel: #2a1e16;
+    --palette-raised: #39291d;
+    --palette-accent: #ffb56b;
+    --palette-secondary: #ffd489;
+    --palette-text: #fff5ea;
+    --palette-muted: #ccb8a6;
+    --palette-glow-strength: 13%;
+}
+
+[data-nx-palette="after-hours"] {
+    --palette-bg: #190d20;
+    --palette-panel: #291531;
+    --palette-raised: #3a1d43;
+    --palette-accent: #f28cda;
+    --palette-secondary: #c6a0ff;
+    --palette-text: #fff0fc;
+    --palette-muted: #ceb5d1;
+    --palette-glow-strength: 25%;
+}
+
+.nexus-settings .nx-palette-setting > #nx-color-palettes-label {
+    font-weight: 700;
+    color: var(--settings-text);
+}
+
+.nx-color-palette-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 144px), 1fr));
+    gap: 10px;
+}
+
+.nexus-settings .nx-color-palette {
+    position: relative;
+    display: grid;
+    gap: 4px;
+    align-content: start;
+    min-width: 0;
+    padding: 9px;
+    border: 1px solid var(--settings-border);
+    border-radius: 10px;
+    background: var(--settings-input);
+    color: var(--settings-text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.nexus-settings .nx-color-palette:hover,
+.nexus-settings .nx-color-palette[aria-pressed="true"] {
+    border-color: var(--settings-accent);
+}
+
+.nexus-settings .nx-color-palette:focus-visible {
+    outline: 2px solid var(--settings-accent);
+    outline-offset: 2px;
+}
+
+.nx-color-palette-preview {
+    position: relative;
+    display: block;
+    height: 38px;
+    margin-bottom: 4px;
+    border-radius: 5px;
+    background: linear-gradient(125deg, var(--palette-bg) 15%, var(--palette-raised));
+    border: 1px solid var(--palette-raised);
+}
+
+.nx-color-palette-preview-panel {
+    position: absolute;
+    inset: 7px auto 7px 7px;
+    width: 39%;
+    border: 1px solid var(--palette-raised);
+    border-radius: 4px;
+    background: var(--palette-panel);
+}
+
+.nx-color-palette-preview-accent {
+    position: absolute;
+    inset: auto 7px 7px auto;
+    width: 35%;
+    height: 7px;
+    border-radius: 4px;
+    background: linear-gradient(100deg, var(--palette-accent), var(--palette-secondary));
+}
+
+.nx-color-palette-name { font-size: 13px; font-weight: 800; }
+.nx-color-palette-description { font-size: 11px; color: var(--settings-muted); }
+
+.nx-color-palette .nx-color-palette-check {
+    display: none;
+    position: absolute;
+    top: 13px;
+    right: 13px;
+    color: var(--palette-secondary);
+    font-size: 15px;
+}
+
+.nx-color-palette[aria-pressed="true"] .nx-color-palette-check { display: block; }
+
+/* Palette settings override color properties only. Existing skin and layout
+   selectors still own sizing, placement, blur, typography and transitions. */
+html[data-nx-palette]:not([data-nx-tone="light"]) {
+    color-scheme: dark;
+    background-color: var(--palette-bg);
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) {
+    --palette-ink: #140e16;
+    --palette-border: color-mix(in srgb, var(--palette-muted) 30%, var(--palette-panel));
+    --palette-edge: color-mix(in srgb, var(--palette-accent) 56%, var(--palette-panel));
+    --palette-tint: color-mix(in srgb, var(--palette-accent) 15%, var(--palette-panel));
+    --palette-glow: color-mix(in srgb, var(--palette-accent) var(--palette-glow-strength), transparent);
+    --palette-glow-alt: color-mix(in srgb, var(--palette-secondary) 14%, transparent);
+    --palette-fill: linear-gradient(120deg, var(--palette-accent), var(--palette-secondary));
+    --palette-highlight: color-mix(in srgb, var(--palette-accent) 86%, white);
+    --palette-wash: linear-gradient(135deg, var(--palette-tint), var(--palette-raised));
+    --palette-frost: color-mix(in srgb, var(--palette-panel) 91%, transparent);
+    --palette-deep: color-mix(in srgb, var(--palette-bg) 88%, var(--palette-panel));
+    --bg: var(--palette-bg);
+    --surface: var(--palette-panel);
+    --surface-hover: var(--palette-raised);
+    --text: var(--palette-text);
+    --text-dim: var(--palette-muted);
+    --border: var(--palette-border);
+    --primary: var(--palette-accent);
+    --primary-glow: var(--palette-glow);
+    --nx-bg: var(--palette-bg);
+    --nx-bg-2: var(--palette-deep);
+    --nx-bg-elevated: var(--palette-panel);
+    --nx-surface: var(--palette-panel);
+    --nx-surface-2: var(--palette-raised);
+    --nx-elev: var(--palette-raised);
+    --nx-border: var(--palette-border);
+    --nx-border-2: var(--palette-border);
+    --nx-border-strong: var(--palette-border);
+    --nx-text: var(--palette-text);
+    --nx-text-soft: var(--palette-text);
+    --nx-text-dim: var(--palette-muted);
+    --nx-dim: var(--palette-muted);
+    --nx-faint: var(--palette-muted);
+    --nx-muted: var(--palette-muted);
+    --nx-accent: var(--palette-accent);
+    --nx-accent-2: var(--palette-secondary);
+    --nx-accent-hot: var(--palette-secondary);
+    --nx-accent-sft: var(--palette-glow);
+    --nx-violet: var(--palette-accent);
+    --nx-violet-soft: var(--palette-glow);
+    --nx-cyan: var(--palette-secondary);
+    --nx-cyan-soft: var(--palette-glow-alt);
+    --nx-panel: var(--palette-frost);
+    --nx-panel-strong: var(--palette-panel);
+    --nx-card: var(--palette-panel);
+    --nx-card-hover: var(--palette-raised);
+    --nx-glass-bg: var(--palette-frost);
+    --nx-glass-bg-strong: var(--palette-panel);
+    --nx-glass-card: var(--palette-panel);
+    --nx-glass-card-hover: var(--palette-raised);
+    --nx-glass-edge: var(--palette-edge);
+    --nx-glass-border: var(--palette-border);
+    --nx-glass-glow-violet: var(--palette-glow);
+    --nx-glass-glow-cyan: var(--palette-glow-alt);
+    --nx-menu-bg: var(--palette-panel);
+    --nx-menu-input-bg: var(--palette-deep);
+    --nx-menu-border: var(--palette-border);
+    --nx-menu-text: var(--palette-text);
+    --nx-menu-muted: var(--palette-muted);
+    --vg-bg: var(--palette-bg);
+    --vg-text: var(--palette-text);
+    --vg-dim: var(--palette-muted);
+    --vg-faint: var(--palette-muted);
+    --vg-glass: var(--palette-frost);
+    --vg-glass-soft: var(--palette-frost);
+    --vg-glass-strong: var(--palette-panel);
+    --vg-glass-hover: var(--palette-raised);
+    --vg-line: var(--palette-border);
+    --vg-accent: var(--palette-accent);
+    --vg-accent-bright: var(--palette-secondary);
+    --vg-accent-soft: var(--palette-glow);
+    --vg-primary-fill: var(--palette-fill);
+    --vg-primary-text: var(--palette-ink);
+    color: var(--palette-text);
+    color-scheme: dark;
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-shell {
+    background:
+        radial-gradient(980px 560px at 12% -6%, var(--palette-glow), transparent 60%),
+        radial-gradient(860px 540px at 88% 2%, var(--palette-glow-alt), transparent 58%),
+        var(--palette-bg) !important;
+    color: var(--palette-text);
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) :is(
+    .nx-rail, .nx-drawer, .nx-topbar, .nx-drawer-footer, .nx-main .gallery-controls-bar,
+    .nx-main .filter-bar, .nx-active-filters, .nx-top-strip, .batch-bar, .nx-batch-card,
+    .nx-quick-box, .nx-bt-card, .nx-source-tile, .nx-tool-btn, .thumbnail-monitor,
+    .dashboard-import-monitor, .nx-main .v-card, .nx-vault-page .ctrl-group,
+    .nx-vault-page .chip, .nx-vault-page .sel-bar
+) {
+    background: var(--palette-frost) !important;
+    border-color: var(--palette-border) !important;
+    color: var(--palette-text);
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) :is(
+    .nx-search-box, .nx-select, .nx-main .gallery-controls-bar .nx-date-input,
+    .nx-main .gallery-controls-bar [x-show^="multiFilterUI.open"],
+    .nx-filter-menu, .nx-filter-menu__search, .nx-view-tools-menu,
+    .quantum-search-input-wrap, .dhub-search, .quantum-results-toolbar
+) {
+    background: var(--palette-deep) !important;
+    border-color: var(--palette-border) !important;
+    color: var(--palette-text) !important;
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) :is(
+    .nx-search-box input, .nx-drawer-brand, .nx-list-item, .v-card .v-title, .nx-vault-page .title
+) {
+    color: var(--palette-text) !important;
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-search-box input::placeholder,
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) :is(.v-card .v-date-display, .nx-vault-page .sub) {
+    color: var(--palette-muted) !important;
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) :is(
+    .nx-main .v-card:hover, .nx-vault-page .card:hover, .dhub-card:hover, .search-result-card:hover,
+    .nx-rel-card:hover
+) {
+    background: var(--palette-raised) !important;
+    border-color: var(--palette-edge) !important;
+    box-shadow: 0 12px 30px #0005, 0 0 20px var(--palette-glow) !important;
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) :is(
+    .nx-rail-btn.active, .nx-mini-btn.is-violet, .nx-pill-btn.active, .nx-vault-jump-btn,
+    .nx-main .gallery-controls-bar .gcb-btn.active, .nx-main .filter-bar button.active,
+    .dhub-view-switch button.active, .nexus-settings .settings-tabs button.active,
+    .nexus-settings .settings-title > .material-icons-round, .nx-drawer-expand-fab,
+    .nx-vault-page .chip.active, .nx-vault-page .btn-cyan-glass, .quantum-search-btn-icon:hover
+) {
+    color: var(--palette-text) !important;
+    background: var(--palette-wash) !important;
+    border-color: var(--palette-edge) !important;
+    box-shadow: 0 0 14px var(--palette-glow) !important;
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-rail-btn.active::before,
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) :is(.nx-drawer-brand-dot, .progress-fill-anim) {
+    background: var(--palette-fill) !important;
+    box-shadow: 0 0 14px var(--palette-glow) !important;
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) :is(
+    .nx-main .v-card .v-actions-row .btn-stream, .nx-main .v1-primary-btn,
+    .nx-main .v1-import-btn, .nx-main .btn-import, .dhub-header-btn-search,
+    .nx-rel-sidebar .btn-primary.nx-rel-cta, .nexus-settings .settings-card .btn-primary,
+    .nx-vault-page .btn-primary-glass, .nx-logo-mark
+) {
+    background: var(--palette-fill) !important;
+    border-color: var(--palette-edge) !important;
+    color: var(--palette-ink) !important;
+    box-shadow: 0 4px 16px var(--palette-glow) !important;
+
+    &:hover:not(:disabled) {
+        background: linear-gradient(120deg, var(--palette-highlight), var(--palette-secondary)) !important;
+    }
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) :is(
+    .modal-wrap .modal-card, .dhub-container, .quantum-search-container, .nx-rel-modal-card,
+    .mhub-dialog, .player-container, .tna-player-box, .dhub-player-box, .nx-vault-page .modal
+) {
+    background:
+        radial-gradient(780px 400px at 14% 0%, var(--palette-glow), transparent 62%),
+        linear-gradient(165deg, var(--palette-panel), var(--palette-deep)) !important;
+    border-color: var(--palette-border) !important;
+    color: var(--palette-text);
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) .player-header {
+    background: linear-gradient(180deg, var(--palette-frost), transparent) !important;
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) :is(
+    .modal-header, .dhub-header, .dhub-footer, .nx-rel-header, .nx-rel-sidebar, .dhub-card,
+    .search-result-card, .nx-rel-card, .nx-rel-bulk-bar, .nx-vault-page .modal-head
+) {
+    background-color: var(--palette-frost) !important;
+    border-color: var(--palette-border) !important;
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) :is(
+    .nx-search-box:focus-within, .v-card.selected, .v-card:focus-within
+) {
+    border-color: var(--palette-edge) !important;
+    box-shadow: 0 0 0 2px var(--palette-glow) !important;
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) :is(
+    .nx-rail-btn:focus-visible, .nx-main button:focus-visible, .nexus-settings button:focus-visible
+) {
+    outline: 2px solid var(--palette-accent);
+    outline-offset: 2px;
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) .nexus-settings {
+    --settings-bg: var(--palette-panel);
+    --settings-card: var(--palette-frost);
+    --settings-input: var(--palette-deep);
+    --settings-text: var(--palette-text);
+    --settings-muted: var(--palette-muted);
+    --settings-border: var(--palette-border);
+    --settings-accent: var(--palette-accent);
+    --settings-accent-2: var(--palette-secondary);
+    --settings-accent-soft: var(--palette-glow);
+    --settings-accent-border: var(--palette-edge);
+}
+
+html[data-nx-palette] body:is(.ui-classic, .ui-v1):not(.light-theme):not(.skin-vision:not(.vision-dark)) .nexus-settings .settings-card {
+    color-scheme: dark;
+}

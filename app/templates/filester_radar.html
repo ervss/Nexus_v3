@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Filester Radar — Nexus</title>
+  <link rel="stylesheet" href="/static/filester_radar.css?v=8">
+  <link rel="stylesheet" href="/static/filester_radar_browser.css?v=1">
+<script src="/static/playback_activity.js?v=20260930_activity_3" defer></script>
+</head>
+<body>
+  <header class="radar-header">
+    <a class="back-link" href="/" aria-label="Späť do Nexus galérie">Nexus</a>
+    <div class="header-title">
+      <span class="pulse-mark" aria-hidden="true"></span>
+      <div>
+        <h1>Filester Radar</h1>
+        <p>Verejný index → čistý shortlist → Source Boards</p>
+      </div>
+    </div>
+    <div class="policy-note" title="Nástroj číta iba verejne indexované výsledky a nič automaticky neimportuje.">
+      <span class="policy-dot"></span> Review-first
+    </div>
+  </header>
+
+  <main class="radar-shell">
+    <section class="search-deck" aria-labelledby="search-heading">
+      <div class="deck-intro">
+        <p class="section-kicker">Discovery brief</p>
+        <h2 id="search-heading">Každý prelet má svoj čas. Každá zmena svoju stopu.</h2>
+        <p>Radar ukladá jednotlivé hľadania ako samostatné odseky. Opätovne nájdený album porovná s posledným stavom a ukáže nové súbory, posledný upload aj prvé vizuálne náhľady.</p>
+      </div>
+
+      <form id="radar-form" class="query-form">
+        <label class="field field-grow">
+          <span>Meno, kolekcia alebo téma</span>
+          <input id="seed" name="seed" type="search" autocomplete="off" placeholder="napr. názov kolekcie; prázdne = široký radar">
+        </label>
+        <label class="field">
+          <span>Režim pokrytia</span>
+          <select id="strategy" name="strategy">
+            <option value="balanced">Vyvážený</option>
+            <option value="focused">Presné meno</option>
+            <option value="deep">Hlboké pokrytie</option>
+          </select>
+        </label>
+        <label class="field compact-field">
+          <span>Dotazy</span>
+          <select id="query-limit" name="queryLimit">
+            <option value="3">3 / rýchlo</option>
+            <option value="5" selected>5 / odporúčané</option>
+            <option value="8">8 / hlboko</option>
+          </select>
+        </label>
+        <label class="field compact-field">
+          <span>Výsledkov / dotaz</span>
+          <select id="result-limit" name="resultLimit">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="30">30</option>
+          </select>
+        </label>
+        <button id="scan-btn" class="primary-action" type="submit">
+          <span class="action-icon">⌁</span>
+          <span><b>Spustiť radar</b><small id="credit-estimate">≈ 10 API požiadaviek</small></span>
+        </button>
+      </form>
+
+      <div class="coverage-strip" aria-label="Plán pokrytia">
+        <div class="coverage-label"><strong>Coverage</strong><span id="coverage-summary">Pripravených 5 dotazov</span></div>
+        <ol id="coverage-plan"></ol>
+      </div>
+      <p class="deck-footnote">Google beží cez nakonfigurované SerpApi. Žiadny nález sa neimportuje automaticky.</p>
+    </section>
+
+    <section class="workspace">
+      <div class="result-column">
+        <div class="result-toolbar">
+          <div class="stat-ribbon" aria-live="polite">
+            <div><strong id="stat-folders">0</strong><span>albumov</span></div>
+            <div><strong id="stat-runs">0</strong><span>preletov</span></div>
+            <div><strong id="stat-new">0</strong><span>nových</span></div>
+            <div><strong id="stat-updated">0</strong><span>aktualizovaných</span></div>
+            <div><strong id="stat-files">0</strong><span>známych súborov</span></div>
+            <div><strong id="stat-selected">0</strong><span>vybraných</span></div>
+          </div>
+          <div class="filter-row">
+            <label class="search-filter"><span class="sr-only">Filtrovať výsledky</span><input id="filter-text" type="search" placeholder="Filtrovať názov alebo ID"></label>
+            <label class="album-keyword-filter"><span class="sr-only">Keyword v názve súboru</span><input id="album-keyword" type="search" autocomplete="off" placeholder="Keyword v názve súboru" title="Vytvorí grid súborov so zhodou v názve, bez ohľadu na veľkosť písmen"></label>
+            <label><span class="sr-only">Rozsah keyword hľadania</span><select id="keyword-scope"><option value="all">Všetky nájdené albumy</option><option value="selected">Iba vybrané albumy</option></select></label>
+            <label><span class="sr-only">Stav albumu</span><select id="change-filter"><option value="all">Všetky stavy</option><option value="new">Iba nové</option><option value="updated">Iba aktualizované</option><option value="unchanged">Nájdené bez zmeny</option></select></label>
+            <label><span class="sr-only">Minimálny počet súborov</span><select id="min-files"><option value="0">Všetky veľkosti</option><option value="10">10+ súborov</option><option value="50">50+ súborov</option><option value="100">100+ súborov</option><option value="500">500+ súborov</option></select></label>
+            <label class="size-filter"><span class="sr-only">Minimálna celková veľkosť folderu v GB</span><input id="size-min" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Min GB" title="Minimálna celková veľkosť folderu v GB"></label>
+            <label class="size-filter"><span class="sr-only">Maximálna celková veľkosť folderu v GB</span><input id="size-max" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Max GB" title="Maximálna celková veľkosť folderu v GB"></label>
+            <label><span class="sr-only">Zoradenie</span><select id="sort-by"><option value="score">Najlepší signál</option><option value="files">Najviac súborov</option><option value="name">Názov A–Z</option><option value="found">Najnovšie nájdené</option></select></label>
+            <button id="select-visible" class="quiet-button" type="button">Vybrať viditeľné</button>
+            <button id="fetch-selected-meta" class="quiet-button fetch-meta" type="button" disabled title="Vytvorí nový časový záznam a porovná vybrané albumy s posledným uloženým stavom. Neimportuje súbory.">Obnoviť meta (0)</button>
+            <button id="search-selected-keyword" class="quiet-button keyword-search" type="button" disabled title="Prehľadá názvy súborov naprieč albumami a vytvorí spoločný grid zhôd. Neimportuje súbory.">Vytvoriť cielený grid (0)</button>
+            <button id="clear-selection" class="quiet-button clear-selection" type="button" disabled>Zrušiť výber (0)</button>
+          </div>
+        </div>
+
+        <div id="run-status" class="run-status" role="status" aria-live="polite" hidden></div>
+        <section id="target-panel" class="target-panel" aria-labelledby="target-heading">
+          <header class="target-head">
+            <div><h2 id="target-heading">Cielený grid</h2><p id="target-summary" role="status">Zadaj keyword a prehľadaj názvy súborov vo všetkých nájdených albumoch.</p></div>
+            <div class="target-actions">
+              <label><span class="sr-only">Zoradenie cieleného gridu</span><select id="target-sort"><option value="album">Podľa albumu</option><option value="name">Názov A–Z</option><option value="size">Najväčšie súbory</option><option value="upload">Najnovší upload</option></select></label>
+              <button id="select-target-albums" class="quiet-button" type="button" disabled>Vybrať zdrojové albumy</button>
+              <button id="browse-focus" class="quiet-button" type="button" aria-pressed="false">⛶ Iba browsing</button>
+            </div>
+          </header>
+          <div class="browser-controls">
+            <label class="browser-find"><span class="sr-only">Filtrovať karty súborov</span><input id="browser-find" type="search" placeholder="Rýchly filter v gride…"></label>
+            <label><span class="sr-only">Kvalita videí v gride</span><select id="browser-quality"><option value="0">Všetky kvality</option><option value="2160">4K+</option><option value="1080">1080p+</option><option value="720">720p+</option></select></label>
+            <label><span class="sr-only">Veľkosť náhľadov</span><select id="browser-density"><option value="large">Veľké náhľady</option><option value="medium">Vyvážený grid</option><option value="compact">Hustý grid</option></select></label>
+            <label><span class="sr-only">Formát náhľadov</span><select id="browser-shape"><option value="portrait">Vysoké náhľady</option><option value="landscape">Široké náhľady</option></select></label>
+            <button id="browser-meta" class="quiet-button" type="button" disabled>Doplniť meta</button>
+            <span id="browser-count" class="browser-count" role="status"></span>
+          </div>
+          <p id="target-message" class="target-message">Výsledkom budú karty konkrétnych súborov so zhodou v názve. Nič sa automaticky neimportuje.</p>
+          <div id="target-grid" class="target-grid"></div>
+          <button id="target-more" class="quiet-button target-more" type="button" hidden>Zobraziť ďalšie</button>
+          <div class="browser-dock">
+            <div class="browser-selection"><strong id="browser-selected-count">0 videí vybraných</strong><small id="browser-selected-size">Vyber checkboxom na karte. Play otvorí prehrávač.</small></div>
+            <div class="browser-dock-actions">
+              <button id="browser-select-visible" class="quiet-button" type="button" disabled>Vybrať zobrazené</button>
+              <button id="browser-clear" class="quiet-button" type="button" disabled>Zrušiť výber videí</button>
+              <button id="browser-import" class="browser-import" type="button" disabled>Importovať vybrané (0)</button>
+            </div>
+          </div>
+          <p id="browser-job" class="browser-job" role="status" hidden></p>
+        </section>
+        <div id="empty-state" class="empty-state">
+          <div class="empty-glyph" aria-hidden="true">/f/</div>
+          <h3>Radar čaká na prvý prelet.</h3>
+          <p>Začni široko bez mena alebo zadaj konkrétnu kolekciu. Rovnaké foldery z viacerých dotazov sa automaticky spoja.</p>
+        </div>
+        <div id="result-list" class="result-list run-ledger" aria-live="polite"></div>
+      </div>
+
+      <aside class="selection-rail" aria-labelledby="selection-heading">
+        <div class="rail-head">
+          <div>
+            <p class="section-kicker">Shortlist</p>
+            <h2 id="selection-heading">Tvoj výber</h2>
+          </div>
+          <button id="clear-selected" class="text-button" type="button">Vyčistiť</button>
+        </div>
+        <div id="selected-list" class="selected-list"><p class="rail-empty">Označ foldery, ktoré chceš ďalej preveriť.</p></div>
+        <div class="rail-actions">
+          <button id="delete-selected" class="quiet-button delete-button" type="button" disabled>Zmazať vybrané (0)</button>
+          <button id="delete-all" class="quiet-button delete-button" type="button" disabled>Zmazať všetky albumy</button>
+        </div>
+        <button id="create-boards" class="board-action" type="button" disabled>
+          <span>Pridať do Source Boards</span><b id="board-count">0</b>
+        </button>
+        <p class="rail-note">Vytvorí pripnuté boardy bez automatického importu. Sync spustíš až v hlavnom dashboarde.</p>
+      </aside>
+    </section>
+
+    <details class="yandex-lane">
+      <summary>
+        <span><b>Yandex assisted lane</b><small>komplementárny index, manuálne tempo</small></span>
+        <span class="lane-badge">anti-CAPTCHA režim</span>
+      </summary>
+      <div class="lane-body">
+        <div class="lane-copy">
+          <h3>Otváraj jeden dotaz, potom výsledky vlož späť.</h3>
+          <p>Živý test narazil po štyroch rýchlych dotazoch na CAPTCHA. Preto Radar Yandex nescrapuje v slučke. Otvor jeden pripravený dotaz, skopíruj výsledkovú stránku alebo URL a vlož ju sem.</p>
+          <div id="yandex-queries" class="query-chips"></div>
+        </div>
+        <label class="paste-zone">
+          <span>Vložený text alebo zoznam URL</span>
+          <textarea id="paste-input" rows="7" placeholder="Ctrl+A, Ctrl+C na výsledkoch → vložiť sem. Radar vyberie filester.me/f/..."></textarea>
+          <button id="parse-paste" class="quiet-button" type="button">Pridať foldery z textu</button>
+        </label>
+      </div>
+    </details>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <dialog id="radar-player" class="radar-player" aria-labelledby="radar-player-title">
+    <header class="radar-player-head"><div><h2 id="radar-player-title">Prehrávač</h2><p id="radar-player-meta"></p></div><button id="radar-player-close" class="quiet-button" type="button" aria-label="Zavrieť prehrávač">✕</button></header>
+    <div class="radar-player-surface"><video id="radar-player-video" controls playsinline preload="metadata" hidden></video><p id="radar-player-status" role="status">Pripravujem prehrávanie…</p></div>
+    <footer class="radar-player-foot"><div><button id="radar-player-prev" class="quiet-button" type="button" aria-label="Predchádzajúce video">←</button><span id="radar-player-position"></span><button id="radar-player-next" class="quiet-button" type="button" aria-label="Nasledujúce video">→</button><button id="radar-player-retry" class="quiet-button" type="button" hidden>Obnoviť stream</button></div><div><a id="radar-player-source" class="quiet-button" target="_blank" rel="noopener">Otvoriť zdroj</a><button id="radar-player-select" class="quiet-button" type="button">Vybrať video</button><button id="radar-player-import" class="browser-import" type="button">Importovať video</button></div></footer>
+    <p class="radar-player-hint">Esc zavrie prehrávač. Video po skončení ostane v modale; na ďalšie prejdeš šípkou. Prehrávanie začína bez zvuku.</p>
+  </dialog>
+  <script type="module" src="/static/filester_radar.js?v=9"></script>
+</body>
+</html>

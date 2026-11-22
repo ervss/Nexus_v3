@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spúšťam IDM...</title>
+    <script src="hls.min.js"></script>
+    <style>
+        body { background: #111; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        video { width: 320px; height: 180px; background: #000; border: 1px solid #333; margin-top: 20px; }
+        .info { font-size: 14px; opacity: 0.8; max-width: 400px; text-align: center; }
+    </style>
+</head>
+<body>
+    <h2>Pripravujem IDM...</h2>
+    <p class="info">Počkaj, kým IDM nezachytí video stream a nezobrazí tlačidlo "Stiahnuť toto video". Potom môžeš túto kartu zatvoriť.</p>
+    <video id="player" controls muted autoplay></video>
+    <script src="idm_launcher.js"></script>
+</body>
+</html>

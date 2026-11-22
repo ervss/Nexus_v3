@@ -1,0 +1,1644 @@
+/* ============================================================
+   Nexus Video Card Selector — Styles
+   ============================================================ */
+
+/* ── Checkbox Selector Overlay ─────────────────────────────── */
+.nvs-selector-wrap {
+  position: absolute !important;
+  top: 6px !important;
+  left: 6px !important;
+  z-index: 9999 !important;
+  pointer-events: all !important;
+}
+
+.nvs-checkbox {
+  display: block !important;
+  width: 22px !important;
+  height: 22px !important;
+  background: rgba(0,0,0,0.7) !important;
+  border: 2px solid rgba(255,255,255,0.35) !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s !important;
+  backdrop-filter: blur(4px) !important;
+  position: relative !important;
+}
+
+.nvs-checkbox::after {
+  content: '' !important;
+  display: block !important;
+  position: absolute !important;
+  top: 3px !important; left: 7px !important;
+  width: 5px !important; height: 9px !important;
+  border: 2.5px solid #fff !important;
+  border-top: none !important;
+  border-left: none !important;
+  transform: rotate(45deg) scale(0) !important;
+  opacity: 0 !important;
+  transition: transform 0.12s, opacity 0.12s !important;
+}
+
+.nvs-checkbox:hover {
+  background: rgba(100,200,255,0.25) !important;
+  border-color: rgba(100,200,255,0.8) !important;
+  transform: scale(1.08) !important;
+}
+
+/* Celý vizuálny náhľad je selektor; titulok a metadata mimo tejto zóny nie sú. */
+.nvs-thumbnail-selector {
+  cursor: pointer !important;
+}
+
+.nvs-card-selected .nvs-checkbox {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+  border-color: #a78bfa !important;
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.7) !important;
+}
+
+.nvs-card-selected .nvs-checkbox::after {
+  transform: rotate(45deg) scale(1) !important;
+  opacity: 1 !important;
+}
+
+/* ── Selected card highlight ──────────────────────────────── */
+.nvs-card-selected {
+  outline: 2.5px solid #7c3aed !important;
+  outline-offset: -2px !important;
+  border-radius: 4px !important;
+}
+
+.nvs-card-selected::before {
+  content: '' !important;
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(124, 58, 237, 0.08) !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+  border-radius: inherit !important;
+}
+
+/* ── Metadata Badge ────────────────────────────────────────── */
+.nvs-badge {
+  position: absolute !important;
+  bottom: 6px !important;
+  left: 6px !important;
+  z-index: 9998 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  font-size: 11px !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
+  line-height: 1 !important;
+  color: #f0f0f0 !important;
+  background: rgba(0,0,0,0.82) !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  border-radius: 999px !important;
+  padding: 4px 8px !important;
+  white-space: nowrap !important;
+  max-width: calc(100% - 14px) !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  pointer-events: none !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.9) !important;
+  backdrop-filter: blur(6px) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
+  transition: opacity 0.2s !important;
+  /* Kľúčové: badge musí byť viditeľný aj cez overflow:hidden rodiča */
+  clip-path: none !important;
+}
+
+/* Badge s dátami extrahovanými priamo z karty (okamžité) */
+.nvs-badge-card-data {
+  border-color: rgba(167,139,250,0.25) !important;
+  color: #c4b5fd !important;
+}
+
+.nvs-badge-loading {
+  color: rgba(200,200,200,0.55) !important;
+  font-style: italic !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
+.nvs-badge-locked {
+  color: #fecaca !important;
+  background: rgba(127, 29, 29, 0.9) !important;
+  border-color: rgba(248, 113, 113, 0.65) !important;
+}
+
+.nvs-badge svg {
+  flex: 0 0 auto !important;
+  width: 11px !important;
+  height: 11px !important;
+  fill: #a78bfa !important;
+  opacity: 0.9 !important;
+}
+
+.nvs-badge > .nvs-badge-text {
+  position: static !important;
+  inset: auto !important;
+  display: inline !important;
+  flex: 0 1 auto !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  background: none !important;
+  border: 0 !important;
+  color: inherit !important;
+  font: inherit !important;
+  line-height: inherit !important;
+  text-align: inherit !important;
+  text-decoration: none !important;
+  text-transform: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+
+.nvs-badge-quality {
+  background: linear-gradient(135deg, rgba(124,58,237,0.9), rgba(109,40,217,0.9)) !important;
+  border-color: rgba(167,139,250,0.4) !important;
+  padding: 3px 7px !important;
+  font-weight: 600 !important;
+  font-size: 10px !important;
+  letter-spacing: 0.3px !important;
+  position: absolute !important;
+  top: 6px !important;
+  right: 6px !important;
+  left: auto !important;
+  bottom: auto !important;
+  color: #fff !important;
+}
+
+.nvs-source-badge {
+  bottom: 29px !important;
+  left: 6px !important;
+  max-width: calc(100% - 14px) !important;
+  color: #fcd9ae !important;
+  border-color: rgba(251, 146, 60, 0.5) !important;
+  font-size: 10px !important;
+  pointer-events: auto !important;
+}
+
+.nvs-source-all-verified {
+  color: #bbf7d0 !important;
+  border-color: rgba(74, 222, 128, 0.6) !important;
+}
+
+/* NoodleMagazine: readable metadata row under the native title. */
+.nvs-noodle-info {
+  display: block !important;
+  margin-top: 3px !important;
+  color: #e5e7eb !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.85) !important;
+}
+
+.nvs-noodle-info::first-letter {
+  color: #facc15 !important;
+}
+
+/* ── Floating Sort Panel ───────────────────────────────────── */
+#nvs-sort-panel {
+  position: fixed !important;
+  top: 12px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 2147483646 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 10px !important;
+  background: rgba(15, 10, 30, 0.94) !important;
+  border: 1px solid rgba(124, 58, 237, 0.45) !important;
+  border-radius: 999px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55) !important;
+  backdrop-filter: blur(14px) saturate(180%) !important;
+  color: #e2e8f0 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
+  font-size: 12px !important;
+  pointer-events: auto !important;
+}
+
+#nvs-sort-panel.nvs-panel-hidden {
+  display: none !important;
+}
+
+.nvs-sort-label {
+  color: #c4b5fd !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2px !important;
+}
+
+#nvs-filter-duration,
+#nvs-sort-key,
+#nvs-sort-dir,
+#nvs-sort-apply {
+  height: 28px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  background: rgba(255,255,255,0.08) !important;
+  color: #f8fafc !important;
+  font: inherit !important;
+  font-weight: 650 !important;
+  outline: none !important;
+}
+
+#nvs-sort-key,
+#nvs-filter-duration {
+  padding: 0 28px 0 10px !important;
+}
+
+#nvs-sort-key option,
+#nvs-filter-duration option {
+  color: #111827 !important;
+  background: #ffffff !important;
+}
+
+#nvs-sort-dir {
+  padding: 0 11px !important;
+  cursor: pointer !important;
+}
+
+#nvs-sort-dir:hover:not(:disabled) {
+  background: rgba(124,58,237,0.32) !important;
+  border-color: rgba(167,139,250,0.45) !important;
+}
+
+#nvs-sort-dir:disabled {
+  cursor: default !important;
+  opacity: 0.62 !important;
+}
+
+#nvs-sort-apply {
+  padding: 0 13px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(124,58,237,0.55) !important;
+  background: rgba(124,58,237,0.25) !important;
+  color: #e9d5ff !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: background 0.15s, border-color 0.15s !important;
+  white-space: nowrap !important;
+}
+
+#nvs-sort-apply:hover:not(:disabled) {
+  background: rgba(124,58,237,0.5) !important;
+  border-color: rgba(167,139,250,0.7) !important;
+}
+
+#nvs-sort-apply:disabled {
+  cursor: default !important;
+  opacity: 0.45 !important;
+}
+
+/* Tlačidlo "Vybrať zobrazené" */
+.nvs-btn-select-visible {
+  height: 28px !important;
+  padding: 0 11px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(34,197,94,0.45) !important;
+  background: rgba(34,197,94,0.15) !important;
+  color: #86efac !important;
+  font: inherit !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: background 0.15s, border-color 0.15s !important;
+}
+
+.nvs-btn-select-visible:hover {
+  background: rgba(34,197,94,0.28) !important;
+  border-color: rgba(34,197,94,0.7) !important;
+}
+
+/* Multi-page loader: input "po stranu" + tlačidlo Načítať */
+#nvs-load-until {
+  width: 46px !important;
+  height: 28px !important;
+  padding: 0 6px !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  background: rgba(255,255,255,0.06) !important;
+  color: #e2e8f0 !important;
+  font: inherit !important;
+  font-size: 12px !important;
+  text-align: center !important;
+  outline: none !important;
+  -moz-appearance: textfield !important;
+}
+#nvs-load-until::-webkit-outer-spin-button,
+#nvs-load-until::-webkit-inner-spin-button { -webkit-appearance: none !important; margin: 0 !important; }
+#nvs-load-until:focus { border-color: rgba(124,58,237,0.6) !important; }
+
+.nvs-load-count {
+  height: 28px !important;
+  min-width: 62px !important;
+  padding: 0 6px !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  background: rgba(255,255,255,0.06) !important;
+  color: #e2e8f0 !important;
+  font: inherit !important;
+  font-size: 12px !important;
+  outline: none !important;
+}
+.nvs-load-count:focus { border-color: rgba(124,58,237,0.6) !important; }
+
+.nvs-btn-load-pages {
+  height: 28px !important;
+  padding: 0 11px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(59,130,246,0.5) !important;
+  background: rgba(59,130,246,0.18) !important;
+  color: #bfdbfe !important;
+  font: inherit !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: background 0.15s, border-color 0.15s !important;
+}
+.nvs-btn-load-pages:hover {
+  background: rgba(59,130,246,0.32) !important;
+  border-color: rgba(96,165,250,0.75) !important;
+}
+
+/* Tlačidlo ↺ rescan v paneli */
+.nvs-btn-panel-rescan {
+  height: 28px !important;
+  width: 28px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  background: rgba(255,255,255,0.06) !important;
+  color: #94a3b8 !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background 0.15s, color 0.15s !important;
+  flex-shrink: 0 !important;
+}
+
+.nvs-btn-panel-rescan:hover {
+  background: rgba(124,58,237,0.28) !important;
+  color: #c4b5fd !important;
+  border-color: rgba(167,139,250,0.4) !important;
+}
+
+/* Separator medzi rescan a action buttonmi */
+.nvs-panel-sep {
+  width: 1px !important;
+  height: 18px !important;
+  background: rgba(255,255,255,0.15) !important;
+  margin: 0 2px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Tlačidlo Vypnúť na tejto stránke */
+.nvs-btn-panel-disable {
+  height: 26px !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(251,146,60,0.35) !important;
+  background: rgba(251,146,60,0.10) !important;
+  color: #fdba74 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  font-family: inherit !important;
+  line-height: 1 !important;
+  letter-spacing: 0.2px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  white-space: nowrap !important;
+  transition: background 0.15s, color 0.15s, border-color 0.15s !important;
+  flex-shrink: 0 !important;
+}
+
+.nvs-btn-panel-disable:hover {
+  background: rgba(251,146,60,0.28) !important;
+  color: #fed7aa !important;
+  border-color: rgba(251,146,60,0.65) !important;
+}
+
+/* Tlačidlo ✕ Skryť panel */
+.nvs-btn-panel-close {
+  height: 26px !important;
+  width: 26px !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(239,68,68,0.25) !important;
+  background: rgba(239,68,68,0.08) !important;
+  color: #f87171 !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background 0.15s, color 0.15s, border-color 0.15s !important;
+  flex-shrink: 0 !important;
+}
+
+.nvs-btn-panel-close:hover {
+  background: rgba(239,68,68,0.28) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239,68,68,0.6) !important;
+}
+
+.nvs-fetch-counter {
+  color: rgba(196,181,253,0.75) !important;
+  font-size: 11px !important;
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: 0.3px !important;
+  white-space: nowrap !important;
+  min-width: 36px !important;
+  text-align: center !important;
+}
+
+/* ── Floating Import Bar ───────────────────────────────────── */
+#nvs-import-bar {
+  position: fixed !important;
+  bottom: -90px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 2147483647 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 12px 18px !important;
+  background: rgba(15, 10, 30, 0.97) !important;
+  border: 1px solid rgba(124, 58, 237, 0.4) !important;
+  border-radius: 50px !important;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(124,58,237,0.15) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
+  font-size: 13px !important;
+  color: #e2e8f0 !important;
+  transition: bottom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  white-space: nowrap !important;
+  min-width: 520px !important;
+  max-width: 90vw !important;
+}
+
+#nvs-import-bar.nvs-bar-visible {
+  bottom: 24px !important;
+}
+
+#nvs-bar-count {
+  background: rgba(124, 58, 237, 0.3) !important;
+  border: 1px solid rgba(124, 58, 237, 0.5) !important;
+  color: #c4b5fd !important;
+  border-radius: 999px !important;
+  padding: 3px 10px !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  min-width: 28px !important;
+  text-align: center !important;
+}
+
+.nvs-bar-label {
+  color: #94a3b8 !important;
+  font-size: 12px !important;
+}
+
+.nvs-bar-sep {
+  width: 1px !important;
+  height: 20px !important;
+  background: rgba(255,255,255,0.12) !important;
+  flex-shrink: 0 !important;
+}
+
+.nvs-bar-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 7px 13px !important;
+  border-radius: 999px !important;
+  border: 1px solid transparent !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  font-family: inherit !important;
+  transition: all 0.15s !important;
+  letter-spacing: 0.2px !important;
+  text-decoration: none !important;
+}
+
+.nvs-btn-import {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+  border-color: rgba(167,139,250,0.3) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 12px rgba(124,58,237,0.4) !important;
+}
+
+.nvs-btn-import:hover {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.6) !important;
+}
+
+.nvs-btn-sidecar {
+  color: #99f6e4 !important;
+  border-color: rgba(45, 212, 191, 0.42) !important;
+  background: rgba(13, 148, 136, 0.16) !important;
+}
+
+.nvs-btn-sidecar:hover {
+  color: #ccfbf1 !important;
+  border-color: rgba(94, 234, 212, 0.76) !important;
+  background: rgba(13, 148, 136, 0.3) !important;
+}
+
+.nvs-btn-secondary {
+  background: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  color: #cbd5e1 !important;
+}
+
+.nvs-btn-secondary:hover {
+  background: rgba(255,255,255,0.12) !important;
+  color: #fff !important;
+}
+
+.nvs-btn-danger {
+  background: rgba(239,68,68,0.12) !important;
+  border-color: rgba(239,68,68,0.3) !important;
+  color: #fca5a5 !important;
+}
+
+.nvs-btn-danger:hover {
+  background: rgba(239,68,68,0.25) !important;
+}
+
+/* Port offline alebo dashboard (aktuálny port) */
+.nvs-bar-btn.nvs-btn-dead {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(0.6) !important;
+}
+
+.nvs-bar-btn.nvs-btn-dead:hover {
+  transform: none !important;
+  filter: grayscale(0.6) !important;
+}
+
+.nvs-bar-btn svg {
+  width: 12px !important;
+  height: 12px !important;
+  fill: currentColor !important;
+  flex-shrink: 0 !important;
+}
+
+/* ── Toast notifications ───────────────────────────────────── */
+.nvs-toast {
+  position: fixed !important;
+  bottom: 80px !important;
+  left: 50% !important;
+  transform: translateX(-50%) translateY(10px) !important;
+  z-index: 2147483647 !important;
+  padding: 10px 18px !important;
+  background: rgba(15,10,30,0.97) !important;
+  border: 1px solid rgba(124,58,237,0.4) !important;
+  border-radius: 999px !important;
+  color: #e2e8f0 !important;
+  font-size: 13px !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  opacity: 0 !important;
+  animation: nvs-toast-in 0.25s ease forwards, nvs-toast-out 0.25s ease 2.5s forwards !important;
+  white-space: nowrap !important;
+}
+
+.nvs-toast-success { border-color: rgba(34,197,94,0.5) !important; }
+.nvs-toast-error { border-color: rgba(239,68,68,0.5) !important; }
+
+@keyframes nvs-toast-in {
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes nvs-toast-out {
+  to { opacity: 0; transform: translateX(-50%) translateY(10px); }
+}
+
+/* ── Filtering ─────────────────────────────────────────────── */
+.nvs-hidden,
+.nvs-tag-hidden {
+  display: none !important;
+}
+
+/* ── Tag filter v HUD ─────────────────────────────────────── */
+#nvs-scan-hud-panel { max-height: 80vh !important; }
+.nvs-tag-section { border: 1px solid rgba(139,92,246,.35); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.nvs-tag-head { display: flex; justify-content: space-between; font-weight: 700; color: #c4b5fd; }
+.nvs-tag-count { color: #94a3b8; font-weight: 600; }
+.nvs-tag-search { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.15); border-radius: 6px; color: #f1f5f9; padding: 5px 8px; font-size: 12px; outline: none; }
+.nvs-tag-modes, .nvs-tag-actions { display: flex; gap: 6px; }
+.nvs-tag-modes .nvs-hud-btn, .nvs-tag-actions .nvs-hud-btn { flex: 1; }
+.nvs-tag-mode-on { background: #7c3aed !important; color: #fff !important; }
+.nvs-tag-chips { display: flex; flex-wrap: wrap; gap: 4px; max-height: 150px; overflow-y: auto; }
+.nvs-tag-chip { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); color: #cbd5e1; border-radius: 999px; padding: 2px 8px; font-size: 11px; cursor: pointer; }
+.nvs-tag-chip:hover { border-color: #a78bfa; }
+.nvs-tag-chip.nvs-tag-inc { background: #16a34a; border-color: #4ade80; color: #fff; font-weight: 700; }
+.nvs-tag-chip.nvs-tag-exc { background: #b91c1c; border-color: #f87171; color: #fff; text-decoration: line-through; }
+.nvs-tag-hint { font-size: 10px; color: #64748b; }
+
+/* Import workspace: fixed right rail, independently scrollable at every size. */
+#nvs-sort-panel.nvs-workbench {
+  position: fixed !important; inset: 0 0 0 auto !important;
+  width: 360px !important; height: 100dvh !important; max-height: 100dvh !important;
+  display: flex !important; flex-direction: column !important; align-items: stretch !important;
+  gap: 0 !important; padding: 0 !important; border: 0 !important; border-left: 1px solid #625079 !important;
+  border-radius: 0 !important; background: #151522f5 !important; color: #edeaf6 !important;
+  box-shadow: -12px 0 40px #0008 !important; transform: none !important;
+  font: 13px/1.5 system-ui, sans-serif !important; z-index: 2147483645 !important;
+  overflow: hidden !important; white-space: normal !important;
+}
+#nvs-sort-panel.nvs-workbench.nvs-panel-hidden { display: none !important; }
+#nvs-sort-panel.nvs-workbench header { display:flex; justify-content:space-between; align-items:center; padding:15px 16px; gap:10px; background:linear-gradient(110deg,#342441,#202539); border-bottom:1px solid #4a3e5b; }
+#nvs-sort-panel.nvs-workbench header strong { font-size:16px; color:#eee; letter-spacing:.4px; }
+#nvs-sort-panel.nvs-workbench header strong span { color:#c5abd9; font-size:13px; font-weight:500; }
+#nvs-sort-panel.nvs-workbench small { display:block; color:#b6afc5; font-size:11px; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-body { overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; padding:14px 16px; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-summary { color:#d6c0f2; background:#2b2239; border:1px solid #514164; padding:9px 11px; border-radius:8px; margin-bottom:12px; font-weight:600; }
+#nvs-sort-panel.nvs-workbench label { display:flex; flex-direction:column; gap:4px; color:#c9c3d6; font-size:11px; min-width:0; }
+#nvs-sort-panel.nvs-workbench input:not([type="checkbox"]), #nvs-sort-panel.nvs-workbench select { box-sizing:border-box !important; width:100% !important; min-width:0 !important; height:34px !important; margin:0 !important; background:#10111b !important; color:#f5f1fc !important; border:1px solid #51495f !important; border-radius:7px !important; padding:5px 8px !important; font:12px system-ui !important; color-scheme:dark; }
+#nvs-sort-panel.nvs-workbench input[type="checkbox"] { appearance:auto !important; width:15px !important; height:15px !important; margin:0 !important; accent-color:#af82e2; }
+#nvs-sort-panel.nvs-workbench button { height:auto !important; min-height:32px !important; margin:0 !important; padding:6px 10px !important; border:1px solid #574567 !important; border-radius:7px !important; background:#292336 !important; color:#e5d8f5 !important; font:12px/1.4 system-ui !important; cursor:pointer !important; white-space:normal !important; }
+#nvs-sort-panel.nvs-workbench button:hover { background:#413052 !important; }
+#nvs-sort-panel.nvs-workbench button:disabled { opacity:.45 !important; cursor:default !important; }
+#nvs-sort-panel.nvs-workbench :focus-visible, #nvs-workbench-launch:focus-visible { outline:2px solid #c29aef !important; outline-offset:2px; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-search { display:grid; grid-template-columns: minmax(0,1fr); gap:8px; align-items:end; margin-bottom:12px; }
+#nvs-sort-panel.nvs-workbench details { border-top:1px solid #3c344a; padding:10px 0; }
+#nvs-sort-panel.nvs-workbench summary { cursor:pointer; color:#dfd2ef; font-weight:600; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-qualities { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-qualities label { flex-direction:row; align-items:center; gap:5px; background:#252032; border:1px solid #4b3c5b; border-radius:6px; padding:5px 7px; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-ranges { display:grid; gap:8px; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-ranges > label { display:grid; grid-template-columns:minmax(0,1fr); align-items:stretch; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-range { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:6px; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-view, #nvs-sort-panel.nvs-workbench .nvs-wb-actions { display:flex; align-items:center; flex-wrap:wrap; gap:7px; margin:10px 0; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-load { align-items:flex-end; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-load > label { flex:0 0 158px; width:158px; max-width:100%; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-load input { min-width:72px !important; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-view label, #nvs-sort-panel.nvs-workbench .nvs-wb-toggle { flex-direction:row; align-items:center; gap:5px; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-toggle { margin-top:9px; }
+#nvs-sort-panel.nvs-workbench footer { border-top:1px solid #65507e; margin-top:8px; padding-top:12px; }
+#nvs-sort-panel.nvs-workbench button.nvs-wb-primary { background:#7446a6 !important; border-color:#aa80d6 !important; color:white !important; font-weight:700 !important; }
+#nvs-sort-panel.nvs-workbench progress { width:100%; height:5px; accent-color:#b68bea; }
+#nvs-sort-panel.nvs-workbench [data-part="progress"], #nvs-sort-panel.nvs-workbench [data-part="result"] { margin-top:8px; font-size:11px; overflow-wrap:anywhere; }
+#nvs-sort-panel.nvs-workbench [data-tone="error"] { color:#ffabae; }
+#nvs-sort-panel.nvs-workbench [data-tone="success"] { color:#91dbb8; }
+#nvs-workbench-launch { position:fixed; right:18px; bottom:20px; z-index:2147483646; padding:11px 18px; border:1px solid #a978d7; border-radius:12px; background:#2a1e3e; color:#eee0ff; box-shadow:0 5px 20px #0008; font:13px system-ui; cursor:pointer; }
+#nvs-workbench-launch[hidden], #nvs-sort-panel.nvs-workbench [hidden] { display:none !important; }
+.nvs-wb-unmatched { opacity:.35 !important; }
+/* PimpBunny keeps the primary action visible while advanced controls scroll. */
+#nvs-sort-panel.nvs-workbench[data-site="pimpbunny"] { background:#151522 !important; }
+#nvs-sort-panel[data-site="pimpbunny"] header { flex-shrink:0; }
+#nvs-sort-panel[data-site="pimpbunny"] .nvs-wb-body { flex:1; min-height:0; padding-bottom:10px; }
+#nvs-sort-panel[data-site="pimpbunny"] > footer { flex-shrink:0; margin:0; padding:12px 16px; background:#201c2b; max-height:45dvh; overflow:auto; }
+#nvs-sort-panel[data-site="pimpbunny"] footer .nvs-wb-search { grid-template-columns:minmax(0,1fr) 84px; }
+#nvs-sort-panel[data-site="pimpbunny"] .nvs-wb-body > .nvs-wb-search { grid-template-columns:minmax(0,1fr) 108px; }
+#nvs-sort-panel[data-site="pimpbunny"] .nvs-wb-body > .nvs-wb-search > label:first-child { grid-column:1 / -1; }
+#nvs-sort-panel[data-site="pimpbunny"] [data-action="import-selected"] { width:100%; min-height:42px !important; font-size:14px !important; }
+#nvs-sort-panel[data-site="pimpbunny"] .nvs-wb-alternatives { padding-bottom:0; }
+#nvs-sort-panel[data-site="pimpbunny"] .nvs-wb-alternatives summary { font-size:11px; color:#c5b6d6; }
+#nvs-sort-panel[data-site="pimpbunny"] select { position:static !important; clip:auto !important; clip-path:none !important; display:block !important; }
+#nvs-sort-panel[data-site="pimpbunny"] .select2-container { display:none !important; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-tags { border-top:1px solid #4b3c5b; padding:10px 0; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-tags > strong { font-size:12px; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-tags > small { margin-top:5px; display:block; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-tag-chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; max-height:100px; overflow:auto; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-tag-chips button { font-size:11px !important; padding:4px 7px !important; min-height:28px !important; }
+#nvs-sort-panel.nvs-workbench .nvs-wb-tag-chips button[aria-pressed="true"] { background:#7446a6 !important; border-color:#c29aef !important; }
+#nvs-sort-panel.nvs-workbench [data-part="tags-progress"] { color:#b6afc5; font-size:11px; margin-top:7px; }
+.nvs-pb-card-tags { margin-top:5px; color:#b8a2ca; font:11px/1.5 system-ui; overflow-wrap:anywhere; }
+.nvs-pb-card-tags summary { cursor:pointer; }
+#nvs-sort-panel[data-site="pimpbunny"] [data-part="result"]:empty { display:none; }
+#nvs-sort-panel[data-site="pimpbunny"] [data-part="result"]:not(:empty) { background:#12131b; padding:8px; border-radius:6px; }
+@media (min-width:1100px) { html.nvs-pb-panel-open body { box-sizing:border-box !important; padding-right:360px !important; } }
+#nvs-sort-panel.nvs-workbench .nvs-wb-columns { flex: 0 0 148px; }
+#nvs-sort-panel.nvs-workbench label:has([data-filter="hideRejected"]) { flex-basis: 100%; font-weight: 700; color: #f3e9ff; }
+
+html.nvs-xh-wide.nvs-xh-panel-open body { box-sizing: border-box !important; padding-right: 360px !important; }
+html.nvs-xh-wide.nvs-xh-filters-open body { box-sizing: border-box !important; padding-left: 320px !important; }
+html.nvs-xh-wide .nvs-xh-hide { display: none !important; }
+html.nvs-xh-wide .nvs-xh-filters {
+  position: fixed !important; inset: 0 auto 0 0 !important;
+  width: 320px !important; max-width: 320px !important; height: 100dvh !important; max-height: 100dvh !important;
+  margin: 0 !important; display: none !important; overflow: auto !important; overscroll-behavior: contain;
+  z-index: 2147483644 !important; background: #14141c !important; color: #eee !important;
+  box-shadow: 12px 0 40px #0008 !important; box-sizing: border-box !important;
+}
+html.nvs-xh-wide.nvs-xh-filters-open .nvs-xh-filters { display: block !important; }
+.nvs-xh-filters-bar {
+  position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: center;
+  gap: 8px; padding: 12px 14px; background: #221c30; border-bottom: 1px solid #4a3e5b;
+}
+.nvs-xh-filters-bar strong { color: #eee; font: 650 14px/1.3 system-ui, sans-serif; }
+.nvs-xh-filters-bar button {
+  min-height: 32px; padding: 6px 10px; border: 1px solid #574567; border-radius: 7px;
+  background: #292336; color: #e5d8f5; font: 12px/1.4 system-ui, sans-serif; cursor: pointer;
+}
+.nvs-xh-filters-bar button:hover { background: #413052; }
+#nvs-xh-filters-launch {
+  position: fixed; left: 18px; bottom: 20px; z-index: 2147483646; padding: 11px 18px;
+  border: 1px solid #7f93e6; border-radius: 12px; background: #1b2438; color: #e7ecff;
+  box-shadow: 0 5px 20px #0008; font: 13px system-ui, sans-serif; cursor: pointer;
+}
+#nvs-xh-filters-launch[hidden] { display: none !important; }
+#nvs-xh-filters-launch:focus-visible, .nvs-xh-filters-bar button:focus-visible { outline: 2px solid #9eb0ff; outline-offset: 2px; }
+html.nvs-xh-wide .nvs-xh-stretch {
+  max-width: none !important; width: 100% !important; flex: 1 1 auto !important; min-width: 0 !important; margin-left: 0 !important; margin-right: 0 !important;
+}
+html.nvs-xh-wide .nvs-xh-grid {
+  display: grid !important;
+  grid-template-columns: repeat(var(--nvs-xh-cols, 5), minmax(0, 1fr)) !important;
+  gap: 16px 12px !important;
+  width: 100% !important;
+  max-width: none !important;
+  align-items: start !important;
+}
+html.nvs-xh-wide .nvs-xh-grid > .thumb-list__item,
+html.nvs-xh-wide .nvs-xh-grid > .video-thumb {
+  width: 100% !important; max-width: none !important; min-width: 0 !important; margin: 0 !important;
+}
+html.nvs-xh-wide .nvs-xh-grid .video-thumb__image-container,
+html.nvs-xh-wide .nvs-xh-grid .thumb-image-container {
+  display: block !important; position: relative !important; width: 100% !important;
+  height: auto !important; min-height: 0 !important; max-height: none !important;
+  aspect-ratio: 16 / 9 !important; overflow: hidden !important; background: #000 !important;
+}
+html.nvs-xh-wide .nvs-xh-grid .nvs-badge-anchor {
+  position: absolute !important; inset: 0 !important; display: block !important;
+  width: 100% !important; height: 100% !important;
+}
+html.nvs-xh-wide .nvs-xh-grid .thumb-image-container__image,
+html.nvs-xh-wide .nvs-xh-grid .thumb-image-container__video {
+  position: absolute !important; inset: 0 !important; display: block !important;
+  width: 100% !important; height: 100% !important; max-width: none !important;
+  object-fit: cover !important;
+}
+html.nvs-xh-wide .nvs-xh-grid .thumb-image-container__on-video {
+  display: none !important;
+}
+html.nvs-xh-wide .nvs-xh-date {
+  display: block !important; margin-top: 4px !important; color: #d5cee2 !important;
+  font: 650 12px/1.3 "Segoe UI", system-ui, sans-serif !important;
+}
+html.nvs-sb-wide.nvs-xh-panel-open body { box-sizing: border-box !important; padding-right: 360px !important; }
+html.nvs-xv-wide { --nvs-xv-gap: 12px; }
+html.nvs-xv-wide body { box-sizing: border-box !important; padding-right: 360px !important; }
+html.nvs-xv-wide .mozaique { display:grid !important; grid-template-columns:repeat(var(--nvs-xh-cols,5),minmax(0,1fr)) !important; gap:16px var(--nvs-xv-gap) !important; width:100% !important; max-width:none !important; }
+html.nvs-xv-wide .mozaique .thumb-block { box-sizing:border-box !important; width:100% !important; max-width:none !important; margin:0 !important; float:none !important; }
+html.nvs-xv-wide .mozaique .thumb-block img { max-width:100% !important; }
+#nvs-sort-panel[data-site="xvideos"] .nvs-wb-columns { display:flex !important; }
+#nvs-sort-panel[data-site="xvideos"] footer .nvs-wb-actions { flex-wrap:wrap; }
+@media(max-width:600px) { #nvs-sort-panel.nvs-workbench { inset:auto 12px 12px 12px !important; width:auto !important; max-height:75dvh !important; } #nvs-sort-panel.nvs-workbench .nvs-wb-ranges > label { grid-template-columns:105px minmax(0,1fr); } }
+
+/* ── Duration badge on card ────────────────────────────────── */
+.nvs-duration-badge {
+  position: absolute !important;
+  bottom: 6px !important;
+  right: 6px !important;
+  background: rgba(0,0,0,0.8) !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  pointer-events: none !important;
+  z-index: 9997 !important;
+}
+
+/* ── GoFile Inline Controls & Batch Import ─────────────────── */
+.nvs-gofile-inline-tools {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-left: 14px !important;
+  margin-right: 14px !important;
+  vertical-align: middle !important;
+  z-index: 100 !important;
+}
+
+.nvs-gofile-checkbox {
+  display: inline-block !important;
+  position: static !important;
+  width: 20px !important;
+  height: 20px !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+}
+
+.nvs-gofile-btn-import {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 4px 10px !important;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+  color: #fff !important;
+  border: 1px solid rgba(167, 139, 250, 0.4) !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3) !important;
+}
+
+.nvs-gofile-btn-import:hover {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.5) !important;
+}
+
+.nvs-gofile-btn-import.nvs-btn-success {
+  background: #16a34a !important;
+  border-color: #22c55e !important;
+}
+
+.nvs-gofile-btn-import svg {
+  width: 12px !important;
+  height: 12px !important;
+  fill: currentColor !important;
+}
+
+/* Batch input v Import Bare */
+.nvs-batch-input-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.nvs-batch-input {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(148, 163, 184, 0.35) !important;
+  border-radius: 999px !important;
+  padding: 5px 12px !important;
+  color: #f1f5f9 !important;
+  font-size: 12px !important;
+  outline: none !important;
+  width: 180px !important;
+  transition: border-color 0.2s, width 0.2s !important;
+}
+
+.nvs-batch-input:focus {
+  border-color: #a78bfa !important;
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.25) !important;
+  width: 230px !important;
+}
+
+.nvs-btn-batch {
+  background: linear-gradient(135deg, #ec4899, #db2777) !important;
+  border-color: rgba(244, 114, 182, 0.4) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 10px rgba(236, 72, 153, 0.4) !important;
+}
+
+.nvs-btn-batch:hover {
+  background: linear-gradient(135deg, #f472b6, #ec4899) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.6) !important;
+}
+
+/* Tlačidlo v GoFile hlavičke priečinka */
+.nvs-gofile-folder-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 6px 14px !important;
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
+  color: #fff !important;
+  border: 1px solid rgba(196, 181, 253, 0.5) !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  margin-left: 10px !important;
+  transition: all 0.15s !important;
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.4) !important;
+}
+
+.nvs-gofile-folder-btn:hover {
+  background: linear-gradient(135deg, #a78bfa, #7c3aed) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.6) !important;
+}
+#nvs-import-result {
+  position: fixed;
+  bottom: 100px;
+  right: 18px;
+  z-index: 2147483646;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  max-width: min(540px, calc(100vw - 36px));
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border: 1px solid #64748b;
+  border-radius: 12px;
+  background: #111827;
+  color: #f8fafc;
+  box-shadow: 0 8px 28px #0006;
+  font: 14px/1.5 system-ui, sans-serif;
+  overflow-wrap: anywhere;
+}
+#nvs-import-result[data-tone="success"] { border-color: #34d399; }
+#nvs-import-result[data-tone="warning"] { border-color: #fbbf24; }
+#nvs-import-result[data-tone="error"] { border-color: #fb7185; }
+#nvs-import-result button {
+  flex: 0 0 auto;
+  border: 0;
+  padding: 0 5px;
+  background: transparent;
+  color: inherit;
+  font: 24px/1 system-ui, sans-serif;
+  cursor: pointer;
+}
+/* Current-page Turbo overview: controls stay outside the scrolling table. */
+#nvs-overview-launch { position: fixed; right: 20px; top: 140px; z-index: 2147483647; background: #29213f; color: #fff; border: 1px solid #ad8aff; border-radius: 9px; padding: 10px 16px; cursor: pointer; font: 600 14px system-ui; box-shadow: 0 3px 18px #0008; }
+.nvs-turbo-card { display: inline-block; padding-right: 38px; min-height: 32px; }
+#nvs-import-bar.nvs-overview-open { visibility: hidden; }
+#nvs-overview { position: fixed; inset: 0; z-index: 2147483647; background: #080710dc; padding: 24px; color: #eeeaf8; font: 14px/1.45 system-ui, sans-serif; box-sizing: border-box; }
+#nvs-overview * { box-sizing: border-box; }
+#nvs-overview { margin: 0; border: 0; width: 100%; height: 100%; max-width: none; max-height: none; }
+#nvs-overview .nvs-overview-shell { width: min(1500px, 100%); height: 100%; margin: auto; display: flex; flex-direction: column; background: #191723; border: 1px solid #5c4b79; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 50px #000a; }
+#nvs-overview header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 16px 20px; background: #262036; flex-shrink: 0; }
+#nvs-overview h2 { margin: 0; font: 700 22px system-ui; color: #fff; }
+#nvs-overview h2 small { font-size: 14px; color: #c6adff; }
+#nvs-overview p { margin: 6px 0 0; }
+#nvs-overview button, #nvs-overview input, #nvs-overview select { font: inherit; color: #f3efff; background: #302a40; border: 1px solid #665779; border-radius: 6px; padding: 7px 10px; min-height: 34px; }
+#nvs-overview button { cursor: pointer; white-space: nowrap; }
+#nvs-overview button:hover { background: #493960; }
+#nvs-overview button:disabled { opacity: .45; cursor: default; }
+#nvs-overview :focus-visible { outline: 2px solid #cba8ff; outline-offset: 2px; }
+#nvs-overview .nvs-overview-filters { padding: 12px 20px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px 12px; }
+#nvs-overview label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #d8cde8; }
+#nvs-overview input, #nvs-overview select { width: 100%; min-width: 0; }
+#nvs-overview .nvs-overview-actions { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 8px; }
+#nvs-overview .nvs-overview-help { padding: 0 20px 10px; color: #b4a8c7; font-size: 12px; }
+#nvs-overview .nvs-overview-table { overflow: auto; flex: 1; min-height: 80px; border-top: 1px solid #443653; }
+#nvs-overview table { width: 100%; border-collapse: collapse; text-align: left; min-width: 850px; }
+#nvs-overview th { position: sticky; top: 0; background: #2d263b; color: #d9c4ff; z-index: 1; }
+#nvs-overview th, #nvs-overview td { padding: 11px 12px; border-bottom: 1px solid #3b324a; vertical-align: top; }
+#nvs-overview tr:nth-child(even) { background: #211d2c; }
+#nvs-overview td:nth-child(2) { max-width: 300px; overflow-wrap: anywhere; }
+#nvs-overview td:last-child { max-width: 290px; }
+#nvs-overview td input { width: 18px; min-height: 18px; height: 18px; accent-color: #b081ff; }
+#nvs-overview small { display: block; font-size: 12px; color: #b4a7ca; margin: 4px 0; }
+#nvs-overview a { color: #c8a7ff; text-decoration: underline; }
+#nvs-overview footer { background: #292137; border-top: 1px solid #695080; padding: 14px 20px; flex-shrink: 0; }
+#nvs-overview .nvs-overview-import { display: flex; align-items: end; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+#nvs-overview .nvs-overview-import input { width: 220px; }
+#nvs-overview .nvs-overview-primary { background: #7847b7; font-weight: 700; }
+#nvs-overview .nvs-overview-pagination { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 7px; }
+@media (max-width: 800px) {
+  #nvs-overview { padding: 8px; font-size: 12px; }
+  #nvs-overview .nvs-overview-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 8px; }
+  #nvs-overview header, #nvs-overview footer { padding: 10px; }
+  #nvs-overview .nvs-overview-actions { padding: 0 8px; }
+  #nvs-overview .nvs-overview-help { padding: 4px 8px; }
+  #nvs-overview .nvs-overview-filters { max-height: 160px; overflow-y: auto; flex-shrink: 0; }
+  #nvs-overview .nvs-overview-actions { max-height: 90px; overflow-y: auto; flex-shrink: 0; }
+}
+@media (max-height: 650px) { #nvs-overview .nvs-overview-filters { max-height: 150px; overflow-y: auto; } #nvs-overview .nvs-overview-help { display: none; } }
+@media (max-width: 480px) {
+  #nvs-overview .nvs-overview-filters { max-height: 120px; }
+  #nvs-overview .nvs-overview-actions { max-height: 76px; }
+  #nvs-overview .nvs-overview-help { display: none; }
+  #nvs-overview h2 { font-size: 18px; }
+  #nvs-overview [data-part="progress"] { font-size: 11px; }
+  #nvs-overview footer { font-size: 12px; }
+}
+/* Gallery: six stable embedded players per page, three columns on desktop. */
+#nvs-overview .nvs-overview-shell { background: #12131c; border-color: #3d354e; }
+#nvs-overview header { background: linear-gradient(110deg, #29213c, #181c2c); }
+#nvs-overview .nvs-gallery { flex: 1; min-height: 100px; overflow: auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 16px 20px; align-content: start; }
+#nvs-overview .nvs-gallery-card { min-width: 0; background: #1e1e2c; border: 1px solid #373448; border-radius: 13px; overflow: hidden; transition: border-color .15s, box-shadow .15s; }
+#nvs-overview .nvs-gallery-card.is-selected { border-color: #a87aee; box-shadow: 0 0 0 1px #a87aee55; }
+#nvs-overview .nvs-gallery-media { aspect-ratio: 16/9; background: #08090e; }
+#nvs-overview .nvs-gallery-media iframe { display: block; width: 100%; height: 100%; border: 0; }
+#nvs-overview .nvs-gallery-info { padding: 12px 14px; }
+#nvs-overview .nvs-gallery-heading { flex-direction: row; align-items: center; gap: 9px; color: #f4f1ff; font-size: 14px; }
+#nvs-overview .nvs-gallery-heading strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#nvs-overview .nvs-gallery-heading input { flex: 0 0 18px; width: 18px; height: 18px; min-height: 18px; accent-color: #a77ae8; }
+#nvs-overview .nvs-gallery-id { font-size: 11px; opacity: .7; }
+#nvs-overview .nvs-gallery-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin: 10px 0; }
+#nvs-overview .nvs-gallery-metrics > div { background: #151520; border-radius: 7px; padding: 7px 9px; }
+#nvs-overview .nvs-gallery-metrics small { font-size: 10px; margin: 0 0 2px; }
+#nvs-overview .nvs-gallery-metrics b { font-size: 14px; color: #ece4ff; }
+#nvs-overview .nvs-gallery-status { font-size: 11px; color: #a99bbd; overflow-wrap: anywhere; }
+#nvs-overview .nvs-gallery-status[data-state="ready"] { color: #80d8b3; }
+#nvs-overview .nvs-gallery-status small { font-size: 10px; }
+#nvs-overview .nvs-gallery-sources { font-size: 11px; margin-top: 6px; color: #9990ab; }
+#nvs-overview .nvs-gallery-sources a:last-child { float: right; }
+#nvs-overview .nvs-gallery { grid-auto-rows: max-content; }
+#nvs-overview .nvs-gallery { overflow-y: scroll; overscroll-behavior: contain; scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: #8b69b0 #16121f; }
+#nvs-overview .nvs-overview-count { padding: 6px 20px; text-align: center; color: #b7a6ca; font-size: 12px; flex-shrink: 0; }
+#nvs-overview .nvs-gallery-card { height: auto !important; align-self: start; }
+#nvs-overview .nvs-gallery-media { position: relative; }
+#nvs-overview .nvs-gallery-metrics { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; gap: 6px; margin: 0; z-index: 2; pointer-events: none; }
+#nvs-overview .nvs-gallery-metrics > div { display: flex; align-items: center; gap: 5px; padding: 5px 8px; background: #080912e8; border: 1px solid #ffffff25; box-shadow: 0 2px 8px #0008; backdrop-filter: blur(6px); }
+#nvs-overview .nvs-gallery-metrics small { margin: 0; color: #c0b7d0; }
+#nvs-overview .nvs-gallery-metrics b { font-size: 13px; color: #fff; }
+#nvs-overview-launch { right: auto; left: 20px; }
+#nvs-overview .nvs-gallery-advanced { margin: 0 20px 10px; color: #afa1c0; font-size: 12px; flex-shrink: 0; }
+#nvs-overview .nvs-gallery-advanced summary { cursor: pointer; }
+#nvs-overview .nvs-gallery-ranges { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; padding-top: 8px; }
+@media (min-width: 951px) { #nvs-overview .nvs-gallery-media { aspect-ratio: auto; height: clamp(130px, calc((100dvh - 570px) / 2), 260px); } }
+@media (max-width: 950px) { #nvs-overview .nvs-gallery { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; padding: 12px; } }
+@media (max-width: 550px) { #nvs-overview .nvs-gallery { grid-template-columns: minmax(0,1fr); padding: 10px; } }
+.nvs-thread-meta { position: absolute; top: 10px; left: 42px; right: 10px; z-index: 15; display: flex; justify-content: space-between; gap: 5px; pointer-events: none; font: 12px/1.3 system-ui,sans-serif; }
+.nvs-thread-meta > span { display: flex; gap: 5px; align-items: center; padding: 5px 7px; color: #fff; background: #090911eb; border: 1px solid #ffffff30; border-radius: 6px; box-shadow: 0 2px 8px #0008; }
+.nvs-thread-meta small { color: #c2b6d2; font-size: 10px; }
+.nvs-thread-meta[data-state="loading"] > span { border-color: #a87aee; }
+#nvs-thread-tools { position: fixed; top: 190px; left: 20px; z-index: 2147483646; width: 230px; display: flex; flex-wrap: wrap; gap: 7px; padding: 12px; border: 1px solid #6b518c; border-radius: 12px; background: #191523f5; color: #eee; box-shadow: 0 8px 22px #0008; font: 12px/1.4 system-ui,sans-serif; }
+#nvs-thread-tools[hidden] { display: none; }
+#nvs-thread-tools button { color: #fff; background: #30233f; border: 1px solid #725490; border-radius: 6px; padding: 6px 9px; cursor: pointer; }
+#nvs-thread-tools button:disabled { opacity: .5; }
+#nvs-thread-tools label { display: flex; align-items: center; gap: 6px; width: 100%; }
+#nvs-thread-tools small { color: #c1accf; width: 100%; }
+@media(max-width: 1100px) { #nvs-thread-tools { top: auto; bottom: 85px; width: min(350px,calc(100vw - 40px)); } .nvs-thread-meta small { display: none; } }
+.nvs-wh-footer { display: flex; justify-content: center; gap: 12px; padding: 24px; clear: both; }
+[id$="_pagination"][data-nvs-wh-pager] { display: none !important; }
+.nvs-wh-footer button { color: #e7dcff; background: #292039; border: 1px solid #74519c; border-radius: 18px; padding: 10px 18px; cursor: pointer; }
+.nvs-wh-footer button:disabled, #nvs-wh-all:disabled { opacity: .5; cursor: default; }
+#nvs-wh-status { white-space: nowrap; color: #d4c0ed; font-size: 11px; }
+.nvs-wh-play { position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%); z-index: 10000 !important; width: 48px; height: 48px; border: 1px solid #c3a1f8; border-radius: 50%; background: #181122e6; color: #fff; box-shadow: 0 2px 16px #0008; cursor: pointer; font: 22px/1 system-ui,sans-serif; display: grid; place-items: center; }
+.nvs-wh-play:hover, .nvs-wh-play:focus-visible { background: #6c39a8; outline: 2px solid #eee; outline-offset: 2px; }
+.nvs-wh-playing { outline: 2px solid #ac73ed; outline-offset: 2px; }
+#nvs-wh-player { box-sizing: border-box; width: min(1200px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); padding: 0; margin: auto; border: 1px solid #7654a0; border-radius: 16px; background: #121019; color: #f3edf9; box-shadow: 0 20px 100px #000b; overflow: auto; font: 14px/1.4 system-ui,sans-serif; }
+#nvs-wh-player::backdrop { background: #06040cd9; backdrop-filter: blur(5px); }
+#nvs-wh-player .nvs-wh-player-header { display: flex; align-items: center; gap: 16px; padding: 14px 18px; }
+#nvs-wh-player .nvs-wh-player-header > div { flex: 1; min-width: 0; }
+#nvs-wh-player .nvs-wh-player-caption { color: #b497d0; font-size: 10px; letter-spacing: 1.5px; }
+#nvs-wh-player h2 { margin: 4px 0 0; color: #f3edf9; font: 600 16px/1.4 system-ui,sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#nvs-wh-player [data-wh="position"] { white-space: nowrap; color: #d6c4ec; }
+#nvs-wh-player button { padding: 9px 14px; border: 1px solid #695183; border-radius: 9px; background: #2c203b; color: #f3edf9; cursor: pointer; font: inherit; }
+#nvs-wh-player button:hover, #nvs-wh-player button:focus-visible { background: #563471; outline-color: #b989ef; }
+#nvs-wh-player button:disabled { opacity: .4; cursor: default; }
+#nvs-wh-player .nvs-wh-player-stage { background: #000; height: min(65dvh, 675px); min-height: 180px; width: 100%; }
+#nvs-wh-player iframe { display: block; width: 100%; height: 100%; border: 0; }
+#nvs-wh-player video { display: block; width: 100%; height: 100%; object-fit: contain; background: #000; }
+#nvs-wh-player .nvs-wh-player-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 18px 10px; }
+#nvs-wh-player .nvs-wh-player-controls label { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; color: #d6c4ec; cursor: pointer; }
+#nvs-wh-player input[type="checkbox"] { appearance: auto; accent-color: #ad70e7; width: 16px; height: 16px; margin: 0; }
+#nvs-wh-player a { color: #cbb1ec; font: inherit; text-decoration: none; }
+#nvs-wh-player a:hover { text-decoration: underline; }
+#nvs-wh-player .nvs-wh-player-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 0 18px 14px; color: #af9ec3; font-size: 12px; }
+@media (max-width: 700px) { #nvs-wh-player { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); } #nvs-wh-player .nvs-wh-player-stage { height: 45dvh; } #nvs-wh-player .nvs-wh-player-controls label { margin-left: 0; } #nvs-wh-player h2 { font-size: 14px; } }
+
+#nvs-wh-player .nvs-wh-quality-bar { display:flex; flex-wrap:wrap; align-items:center; gap:12px 24px; padding:12px 18px; background:#211a30; font-size:13px; }
+#nvs-wh-player .nvs-wh-quality-bar label { display:flex; align-items:center; gap:8px; }
+#nvs-wh-player .nvs-wh-quality-bar select { color:#fff; background:#342544; border:1px solid #74519c; border-radius:7px; padding:7px 10px; }
+#nvs-wh-player [data-wh="quality-note"] { color:#ffc984; }
+
+/* --- Nexus Server Switcher & Missing Retry --- */
+.nvs-source-badge {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  user-select: none !important;
+  z-index: 100 !important;
+  transition: transform 0.15s ease, filter 0.15s ease !important;
+}
+.nvs-source-badge:hover {
+  transform: scale(1.05) !important;
+  filter: brightness(1.25) !important;
+}
+
+.nvs-btn-retry-missing {
+  height: 28px !important;
+  padding: 0 10px !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(251, 146, 60, 0.45) !important;
+  background: rgba(251, 146, 60, 0.15) !important;
+  color: #fdba74 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  transition: all 0.15s ease !important;
+  flex-shrink: 0 !important;
+}
+.nvs-btn-retry-missing:hover {
+  background: rgba(251, 146, 60, 0.3) !important;
+  color: #ffedd5 !important;
+  border-color: rgba(251, 146, 60, 0.7) !important;
+}
+.nvs-btn-retry-missing:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+.nvs-server-popover {
+  box-sizing: border-box !important;
+  width: 300px !important;
+  max-width: 90vw !important;
+  background: #18181b !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255,255,255,0.05) !important;
+  color: #f4f4f5 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  padding: 12px !important;
+  z-index: 9999999 !important;
+  animation: nvsPopFade 0.15s ease-out !important;
+}
+
+@keyframes nvsPopFade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.nvs-pop-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding-bottom: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+.nvs-pop-title {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #e4e4e7 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 240px !important;
+}
+
+.nvs-pop-close {
+  background: transparent !important;
+  border: 0 !important;
+  color: #a1a1aa !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+}
+.nvs-pop-close:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+.nvs-pop-body {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  max-height: 220px !important;
+  overflow-y: auto !important;
+  margin-bottom: 10px !important;
+}
+
+.nvs-pop-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 5px 8px !important;
+  border-radius: 6px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  font-size: 11.5px !important;
+}
+
+.nvs-pop-row-active {
+  background: rgba(74, 222, 128, 0.1) !important;
+  border: 1px solid rgba(74, 222, 128, 0.3) !important;
+}
+
+.nvs-pop-server-info {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.nvs-pop-player-num {
+  font-weight: 700 !important;
+  color: #93c5fd !important;
+  font-size: 11px !important;
+}
+
+.nvs-pop-host {
+  color: #d4d4d8 !important;
+}
+
+.nvs-pop-status {
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+}
+
+.nvs-pop-active {
+  background: rgba(74, 222, 128, 0.2) !important;
+  color: #4ade80 !important;
+}
+
+.nvs-pop-mirror {
+  background: rgba(251, 146, 60, 0.15) !important;
+  color: #fb923c !important;
+}
+
+.nvs-pop-unverified {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+}
+
+.nvs-pop-btn-select {
+  background: rgba(59, 130, 246, 0.2) !important;
+  border: 1px solid rgba(59, 130, 246, 0.4) !important;
+  color: #60a5fa !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+.nvs-pop-btn-select:hover {
+  background: rgba(59, 130, 246, 0.4) !important;
+  color: #fff !important;
+}
+
+.nvs-pop-footer {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding-top: 8px !important;
+}
+
+.nvs-pop-btn {
+  flex: 1 !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #e4e4e7 !important;
+  border-radius: 6px !important;
+  padding: 5px 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  text-align: center !important;
+  transition: all 0.15s ease !important;
+}
+.nvs-pop-btn:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
+}
+.nvs-pop-btn:disabled {
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+}
+
+/* ── Popover Statusline ─────────────────────────────────── */
+.nvs-pop-statusline {
+  font-size: 11px !important;
+  color: #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.12) !important;
+  border-left: 3px solid #38bdf8 !important;
+  padding: 4px 8px !important;
+  margin: 6px 0 !important;
+  border-radius: 3px !important;
+  line-height: 1.3 !important;
+}
+.nvs-pop-statusline-busy {
+  color: #fbbf24 !important;
+  background: rgba(251, 191, 36, 0.12) !important;
+  border-left-color: #fbbf24 !important;
+}
+.nvs-pop-statusline-error {
+  color: #f87171 !important;
+  background: rgba(248, 113, 113, 0.15) !important;
+  border-left-color: #f87171 !important;
+}
+
+/* ── Sxyprn Dedicated Metadata Bar (.nvs-sx-bar) ────────── */
+.nvs-sx-bar {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 5px !important;
+  margin: 6px 0 2px 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  position: static !important;
+  z-index: 10 !important;
+}
+.nvs-sx-bar .nvs-badge,
+.nvs-sx-bar .nvs-main-badge,
+.nvs-sx-bar .nvs-badge-quality,
+.nvs-sx-bar .nvs-source-badge,
+.nvs-sx-bar .nvs-duration-badge {
+  position: static !important;
+  bottom: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  display: inline-flex !important;
+  margin: 0 !important;
+  max-width: 100% !important;
+  pointer-events: auto !important;
+}
+.nvs-sx-bar .nvs-source-badge {
+  cursor: pointer !important;
+}
+.nvs-badge-error {
+  background: rgba(185, 28, 28, 0.85) !important;
+  border: 1px solid rgba(248, 113, 113, 0.5) !important;
+  color: #fecaca !important;
+  cursor: pointer !important;
+}
+
+/* ── Scan HUD (Floating pill & panel) ──────────────────── */
+#nvs-scan-hud-pill {
+  position: fixed !important;
+  bottom: 14px !important;
+  left: 14px !important;
+  z-index: 2147483640 !important;
+  background: rgba(15, 23, 42, 0.92) !important;
+  border: 1px solid rgba(139, 92, 246, 0.5) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  color: #e2e8f0 !important;
+  border-radius: 9999px !important;
+  padding: 6px 14px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45) !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  user-select: none !important;
+  transition: all 0.2s ease !important;
+}
+#nvs-scan-hud-pill:hover {
+  transform: translateY(-1px) !important;
+  border-color: rgba(167, 139, 250, 0.85) !important;
+  box-shadow: 0 6px 22px rgba(124, 58, 237, 0.35) !important;
+}
+#nvs-scan-hud-pill .nvs-hud-pulse {
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  background: #10b981 !important;
+  display: inline-block !important;
+}
+#nvs-scan-hud-pill.nvs-hud-pill-busy .nvs-hud-pulse {
+  background: #f59e0b !important;
+  box-shadow: 0 0 8px #f59e0b !important;
+  animation: nvsPulse 1.2s infinite ease-in-out !important;
+}
+@keyframes nvsPulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+#nvs-scan-hud-panel {
+  position: fixed !important;
+  bottom: 50px !important;
+  left: 14px !important;
+  z-index: 2147483641 !important;
+  width: 360px !important;
+  max-width: calc(100vw - 28px) !important;
+  max-height: 480px !important;
+  background: rgba(15, 23, 42, 0.96) !important;
+  border: 1px solid rgba(139, 92, 246, 0.5) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.6) !important;
+  color: #f1f5f9 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 12px !important;
+  display: none !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+#nvs-scan-hud-panel.nvs-hud-open {
+  display: flex !important;
+}
+.nvs-hud-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 10px 14px !important;
+  background: rgba(124, 58, 237, 0.15) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+}
+.nvs-hud-close {
+  background: transparent !important;
+  border: none !important;
+  color: #94a3b8 !important;
+  font-size: 15px !important;
+  cursor: pointer !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+}
+.nvs-hud-close:hover {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+.nvs-hud-body {
+  padding: 12px 14px !important;
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+.nvs-hud-stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 6px !important;
+}
+.nvs-hud-stat-box {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 6px !important;
+  padding: 6px 8px !important;
+  text-align: center !important;
+}
+.nvs-hud-stat-val {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #a78bfa !important;
+}
+.nvs-hud-stat-lbl {
+  font-size: 10px !important;
+  color: #94a3b8 !important;
+  margin-top: 2px !important;
+}
+.nvs-hud-fields-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 5px !important;
+}
+.nvs-hud-field-box {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  border-radius: 6px !important;
+  padding: 5px 4px !important;
+  text-align: center !important;
+}
+.nvs-hud-field-val {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #cbd5e1 !important;
+  line-height: 1.2 !important;
+}
+.nvs-hud-field-lbl {
+  font-size: 9.5px !important;
+  color: #94a3b8 !important;
+  margin-top: 2px !important;
+  white-space: nowrap !important;
+}
+.nvs-hud-cache-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  font-size: 10.5px !important;
+  color: #94a3b8 !important;
+  padding: 2px 2px 0 !important;
+}
+.nvs-hud-current {
+  background: rgba(30, 41, 59, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 6px !important;
+  padding: 8px 10px !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+}
+.nvs-hud-current-title {
+  color: #38bdf8 !important;
+  font-weight: 600 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.nvs-hud-progress-bg {
+  width: 100% !important;
+  height: 5px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 3px !important;
+  overflow: hidden !important;
+}
+.nvs-hud-progress-bar {
+  height: 100% !important;
+  background: linear-gradient(90deg, #7c3aed, #06b6d4) !important;
+  width: 0% !important;
+  transition: width 0.2s ease !important;
+}
+.nvs-hud-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+}
+.nvs-hud-btn {
+  flex: 1 1 calc(50% - 4px) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #f1f5f9 !important;
+  padding: 6px 8px !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  text-align: center !important;
+  transition: all 0.15s ease !important;
+}
+.nvs-hud-btn:hover {
+  background: rgba(124, 58, 237, 0.3) !important;
+  border-color: rgba(167, 139, 250, 0.5) !important;
+}
+.nvs-hud-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.3) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+.nvs-hud-logs {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 6px !important;
+  padding: 6px 8px !important;
+  max-height: 100px !important;
+  overflow-y: auto !important;
+  font-size: 10.5px !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  line-height: 1.4 !important;
+}
+.nvs-hud-log-line {
+  color: #cbd5e1 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.nvs-hud-log-error { color: #f87171 !important; }
+.nvs-hud-log-done { color: #4ade80 !important; }
+.nvs-hud-log-info { color: #38bdf8 !important; }
+
+/* Zabráň prekrývaniu HUD Scanneru a spodnej lišty prvkom Quick Selection (#nuss-quick-selection) */
+body:has(#nvs-scan-hud-panel.nvs-hud-open) #nuss-quick-selection,
+#nvs-scan-hud-panel.nvs-hud-open ~ #nuss-quick-selection {
+  left: 416px !important;
+  bottom: 86px !important;
+  z-index: 2147483647 !important;
+  transition: left 0.2s ease, bottom 0.2s ease;
+}
+
+body:has(#nvs-import-bar.nvs-bar-visible) #nuss-quick-selection {
+  bottom: 86px !important;
+  z-index: 2147483647 !important;
+}
+
+.nvs-btn-play-split:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 12px rgba(219, 39, 119, 0.5);
+}
+
+#nvs-hud-btn-import-selected:hover {
+  background: #6d28d9 !important;
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.5) !important;
+}
+
+#nvs-hud-btn-import-all:hover {
+  background: #1d4ed8 !important;
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.5) !important;
+}
+
+.nvs-tag-chip.nvs-tag-fav { border-color: #facc15; color: #fde047; }
+.nvs-tag-chip.nvs-tag-bl { background: #450a0a; border-color: #7f1d1d; color: #fca5a5; }
+.nvs-fav-card { box-shadow: 0 0 0 2px #facc15 !important; }
+.nvs-imported-card { opacity: .45; }
+.nvs-imported-card::before { content: '✓ importované'; position: absolute; z-index: 5; top: 4px; left: 4px; background: #16a34a; color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 4px; }
+.nvs-tag-check { font-size: 11px; color: #cbd5e1; display: flex; align-items: center; gap: 4px; flex: 1; }
+
+/* ARCHVE album statistics need room for size, average and date. */
+.nvs-archve-card .nvs-main-badge {
+  white-space: normal !important; line-height: 1.3 !important;
+  border-radius: 8px !important; pointer-events: auto !important;
+}

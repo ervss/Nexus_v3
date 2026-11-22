@@ -1,0 +1,277 @@
+/* Settings owns its layout so gallery skins cannot shrink or wash out the dialog. */
+body.settings-open,
+body:has(.nexus-settings:not([style*="display: none"])) { overflow: hidden; }
+.modal-wrap.nexus-settings {
+    --settings-bg: rgba(11, 15, 27, 0.80);
+    --settings-card: rgba(255, 255, 255, 0.045);
+    --settings-input: rgba(7, 10, 18, 0.72);
+    --settings-text: #f1f5f9;
+    --settings-muted: #94a3b8;
+    --settings-border: rgba(255, 255, 255, 0.11);
+    --settings-accent: #a855f7;
+    --settings-accent-2: #6366f1;
+    --settings-accent-soft: rgba(168, 85, 247, 0.22);
+    --settings-accent-border: rgba(168, 85, 247, 0.48);
+    padding: 20px;
+    box-sizing: border-box;
+    background: rgba(4, 6, 13, 0.80);
+    backdrop-filter: blur(28px) saturate(135%);
+    -webkit-backdrop-filter: blur(28px) saturate(135%);
+    z-index: 100100;
+    overscroll-behavior: contain;
+}
+body[data-accent="blue"] .nexus-settings {
+    --settings-accent: #38bdf8;
+    --settings-accent-2: #2563eb;
+    --settings-accent-soft: rgba(56, 189, 248, 0.20);
+    --settings-accent-border: rgba(56, 189, 248, 0.48);
+}
+body[data-accent="green"] .nexus-settings {
+    --settings-accent: #34d399;
+    --settings-accent-2: #059669;
+    --settings-accent-soft: rgba(52, 211, 153, 0.20);
+    --settings-accent-border: rgba(52, 211, 153, 0.48);
+}
+body[data-accent="orange"] .nexus-settings {
+    --settings-accent: #fb923c;
+    --settings-accent-2: #ea580c;
+    --settings-accent-soft: rgba(251, 146, 60, 0.20);
+    --settings-accent-border: rgba(251, 146, 60, 0.48);
+}
+body.light-theme .nexus-settings {
+    --settings-bg: #f5f7fb;
+    --settings-card: #fff;
+    --settings-input: #f0f3f8;
+    --settings-text: #172338;
+    --settings-muted: #53627a;
+    --settings-border: #d7dfeb;
+    --settings-accent: #c4510b;
+}
+.nexus-settings *, .nexus-settings *::before, .nexus-settings *::after { box-sizing: border-box; }
+.modal-wrap.nexus-settings .modal-card.settings-card {
+    display: grid;
+    grid-template: auto minmax(0, 1fr) auto / minmax(0, 1fr);
+    width: min(1080px, 100%);
+    height: min(780px, calc(100vh - 40px));
+    height: min(780px, calc(100dvh - 40px));
+    min-width: 0;
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--settings-border) !important;
+    border-radius: 20px;
+    background: var(--settings-bg) !important;
+    backdrop-filter: blur(30px) saturate(165%);
+    -webkit-backdrop-filter: blur(30px) saturate(165%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 32px 84px rgba(0, 0, 0, 0.76) !important;
+    color: var(--settings-text);
+    color-scheme: dark;
+    font: 14px/1.5 Manrope, system-ui, sans-serif;
+}
+body.light-theme .nexus-settings .settings-card { color-scheme: light; }
+.nexus-settings .settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0;
+    padding: 22px 26px;
+    border-bottom: 1px solid var(--settings-border);
+}
+.nexus-settings .settings-title { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.nexus-settings .settings-title > .material-icons-round {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    color: #e9d5ff;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.28), rgba(34, 211, 238, 0.18));
+    border: 1px solid rgba(168, 85, 247, 0.36);
+    border-radius: 13px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+.nexus-settings .settings-header h3 { margin: 0; color: var(--settings-text) !important; font-size: 21px; font-weight: 800; }
+.nexus-settings .settings-header p { margin: 2px 0 0; color: var(--settings-muted); font-size: 12px; }
+.nexus-settings .settings-close {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    padding: 0;
+    border: 1px solid var(--settings-border);
+    border-radius: 10px;
+    background: var(--settings-card);
+    color: var(--settings-muted);
+    cursor: pointer;
+}
+.nexus-settings .settings-layout { display: grid; grid-template-columns: 200px minmax(0, 1fr); min-height: 0; overflow: hidden; }
+.nexus-settings .settings-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 20px 12px;
+    border: 0;
+    border-right: 1px solid var(--settings-border);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+.nexus-settings .settings-tabs button {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    width: 100%;
+    min-height: 44px;
+    padding: 11px 13px;
+    text-align: left;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent !important;
+    color: var(--settings-muted) !important;
+    font: 600 13px/1.4 Manrope, system-ui, sans-serif;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.nexus-settings .settings-tabs .material-icons-round { font-size: 20px; }
+.nexus-settings .settings-tabs button:hover { background: var(--settings-card) !important; color: var(--settings-text) !important; }
+.nexus-settings .settings-tabs button.active {
+    border-color: var(--settings-accent-border, rgba(168, 85, 247, 0.42));
+    background: linear-gradient(135deg, var(--settings-accent-soft, rgba(168, 85, 247, 0.2)), rgba(34, 211, 238, 0.12)) !important;
+    color: #f3e8ff !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.nexus-settings .settings-content {
+    min-width: 0;
+    min-height: 0;
+    padding: 24px;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--settings-border) transparent;
+    scroll-padding: 20px;
+}
+.nexus-settings .settings-section-heading { margin-bottom: 20px; }
+.nexus-settings .settings-section-heading h4 { margin: 0 0 4px; color: var(--settings-text); font-size: 19px; }
+.nexus-settings .settings-section-heading p { margin: 0; color: var(--settings-muted); font-size: 12px; }
+.nexus-settings .settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
+.nexus-settings .settings-grid > * { min-width: 0; }
+.nexus-settings .set-group {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 12px;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 18px !important;
+    border: 1px solid var(--settings-border) !important;
+    border-radius: 12px;
+    background: var(--settings-card) !important;
+    overflow-wrap: anywhere;
+}
+.nexus-settings .set-group > label:not(.switch) { display: block; margin: 0; color: var(--settings-text); font-size: 13px; font-weight: 700; }
+.nexus-settings .set-group > p, .nexus-settings .text-dim { margin: 0; color: var(--settings-muted) !important; font-size: 12px; line-height: 1.65; }
+.nexus-settings .set-group > div { min-width: 0; }
+.nexus-settings .settings-wide, .nexus-settings .settings-telegram { grid-column: 1 / -1; }
+.nexus-settings .settings-danger { order: 10; border-color: rgba(248, 113, 113, .4) !important; }
+.nexus-settings .settings-danger > label { color: #f87171 !important; }
+.nexus-settings .settings-card input:not([type="checkbox"]),
+.nexus-settings .settings-card select {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: 40px;
+    margin: 0;
+    padding: 8px 10px;
+    border: 1px solid var(--settings-border);
+    border-radius: 8px;
+    background: var(--settings-input) !important;
+    color: var(--settings-text) !important;
+    font: inherit;
+    font-size: 13px;
+}
+.nexus-settings .settings-card input[type="checkbox"] { margin: 0; }
+.nexus-settings .settings-telegram > div:not(.set-group) { display: grid; gap: 12px; margin-top: 14px; }
+.nexus-settings .ai-vision-tagger-panel > div:first-child > div { flex-wrap: wrap; min-width: 0; }
+.nexus-settings .ai-vision-tagger-panel > div:first-child > div > span { overflow-wrap: anywhere; }
+.nexus-settings .switch { flex: 0 0 40px; align-self: flex-start; }
+.nexus-settings .switch input { width: 0; padding: 0; margin: 0; opacity: 0; }
+.nexus-settings .accent-swatch { width: 30px; height: 30px; flex: 0 0 30px; }
+.nexus-settings .settings-card .btn-primary,
+.nexus-settings .settings-card .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 0 !important;
+    min-height: 40px;
+    height: auto;
+    padding: 9px 13px !important;
+    border: 1px solid var(--settings-border) !important;
+    border-radius: 8px !important;
+    background: var(--settings-input) !important;
+    color: var(--settings-text) !important;
+    font: 600 12px/1.5 Manrope, system-ui, sans-serif;
+    white-space: normal;
+    text-align: center;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+.nexus-settings .settings-card .btn-primary {
+    background: linear-gradient(135deg, var(--settings-accent, #a855f7) 0%, var(--settings-accent-2, #6366f1) 100%) !important;
+    color: #ffffff !important;
+    border-color: var(--settings-accent-border, rgba(168, 85, 247, 0.58)) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 6px 20px var(--settings-accent-soft, rgba(168, 85, 247, 0.34)) !important;
+}
+.nexus-settings .settings-card button:disabled { opacity: .45; cursor: default; }
+.nexus-settings .settings-card button .material-icons-round { flex-shrink: 0; font-size: 18px; }
+.nexus-settings .settings-danger .btn-ghost { color: #f87171 !important; }
+.nexus-settings .settings-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--settings-border);
+    background: var(--settings-bg);
+}
+.nexus-settings .settings-footer p { display: flex; align-items: center; gap: 7px; margin: 0; color: var(--settings-muted); font-size: 11px; }
+.nexus-settings .settings-footer .material-icons-round { font-size: 16px; }
+.nexus-settings .settings-footer .btn-primary { flex-shrink: 0; }
+.nexus-settings :focus-visible { outline: 2px solid var(--settings-accent) !important; outline-offset: 3px; }
+.nexus-settings .switch:has(input:focus-visible) { outline: 2px solid var(--settings-accent); outline-offset: 3px; border-radius: 20px; }
+@media (max-width: 760px) {
+    .modal-wrap.nexus-settings { padding: 10px; }
+    .modal-wrap.nexus-settings .modal-card.settings-card {
+        height: calc(100vh - 20px);
+        height: calc(100dvh - 20px);
+        border-radius: 14px;
+    }
+    .nexus-settings .settings-header { padding: 16px; }
+    .nexus-settings .settings-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+    .nexus-settings .settings-tabs { flex-direction: row; gap: 5px; padding: 9px 12px; border-right: 0; border-bottom: 1px solid var(--settings-border); overflow-x: auto; overflow-y: hidden; }
+    .nexus-settings .settings-tabs button { width: auto; min-height: 38px; padding: 8px 11px; flex-shrink: 0; }
+    .nexus-settings .settings-tabs .material-icons-round { display: none; }
+    .nexus-settings .settings-content { padding: 18px; }
+    .nexus-settings .settings-footer { padding: 12px 16px; }
+}
+@media (max-width: 520px) {
+    .nexus-settings .settings-grid { grid-template-columns: minmax(0, 1fr); }
+    .nexus-settings .settings-title > .material-icons-round { width: 36px; height: 36px; }
+    .nexus-settings .settings-header h3 { font-size: 18px; }
+    .nexus-settings .settings-header p { display: none; }
+    .nexus-settings .settings-content { padding: 14px; }
+    .nexus-settings .set-group { padding: 14px !important; }
+    .nexus-settings .settings-footer p { display: none; }
+    .nexus-settings .settings-footer .btn-primary { width: 100%; }
+}
+@media (max-height: 480px) {
+    .nexus-settings .settings-header { padding: 10px 16px; }
+    .nexus-settings .settings-header p { display: none; }
+    .nexus-settings .settings-title > .material-icons-round { width: 32px; height: 32px; }
+    .nexus-settings .settings-footer { padding: 8px 16px; }
+}

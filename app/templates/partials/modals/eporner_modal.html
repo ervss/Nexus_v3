@@ -1,0 +1,219 @@
+    <!-- Eporner Smart Discovery Modal -->
+    <template x-if="showEpornerDiscoveryModal">
+    <div class="modal-wrap nx-lazy-modal" role="dialog" aria-modal="true" aria-label="Eporner Smart Discovery">
+        <div class="modal-card" style="min-width:90vw;max-width:95vw;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
+                <h3><span class="material-icons-round">search</span>🔍 Smart Eporner Discovery</h3>
+                <button @click="showEpornerDiscoveryModal = false"><span
+                        class="material-icons-round">close</span></button>
+            </div>
+            <div class="modal-content">
+                <!-- Search Form -->
+                <div style="background:rgba(255,255,255,0.03);padding:20px;border-radius:12px;margin-bottom:20px;">
+                    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:15px;margin-bottom:15px;">
+                        <div>
+                            <label
+                                style="font-size:13px;color:#22c55e;font-weight:600;display:block;margin-bottom:8px;">Keyword
+                                / Tag:</label>
+                            <input type="text" x-model="epornerDiscovery.keyword"
+                                placeholder="e.g., bbc sloppy, interracial, pov..."
+                                style="width:100%;padding:10px;background:#1a1a1a;border:1px solid #3f3f46;border-radius:8px;color:#fff;font-size:14px;"
+                                @keydown.enter="searchEpornerDiscovery()">
+                        </div>
+                        <div>
+                            <label
+                                style="font-size:13px;color:#22c55e;font-weight:600;display:block;margin-bottom:8px;">Title
+                                Filter:</label>
+                            <input type="text" x-model="epornerDiscovery.searchTerms"
+                                placeholder="search inside results"
+                                style="width:100%;padding:10px;background:#1a1a1a;border:1px solid #3f3f46;border-radius:8px;color:#fff;font-size:14px;">
+                        </div>
+                        <div>
+                            <label
+                                style="font-size:13px;color:#22c55e;font-weight:600;display:block;margin-bottom:8px;">Min
+                                Duration (sec):</label>
+                            <input type="number" x-model.number="epornerDiscovery.minDuration" min="0"
+                                style="width:100%;padding:10px;background:#1a1a1a;border:1px solid #3f3f46;border-radius:8px;color:#fff;font-size:14px;">
+                        </div>
+                        <div>
+                            <label
+                                style="font-size:13px;color:#22c55e;font-weight:600;display:block;margin-bottom:8px;">Max
+                                Duration (sec):</label>
+                            <input type="number" x-model.number="epornerDiscovery.maxDuration" min="0"
+                                style="width:100%;padding:10px;background:#1a1a1a;border:1px solid #3f3f46;border-radius:8px;color:#fff;font-size:14px;">
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
+                        <div>
+                            <label
+                                style="font-size:13px;color:#22c55e;font-weight:600;display:block;margin-bottom:8px;">Min
+                                Quality:</label>
+                            <select x-model.number="epornerDiscovery.minQuality"
+                                style="width:100%;padding:10px;background:#1a1a1a;border:1px solid #3f3f46;border-radius:8px;color:#fff;font-size:14px;">
+                                <option value="720">720p (HD)</option>
+                                <option value="1080" selected>1080p (FHD)</option>
+                                <option value="1440">1440p (2K)</option>
+                                <option value="2160">2160p (4K)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label
+                                style="font-size:13px;color:#22c55e;font-weight:600;display:block;margin-bottom:8px;">Pages:</label>
+                            <input type="number" x-model.number="epornerDiscovery.pages" min="1" max="5"
+                                style="width:100%;padding:10px;background:#1a1a1a;border:1px solid #3f3f46;border-radius:8px;color:#fff;font-size:14px;">
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <label
+                            style="font-size:12px;color:#94a3b8;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="checkbox" x-model="epornerDiscovery.autoSkipLowQuality"
+                                style="width:16px;height:16px;cursor:pointer;">
+                            Auto-skip videos below minimum quality
+                        </label>
+                        <button @click="searchEpornerDiscovery()"
+                            :disabled="epornerDiscovery.loading || !epornerDiscovery.keyword.trim()"
+                            style="padding:10px 30px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:8px;color:#fff;font-weight:600;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(34,197,94,0.4);transition:transform 0.2s;"
+                            :style="epornerDiscovery.loading ? 'opacity:0.6;cursor:not-allowed;' : ''"
+                            onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                            <span class="material-icons-round" x-show="!epornerDiscovery.loading">search</span>
+                            <span class="material-icons-round" x-show="epornerDiscovery.loading"
+                                style="animation:spin 1s linear infinite;">refresh</span>
+                            <span x-text="epornerDiscovery.loading ? 'Searching...' : 'Search'"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div x-show="epornerDiscovery.results.length > 0" style="margin-top:20px;">
+                    <!-- Results Header -->
+                    <div
+                        style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;padding:15px;background:rgba(34,197,94,0.1);border-radius:8px;border:1px solid rgba(34,197,94,0.2);">
+                        <div>
+                            <h3 style="margin:0;font-size:16px;color:#22c55e;font-weight:700;">
+                                Found <span x-text="getEpornerMatchingResults().length"></span>/<span
+                                    x-text="epornerDiscovery.total"></span> videos
+                            </h3>
+                            <p style="margin:4px 0 0 0;font-size:12px;color:#94a3b8;">
+                                Keyword: <span x-text="epornerDiscovery.keyword"
+                                    style="color:#22c55e;font-weight:600;"></span>
+                            </p>
+                            <p style="margin:4px 0 0 0;font-size:12px;color:#94a3b8;">
+                                Showing <span x-text="getEpornerFilteredResults().length"></span> visible results
+                                <span x-show="!epornerDiscovery.showAllResults">with the current filters</span>
+                                <span x-show="epornerDiscovery.showAllResults">from the full result set</span>
+                            </p>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+                            <label
+                                style="font-size:12px;color:#cbd5e1;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                <input type="checkbox" x-model="epornerDiscovery.showAllResults"
+                                    style="width:16px;height:16px;cursor:pointer;">
+                                Show all results
+                            </label>
+                            <button @click="selectAllMatching()"
+                                style="padding:8px 16px;background:rgba(59,130,246,0.2);border:1px solid rgba(59,130,246,0.4);border-radius:6px;color:#60a5fa;font-size:12px;cursor:pointer;font-weight:600;">
+                                Select All Matching
+                            </button>
+                            <button @click="importSelectedEporner()" :disabled="epornerDiscovery.selected.length === 0"
+                                :style="epornerDiscovery.selected.length === 0 ? 'opacity:0.5;cursor:not-allowed;' : ''"
+                                style="padding:8px 20px;background:linear-gradient(135deg,#a855f7,#ec4899);border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer;font-weight:700;box-shadow:0 4px 12px rgba(168,85,247,0.4);">
+                                Import Selected (<span x-text="epornerDiscovery.selected.length"></span>)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Results Grid -->
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:15px;">
+                        <template x-for="video in getEpornerFilteredResults()" :key="video.url">
+                            <div @click="toggleEpornerSelection(video.url)"
+                                :class="epornerDiscovery.selected.includes(video.url) ? 'eporner-card-selected' : ''"
+                                style="position:relative;background:rgba(255,255,255,0.05);border-radius:12px;overflow:hidden;cursor:pointer;transition:all 0.3s;border:2px solid transparent;"
+                                class="eporner-discovery-card"
+                                onmouseenter="this.style.transform='translateY(-5px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.4)';"
+                                onmouseleave="this.style.transform='translateY(0)';this.style.boxShadow='none';">
+
+                                <!-- Checkbox -->
+                                <div style="position:absolute;top:10px;left:10px;z-index:10;">
+                                    <div :style="epornerDiscovery.selected.includes(video.url) ? 'background:#22c55e;border-color:#22c55e;' : 'background:rgba(0,0,0,0.6);border-color:rgba(255,255,255,0.3);'"
+                                        style="width:24px;height:24px;border:2px solid;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">
+                                        <span class="material-icons-round"
+                                            x-show="epornerDiscovery.selected.includes(video.url)"
+                                            style="font-size:18px;color:#fff;">check</span>
+                                    </div>
+                                </div>
+
+                                <!-- Thumbnail -->
+                                <img :src="video.thumbnail" :alt="video.title"
+                                    style="width:100%;height:180px;object-fit:cover;">
+
+                                <!-- Info -->
+                                <div style="padding:12px;">
+                                    <div style="font-size:13px;font-weight:600;color:#e6eef8;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;min-height:38px;"
+                                        x-text="video.title"></div>
+
+                                    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                                        <!-- Quality Badge -->
+                                        <span :class="'quality-badge-' + video.resolution" :style="video.resolution >= 2160 ? 'background:linear-gradient(135deg,#667eea,#764ba2);' : 
+                                                    video.resolution >= 1440 ? 'background:linear-gradient(135deg,#f093fb,#f5576c);' : 
+                                                    video.resolution >= 1080 ? 'background:linear-gradient(135deg,#4facfe,#00f2fe);' : 
+                                                    'background:linear-gradient(135deg,#43e97b,#38f9d7);'"
+                                            style="padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;color:#fff;"
+                                            x-text="video.quality"></span>
+
+                                        <!-- Duration -->
+                                        <span
+                                            style="padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;color:#fff;background:rgba(148,163,184,0.3);display:flex;align-items:center;gap:3px;">
+                                            <span class="material-icons-round" style="font-size:14px;">schedule</span>
+                                            <span x-text="formatDuration(video.duration)"></span>
+                                        </span>
+
+                                        <!-- Rating -->
+                                        <span x-show="video.rating"
+                                            style="padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;color:#fff;background:rgba(251,191,36,0.3);display:flex;align-items:center;gap:3px;">
+                                            <span class="material-icons-round" style="font-size:14px;">thumb_up</span>
+                                            <span x-text="video.rating + '%'"></span>
+                                        </span>
+
+                                        <!-- Views -->
+                                        <span x-show="video.views"
+                                            style="padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;color:#fff;background:rgba(148,163,184,0.2);display:flex;align-items:center;gap:3px;">
+                                            <span class="material-icons-round" style="font-size:14px;">visibility</span>
+                                            <span x-text="formatViews(video.views)"></span>
+                                        </span>
+
+                                        <!-- Upload Date -->
+                                        <span x-show="video.upload_date"
+                                            style="padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;color:#fff;background:rgba(99,102,241,0.3);display:flex;align-items:center;gap:3px;">
+                                            <span class="material-icons-round"
+                                                style="font-size:14px;">calendar_today</span>
+                                            <span x-text="video.upload_date"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div x-show="!epornerDiscovery.loading && epornerDiscovery.results.length === 0 && epornerDiscovery.keyword"
+                    style="text-align:center;padding:60px 20px;color:#94a3b8;">
+                    <span class="material-icons-round"
+                        style="font-size:64px;opacity:0.3;margin-bottom:15px;">search_off</span>
+                    <p style="font-size:16px;margin:0;">No videos found. Try different keywords or lower quality filter.
+                    </p>
+                </div>
+
+                <div x-show="!epornerDiscovery.loading && epornerDiscovery.results.length > 0 && getEpornerFilteredResults().length === 0 && epornerDiscovery.keyword"
+                    style="text-align:center;padding:60px 20px;color:#94a3b8;">
+                    <span class="material-icons-round"
+                        style="font-size:64px;opacity:0.3;margin-bottom:15px;">search_off</span>
+                    <p style="font-size:16px;margin:0;">No videos match the current filters. Try lowering quality,
+                        widening the duration range, or clearing the title filter.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

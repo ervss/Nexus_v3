@@ -1,0 +1,116 @@
+<dialog id="mega-hub" class="mh-dialog" aria-labelledby="mh-title">
+    <div class="mh-frame">
+        <header class="mh-header">
+            <span class="mh-mark material-icons-round" aria-hidden="true">folder_open</span>
+            <h2 id="mh-title">MEGA Hub</h2>
+            <form class="mh-add" data-mh="add">
+                <input name="url" type="url" placeholder="Vlož odkaz z MEGA" aria-label="Odkaz z MEGA" required autocomplete="off" maxlength="512" spellcheck="false">
+                <button type="submit" class="mh-primary">Pridať odkaz</button>
+            </form>
+            <button type="button" data-mh="close" aria-label="Zavrieť MEGA Hub" class="mh-icon">×</button>
+        </header>
+        <div class="mh-body">
+            <aside class="mh-inbox" aria-label="Uložené položky MEGA">
+                <div class="mh-inbox-header"><h3>Odoslané</h3><output data-mh="entry-count">0</output></div>
+                <div class="mh-entry-list" data-mh="entries"></div>
+                <details class="mh-setup">
+                    <summary>Odosielanie z prehliadača</summary>
+                    <a href="/api/v1/mega/hub/scripts/mega-hub-capture.user.js">Nainštalovať MEGA Link Capture</a>
+                    <a href="/api/v1/mega/hub/scripts/mega-folder-enhancer.user.js">Aktualizovať MEGA Helper</a>
+                </details>
+            </aside>
+            <main class="mh-workspace">
+                <div class="mh-message" data-mh="message" role="status" hidden></div>
+                <div class="mh-empty" data-mh="empty">
+                    <span class="material-icons-round" aria-hidden="true">video_library</span>
+                    <p style="font-size:16px;font-weight:700;color:#f1f5f9;margin:0;">Vyber priečinok alebo pridaj odkaz z MEGA.</p>
+                    <div class="mh-empty-hint">
+                        Vlož verejný odkaz napr. <code>https://mega.nz/folder/...</code> do poľa vpravo hore, alebo použi rozšírenie v sekcii <strong>Odosielanie z prehliadača</strong> vľavo dole.
+                    </div>
+                </div>
+                <section data-mh="detail" hidden>
+                    <div class="mh-detail-header">
+                        <div><div class="mh-crumbs" data-mh="crumbs" aria-label="Cesta k priečinku"></div>
+                            <h3 data-mh="title"></h3></div>
+                        <div class="mh-detail-actions">
+                            <button type="button" data-mh="refresh">Obnoviť obsah</button>
+                            <button type="button" data-mh="remove-entry" class="mh-danger">Odstrániť položku</button>
+                            <a data-mh="source" target="_blank" rel="noopener noreferrer">Otvoriť v MEGA ↗</a>
+                        </div>
+                    </div>
+                    <div class="mh-folders" data-mh="folders"></div>
+                    <form class="mh-filters" data-mh="filters">
+                        <input name="query" type="search" aria-label="Hľadať videá" placeholder="Hľadať videá">
+                        <select name="quality" aria-label="Kvalita">
+                            <option value="">Každá kvalita</option><option>SD</option><option>480p</option>
+                            <option>720p</option><option>1080p</option><option>1440p</option><option>4K</option>
+                            <option value="unknown">Neznáma kvalita</option>
+                        </select>
+                        <input name="durationMin" type="number" min="0" step="any" placeholder="Min minút" aria-label="Minimálna dĺžka v minútach">
+                        <input name="durationMax" type="number" min="0" step="any" placeholder="Max minút" aria-label="Maximálna dĺžka v minútach">
+                        <input name="sizeMin" type="number" min="0" step="any" placeholder="Min MB" aria-label="Minimálna veľkosť v MB">
+                        <input name="sizeMax" type="number" min="0" step="any" placeholder="Max MB" aria-label="Maximálna veľkosť v MB">
+                        <select name="sort" aria-label="Triedenie">
+                            <option value="name">Názov A–Z</option><option value="date">Najnovšie</option>
+                            <option value="size">Najväčšie</option><option value="duration">Najdlhšie</option>
+                            <option value="quality">Najvyššia kvalita</option>
+                        </select>
+                        <label class="mh-check"><input name="recursive" type="checkbox" checked> Aj podpriečinky</label>
+                        <button type="reset">Zrušiť filtre</button>
+                    </form>
+                    <div class="mh-selection">
+                        <output data-mh="stats"></output>
+                        <select data-mh="layout" aria-label="Rozloženie mriežky">
+                            <option value="3x2">3 × 2</option><option value="3x3">3 × 3</option>
+                            <option value="4x2">4 × 2</option><option value="4x3">4 × 3</option>
+                            <option value="5x3" selected>5 × 3</option><option value="6x3">6 × 3</option>
+                        </select>
+                        <button type="button" data-mh="select">Vybrať filtrované</button>
+                        <button type="button" data-mh="clear">Zrušiť výber</button>
+                        <button type="button" data-mh="remove-videos" class="mh-danger">Odstrániť vybrané</button>
+                        <button type="button" data-mh="rethumb" class="mh-rethumb" title="Vygenerovať ostré HD náhľady z videa pre vybrané položky (alebo aktuálnu stranu)">✨ Zlepšiť náhľady</button>
+                        <button type="button" data-mh="split">Split Screen</button>
+                        <button type="button" class="mh-primary" data-mh="import">Uložiť vybrané do galérie</button>
+                    </div>
+                    <div class="mh-grid" data-mh="grid"></div>
+                    <nav class="mh-pages" data-mh="pages" aria-label="Strany videí" hidden>
+                        <button type="button" data-mh="page-back">Predošlá</button>
+                        <output data-mh="page-label"></output>
+                        <button type="button" data-mh="page-next">Ďalšia</button>
+                    </nav>
+                </section>
+            </main>
+        </div>
+    </div>
+    <button type="button" class="mh-resize" data-mh="resize" title="Potiahni roh · dvojklik obnoví veľkosť" aria-label="Zmeniť veľkosť MEGA Hubu"></button>
+    <div class="mh-player" data-mh="player" hidden>
+        <div class="mh-player-frame">
+            <div class="mh-player-header">
+                <strong data-mh="player-title"></strong>
+                <button type="button" data-mh="close-player" aria-label="Zavrieť prehrávač" class="mh-icon">×</button>
+            </div>
+            <video data-mh="video" controls playsinline preload="metadata"></video>
+            <div class="mh-player-footer">
+                <button type="button" data-mh="previous">Predošlé</button>
+                <output role="status" data-mh="player-status"></output>
+                <a data-mh="player-download" hidden download>Stiahnuť</a>
+                <a data-mh="player-source" target="_blank" rel="noopener noreferrer" hidden>Otvoriť v MEGA ↗</a>
+                <button type="button" data-mh="next">Ďalšie</button>
+            </div>
+        </div>
+    </div>
+    <template data-mh="card">
+        <article class="mh-card">
+            <button type="button" class="mh-thumb">
+                <span class="material-icons-round" aria-hidden="true">play_circle</span>
+                <img alt="" loading="lazy" decoding="async">
+                <span class="mh-quality mh-badge"></span>
+                <span class="mh-size mh-badge"></span>
+                <span class="mh-duration"></span>
+            </button>
+            <button type="button" class="mh-card-rethumb" title="Zlepšiť náhľad (nová ostrá snímka z videa)" aria-label="Zlepšiť náhľad">✨</button>
+            <label class="mh-card-select"><input type="checkbox"></label>
+            <div class="mh-card-info"><strong></strong><small></small></div>
+        </article>
+    </template>
+</dialog>

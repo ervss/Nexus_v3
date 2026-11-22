@@ -1,0 +1,44 @@
+<section class="library-insights" aria-labelledby="library-insights-title">
+    <div class="library-insights-heading">
+        <div>
+            <h2 id="library-insights-title">Knižnica pod lupou</h2>
+            <p>Čo pribudlo a čo o súboroch skutočne vieme.</p>
+        </div>
+        <div class="library-insights-switch" role="group" aria-label="Rozsah prehľadu">
+            <button type="button" aria-pressed="true" data-insights-scope="all">Celá knižnica</button>
+            <button type="button" aria-pressed="false" data-insights-scope="recent">Posledných 100</button>
+        </div>
+    </div>
+    {% for scope, summary in library_insights.items() %}
+    <div data-insights-panel="{{ scope }}" {% if scope != 'all' %}hidden{% endif %}>
+        <p class="library-insights-context">{{ summary.count }} položiek · {% if scope == 'recent' %}najnovšie podľa dátumu pridania; nejde o jednu importnú dávku{% else %}aktuálny stav databázy pri otvorení stránky{% endif %}</p>
+        {% if summary.count %}
+        <dl class="library-insights-metrics">
+            <div><dt>Medián dĺžky</dt><dd>{{ summary.median_duration if summary.median_duration is not none else '—' }} <small>s</small></dd><span>zo {{ summary.duration_known }} známych dĺžok</span></div>
+            <div><dt>Medián veľkosti</dt><dd>{{ summary.median_size if summary.median_size is not none else '—' }} <small>MiB</small></dd><span>zo {{ summary.size_known }} známych veľkostí</span></div>
+            <div><dt>Kratšie než minúta</dt><dd>{{ summary.short_count }}</dd><span>{{ summary.portrait_count }} položiek má zistený formát na výšku</span></div>
+        </dl>
+        <div class="library-insights-details">
+            <div>
+                <h3>Úplnosť metadát</h3>
+                {% for field in summary.coverage %}
+                <div class="library-insights-coverage">
+                    <label for="coverage-{{ scope }}-{{ loop.index }}">{{ field.label }} <span>{{ field.known }}/{{ summary.count }} · {{ field.percent }} %</span></label>
+                    <progress id="coverage-{{ scope }}-{{ loop.index }}" value="{{ field.known }}" max="{{ summary.count }}">{{ field.percent }} %</progress>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="library-insights-health">
+                <h3>Dostupnosť odkazov</h3>
+                <p><strong>{{ summary.unknown }}</strong> bez jednoznačného výsledku kontroly</p>
+                <p>{{ summary.working }} evidovaných ako funkčné · {{ summary.broken }} ako nefunkčné</p>
+                <p class="library-insights-note">Ide o uložený výsledok, nie o novú kontrolu. Stav „pripravené“ nepotvrdzuje dostupnosť odkazu.</p>
+            </div>
+        </div>
+        <p class="library-insights-note">Súčet známych veľkostí: {{ summary.size_tib }} TiB. Zahŕňa aj vzdialené videá; nejde o obsadené miesto na disku. Chýbajúce hodnoty sa do mediánov nezapočítavajú.</p>
+        {% else %}
+        <p>V knižnici zatiaľ nie sú položky. Po pridaní súborov sa tu zobrazí ich prehľad.</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</section>

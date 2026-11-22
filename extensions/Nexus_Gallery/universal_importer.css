@@ -1,0 +1,1912 @@
+/* Nexus Universal Importer - Premium Glassmorphism UI */
+
+.nexus-import-overlay {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 2147483647;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+    pointer-events: auto;
+    user-select: none;
+}
+
+.nexus-import-overlay.nexus-fixed {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    left: auto;
+    bottom: auto;
+}
+
+.nexus-import-btn {
+    background: rgba(10, 10, 10, 0.75);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 10px 14px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    min-width: 190px;
+}
+
+.nexus-import-btn:hover {
+    border-color: rgba(0, 255, 127, 0.5);
+    box-shadow: 0 12px 40px rgba(0, 255, 127, 0.2);
+}
+
+.nexus-import-btn svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    fill: #00FF7F;
+    filter: drop-shadow(0 0 4px rgba(0, 255, 127, 0.5));
+}
+
+.nexus-btn-label {
+    flex: 1;
+}
+
+.nexus-drag-hint {
+    font-size: 16px;
+    opacity: 0.45;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.nexus-port-menu {
+    margin-top: 8px;
+    background: rgba(12, 12, 12, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 10px;
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 220px;
+    max-width: 260px;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7);
+    animation: nexusSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nexus-import-overlay.nexus-open .nexus-port-menu {
+    display: flex;
+}
+
+.nexus-import-overlay.nexus-open.nexus-player-active .nexus-port-menu {
+    display: flex;
+    width: min(420px, calc(100vw - 36px));
+    max-width: min(720px, calc(100vw - 36px));
+}
+
+.nexus-stream-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(210, 235, 255, 0.9);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.nexus-quality-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.nexus-quality-list:empty {
+    display: none;
+}
+
+.nexus-quality-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.nexus-quality-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 127, 0.3);
+    border-radius: 4px;
+}
+
+.nexus-quality-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.04);
+    transition: background 0.15s;
+}
+
+.nexus-quality-item:hover {
+    background: rgba(0, 255, 127, 0.08);
+}
+
+.nexus-q-label {
+    color: #b8e8ff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.nexus-q-actions {
+    display: inline-flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.nexus-q-copy,
+.nexus-q-play {
+    padding: 3px 9px;
+    border-radius: 7px;
+    border: 1px solid rgba(0, 255, 127, 0.35);
+    background: rgba(0, 255, 127, 0.1);
+    color: #9effd2;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+
+.nexus-q-play {
+    border-color: rgba(100, 180, 255, 0.35);
+    background: rgba(50, 130, 255, 0.1);
+    color: #bfe4ff;
+}
+
+.nexus-q-copy:hover,
+.nexus-q-play:hover {
+    background: rgba(0, 255, 127, 0.25);
+    border-color: rgba(0, 255, 127, 0.7);
+}
+
+.nexus-mini-btn {
+    padding: 8px 6px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: #ddf2ff;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: center;
+    letter-spacing: 0.2px;
+}
+
+.nexus-mini-btn:hover:not(:disabled) {
+    border-color: rgba(0, 255, 127, 0.55);
+    background: rgba(0, 255, 127, 0.14);
+    color: #9effd2;
+}
+
+.nexus-mini-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* IDM Download button */
+.nexus-idm-btn {
+    width: 100%;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(100, 180, 255, 0.35);
+    background: rgba(50, 130, 255, 0.1);
+    color: #9dd4ff;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: center;
+    letter-spacing: 0.2px;
+}
+
+.nexus-idm-btn:hover:not(:disabled) {
+    border-color: rgba(100, 180, 255, 0.7);
+    background: rgba(50, 130, 255, 0.22);
+    color: #c8e8ff;
+}
+
+.nexus-idm-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.nexus-panel-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+    padding: 0 4px;
+}
+
+.nexus-close-panel {
+    background: rgba(255, 50, 50, 0.1) !important;
+    border-color: rgba(255, 50, 50, 0.3) !important;
+    color: #ffb8b8 !important;
+    font-weight: 800 !important;
+    min-width: 100px;
+}
+
+.nexus-close-panel:hover {
+    background: rgba(255, 50, 50, 0.25) !important;
+    border-color: rgba(255, 50, 50, 0.7) !important;
+    color: #fff !important;
+}
+
+.nexus-ports-header {
+    padding: 4px 10px 0;
+    color: rgba(180, 180, 180, 0.5);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.nexus-port-opt {
+    padding: 9px 12px;
+    border-radius: 10px;
+    color: #f0f0f0;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.nexus-port-opt:hover {
+    background: rgba(0, 255, 127, 0.14);
+    color: #00FF7F;
+    transform: translateX(3px);
+}
+
+.nexus-port-opt span {
+    opacity: 0.5;
+    font-size: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+}
+
+.nexus-player-card {
+    margin-top: 4px;
+    padding: 8px;
+    min-width: 220px;
+    min-height: 180px;
+    width: 100%;
+    resize: both;
+    overflow: auto;
+    border-radius: 14px;
+    border: 1px solid rgba(100, 180, 255, 0.16);
+    background: rgba(2, 7, 12, 0.52);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nexus-player-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    color: rgba(220, 240, 255, 0.92);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+}
+
+.nexus-player-actions {
+    display: inline-flex;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.nexus-icon-btn {
+    width: 28px;
+    height: 26px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    color: #ddf2ff;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.nexus-icon-btn:hover:not(:disabled) {
+    border-color: rgba(0, 255, 127, 0.55);
+    color: #9effd2;
+    background: rgba(0, 255, 127, 0.13);
+}
+
+.nexus-icon-btn:disabled {
+    opacity: 0.36;
+    cursor: default;
+}
+
+.nexus-player-stage {
+    position: relative;
+    width: 100%;
+    min-height: 140px;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #000;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: default;
+}
+
+.nexus-port-menu:fullscreen {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    background: #000 !important;
+    padding: 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.nexus-port-menu:fullscreen .nexus-player-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    border: none;
+}
+
+.nexus-port-menu:fullscreen .nexus-player-stage {
+    flex: 1;
+    margin: 15px 0;
+}
+
+.nexus-port-menu:fullscreen .nexus-player-toolbar,
+.nexus-port-menu:fullscreen .nexus-player-controls,
+.nexus-port-menu:fullscreen .nexus-panel-footer {
+    transition: opacity 0.3s ease;
+}
+
+/* Hide everything except the player when in fullscreen */
+.nexus-port-menu:fullscreen>*:not(.nexus-player-card):not(.nexus-panel-footer) {
+    display: none;
+}
+
+.nexus-live-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform-origin: center center;
+    transition: transform 120ms ease, filter 120ms ease;
+    background: #000;
+}
+
+.nexus-player-status {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    padding: 5px 7px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.58);
+    color: rgba(220, 240, 255, 0.88);
+    font-size: 10px;
+    font-weight: 700;
+    pointer-events: none;
+    text-align: center;
+}
+
+.nexus-player-status.nexus-error {
+    color: #ffd1d1;
+    border: 1px solid rgba(255, 80, 80, 0.32);
+}
+
+.nexus-player-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 8px;
+    margin-top: 8px;
+}
+
+.nexus-player-controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    color: rgba(210, 235, 255, 0.78);
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 0.2px;
+}
+
+.nexus-player-range {
+    width: 100%;
+    accent-color: #00ff7f;
+}
+
+.nexus-player-reset {
+    grid-column: 1 / -1;
+    min-height: 28px;
+}
+
+.nexus-player-svg-filter {
+    position: absolute;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+@keyframes nexusSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.nexus-toast {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: #fff;
+    padding: 13px 28px;
+    border-radius: 100px;
+    z-index: 2147483647;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    transition: all 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0;
+    pointer-events: none;
+    font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+}
+
+.nexus-toast.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* ── Quality Badge (Stream Meta) ──────────────────────────────────────────── */
+
+.nexus-quality-state {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
+    color: #c4b5fd;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.nexus-quality-find {
+    padding: 4px 8px;
+    font-size: 10px;
+}
+
+/* ── Quality Hunt: Moderný Workbench & Karty ──────────────────────────────── */
+
+.nexus-hunt-modal,
+.nexus-hunt-panel {
+    --nh-bg-base: #0f0d15;
+    --nh-bg-surface: #181521;
+    --nh-bg-elevated: #221e2e;
+    --nh-bg-hover: #2b263a;
+    --nh-border-subtle: rgba(255, 255, 255, 0.09);
+    --nh-border-default: rgba(196, 181, 253, 0.24);
+    --nh-border-strong: #a855f7;
+
+    --nh-text-primary: #f6f3fc;
+    --nh-text-secondary: #c4bdd3;
+    --nh-text-muted: #8e86a0;
+
+    --nh-accent: #8b5cf6;
+    --nh-accent-hover: #7c3aed;
+    --nh-accent-soft: rgba(139, 92, 246, 0.2);
+
+    --nh-success: #4ade80;
+    --nh-success-bg: rgba(34, 197, 94, 0.15);
+    --nh-success-border: rgba(74, 222, 128, 0.4);
+
+    --nh-warning: #fbbf24;
+    --nh-warning-bg: rgba(245, 158, 11, 0.15);
+    --nh-warning-border: rgba(251, 191, 36, 0.36);
+
+    --nh-danger: #f87171;
+    --nh-danger-bg: rgba(239, 68, 68, 0.16);
+
+    --nh-radius-sm: 6px;
+    --nh-radius-md: 10px;
+    --nh-radius-lg: 14px;
+    --nh-font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.nexus-hunt-btn {
+    width: 100%;
+    margin-top: 2px;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(168, 85, 247, 0.48);
+    background: linear-gradient(135deg, rgba(109, 40, 217, 0.55), rgba(30, 20, 50, 0.85));
+    color: #f3e8ff;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.nexus-hunt-btn:hover {
+    border-color: rgba(216, 180, 254, 0.85);
+    box-shadow: 0 0 18px rgba(168, 85, 247, 0.28);
+}
+
+.nexus-hunt-btn.nexus-hunt-busy {
+    border-color: rgba(250, 204, 21, 0.7);
+    background: linear-gradient(135deg, rgba(120, 80, 20, 0.72), rgba(40, 30, 10, 0.88));
+    color: #fef08a;
+}
+
+.nexus-hunt-btn:disabled {
+    cursor: wait;
+}
+
+/* ── Kompaktný inline panel (.nexus-hunt-panel) ───────────────────────────── */
+
+.nexus-hunt-panel [hidden] {
+    display: none !important;
+}
+
+.nexus-hunt-panel {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    max-height: min(65vh, 520px);
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    border-radius: 12px;
+    background: rgba(18, 14, 28, 0.96);
+    margin-top: 6px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    font-family: var(--nh-font);
+    color: var(--nh-text-primary);
+}
+
+.nexus-hunt-panel:not([hidden]) {
+    display: flex !important;
+}
+
+.nexus-import-overlay.nexus-hunting .nexus-port-menu {
+    max-width: min(370px, calc(100vw - 24px));
+    min-width: 290px;
+    max-height: min(88vh, 900px);
+    overflow-y: auto;
+}
+
+.nexus-import-overlay.nexus-hunting .nexus-player-card {
+    display: none !important;
+}
+
+.nexus-hunt-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.nexus-hunt-status {
+    font-size: 12px;
+    color: #e9d5ff;
+    font-weight: 600;
+    min-width: 110px;
+    flex: 1;
+}
+
+.nexus-hunt-head .nexus-mini-btn {
+    flex-shrink: 0;
+    padding: 4px 9px;
+    font-size: 11px;
+}
+
+.nexus-hunt-popout {
+    background: var(--nh-accent-soft) !important;
+    border-color: rgba(168, 85, 247, 0.55) !important;
+    color: #f3e8ff !important;
+}
+
+.nexus-hunt-reference {
+    font-size: 11px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    color: var(--nh-text-secondary);
+    border-bottom: 1px solid var(--nh-border-subtle);
+    padding-bottom: 6px;
+}
+
+.nexus-hunt-options {
+    font-size: 12px;
+    color: var(--nh-text-secondary);
+}
+
+.nexus-hunt-options summary {
+    cursor: pointer;
+    padding: 2px 0;
+    font-size: 11px;
+    color: var(--nh-text-muted);
+}
+
+.nexus-hunt-options[open] label,
+.nexus-hunt-options[open] button {
+    margin-top: 6px;
+}
+
+.nexus-hunt-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.4;
+}
+
+.nexus-hunt-options select,
+.nexus-hunt-options input[type="text"] {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    background: #24182f;
+    color: #f3e8ff;
+    border: 1px solid var(--nh-border-default);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font: inherit;
+}
+
+.nexus-hunt-relevance {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    color: var(--nh-text-primary);
+    font-size: 12px;
+}
+
+.nexus-hunt-relevance strong {
+    flex-basis: 100%;
+    font-size: 12px;
+}
+
+.nexus-hunt-relevance .nexus-mini-btn {
+    min-height: 26px;
+    padding: 4px 8px;
+    font-size: 11px;
+}
+
+/* Horizontálne mini karty v bočnom inline paneli */
+.nexus-hunt-panel .nexus-hunt-card {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.nexus-hunt-panel .nexus-hunt-preview {
+    width: 96px;
+    flex-shrink: 0;
+    border-radius: var(--nh-radius-sm);
+}
+
+.nexus-hunt-panel .nh-corner-tr,
+.nexus-hunt-panel .nh-preview-hover,
+.nexus-hunt-panel .nh-pb-src,
+.nexus-hunt-panel .nh-pb-size,
+.nexus-hunt-panel .nexus-hunt-evidence {
+    display: none;
+}
+
+.nexus-hunt-panel .nh-preview-bottom {
+    padding: 4px;
+}
+
+.nexus-hunt-panel .nexus-hunt-body {
+    padding: 0;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.nexus-hunt-panel .nexus-hunt-title {
+    min-height: 0;
+    -webkit-line-clamp: 1;
+    font-size: 12px;
+}
+
+.nexus-hunt-panel .nexus-hunt-actions .nh-btn {
+    min-height: 26px;
+    padding: 3px 8px;
+    font-size: 11px;
+}
+
+.nexus-hunt-empty {
+    font-size: 12px;
+    color: var(--nh-text-secondary);
+    padding: 16px 6px;
+    line-height: 1.45;
+}
+
+.nexus-hunt-error {
+    color: #fca5a5;
+}
+
+/* ── Modal Workbench ──────────────────────────────────────────────────────── */
+
+.nexus-hunt-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(6, 5, 10, 0.78);
+    backdrop-filter: blur(6px);
+    font-family: var(--nh-font);
+    color: var(--nh-text-primary);
+}
+
+.nexus-hunt-modal[hidden] {
+    display: none !important;
+}
+
+.nexus-hunt-modal-card {
+    position: relative;
+    width: min(1420px, calc(100vw - 32px));
+    height: min(920px, calc(100vh - 32px));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--nh-bg-base);
+    border: 1px solid var(--nh-border-default);
+    border-radius: var(--nh-radius-lg);
+    box-shadow: 0 28px 90px rgba(0, 0, 0, 0.75);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.nexus-hunt-modal :focus-visible,
+.nexus-hunt-panel :focus-visible,
+.nexus-hunt-btn:focus-visible {
+    outline: 2px solid #d8b4fe;
+    outline-offset: 2px;
+}
+
+/* ── Vrstva 1: Topbar ─────────────────────────────────────────────────────── */
+
+.nh-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--nh-bg-surface);
+    border-bottom: 1px solid var(--nh-border-subtle);
+    flex-shrink: 0;
+}
+
+.nh-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.nh-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--nh-text-primary);
+    white-space: nowrap;
+}
+
+.nh-ref-chip {
+    min-width: 0;
+    max-width: 340px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--nh-bg-elevated);
+    border: 1px solid var(--nh-border-subtle);
+    color: var(--nh-text-secondary);
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nh-segmented {
+    display: inline-flex;
+    padding: 3px;
+    gap: 2px;
+    background: var(--nh-bg-base);
+    border: 1px solid var(--nh-border-subtle);
+    border-radius: 9px;
+}
+
+.nh-seg-btn {
+    padding: 5px 11px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--nh-text-secondary);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nh-seg-btn:hover {
+    color: var(--nh-text-primary);
+}
+
+.nh-seg-btn[aria-checked="true"] {
+    background: var(--nh-accent-soft);
+    color: #f3e8ff;
+    box-shadow: inset 0 0 0 1px rgba(168, 85, 247, 0.45);
+}
+
+.nh-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.nh-live-status {
+    font-size: 12px;
+    color: var(--nh-text-secondary);
+    max-width: 210px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Spoločné tlačidlá a vstupy ───────────────────────────────────────────── */
+
+.nh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 6px 12px;
+    border-radius: var(--nh-radius-sm);
+    border: 1px solid var(--nh-border-subtle);
+    background: var(--nh-bg-elevated);
+    color: var(--nh-text-primary);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.nh-btn:hover:not(:disabled) {
+    background: var(--nh-bg-hover);
+    border-color: var(--nh-border-default);
+}
+
+.nh-btn:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+}
+
+.nh-btn[hidden] {
+    display: none !important;
+}
+
+.nh-btn-primary {
+    background: var(--nh-accent);
+    border-color: rgba(216, 180, 254, 0.35);
+    color: #fff;
+}
+
+.nh-btn-primary:hover:not(:disabled) {
+    background: var(--nh-accent-hover);
+}
+
+.nh-btn-subtle {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.nh-btn-ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--nh-text-secondary);
+}
+
+.nh-btn-ghost:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--nh-text-primary);
+}
+
+.nh-btn-danger {
+    background: var(--nh-danger-bg);
+    border-color: rgba(248, 113, 113, 0.42);
+    color: #fecaca;
+}
+
+.nh-btn-warning {
+    background: var(--nh-warning-bg);
+    border-color: var(--nh-warning-border);
+    color: #fde68a;
+}
+
+.nh-btn-icon {
+    width: 32px;
+    padding: 0;
+}
+
+.nh-input,
+.nh-select {
+    min-height: 32px;
+    padding: 5px 10px;
+    border-radius: var(--nh-radius-sm);
+    border: 1px solid var(--nh-border-default);
+    background: var(--nh-bg-base);
+    color: var(--nh-text-primary);
+    font: inherit;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.nh-input-num {
+    width: 72px;
+}
+
+/* ── Drawer dotazu & Technické filtre ─────────────────────────────────────── */
+
+.nh-drawer,
+.nh-tech-filters {
+    padding: 10px 16px;
+    background: #14111c;
+    border-bottom: 1px solid var(--nh-border-subtle);
+    flex-shrink: 0;
+}
+
+.nh-drawer[hidden],
+.nh-tech-filters[hidden] {
+    display: none !important;
+}
+
+.nh-drawer-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.nh-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 220px;
+}
+
+.nh-field span {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--nh-text-secondary);
+}
+
+.nh-field-hint {
+    font-size: 11px;
+    color: var(--nh-text-muted);
+    line-height: 1.35;
+}
+
+.nh-help-drawer {
+    padding: 12px 16px 14px;
+    background: #14111e;
+    border-bottom: 1px solid var(--nh-border-default);
+    flex-shrink: 0;
+}
+
+.nh-help-drawer[hidden] {
+    display: none !important;
+}
+
+.nh-help-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: var(--nh-text-primary);
+}
+
+.nh-help-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.nh-help-col {
+    padding: 10px 12px;
+    border-radius: var(--nh-radius-sm);
+    background: var(--nh-bg-surface);
+    border: 1px solid var(--nh-border-subtle);
+}
+
+.nh-help-col h4 {
+    margin: 0 0 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ddd6fe;
+}
+
+.nh-help-col ul {
+    margin: 0;
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--nh-text-secondary);
+}
+
+.nh-help-col code {
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #f3e8ff;
+    font-size: 11px;
+}
+
+.nh-drawer-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.nh-tech-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.nh-inline-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--nh-text-secondary);
+}
+
+.nh-inline-check {
+    cursor: pointer;
+}
+
+.nh-visible-count {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--nh-text-muted);
+}
+
+/* ── Vrstva 2: Filterbar s pill čipmi ─────────────────────────────────────── */
+
+.nh-filterbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 16px;
+    background: var(--nh-bg-surface);
+    border-bottom: 1px solid var(--nh-border-subtle);
+    flex-shrink: 0;
+}
+
+.nh-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.nh-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--nh-border-subtle);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--nh-text-secondary);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.14s ease;
+}
+
+.nh-pill[hidden] {
+    display: none !important;
+}
+
+.nh-pill:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--nh-text-primary);
+}
+
+.nh-pill[aria-pressed="true"] {
+    background: var(--nh-accent-soft);
+    border-color: var(--nh-border-strong);
+    color: #fff;
+}
+
+.nh-pill-accent:not([aria-pressed="true"]) {
+    border-color: var(--nh-success-border);
+    color: var(--nh-success);
+}
+
+.nh-pill-count {
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.35);
+    font-size: 11px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.nh-filterbar-utils {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.nh-fast-status {
+    font-size: 12px;
+    color: var(--nh-text-secondary);
+}
+
+.nh-active-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--nh-accent);
+}
+
+.nh-view-tabs {
+    display: inline-flex;
+    padding: 2px;
+    border-radius: 7px;
+    background: var(--nh-bg-base);
+    border: 1px solid var(--nh-border-subtle);
+}
+
+.nh-tab-btn {
+    padding: 4px 10px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--nh-text-secondary);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.nh-tab-btn[aria-pressed="true"] {
+    background: var(--nh-bg-elevated);
+    color: var(--nh-text-primary);
+}
+
+/* ── Telo modalu & Mriežka kariet ─────────────────────────────────────────── */
+
+.nexus-hunt-modal-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.nexus-hunt-modal-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 14px;
+    align-items: start;
+}
+
+.nexus-hunt-modal-list[hidden],
+.nexus-hunt-modal-stage[hidden],
+.nexus-hunt-workbench-sources[hidden] {
+    display: none !important;
+}
+
+/* ── Redizajn karty (.nexus-hunt-card) ────────────────────────────────────── */
+
+.nexus-hunt-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--nh-bg-surface);
+    border: 1px solid var(--nh-border-subtle);
+    border-radius: var(--nh-radius-md);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nexus-hunt-card:hover {
+    border-color: var(--nh-border-default);
+}
+
+.nexus-hunt-card[aria-current="true"] {
+    border-color: var(--nh-border-strong);
+    box-shadow: 0 0 0 1px var(--nh-border-strong), 0 12px 28px rgba(139, 92, 246, 0.16);
+}
+
+.nexus-hunt-preview {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #120f1a;
+    overflow: hidden;
+}
+
+.nexus-hunt-thumb {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.nh-thumb-fallback {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: radial-gradient(circle at 50% 35%, #231d33 0%, #13101c 100%);
+    color: var(--nh-text-muted);
+    text-align: center;
+    padding: 12px;
+}
+
+.nh-thumb-fallback svg {
+    width: 28px;
+    height: 28px;
+    opacity: 0.45;
+}
+
+.nh-thumb-fallback span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--nh-text-secondary);
+}
+
+.nh-thumb-fallback small {
+    font-size: 11px;
+    opacity: 0.75;
+}
+
+.nh-corner {
+    position: absolute;
+    z-index: 2;
+    padding: 3px 7px;
+    border-radius: 5px;
+    background: rgba(10, 8, 16, 0.84);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+}
+
+.nh-corner-tl {
+    top: 8px;
+    left: 8px;
+}
+
+.nh-corner-tr {
+    top: 8px;
+    right: 8px;
+}
+
+.nh-preview-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 18px 8px 7px;
+    background: linear-gradient(180deg, transparent 0%, rgba(7, 5, 12, 0.86) 68%, rgba(7, 5, 12, 0.94) 100%);
+    pointer-events: none;
+}
+
+.nh-pb-chip {
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: rgba(10, 8, 16, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #f6f3fc;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.nh-pb-src {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #dcd4ea;
+    font-weight: 600;
+}
+
+.nh-pb-size {
+    color: #bbf7d0;
+    border-color: rgba(74, 222, 128, 0.3);
+}
+
+.nh-pb-spacer {
+    flex: 0 0 auto;
+}
+
+.nh-empty-switch {
+    margin-top: 10px;
+}
+
+.nh-quality-upgrade {
+    background: rgba(20, 83, 45, 0.9);
+    border-color: var(--nh-success-border);
+    color: #bbf7d0;
+}
+
+.nh-quality-estimated {
+    color: var(--nh-text-secondary);
+    font-weight: 600;
+}
+
+.nh-match-strong {
+    color: #a7f3d0;
+    border-color: rgba(74, 222, 128, 0.35);
+}
+
+.nh-match-verify {
+    color: #fde68a;
+    border-color: rgba(251, 191, 36, 0.35);
+}
+
+.nh-preview-hover {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 8, 16, 0.42);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+}
+
+.nh-preview-hover span {
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(139, 92, 246, 0.92);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.nexus-hunt-preview:hover .nh-preview-hover {
+    opacity: 1;
+}
+
+.nexus-hunt-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+}
+
+.nexus-hunt-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--nh-text-primary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.7em;
+}
+
+.nh-verdict-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.nh-verdict-pill,
+.nh-access-pill {
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.nh-verdict-pill.is-upgrade {
+    background: var(--nh-success-bg);
+    color: var(--nh-success);
+    border: 1px solid var(--nh-success-border);
+}
+
+.nh-verdict-pill.is-match {
+    background: var(--nh-accent-soft);
+    color: #ddd6fe;
+    border: 1px solid rgba(168, 85, 247, 0.35);
+}
+
+.nh-verdict-pill.is-verify {
+    background: var(--nh-warning-bg);
+    color: var(--nh-warning);
+    border: 1px solid var(--nh-warning-border);
+}
+
+.nh-verdict-pill.is-other {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--nh-text-secondary);
+}
+
+.nh-access-pill.is-playable {
+    background: rgba(45, 212, 191, 0.14);
+    color: #5eead4;
+}
+
+.nh-access-pill.is-locked {
+    background: var(--nh-danger-bg);
+    color: #fca5a5;
+}
+
+.nexus-hunt-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.nexus-hunt-actions .nexus-hunt-play {
+    flex: 1;
+}
+
+.nexus-hunt-import-status {
+    font-size: 11px;
+    color: var(--nh-text-secondary);
+}
+
+.nexus-hunt-import-status:empty {
+    display: none;
+}
+
+.nexus-hunt-evidence {
+    border-top: 1px solid var(--nh-border-subtle);
+    padding-top: 8px;
+    font-size: 12px;
+    color: var(--nh-text-secondary);
+}
+
+.nexus-hunt-evidence summary {
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--nh-text-muted);
+    user-select: none;
+}
+
+.nexus-hunt-evidence summary:hover {
+    color: var(--nh-text-secondary);
+}
+
+.nexus-hunt-evidence p {
+    margin: 6px 0;
+    overflow-wrap: anywhere;
+}
+
+.nexus-hunt-rating-detail {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--nh-border-subtle);
+    margin-bottom: 6px;
+}
+
+.nexus-hunt-rating-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+.nexus-hunt-rating-head strong {
+    color: var(--nh-text-primary);
+}
+
+.nexus-hunt-factors {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.nexus-hunt-factor {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--nh-text-secondary);
+    font-size: 10px;
+}
+
+.nexus-hunt-factor>span:first-child {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nexus-hunt-factor-track {
+    display: block;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+}
+
+.nexus-hunt-factor-track i {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #c7a6ef;
+}
+
+.nexus-hunt-factor:nth-child(2) .nexus-hunt-factor-track i {
+    background: #7ddcbb;
+}
+
+.nexus-hunt-factor:nth-child(3) .nexus-hunt-factor-track i {
+    background: #8fb5ef;
+}
+
+.nexus-hunt-factor:nth-child(4) .nexus-hunt-factor-track i {
+    background: #f0cf8e;
+}
+
+.nh-dup-pill {
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.nh-dup-pill.is-primary {
+    background: rgba(56, 189, 248, 0.14);
+    color: #7dd3fc;
+    border: 1px solid rgba(56, 189, 248, 0.34);
+}
+
+.nh-dup-pill.is-secondary {
+    background: rgba(251, 146, 60, 0.14);
+    color: #fdba74;
+    border: 1px solid rgba(251, 146, 60, 0.32);
+}
+
+.nexus-hunt-card[data-selected="true"] {
+    border-color: var(--nh-accent);
+    box-shadow: 0 0 0 1px var(--nh-accent), 0 8px 22px rgba(139, 92, 246, 0.18);
+}
+
+.nh-card-select {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 32px;
+    border-radius: var(--nh-radius-sm);
+    border: 1px solid var(--nh-border-subtle);
+    background: rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.nh-card-select:hover {
+    border-color: var(--nh-border-default);
+}
+
+.nh-card-check {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: var(--nh-accent);
+    cursor: pointer;
+}
+
+/* ── Popup Prehrávač (.nh-player-popup) ───────────────────────────────────── */
+
+.nexus-hunt-modal-stage.nh-player-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 12;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(6, 5, 10, 0.78);
+    backdrop-filter: blur(6px);
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+}
+
+.nh-player-popup-card {
+    width: min(920px, 100%);
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background: var(--nh-bg-surface);
+    border: 1px solid var(--nh-border-default);
+    border-radius: var(--nh-radius-lg);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.8);
+}
+
+.nh-player-popup-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nh-player-popup-title-wrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.nh-player-popup-title-wrap strong {
+    font-size: 14px;
+    color: var(--nh-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nh-player-popup-specs {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--nh-text-secondary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.nh-player-popup-specs span {
+    padding: 3px 8px;
+    border-radius: 5px;
+    background: var(--nh-bg-base);
+    border: 1px solid var(--nh-border-subtle);
+}
+
+.nh-player-popup-media {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.nh-pane-status {
+    font-size: 12px;
+    color: var(--nh-text-secondary);
+}
+
+.nexus-hunt-original-video,
+.nexus-hunt-modal-video {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border-radius: var(--nh-radius-sm);
+}
+
+.nh-compare-specs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--nh-bg-base);
+    border-radius: var(--nh-radius-sm);
+    border: 1px solid var(--nh-border-subtle);
+}
+
+.nh-spec-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.nh-spec-item small {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--nh-text-muted);
+}
+
+.nh-spec-item b {
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--nh-text-primary);
+}
+
+.nh-spec-item b.is-better {
+    color: var(--nh-success);
+}
+
+.nexus-hunt-modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.nexus-hunt-modal-actions .nexus-hunt-modal-import {
+    flex: 1;
+}
+
+/* ── Záložka Zdroje a diagnostika ─────────────────────────────────────────── */
+
+.nh-sources-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--nh-border-subtle);
+}
+
+.nexus-hunt-cache-info {
+    font-size: 13px;
+    color: var(--nh-text-secondary);
+}
+
+.nexus-hunt-workbench-sources h3 {
+    font-size: 16px;
+    margin: 18px 0 10px;
+    color: var(--nh-text-primary);
+}
+
+.nexus-hunt-source-table>div {
+    display: grid;
+    grid-template-columns: 140px 140px 110px 1fr;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--nh-border-subtle);
+    overflow-wrap: anywhere;
+}
+
+.nexus-hunt-source-table>div>span:last-child {
+    grid-column: 1 / -1;
+    color: #e8c78a;
+}
+
+/* ── Responzivita & Redukovaný pohyb ──────────────────────────────────────── */
+
+@media (max-width: 980px) {
+    .nh-topbar {
+        flex-wrap: wrap;
+    }
+
+    .nh-topbar-center {
+        order: 3;
+        width: 100%;
+    }
+
+    .nh-segmented {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .nh-seg-btn {
+        flex: 1;
+    }
+}
+
+@media (max-width: 760px) {
+    .nexus-hunt-modal {
+        padding: 6px;
+    }
+
+    .nexus-hunt-modal-card {
+        width: calc(100vw - 12px);
+        height: calc(100vh - 12px);
+    }
+
+    .nh-stage-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nh-help-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nexus-hunt-modal-list {
+        grid-template-columns: 1fr;
+    }
+
+    .nexus-hunt-source-table>div {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nexus-hunt-modal *,
+    .nexus-hunt-panel * {
+        transition: none !important;
+        animation: none !important;
+        scroll-behavior: auto !important;
+    }
+}

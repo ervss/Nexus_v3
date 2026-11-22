@@ -1,0 +1,9 @@
+<!doctype html><html lang="sk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="options.css"><title>Nexus Extreme Searcher — nastavenia</title></head><body>
+<main><h1>Nexus Extreme Searcher</h1><p>Nastav lokálne služby. Kľúče sa ukladajú iba do <code>chrome.storage.local</code>.</p>
+<form id="options">
+<fieldset><legend>Nexus</legend><label>URL <input name="nexusUrl" type="url" placeholder="http://127.0.0.1:8000"></label><label>Bridge token <input name="nexusToken" type="password" autocomplete="off"></label></fieldset>
+<fieldset><legend>Torrent indexery</legend><label>Jackett URL <input name="jackettUrl" type="url" placeholder="http://127.0.0.1:9117"></label><label>Jackett API key <input name="jackettKey" type="password" autocomplete="off"></label><label>Prowlarr URL <input name="prowlarrUrl" type="url" placeholder="http://127.0.0.1:9696"></label><label>Prowlarr API key <input name="prowlarrKey" type="password" autocomplete="off"></label></fieldset>
+<fieldset><legend>Vyhľadávanie</legend><label>Cache (minúty) <input name="cacheMinutes" type="number" min="10" max="20"></label></fieldset>
+<button type="submit">Uložiť nastavenia</button><span id="status" role="status"></span></form>
+<p class="note">Priamy qBittorrent handoff poskytuje Nexus endpoint <code>/api/torrent/add</code>. Naň je potrebné prihlásenie do Nexusu a nakonfigurovaný qBittorrent v Nexuse.</p>
+</main><script type="module" src="options.js"></script></body></html>

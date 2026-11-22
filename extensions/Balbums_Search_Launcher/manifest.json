@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Balbums Search Launcher",
+  "version": "1.0.0",
+  "description": "Open a Balbums search and automatically fetch visible album metadata.",
+  "permissions": [
+    "tabs",
+    "storage"
+  ],
+  "action": {
+    "default_title": "Search Balbums",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://balbums.st/*",
+        "https://bunkr-albums.io/*",
+        "https://balbums.io/*"
+      ],
+      "js": ["auto_fetch.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+rich==15.0.0
+Pygments==2.20.0
+pytest==9.0.2
+pytest-asyncio==1.4.1

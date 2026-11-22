@@ -1,0 +1,617 @@
+    <!-- Shared Settings dialog -->
+    <div class="modal-wrap nexus-settings" x-show="showSettings" style="display: none;" x-transition.opacity>
+        <div class="modal-card settings-card" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1"
+            x-data="{ tab: 'appearance', previousFocus: null,
+                trapFocus(event) {
+                    const items = [...$el.querySelectorAll('button, input, select, a[href], [tabindex]')].filter(item => !item.disabled && item.tabIndex >= 0 && item.getClientRects().length);
+                    const first = items[0], last = items[items.length - 1];
+                    if (event.shiftKey && (document.activeElement === first || document.activeElement === $el)) { event.preventDefault(); last?.focus(); }
+                    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+                }
+            }"
+            x-init="$watch('tab', () => $refs.settingsContent.scrollTop = 0); $watch('showSettings', open => { if (open) { previousFocus = document.activeElement; $nextTick(() => $refs.settingsClose.focus()); } else { previousFocus?.focus(); } })"
+            x-effect="if (!showAdminTools && ['maintenance', 'previews', 'tags'].includes(tab)) tab = 'appearance'"
+            @keydown.tab="trapFocus($event)">
+            <div class="modal-header settings-header">
+                <div class="settings-title"><span class="material-icons-round" aria-hidden="true">settings</span><div><h3 id="settings-title" x-text="t('Nastavenia')">Nastavenia</h3><p x-text="t('Prispôsobenie prostredia a správa knižnice')">Prispôsobenie prostredia a správa knižnice</p></div></div>
+                <button class="settings-close" x-ref="settingsClose" :aria-label="t('Zavrieť nastavenia')" @click="showSettings = false; saveSettings()"><span
+                        class="material-icons-round">close</span></button>
+            </div>
+            <div class="settings-layout">
+            <nav class="settings-tabs" aria-label="Kategórie nastavení">
+                <button @click="tab = 'appearance'" :class="{'active': tab === 'appearance'}" :aria-current="tab === 'appearance' ? 'page' : null"><span class="material-icons-round" aria-hidden="true">palette</span><span x-text="t('Vzhľad')">Vzhľad</span></button>
+                <button @click="tab = 'playback'" :class="{'active': tab === 'playback'}" :aria-current="tab === 'playback' ? 'page' : null"><span class="material-icons-round" aria-hidden="true">play_circle</span><span x-text="t('Prehrávanie')">Prehrávanie</span></button>
+                <button @click="tab = 'telegram'" :class="{'active': tab === 'telegram'}" :aria-current="tab === 'telegram' ? 'page' : null"><span class="material-icons-round" aria-hidden="true">send</span><span x-text="t('Telegram')">Telegram</span></button>
+                {% if ui_variant == 'v1' %}
+                <button @click="tab = 'libraryViews'" :class="{'active': tab === 'libraryViews'}" :aria-current="tab === 'libraryViews' ? 'page' : null"><span class="material-icons-round" aria-hidden="true">manage_search</span><span x-text="t('Pohľady knižnice')">Pohľady knižnice</span></button>
+                {% endif %}
+                <button x-show="showAdminTools" @click="tab = 'maintenance'"
+                    :class="{'active': tab === 'maintenance'}" :aria-current="tab === 'maintenance' ? 'page' : null"><span class="material-icons-round" aria-hidden="true">video_library</span><span x-text="t('Knižnica')">Knižnica</span></button>
+                <button x-show="showAdminTools" @click="tab = 'previews'" :class="{'active': tab === 'previews'}" :aria-current="tab === 'previews' ? 'page' : null"><span class="material-icons-round" aria-hidden="true">wallpaper</span><span x-text="t('Náhľady')">Náhľady</span></button>
+                <button x-show="showAdminTools" @click="tab = 'tags'" :class="{'active': tab === 'tags'}" :aria-current="tab === 'tags' ? 'page' : null"><span class="material-icons-round" aria-hidden="true">sell</span><span x-text="t('Tagy a AI')">Tagy a AI</span></button>
+            </nav>
+            <div class="settings-content" x-ref="settingsContent">
+                <div class="settings-section-heading">
+                    <h4 x-text="t(({appearance:'Vzhľad a prostredie', playback:'Prehrávanie videí', telegram:'Pripojenie Telegramu', maintenance:'Správa knižnice', libraryViews:'Pohľady knižnice', previews:'Náhľady videí', tags:'Tagy a AI analýza'})[tab])"></h4>
+                    <p x-text="t(({appearance:'Motív, hustota zobrazenia a výkon aplikácie.', playback:'Predvolené správanie prehrávača pre tvoje videá.', telegram:'Pripoj svoj účet na vyhľadávanie v kanáloch a skupinách.', maintenance:'Optimalizácia, opravy a upratovanie dát na jednom mieste.', libraryViews:'Kontrola a staršie pohľady knižnice.', previews:'Vylepšenie náhľadov celej knižnice, batchu alebo výberu.', tags:'Doplnenie tagov zo zdrojových stránok a analýza náhľadov.'})[tab])"></p>
+                </div>
+                {% if ui_variant == 'v1' %}
+                <div x-show="tab === 'libraryViews'" class="settings-grid">
+                    <div class="set-group">
+                        <label>Pohľady a kontrola</label>
+                        <button class="btn-ghost w-100" @click="showSettings = false; showTesterVids()">Tester Vids</button>
+                        <button class="btn-ghost w-100 mt-10" @click="showSettings = false; showOldGallery()">Old Gallery</button>
+                        <button class="btn-ghost w-100 mt-10" @click="showSettings = false; showNoThumbGallery()">No Thumb</button>
+                        <button class="btn-ghost w-100 mt-10" x-show="filters.noThumbOnly" @click="showSettings = false; refreshNoThumbs()">Refresh Thumbs</button>
+                    </div>
+                </div>
+                {% endif %}
+                <div x-show="tab === 'telegram'" class="settings-grid">
+                    <div class="settings-telegram" x-data="{ tgStatus: {is_connected: false, has_creds: false}, 
+ loginStep: 'creds',
+        form: {
+            api_id: '', api_hash:'', phone:'', code:'', password:''
+        }
+
+        ,
+        loading: false,
+        msg: ''
+        }
+
+        " x-init="fetch('/api/settings/telegram/status').then(r=>r.json()).then(d=>{tgStatus=d; if(d.is_connected) loginStep='done'; else if(d.has_creds) loginStep='phone'; else loginStep='creds';})">
+                        <!-- Status Badge -->
+                        <div class="set-group"><label>Stav pripojenia</label><span
+                                :class="tgStatus.is_connected ? 'status-ready' : 'status-pending'"
+                                style="padding:4px 8px; border-radius:4px; font-size:12px;"
+                                x-text="tgStatus.is_connected ? 'CONNECTED' : 'DISCONNECTED'"></span></div>
+                        <!-- Step 1: Creds -->
+                        <div x-show="!tgStatus.is_connected && loginStep === 'creds'">
+                            <p class="text-xs text-dim mb-10">Get API ID/Hash from <a href='https://my.telegram.org'
+                                    target='_blank' style='color:#a855f7'>my.telegram.org</a>. </p><input type="text"
+                                x-model="form.api_id" placeholder="App API ID"><input type="text"
+                                x-model="form.api_hash" placeholder="App API Hash"><button class="btn-primary w-100"
+                                @click="loginStep='phone'">Next: Phone</button>
+                        </div>
+                        <!-- Step 2: Phone -->
+                        <div x-show="!tgStatus.is_connected && loginStep === 'phone'"><input type="text"
+                                x-model="form.phone" placeholder="Phone (e.g. +421...)"><button
+                                class="btn-primary w-100" :disabled="loading" @click="
+ loading=true;
+        msg='';
+
+        fetch('/api/settings/telegram/login', {
+            method:'POST', headers: {
+                'Content-Type':'application/json'
+            }
+
+            ,
+            body:JSON.stringify({
+                api_id:form.api_id, api_hash:form.api_hash, phone:form.phone
+            })
+
+        }).then(async r=> {
+                let d=await r.json(); loading=false;
+
+                if(r.ok && d.status==='code_sent') {
+                    loginStep='code'; msg='Code sent!';
+                }
+
+                else msg=d.detail || d.message;
+
+            }).catch(e=> {
+                loading=false; msg=e;
+            }) ">
+                                <span x-show="!loading">Send Code</span><span
+                                    x-show="loading">Sending...</span></button></div>
+                        <!-- Step 3: Code -->
+                        <div x-show="!tgStatus.is_connected && loginStep === 'code'"><input type="text"
+                                x-model="form.code" placeholder="Enter Code"><input type="password"
+                                x-model="form.password" placeholder="2FA Password (if needed)" class="mt-10"><button
+                                class="btn-primary w-100 mt-10" :disabled="loading" @click="
+ loading=true;
+
+        fetch('/api/settings/telegram/verify', {
+            method:'POST', headers: {
+                'Content-Type':'application/json'
+            }
+
+            ,
+            body:JSON.stringify({
+                code:form.code, password:form.password
+            })
+
+        }).then(async r=> {
+                let d=await r.json(); loading=false;
+
+                if(r.ok && d.status==='success') {
+                    tgStatus.is_connected=true; loginStep='done';
+
+                    $dispatch('notify', {
+                        message: 'Telegram Connected!', type: 'success'
+                    });
+            }
+
+            else msg=d.detail || d.message;
+
+        }).catch(e=> {
+                loading=false; msg=e;
+            }) ">Verify & Login</button>
+                        </div>
+                        <!-- Error/Info Msg -->
+                        <div x-show="msg" class="text-xs" style="color:#ef4444; margin-top:10px;" x-text="msg">
+                        </div>
+                        <!-- Connected View -->
+                        <div x-show="tgStatus.is_connected" class="text-center" style="padding:20px;">
+                            <span class="material-icons-round"
+                                style="font-size:48px; color:#22c55e;">check_circle</span>
+                            <p>Telegram Deep Search Active</p>
+                            <p class="text-xs text-dim">You can now search your channels and
+                                private groups.</p>
+                        </div>
+                    </div>
+                </div>
+                <div x-show="tab === 'appearance'" class="settings-grid">
+                    <div class="set-group settings-wide nx-palette-setting">
+                        <span id="nx-color-palettes-label" x-text="t('Farebné palety')">Farebné palety</span>
+                        <div class="nx-color-palette-grid" role="group" aria-labelledby="nx-color-palettes-label">
+                            {% for id, name, description in [
+                                ('original', 'Pôvodný vzhľad', 'Tvoj aktuálny motív'),
+                                ('red-hot', 'Red Hot', 'Grafit a horúca červená'),
+                                ('arctic-pulse', 'Arctic Pulse', 'Nočná modrá a ľadový azúr'),
+                                ('emerald-vault', 'Emerald Vault', 'Lesná zelená a mäta'),
+                                ('copper-noir', 'Copper Noir', 'Espresso a žiarivá meď'),
+                                ('after-hours', 'After Hours', 'Tmavá slivka a orchidea')
+                            ] %}
+                            <button type="button" class="nx-color-palette" data-nx-palette="{{ id }}"
+                                aria-pressed="{{ 'true' if id == 'original' else 'false' }}">
+                                <span class="nx-color-palette-preview" aria-hidden="true">
+                                    <span class="nx-color-palette-preview-panel"></span>
+                                    <span class="nx-color-palette-preview-accent"></span>
+                                </span>
+                                <span class="nx-color-palette-name" x-text="t('{{ name }}')">{{ name }}</span>
+                                <span class="nx-color-palette-description" x-text="t('{{ description }}')">{{ description }}</span>
+                                <span class="material-icons-round nx-color-palette-check" aria-hidden="true">check_circle</span>
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <p x-text="t('Kliknutím zmeníš farby. Výber sa zapamätá v tomto prehliadači.')">Kliknutím zmeníš farby. Výber sa zapamätá v tomto prehliadači.</p>
+                    </div>
+                    <div class="set-group">
+                        <label for="admin-tools-setting" x-text="t('Správcovské nástroje')">Správcovské nástroje</label>
+                        <select id="admin-tools-setting" :value="showAdminTools ? 'on' : 'off'"
+                            @change="toggleAdminTools($event.target.value === 'on')">
+                            <option value="on" x-text="t('ON — zapnuté (predvolené)')">ON — zapnuté (predvolené)</option>
+                            <option value="off" x-text="t('OFF — vypnuté')">OFF — vypnuté</option>
+                        </select>
+                        <p class="text-xs text-dim" x-text="t('Voľba sa automaticky zapamätá v tomto prehliadači.')">Voľba sa automaticky zapamätá v tomto prehliadači.</p>
+                    </div>
+                    <div class="set-group"><label for="settings-ui-mode" x-text="t('Rozhranie')">Rozhranie</label><select id="settings-ui-mode" x-model="settings.uiMode">
+                            <option value="default" x-text="t('Klasické')">Klasické</option>
+                            <option value="netflix" x-text="t('Netflix')">Netflix</option>
+                        </select></div>
+                    <div class="set-group"><label for="settings-density" x-text="t('Hustota zobrazenia')">Hustota zobrazenia</label><select id="settings-density" x-model="settings.uiDensity">
+                            <option value="compact" x-text="t('Kompaktné')">Kompaktné</option>
+                            <option value="comfortable" x-text="t('Vzdušné')">Vzdušné</option>
+                        </select></div>
+                    <div class="set-group"><label for="settings-theme" x-text="t('Farebný motív')">Farebný motív</label><select id="settings-theme" x-model="settings.theme">
+                            <option value="dark" x-text="t('Tmavý')">Tmavý</option>
+                            <option value="light" x-text="t('Svetlý')">Svetlý</option>
+                        </select></div>
+                    <div class="set-group"><label for="settings-language" x-text="t('Jazyk rozhrania')">Jazyk rozhrania</label><select id="settings-language" x-model="settings.tooltipLanguage" @change="if (window.nexusI18n) window.nexusI18n.setLanguage($event.target.value)">
+                            <option value="en">English</option>
+                            <option value="sk">Slovensky</option>
+                        </select></div>
+                    <div class="set-group" data-nx-original-accent><label x-text="t('Farba zvýraznenia')">Farba zvýraznenia</label>
+                        <div class="accent-picker"><button class="accent-swatch purple" aria-label="Fialová" :aria-pressed="settings.accentColor === 'purple'"
+                                @click="settings.accentColor = 'purple'"
+                                :class="{'active': settings.accentColor === 'purple'}"></button><button
+                                class="accent-swatch blue" aria-label="Modrá" :aria-pressed="settings.accentColor === 'blue'" @click="settings.accentColor = 'blue'"
+                                :class="{'active': settings.accentColor === 'blue'}"></button><button
+                                class="accent-swatch green" aria-label="Zelená" :aria-pressed="settings.accentColor === 'green'" @click="settings.accentColor = 'green'"
+                                :class="{'active': settings.accentColor === 'green'}"></button><button
+                                class="accent-swatch orange" aria-label="Oranžová" :aria-pressed="settings.accentColor === 'orange'" @click="settings.accentColor = 'orange'"
+                                :class="{'active': settings.accentColor === 'orange'}"></button></div>
+                    </div>
+                    <div class="set-group settings-wide"
+                        style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-icons-round" style="font-size: 18px; color: #facc15;">bolt</span>
+                            <span x-text="t('Výkonový režim skla')">Výkonový režim skla</span>
+                        </label>
+                        <div class="nx-perf-segmented" role="radiogroup" aria-label="Výkonový režim skla">
+                            <button type="button" class="nx-perf-option"
+                                role="radio"
+                                :aria-checked="(settings.perfMode === 'balanced' || (!settings.perfMode && settings.perfLite)).toString()"
+                                :class="{'is-active': settings.perfMode === 'balanced' || (!settings.perfMode && settings.perfLite)}"
+                                @click="setPerformanceMode('balanced')">
+                                <strong><span class="material-icons-round" style="font-size:15px;">tune</span> Vyvážené sklo</strong>
+                                <small>Predvolené — blur na modáloch a lištách, karty bez bluru.</small>
+                            </button>
+                            <button type="button" class="nx-perf-option"
+                                role="radio"
+                                :aria-checked="(settings.perfMode === 'full').toString()"
+                                :class="{'is-active': settings.perfMode === 'full'}"
+                                @click="setPerformanceMode('full')">
+                                <strong><span class="material-icons-round" style="font-size:15px;">auto_awesome</span> Plné sklo</strong>
+                                <small>Plný glassmorphism na celej stránke vrátane kariet a pozadia.</small>
+                            </button>
+                            <button type="button" class="nx-perf-option"
+                                role="radio"
+                                :aria-checked="(settings.perfMode === 'none').toString()"
+                                :class="{'is-active': settings.perfMode === 'none'}"
+                                @click="setPerformanceMode('none')">
+                                <strong><span class="material-icons-round" style="font-size:15px;">blur_off</span> Bez bluru</strong>
+                                <small>Skutočne 0× backdrop-filter pre najvyšší výkon GPU.</small>
+                            </button>
+                        </div>
+                        <div style="font-size: 11px; color: var(--settings-muted, #64748b); margin-top: 8px; font-style: italic;">
+                            <span x-text="t('Zmena režimu sa zapamätá v prehliadači a obnoví stránku.')">Zmena režimu sa zapamätá v prehliadači a obnoví stránku.</span>
+                        </div>
+                    </div>
+                    <div class="set-group">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-icons-round" style="font-size: 18px; color: #34d399;">bolt</span>
+                            <span x-text="t('Rýchle prehliadanie')">Rýchle prehliadanie</span>
+                        </label>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                            <span style="font-size: 12px; color: #94a3b8;">Dávky po 96 kartách s automatickým dočítaním a plynulým posúvaním.</span>
+                            <label class="switch"><input type="checkbox" x-model="settings.fastBrowse" aria-label="Rýchle prehliadanie"
+                                    @change="toggleFastBrowse()"><span class="slider round"></span></label>
+                        </div>
+                    </div>
+                </div>
+                <div x-show="tab === 'playback'" class="settings-grid">
+                    <div class="set-group"><label x-text="t('Automatické prehrávanie')">Automatické prehrávanie</label><label class="switch"><input type="checkbox"
+                                x-model="settings.autoplay" aria-label="Automatické prehrávanie"><span class="slider round"></span></label></div>
+                    <div class="set-group"><label x-text="t('Opakovanie videa')">Opakovanie videa</label><label class="switch"><input type="checkbox"
+                                x-model="settings.loop" aria-label="Opakovanie videa"><span class="slider round"></span></label></div>
+                    <div class="set-group"><label for="settings-speed" x-text="t('Predvolená rýchlosť')">Predvolená rýchlosť</label><select id="settings-speed"
+                            x-model="settings.playbackSpeed">
+                            <option value="0.75">0.75x</option>
+                            <option value="1.0">1.0x (Normal)</option>
+                            <option value="1.25">1.25x</option>
+                            <option value="1.5">1.5x</option>
+                            <option value="2.0">2.0x</option>
+                        </select></div>
+                    <div class="set-group"><label x-text="t('Uprednostniť HLS')">Uprednostniť HLS</label><label class="switch"><input
+                                type="checkbox" x-model="settings.useHls" aria-label="Uprednostniť HLS"><span class="slider round"></span></label>
+                        <div style="font-size:11px; color:#888; margin-top:5px;"><span x-text="t('Pri opätovnom načítaní videa použije kvalitnejší HLS stream, ak je dostupný.')">Pri opätovnom načítaní videa použije kvalitnejší HLS stream, ak je dostupný.</span></div>
+                    </div>
+                    <div class="set-group"><label x-text="t('Podsvietenie Ambilight')">Podsvietenie Ambilight</label><label class="switch"><input type="checkbox"
+                                x-model="settings.enableAmbilight" aria-label="Podsvietenie Ambilight"><span class="slider round"></span></label>
+                        <div style="font-size:11px; color:#888; margin-top:5px;"><span x-text="t('Efekt podsvietenia okolo videa. Predvolene je vypnutý pre plynulejšie prehrávanie.')">Efekt podsvietenia okolo videa. Predvolene je vypnutý pre plynulejšie prehrávanie.</span></div>
+                    </div>
+                </div>
+                <div x-show="showAdminTools && ['maintenance', 'previews', 'tags'].includes(tab)" class="settings-grid">
+                    <div class="set-group" x-show="tab === 'maintenance'">
+                        <label x-text="t('Optimalizácia knižnice')">Optimalizácia knižnice</label>
+                        <button class="btn-primary w-100" @click="runMaintenance('full-optimization')">
+                            <span class="material-icons-round">bolt</span> <span x-text="t('Automatická optimalizácia')">Automatická optimalizácia</span>
+                        </button>
+                        <p class="text-xs text-dim mt-5">Upraví názvy, nájde duplicity a ponechá verzie v najlepšej kvalite.</p>
+                    </div>
+                    <div class="set-group" x-show="tab === 'maintenance'">
+                        <label x-text="t('Duplicitné videá')">Duplicitné videá</label>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                            <button class="btn-ghost" @click="runMaintenance('resolve-name')" x-text="t('Podľa názvu')">Podľa názvu</button>
+                            <button class="btn-ghost" @click="runMaintenance('resolve-hash')" x-text="t('Podľa obrazu')">Podľa obrazu</button>
+                        </div>
+                    </div>
+                    <div class="set-group settings-danger" x-show="tab === 'maintenance'">
+                        <label x-text="t('Čistenie databázy')">Čistenie databázy</label>
+                        <button class="btn-ghost w-100" @click="runMaintenance('cleanup-broken')"
+                            style="color: #ef4444;">
+                            <span class="material-icons-round">delete_sweep</span> <span x-text="t('Odstrániť nefunkčné odkazy')">Odstrániť nefunkčné odkazy</span>
+                        </button>
+                        <button class="btn-ghost w-100 mt-10" @click="wipeEntireDatabase()"
+                            style="color: #ef4444; border-color: rgba(239, 68, 68, 0.45);">
+                            <span class="material-icons-round">warning</span> <span x-text="t('Vymazať celú databázu')">Vymazať celú databázu</span>
+                        </button>
+                    </div>
+                    <div class="set-group" x-show="tab === 'maintenance'">
+                        <label x-text="t('Oprava údajov')">Oprava údajov</label>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom: 10px;">
+                            <button class="btn-ghost" @click="runMaintenance('fix-thumbnails')" x-text="t('Opraviť náhľady')">Opraviť náhľady</button>
+                            <button class="btn-ghost" @click="runMaintenance('retry-flagged-previews')" x-text="t('Zopakovať kontrolu náhľadov')">Zopakovať kontrolu náhľadov</button>
+                            <button class="btn-ghost" @click="runMaintenance('sync-durations')" x-text="t('Doplniť dĺžky')">Doplniť dĺžky</button>
+                            <button class="btn-ghost" @click="runMaintenance('scan-sizes')" x-text="t('Zistiť veľkosti')">Zistiť veľkosti</button>
+                        </div>
+                        <button class="btn-primary w-100" @click="runMaintenance('refresh-metadata')">
+                            <span class="material-icons-round">auto_fix_high</span> <span x-text="t('Obnoviť údaje importu')">Obnoviť údaje importu</span>
+                        </button>
+                        <button class="btn-ghost w-100 mt-10" @click="runMaintenance('refresh-bunkr')">
+                            <span class="material-icons-round">autorenew</span> <span x-text="t('Obnoviť odkazy Bunkr')">Obnoviť odkazy Bunkr</span>
+                        </button>
+                        <p class="text-xs text-dim mt-5">Opraví chýbajúce dĺžky, rozlíšenie a náhľady. Opakovaná kontrola skúsi označené videá ešte raz a odstráni tie, ktoré stále zlyhávajú.</p>
+                    </div>
+                    <div class="set-group smart-rethumb-panel settings-wide" x-show="tab === 'previews'" style="display:block;grid-column:1 / -1;" x-data="{
+                        rethumbStatus: null,
+                        rethumbRunning: false,
+                        rethumbTimer: null,
+                        rethumbPollStatus() {
+                            fetch('/api/v1/maintenance/smart-rethumb/status', { credentials: 'same-origin' })
+                            .then(r => r.json())
+                            .then(d => {
+                                this.rethumbRunning = d.running;
+                                this.rethumbStatus = d.progress?.message || (d.running ? '▶ Prebieha' : 'Pripravené na kontrolu náhľadov');
+                                if (d.progress?.total) this.batchRethumb = {...d.progress, running: d.running};
+                                if (d.running && !this.rethumbTimer) {
+                                    this.rethumbTimer = setInterval(() => this.rethumbPollStatus(), 4000);
+                                } else if (!d.running && this.rethumbTimer) {
+                                    clearInterval(this.rethumbTimer);
+                                    this.rethumbTimer = null;
+                                }
+                            })
+                            .catch(() => {});
+                        },
+                        rethumbStart() {
+                            this.rethumbRunning = true;
+                            this.rethumbStatus = 'Spúšťam…';
+                            fetch('/api/v1/maintenance/smart-rethumb/start', {
+                                method: 'POST',
+                                headers: {'Content-Type':'application/json'},
+                                credentials: 'same-origin',
+                                body: JSON.stringify({limit: 300})
+                            })
+                            .then(r => r.json())
+                            .then(d => {
+                                this.rethumbStatus = d.message || d.status;
+                                if (d.status === 'started') {
+                                    this.rethumbTimer = setInterval(() => this.rethumbPollStatus(), 4000);
+                                } else {
+                                    this.rethumbRunning = false;
+                                }
+                            })
+                            .catch(e => { this.rethumbStatus = 'Chyba: ' + e; this.rethumbRunning = false; });
+                        },
+                        rethumbBatch(batchName) {
+                            if (!batchName || batchName === 'All') {
+                                this.rethumbStatus = 'Najprv vyber batch vo filtri!'; return;
+                            }
+                            this.rethumbRunning = true;
+                            this.rethumbStatus = `Spúšťam pre batch: ${batchName}…`;
+                            fetch('/api/v1/maintenance/smart-rethumb/batch', {
+                                method: 'POST',
+                                headers: {'Content-Type':'application/json'},
+                                credentials: 'same-origin',
+                                body: JSON.stringify({batch_name: batchName, concurrency: 3})
+                            })
+                            .then(r => r.json())
+                            .then(d => {
+                                this.rethumbStatus = d.message || d.status;
+                                this.rethumbPollStatus();
+                            })
+                            .catch(e => { this.rethumbStatus = 'Chyba: ' + e; this.rethumbRunning = false; });
+                        },
+                        rethumbSelected() {
+                            if (!selectedIds || selectedIds.length === 0) {
+                                this.rethumbStatus = 'Najprv vyber nejaké videá!'; return;
+                            }
+                            this.rethumbRunning = true;
+                            this.rethumbStatus = `Spúšťam pre ${selectedIds.length} vybraných videí…`;
+                            fetch('/api/v1/maintenance/smart-rethumb/batch', {
+                                method: 'POST',
+                                headers: {'Content-Type':'application/json'},
+                                credentials: 'same-origin',
+                                body: JSON.stringify({video_ids: selectedIds, concurrency: 3})
+                            })
+                            .then(r => r.json())
+                            .then(d => {
+                                this.rethumbStatus = d.message || d.status;
+                                this.rethumbPollStatus();
+                            })
+                            .catch(e => { this.rethumbStatus = 'Chyba: ' + e; this.rethumbRunning = false; });
+                        }
+                    }" x-init="rethumbPollStatus()">
+                        <label style="display:block;margin-bottom:8px;" x-text="t('Inteligentné vylepšenie náhľadov')">Inteligentné vylepšenie náhľadov</label>
+                        <p class="text-xs text-dim" style="margin-bottom:10px;">
+                            Skenuje vidéa so slabým náhľadom. Extrahuje 5 framov (15–55% dĺžky videa) a automaticky
+                            vyberie ten s najlepším vizuálnym obsahom — preskočí intro, logo a čierne scény.
+                        </p>
+                        <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+                            <button class="btn-primary"
+                                style="flex:1; background: linear-gradient(135deg,#7c3aed,#2563eb);"
+                                :disabled="rethumbRunning" @click="rethumbStart()">
+                                <span class="material-icons-round"
+                                    x-text="rethumbRunning ? 'hourglass_top' : 'auto_awesome'">auto_awesome</span>
+                                <span x-text="rethumbRunning ? t('Prebieha…') : t('Celá knižnica')">Celá knižnica</span>
+                            </button>
+                            <button class="btn-ghost" x-show="rethumbRunning" @click="stopSmartRethumb(); setTimeout(() => rethumbPollStatus(), 300)" type="button" x-text="t('Zastaviť')">Zastaviť</button>
+                            <button class="btn-ghost" style="flex:0 0 auto; padding:0 12px;" title="Skontrolovať stav"
+                                @click="rethumbPollStatus()">
+                                <span class="material-icons-round">info</span>
+                            </button>
+                        </div>
+                        <!-- Batch / Selected rethumb -->
+                        <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+                            <button class="btn-ghost" style="flex:1; border-color:rgba(124,58,237,.4); color:#c4b5fd;"
+                                :disabled="rethumbRunning"
+                                @click="(function(){ const b = prompt('Presný názov batchu:'); if(b) rethumbBatch(b.trim()); })()">
+                                <span class="material-icons-round">photo_library</span>
+                                <span x-text="t('Podľa Batchu')">Podľa Batchu</span>
+                            </button>
+                            <button class="btn-ghost" style="flex:1; border-color:rgba(124,58,237,.4); color:#c4b5fd;"
+                                :disabled="rethumbRunning" @click="rethumbSelected()">
+                                <span class="material-icons-round">check_box</span>
+                                <span x-text="t('Vybrané videá')">Vybrané videá</span>
+                            </button>
+                        </div>
+                        <p class="text-xs" x-show="rethumbStatus" x-text="rethumbStatus"
+                            style="color:#a78bfa; margin:0; min-height:16px;"></p>
+
+                        <!-- Batch rethumb live progress -->
+                        <div x-show="batchRethumb" style="margin-top:10px;">
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                <span class="text-xs" style="color:#94a3b8;">
+                                    <span x-text="batchRethumb?.label || 'Batch'"></span>
+                                </span>
+                                <span class="text-xs" style="color:#a78bfa; font-weight:600;">
+                                    <span x-text="(batchRethumb?.done||0)"></span>/<span
+                                        x-text="(batchRethumb?.total||0)"></span>
+                                    <span x-show="batchRethumb?.failed > 0" style="color:#f87171; margin-left:6px;">
+                                        ✗ <span x-text="batchRethumb?.failed"></span>
+                                    </span>
+                                </span>
+                            </div>
+                            <div
+                                style="height:6px; border-radius:3px; background:rgba(255,255,255,.06); overflow:hidden;">
+                                <div
+                                    :style="'width:' + (batchRethumb?.total > 0 ? Math.round((batchRethumb.done/batchRethumb.total)*100) : 0) + '%; height:100%; border-radius:3px; transition:width .4s; background: linear-gradient(90deg,#7c3aed,#38bdf8);'">
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-top:3px;">
+                                <span class="text-xs" style="color:#475569;">
+                                    <span x-show="batchRethumb?.running" class="material-icons-round av-spin"
+                                        style="font-size:11px;vertical-align:middle;color:#7c3aed;">progress_activity</span>
+                                    <span x-show="!batchRethumb?.running" style="color:#2dd4bf;" x-text="batchRethumb?.cancelled ? 'Zastavené' : 'Dokončené'"></span>
+                                    <span x-text="batchRethumb?.message || ''"></span>
+                                </span>
+                                <span class="text-xs" style="color:#475569;"
+                                    x-text="batchRethumb?.total > 0 ? Math.round((batchRethumb.done/batchRethumb.total)*100) + '%' : ''">
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ⚡ AI Vision Auto-Tagger (Lokálna GPU SigLIP 2 + NLP) -->
+                    <div class="set-group ai-vision-tagger-panel settings-wide" x-show="tab === 'tags'" style="display: block; grid-column: 1 / -1; background: rgba(124, 58, 237, 0.06); border: 1px solid rgba(168, 85, 247, 0.28); border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                            <label style="color: #c084fc; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 6px; font-size: 14px;">
+                                <span class="material-icons-round" style="font-size: 18px; color: #ec4899;">auto_awesome</span>
+                                AI Vision Auto-Tagger (Lokálna GPU SigLIP 2 + NLP)
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <select x-model.number="aiTagLimit" :disabled="aiTagBatch?.running"
+                                    style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(168, 85, 247, 0.35); color: #e2e8f0; padding: 3px 8px; border-radius: 6px; font-size: 11px;">
+                                    <option :value="50">Dávka: 50 videí</option>
+                                    <option :value="250">Dávka: 250 videí</option>
+                                    <option :value="1000">Dávka: 1000 videí</option>
+                                    <option :value="5000">Dávka: 5000 videí</option>
+                                    <option :value="10000">Celá knižnica (10 000)</option>
+                                </select>
+                                <span class="text-xs" style="color: #34d399; background: rgba(16,185,129,0.14); border: 1px solid rgba(16,185,129,0.3); padding: 2px 8px; border-radius: 999px; font-weight: 600;"
+                                    x-text="aiTagBatch?.activeModel || 'siglip2-local-gpu'">
+                                </span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-dim" style="display: block; width: 100%; margin: 0 0 10px 0; line-height: 1.45;">
+                            100 % lokálne a bezplatné tagovanie na tvojej GPU (SigLIP 2 Zero-Shot Vision + vizuálne k-NN rozpoznávanie v knižnici + NLP lexikón z názvov a batchov). Funguje okamžite bez API limitov pre Bunkr, Gofile, Pixeldrain, Filester aj Telegram.
+                        </p>
+
+                        <!-- Akčné tlačidlá -->
+                        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
+                            <button class="btn-primary" style="flex: 1; min-width: 180px; background: linear-gradient(135deg, #7c3aed, #ec4899); border: none; justify-content: center;"
+                                :disabled="aiTagBatch?.running"
+                                @click="startAiTagBatch('missing')">
+                                <span class="material-icons-round" x-text="aiTagBatch?.running ? 'hourglass_top' : 'bolt'">bolt</span>
+                                <span x-text="aiTagBatch?.running ? t('Prebieha AI analýza...') : t('Otagovať chýbajúce (Knižnica)')"></span>
+                            </button>
+                            <button class="btn-ghost" style="flex: 1; min-width: 180px; border-color: rgba(168, 85, 247, 0.4); color: #d8b4fe; justify-content: center;"
+                                :disabled="aiTagBatch?.running || !aiTagBatchNames().length"
+                                @click="startAiTagBatch('batch')">
+                                <span class="material-icons-round">label</span>
+                                <span x-text="t('Otagovať aktuálny batch')">Otagovať aktuálny batch</span>
+                            </button>
+                            <button class="btn-ghost" :disabled="aiTagBatch?.running || !(videos || []).length" @click="startAiTagBatch('view')" x-text="t('Otagovať načítaný pohľad')">Otagovať načítaný pohľad</button>
+                            <button class="btn-ghost" :disabled="aiTagBatch?.running || !(selectedIds || []).length" @click="startAiTagBatch('selected')">Otagovať označené (<span x-text="(selectedIds || []).length"></span>)</button>
+                            <button x-show="aiTagBatch?.running" class="btn-ghost" style="flex: 0 0 auto; color: #f87171; border-color: rgba(239, 68, 68, 0.45); padding: 0 14px;"
+                                @click="cancelAiTagBatch()">
+                                <span class="material-icons-round" style="font-size: 16px;">stop</span>
+                                <span x-text="t('Zastaviť')">Zastaviť</span>
+                            </button>
+                        </div>
+
+                        <!-- 📊 Živý ukazovateľ / Live Status Bar -->
+                        <div x-show="aiTagBatch && (aiTagBatch.running || aiTagBatch.total > 0 || aiTagBatch.done > 0)"
+                            style="display: block; width: 100%; background: rgba(15, 23, 42, 0.78); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; margin-top: 10px;">
+                            
+                            <!-- Riadok 1: Stavový text a číselné počítadlo (Ktoré video z celkového počtu + percentá) -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <span class="text-xs" style="color: #e2e8f0; font-weight: 600; display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    <span x-show="aiTagBatch?.running" class="material-icons-round av-spin" style="font-size: 14px; color: #ec4899; flex-shrink: 0;">progress_activity</span>
+                                    <span x-show="!aiTagBatch?.running && aiTagBatch?.percent >= 100" class="material-icons-round" style="font-size: 15px; color: #10b981; flex-shrink: 0;">check_circle</span>
+                                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" x-text="aiTagBatch?.statusText || (aiTagBatch?.running ? 'Spracúvam...' : 'Dokončené')"></span>
+                                </span>
+                                <span class="text-xs" style="color: #f472b6; font-weight: 700; flex-shrink: 0; font-variant-numeric: tabular-nums;">
+                                    <span x-text="aiTagBatch?.done || 0"></span> / <span x-text="aiTagBatch?.total || 0"></span>
+                                    (<span x-text="Number(aiTagBatch?.percent || 0).toFixed(1)"></span>%)
+                                </span>
+                            </div>
+
+                            <!-- Riadok 2: Loading Progress Bar (0 - 100%) -->
+                            <div style="width: 100%; height: 9px; border-radius: 5px; background: rgba(255,255,255,0.08); overflow: hidden; margin-bottom: 8px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);">
+                                <div :style="'width: ' + Math.min(100, Math.max(0, aiTagBatch?.percent || 0)) + '%; height: 100%; border-radius: 5px; transition: width 0.35s ease; background: linear-gradient(90deg, #ec4899, #8b5cf6, #38bdf8); box-shadow: 0 0 10px rgba(236,72,153,0.6);'"></div>
+                            </div>
+
+                            <!-- Riadok 3: Časový úsek (Odhadovaný čas zostávajúci + uplynutý) a výsledky -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <span style="color: #34d399; font-weight: 600;">✓ <span x-text="aiTagBatch?.improved || 0"></span> otagovaných</span>
+                                    <span x-show="aiTagBatch?.failed > 0" style="color: #f87171; font-weight: 600;">✗ <span x-text="aiTagBatch?.failed || 0"></span> chýb</span>
+                                    <span x-show="aiTagBatch?.skipped > 0" style="color: #94a3b8;">⏭ <span x-text="aiTagBatch?.skipped || 0"></span> bez náhľadu</span>
+                                </div>
+                                <div style="display: flex; gap: 8px; align-items: center; font-variant-numeric: tabular-nums;">
+                                    <span x-show="aiTagBatch?.running && aiTagBatch?.etaFormatted" style="color: #38bdf8; font-weight: 600;">
+                                        ⏱️ Zostáva: <span x-text="aiTagBatch?.etaFormatted"></span>
+                                    </span>
+                                    <span x-show="aiTagBatch?.elapsedFormatted" style="color: #64748b;">
+                                        (Čas: <span x-text="aiTagBatch?.elapsedFormatted"></span>)
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Riadok 4: Písomne aké konkrétne video sa práve spracúva (ID a názov) -->
+                            <div x-show="aiTagBatch?.running && aiTagBatch?.currentVideoId"
+                                style="font-size: 11px; color: #cbd5e1; background: rgba(0,0,0,0.35); border-radius: 5px; padding: 5px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                                <span class="material-icons-round" style="font-size: 13px; color: #ec4899; flex-shrink: 0;">movie</span>
+                                <span style="flex-shrink: 0;">Aktuálne video #<span x-text="aiTagBatch?.currentVideoId"></span>:</span>
+                                <span style="color: #f8fafc; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" x-text="aiTagBatch?.currentVideoTitle || 'Načítavam...'"></span>
+                            </div>
+
+                            <!-- Riadok 5: Ukážka posledných vygenerovaných tagov naživo -->
+                            <div x-show="aiTagBatch?.lastAddedTags && aiTagBatch.lastAddedTags.length > 0"
+                                style="font-size: 11px; color: #a7f3d0; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 5px; padding: 5px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                                <span class="material-icons-round" style="font-size: 13px; color: #34d399; flex-shrink: 0;">sell</span>
+                                <span style="flex-shrink: 0;">Pridané k #<span x-text="aiTagBatch?.lastTaggedVideoId"></span>:</span>
+                                <span style="color: #ecfdf5; overflow: hidden; text-overflow: ellipsis;" x-text="(aiTagBatch?.lastAddedTags || []).join(', ')"></span>
+                            </div>
+
+                            <!-- Riadok 6: Posledná chyba (ak nastala) -->
+                            <div x-show="aiTagBatch?.lastError && aiTagBatch?.failed > 0"
+                                style="font-size: 11px; color: #fca5a5; margin-top: 5px;"
+                                x-text="'Posledná chyba: ' + aiTagBatch.lastError">
+                            </div>
+
+                            <!-- Riadok 7: Záverečná správa po dokončení -->
+                            <div x-show="!aiTagBatch?.running && aiTagBatch?.message"
+                                style="font-size: 11px; color: #34d399; margin-top: 6px; font-weight: 600;"
+                                x-text="aiTagBatch?.message">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="set-group" x-show="tab === 'tags'">
+                        <label>Doplnenie tagov zo zdrojov</label>
+                        <div style="display:grid; grid-template-columns: 1fr; gap:10px; margin-bottom: 10px;">
+                            <button class="btn-primary w-100" @click="runMaintenance('enrich-tags-missing')">
+                                <span class="material-icons-round">sell</span> Doplniť chýbajúce tagy
+                            </button>
+                            <button class="btn-ghost w-100" @click="runMaintenance('enrich-tags-batch')"
+                                :disabled="aiTagBatchNames().length !== 1">
+                                <span class="material-icons-round">label</span> Doplniť tagy aktuálneho batchu
+                            </button>
+                        </div>
+                        <p class="text-xs text-dim mt-5">Načíta tagy zo stránok videí, napríklad Eporner a WhoresHub. Samotné súborové úložiská preskočí.</p>
+                    </div>
+                    <div class="set-group" x-show="tab === 'maintenance'">
+                        <label>Úprava názvov</label>
+                        <button class="btn-ghost w-100" @click="runMaintenance('normalize-titles')">
+                            <span class="material-icons-round">spellcheck</span> Vyčistiť názvy videí
+                        </button>
+                    </div>
+                </div>
+            </div>
+            </div>
+            <footer class="settings-footer"><p><span class="material-icons-round" aria-hidden="true">tune</span><span x-text="t('Nastavenia sa ukladajú v tomto prehliadači.')">Nastavenia sa ukladajú v tomto prehliadači.</span></p><button class="btn-primary"
+                @click="showSettings = false; saveSettings()"><span class="material-icons-round" aria-hidden="true">check</span><span x-text="t('Uložiť a zavrieť')">Uložiť a zavrieť</span></button></footer>
+        </div>
+    </div>

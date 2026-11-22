@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+import test from 'node:test';
+const code=readFileSync(new URL('../app/static/search.js',import.meta.url),'utf8');
+test('inspect selects only suspicious Telegram items and repair updates only selected items', async()=>{
+ const elements={quantumThumbStatus:{},quantumStopThumbs:{style:{}}};
+ const document={getElementById:id=>elements[id]||null, querySelectorAll:()=>[],addEventListener(){}};
+ const requests=[];
+ const context=vm.createContext({document,URL,AbortController,TextEncoder,TextDecoder,setTimeout,clearTimeout,fetch:async(url,opts)=>{requests.push({url,body:JSON.parse(opts.body)});if(url.endsWith('/inspect'))return {ok:true,json:async()=>({items:[{chat_id:100,message_id:1,status:'poor'},{chat_id:100,message_id:2,status:'unchecked'}]})};const ndjson=JSON.stringify({type:'progress',raw_chat_id:100,chat_id:100,message_id:1,ok:true,thumbnail:'/api/v1/telegram/thumb/100/1'})+'\n'+JSON.stringify({type:'done',done:1,failed:0})+'\n';const enc=new TextEncoder().encode(ndjson);return {ok:true,body:{getReader(){let sent=false;return {read:async()=>sent?{done:true,value:undefined}:(sent=true,{done:false,value:enc})};}}};}});
+ vm.runInContext(code+'\nthis.Search=QuantumSearch;',context);
+ const search=Object.create(context.Search.prototype);
+ const results=[{url:'a',source:'Telegram',chat_id:100,message_id:1,duration:'1:00',thumbnail:'old'},{url:'b',source:'Telegram',chat_id:100,message_id:2,thumbnail:'old'}];
+ Object.assign(search,{results,filteredResults:results,selectedUrls:new Set(),updateSelectionToolbar(){},renderResults(){},_durationSeconds:()=>60});
+ await search.inspectTelegramThumbnails({});
+ assert.deepEqual([...search.selectedUrls],['a']);
+ assert.match(elements.quantumThumbStatus.textContent,/1 ešte nenačítaných/);
+ await search.repairSelectedTelegramThumbnails({});
+ assert.equal(requests.length,2);assert.equal(requests[1].body.items[0].message_id,1);
+ assert.match(results[0].thumbnail,/thumb\/100\/1\?v=/);assert.equal(results[1].thumbnail,'old');
+ assert.match(elements.quantumThumbStatus.textContent,/opravených 1/);
+});

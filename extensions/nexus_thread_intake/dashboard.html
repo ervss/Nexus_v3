@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="sk">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thread → Tester</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">↗</span><span>THREAD / INTAKE</span></div>
+    <p id="connectionState" class="connection" aria-live="polite">Pripájam sa k threadu…</p>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="threadTitle">
+      <p class="eyebrow">NEXUS CAPTURE</p>
+      <h1 id="threadTitle">Načítavam aktuálny thread…</h1>
+      <p id="threadUrl" class="thread-url"></p>
+      <div class="scope-row" aria-label="Rozsah zberu">
+        <button class="scope active" data-scope="current" type="button">Táto stránka</button>
+        <button class="scope" data-scope="range" type="button">Rozsah</button>
+        <button class="scope" data-scope="all" type="button">Celý thread</button>
+        <span id="rangeControls" class="range hidden"><input id="fromPage" type="number" min="1" value="1"
+            aria-label="Od stránky"><span>–</span><input id="toPage" type="number" min="1" value="1"
+            aria-label="Po stránku"></span>
+        <button id="scanBtn" class="quiet-button" type="button">Znova načítať</button>
+      </div>
+    </section>
+
+    <section class="pipeline" aria-label="Stav zberu">
+      <div><strong id="foundCount">0</strong><span>nájdených</span></div>
+      <i></i>
+      <div><strong id="readyCount">0</strong><span>do Testera</span></div>
+      <i></i>
+      <div><strong id="dupeCount">0</strong><span>duplikátov zlúčených</span></div>
+      <i></i>
+      <div><strong id="heldCount">0</strong><span>na kontrolu</span></div>
+    </section>
+
+    <section class="controlbar">
+      <label class="search"><span>⌕</span><input id="searchInput" type="search"
+          placeholder="Hľadať názov, autora alebo host…"></label>
+      <label class="source-filter">Source<select id="sourceFilter" aria-label="Filtrovať podľa source">
+          <option value="">Všetky source</option>
+        </select></label>
+      <label class="switch"><input id="onlySupported" type="checkbox"><span></span>Iba podporované</label>
+      <button id="selectVisibleBtn" class="text-button" type="button">Vybrať zobrazené</button>
+      <button id="clearVisibleBtn" class="text-button" type="button">Zrušiť zobrazené</button>
+      <button id="selectReadyBtn" class="text-button" type="button">Vybrať pripravené</button>
+      <button id="clearSelectionBtn" class="text-button" type="button">Zrušiť výber</button>
+    </section>
+
+    <p id="scanReport" class="scan-report" role="status" hidden></p>
+
+    <section id="results" class="results" aria-live="polite">
+      <div class="empty"><span>◇</span>
+        <h2>Pripravujem zber</h2>
+        <p>Prečítam aktuálny thread a vyberiem len odkazy, ktoré má zmysel poslať do Testera.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="handoff">
+    <div><strong id="selectedCount">0</strong> unikátnych odkazov je pripravených na test</div>
+    <div class="tester-range" aria-label="Rozsah odkazov pre Tester">
+      <span>Do Testera č.</span>
+      <label>od <input id="testerRangeStart" type="number" min="1" value="1" aria-label="Od čísla odkazu"></label>
+      <span>–</span>
+      <label>po <input id="testerRangeEnd" type="number" min="1" value="1" aria-label="Po číslo odkazu"></label>
+      <span id="testerRangeCount" class="range-count">0 v rozsahu</span>
+    </div>
+    <div class="handoff-actions">
+      <button id="downloadJsonBtn" class="download-button" type="button" disabled>Stiahnuť JSON</button>
+      <button id="testerBtn" class="tester-button" type="button" disabled>Poslať do Testera <span>→</span></button>
+    </div>
+  </footer>
+
+  <template id="postTemplate">
+    <article class="post">
+      <header>
+        <div>
+          <p class="post-author"></p>
+          <p class="post-context"></p>
+        </div><a class="post-link" target="_blank" rel="noreferrer">Pôvodný post ↗</a>
+      </header>
+      <div class="link-list"></div>
+    </article>
+  </template>
+  <script src="dashboard.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Video Play First",
+  "version": "1.2.0",
+  "description": "Priame video odkazy na ľubovoľnej webovej doméne otvorí na prehrávanie. Prepínač umožňuje sťahovanie.",
+  "minimum_chrome_version": "128",
+  "permissions": ["declarativeNetRequestWithHostAccess"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": {"service_worker": "background.js"},
+  "action": {"default_popup": "popup.html", "default_title": "Video: prehrávanie alebo sťahovanie"},
+  "declarative_net_request": {"rule_resources": [{"id": "play", "enabled": true, "path": "play-rules.json"}]},
+  "content_scripts": [{"matches": ["http://*/*", "https://*/*"], "js": ["autoplay.js"], "run_at": "document_idle"}],
+  "web_accessible_resources": [{"resources": ["player.html"], "matches": ["http://*/*", "https://*/*"]}]
+}

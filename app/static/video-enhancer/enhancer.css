@@ -1,0 +1,20 @@
+.nexus-enhancer-panel[hidden] { display:none; }
+.nexus-enhancer-panel { position:relative; z-index:2; left:auto; bottom:auto; margin:12px 0 0; max-width:100%; display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:8px; color:#fff; background:rgba(9,12,24,.86); border:1px solid #596477; border-radius:8px; font:12px system-ui,sans-serif; }
+.nexus-enhancer-panel button,.nexus-enhancer-panel select { color:#fff; background:#293448; border:1px solid #75839b; border-radius:5px; padding:5px 7px; cursor:pointer; }
+.nexus-enhancer-panel label { white-space:nowrap; }
+.nexus-enhancer-panel progress { width:100px; }
+.nexus-enhancer-panel [data-role="seek"] { width:110px; accent-color:#88baff; cursor:pointer; }
+.nexus-enhancer-panel [data-role="time"] { white-space:nowrap; font-variant-numeric:tabular-nums; }
+.nexus-enhancer-canvas { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; pointer-events:none; z-index:2; }
+.player-box:fullscreen { width:100vw!important; height:100vh!important; max-height:none!important; aspect-ratio:auto!important; background:#000; }
+.player-box:fullscreen { overflow-y:auto; }
+.nexus-enhancer-source { opacity:0!important; }
+.nexus-enhancer-compare .nexus-enhancer-source { position:absolute!important; top:0; left:0; width:50%!important; height:100%!important; object-fit:contain!important; opacity:1!important; }
+.nexus-enhancer-compare .nexus-enhancer-canvas { left:50%; right:auto; width:50%; height:100%; clip-path:none; }
+.nexus-enhancer-compare { background:#05070b; }
+.nexus-enhancer-compare::before { left:12px; }
+.nexus-enhancer-compare::after { left:calc(50% + 12px); right:auto; }
+.nexus-enhancer-compare::before,.nexus-enhancer-compare::after { position:absolute; top:10px; z-index:4; padding:3px 7px; border-radius:4px; background:rgba(0,0,0,.72); color:#fff; font:12px system-ui,sans-serif; pointer-events:none; }
+.nexus-enhancer-compare::before { content:'Original'; left:12px; }
+.nexus-enhancer-compare::after { content:'AI 2×'; right:12px; }
+@media(max-width:700px) { .nexus-enhancer-panel { left:auto; bottom:auto; max-width:100%; max-height:130px; overflow:auto; font-size:11px; } }

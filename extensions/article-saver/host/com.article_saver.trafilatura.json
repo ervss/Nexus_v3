@@ -1,0 +1,9 @@
+{
+    "path":  "C:\\Users\\Peto\\Desktop\\NexusPWC_fresh_v2\\extensions\\article-saver\\host\\start_host.bat",
+    "description":  "Trafilatura native host pre Article Saver",
+    "name":  "com.article_saver.trafilatura",
+    "allowed_origins":  [
+                            "chrome-extension://fnohibafiahdbgalmpggfbmdhjijoeei/"
+                        ],
+    "type":  "stdio"
+}

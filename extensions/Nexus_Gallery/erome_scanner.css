@@ -1,0 +1,107 @@
+.nexus-erome-selector {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.nexus-erome-selector input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    accent-color: #eb6395;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    border-radius: 4px;
+}
+
+.nexus-size-badge {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: rgba(15, 23, 42, 0.9);
+    color: #fff;
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 10px;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    display: none;
+    border-left: 3px solid #10b981;
+    backdrop-filter: blur(4px);
+}
+
+.nexus-size-badge .q-low { color: #f87171; }
+.nexus-size-badge .q-good { color: #fbbf24; }
+.nexus-size-badge .q-high { color: #10b981; }
+
+.nexus-size-badge.visible {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+#nexus-erome-bulk-import-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(233, 30, 99, 0.4);
+    padding: 12px 24px;
+    border-radius: 50px;
+    z-index: 2147483647;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    pointer-events: none;
+}
+
+#nexus-erome-bulk-import-bar.active {
+    opacity: 1;
+    pointer-events: auto;
+    bottom: 30px;
+}
+
+.nexus-bar-text {
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.nexus-bar-port-select {
+    background: #1e293b;
+    color: #fff;
+    border: 1px solid #334155;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.nexus-bar-import-btn {
+    background: #e91e63;
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nexus-bar-import-btn:hover {
+    background: #d81b60;
+    transform: scale(1.05);
+}
+
+.nexus-bar-import-btn:active {
+    transform: scale(0.95);
+}

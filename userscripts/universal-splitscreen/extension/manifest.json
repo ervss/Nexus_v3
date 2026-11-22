@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Nexus Universal Split-Screen Player",
+  "version": "1.0.0",
+  "description": "Prehrávaj ľubovoľné videá na webe vedľa seba v Turbo Split-Screene pomocou Alt+Klik.",
+  "permissions": [
+    "activeTab"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["nexus-splitscreen.lib.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

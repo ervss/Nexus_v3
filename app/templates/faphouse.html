@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Faphouse — Nexus</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<link rel="stylesheet" href="/static/faphouse.css">
+<script src="/static/playback_activity.js?v=20260930_activity_3" defer></script>
+</head>
+<body x-data="faphouse" x-init="init()" :class="{'is-mashup': tab === 'mashup', ['fh-density-' + density]: true}">
+
+<header class="fh-top">
+  <div class="fh-row">
+    <a href="/" class="fh-brand" title="Späť na Nexus">
+      <span class="fh-brand-mark">F</span>
+      <span class="fh-brand-text">
+        <strong>Faphouse</strong>
+        <small>NEXUS · PRIVATE CLUB</small>
+      </span>
+    </a>
+
+    <nav class="fh-tabs">
+      <button class="fh-tab" :class="{on: tab==='discover'}" @click="setTab('discover')">
+        <span class="material-icons-round">grid_view</span> Discover
+      </button>
+      <button class="fh-tab" :class="{on: tab==='foryou'}" @click="setTab('foryou')">
+        <span class="material-icons-round">auto_awesome</span> For You
+      </button>
+      <button class="fh-tab" :class="{on: tab==='models'}" @click="setTab('models')">
+        <span class="material-icons-round">star</span> Models &amp; Studios
+        <span class="fh-badge" x-show="newFollowsCount>0" x-text="newFollowsCount"></span>
+      </button>
+      <button class="fh-tab" :class="{on: tab==='playlists'}" @click="setTab('playlists')">
+        <span class="material-icons-round">playlist_play</span> Playlists
+      </button>
+      <button class="fh-tab" :class="{on: tab==='mashup'}" @click="setTab('mashup')">
+        <span class="material-icons-round">movie_filter</span> Mashup Studio
+      </button>
+      <button class="fh-tab" :class="{on: tab==='history'}" @click="setTab('history')">
+        <span class="material-icons-round">history</span> History
+      </button>
+    </nav>
+
+    <div class="fh-spacer"></div>
+
+    <div class="fh-density-switch" title="Veľkosť zobrazenia">
+      <button class="fh-density-btn" :class="{on: density==='compact'}" @click="setDensity('compact')" title="Kompakt — viac kariet naraz">
+        <span class="material-icons-round">view_comfy</span>
+      </button>
+      <button class="fh-density-btn" :class="{on: density==='cozy'}" @click="setDensity('cozy')" title="Stred — vyvážené">
+        <span class="material-icons-round">view_module</span>
+      </button>
+      <button class="fh-density-btn" :class="{on: density==='relaxed'}" @click="setDensity('relaxed')" title="Veľké — na ležanie ďaleko od monitora">
+        <span class="material-icons-round">view_agenda</span>
+      </button>
+    </div>
+
+    <div class="fh-session" :class="{warn: sessionStale}" :title="sessionHint">
+      <span class="material-icons-round" x-text="netStatus.cookie_present ? (sessionStale ? 'warning' : 'verified_user') : 'lock_open'"></span>
+    </div>
+  </div>
+</header>
+
+<main class="fh-wrap">
+
+  <!-- ============================== DISCOVER ============================== -->
+  <section class="fh-view" :class="{on: tab==='discover'}">
+    <div class="fh-toolbar">
+      <div class="fh-search">
+        <span class="material-icons-round">search</span>
+        <input type="text" placeholder="Hľadaj video, tag, herečku…" x-model="query" @keydown.enter="runSearch()">
+      </div>
+      <select x-model="sort" @change="runSearch()">
+        <option value="recent">Najnovšie</option>
+        <option value="popular">Trending</option>
+      </select>
+      <label class="fh-autoload-control" title="0 načíta jednu stranu. Vyššie číslo doplní ďalšie strany, kým tento počet kariet neprejde aktívnymi filtrami.">
+        <span class="material-icons-round">playlist_add</span>
+        <span>Načítať hneď</span>
+        <input type="number" min="0" max="1000" step="50" inputmode="numeric" x-model.number="initialLoadTarget"
+               aria-label="Minimálny počet kariet na načítanie" @keydown.enter="runSearch()">
+        <span>kariet</span>
+      </label>
+      <button class="fh-btn" @click="filtersOpen = !filtersOpen">
+        <span class="material-icons-round">tune</span> Filtre
+      </button>
+      <button class="fh-btn p" @click="runSearch()">
+        <span class="material-icons-round">search</span> Hľadať
+      </button>
+    </div>
+
+    <div class="fh-filters" x-show="filtersOpen">
+      <div class="fh-filter-group">
+        <label class="fh-fld-label">Kategória</label>
+        <select x-model="category" @change="runSearch()">
+          <option value="">Všetky</option>
+          <template x-for="c in categories" :key="c.slug">
+            <option :value="c.slug" x-text="c.name"></option>
+          </template>
+        </select>
+      </div>
+      <div class="fh-filter-group">
+        <label class="fh-fld-label">Min. kvalita</label>
+        <select x-model.number="minHeight">
+          <option value="0">Akákoľvek</option>
+          <option value="720">720p+</option>
+          <option value="1080">1080p+</option>
+          <option value="2160">4K</option>
+        </select>
+      </div>
+      <div class="fh-filter-group">
+        <label class="fh-fld-label">Dĺžka</label>
+        <select x-model="durationBucket">
+          <option value="">Akákoľvek</option>
+          <option value="short">Krátke (do 5 min)</option>
+          <option value="medium">Stredné (5-30 min)</option>
+          <option value="long">Dlhé (30+ min)</option>
+        </select>
+      </div>
+      <div class="fh-filter-group fh-filter-group-wide">
+        <label class="fh-fld-label">Tagy</label>
+        <div class="fh-chip-input">
+          <template x-for="(chip, idx) in tagChips" :key="idx">
+            <span class="fh-chip removable">
+              <span x-text="chip"></span>
+              <button type="button" @click="removeTagChip(idx)"><span class="material-icons-round">close</span></button>
+            </span>
+          </template>
+          <input type="text" placeholder="napíš tag a Enter/čiarka…" x-model="tagChipDraft"
+                 @keydown.enter.prevent="commitTagChip()" @keydown="onTagChipKeydown($event)">
+        </div>
+      </div>
+      <div class="fh-filter-group fh-filter-group-wide">
+        <label class="fh-fld-label">Herečky / herci</label>
+        <div class="fh-chip-input">
+          <template x-for="(chip, idx) in actorChips" :key="idx">
+            <span class="fh-chip removable">
+              <span x-text="chip"></span>
+              <button type="button" @click="removeActorChip(idx)"><span class="material-icons-round">close</span></button>
+            </span>
+          </template>
+          <input type="text" placeholder="napíš meno a Enter/čiarka…" x-model="actorChipDraft"
+                 @keydown.enter.prevent="commitActorChip()" @keydown="onActorChipKeydown($event)">
+        </div>
+      </div>
+    </div>
+
+    <div class="fh-results-summary" x-show="!loading && items.length" x-text="
+      autoLoading
+        ? `Dopĺňam ${autoLoadProgress} zobrazených kariet · strana ${resultsSummary().page}`
+        : resultsSummary().filtered
+        ? `Zobrazených ${resultsSummary().shown} z ${resultsSummary().loaded} načítaných kariet · strana ${resultsSummary().page}${resultsSummary().hasMore ? ' · + ďalšie k dispozícii' : ''}`
+        : `Načítaných ${resultsSummary().loaded} kariet · strana ${resultsSummary().page}${resultsSummary().hasMore ? ' · + ďalšie k dispozícii' : ''}`
+    "></div>
+
+    <div class="fh-bulk-bar" x-show="!loading && visibleItems().length">
+      <label class="fh-bulk-checkbox" title="Vybrať/zrušiť všetky zobrazené karty">
+        <input type="checkbox" :checked="selectedCount && selectedCount === visibleItems().length"
+               @change="selectedCount === visibleItems().length ? clearSelection() : selectAllVisible()">
+        <span x-text="selectedCount ? `Vybraných ${selectedCount}` : 'Vybrať všetky'"></span>
+      </label>
+      <button type="button" class="fh-btn g sm" x-show="selectedCount" @click="clearSelection()">Zrušiť výber</button>
+      <button type="button" class="fh-btn p sm" x-show="selectedCount" :disabled="bulkImporting" @click="importSelected()">
+        <span class="material-icons-round" x-text="bulkImporting ? 'progress_activity' : 'file_download'" :class="{'fh-spin': bulkImporting}"></span>
+        <span x-text="bulkImporting ? 'Importujem…' : `Importovať vybrané (${selectedCount})`"></span>
+      </button>
+    </div>
+
+    <div class="fh-grid" x-show="!loading && visibleItems().length">
+      <template x-for="item in visibleItems()" :key="item.url">
+        <article class="fh-card" :class="{locked: item.locked, selected: isSelected(item)}">
+          <div class="fh-card-thumb" @click="openPlayer(item)">
+            <img :src="item.thumb" loading="lazy" :alt="item.title">
+            <label class="fh-card-select" @click.stop title="Vybrať pre hromadný import">
+              <input type="checkbox" :checked="isSelected(item)" @change="toggleSelect(item)">
+            </label>
+            <div class="fh-card-badges-top">
+              <span class="fh-badge quality" x-show="item.quality" x-text="item.quality"></span>
+              <span class="fh-badge size" x-show="item.size_mb" x-text="formatSize(item.size_mb)"></span>
+              <span class="fh-badge size fh-badge-pending" x-show="!item.size_mb && !item.enrichedDetails">…</span>
+            </div>
+            <span class="fh-badge fh-card-duration" x-show="item.duration" x-text="item.duration"></span>
+            <div class="fh-card-lock" x-show="item.locked">
+              <span class="material-icons-round">lock</span>
+            </div>
+            <div class="fh-card-hover">
+              <button class="fh-icon-btn" @click.stop="toggleWatchLater(item)" :title="isWatchLater(item) ? 'Odstrániť z Watch Later' : 'Pridať do Watch Later'">
+                <span class="material-icons-round" x-text="isWatchLater(item) ? 'bookmark' : 'bookmark_border'"></span>
+              </button>
+              <button class="fh-icon-btn" @click.stop="openAddToPlaylist(item)" title="Pridať do playlistu">
+                <span class="material-icons-round">playlist_add</span>
+              </button>
+              <button class="fh-icon-btn" @click.stop="sendToMashup(item)" title="Poslať do Mashup Studia">
+                <span class="material-icons-round">movie_filter</span>
+              </button>
+              <button class="fh-icon-btn" @click.stop="importItem(item)" :disabled="item._importState==='busy'"
+                      :title="item._importState==='done' ? 'Zaradené do knižnice' : (item._importState==='error' ? 'Import zlyhal' : 'Importovať do knižnice')">
+                <span class="material-icons-round" x-text="item._importState==='done' ? 'check_circle' : (item._importState==='error' ? 'error' : 'file_download')"></span>
+              </button>
+              <button class="fh-icon-btn" @click.stop="downloadItem(item)" :disabled="item._copyState==='busy'"
+                      :title="item._copyState==='done' ? 'Odkaz skopírovaný' : (item._copyState==='error' ? 'Odkaz sa nenašiel' : 'Skopírovať priamy odkaz na stiahnutie')">
+                <span class="material-icons-round" x-text="item._copyState==='done' ? 'check_circle' : (item._copyState==='error' ? 'error' : 'link')"></span>
+              </button>
+            </div>
+          </div>
+          <div class="fh-card-meta">
+            <div class="fh-card-title-row">
+              <h3 x-text="item.title" @click="openPlayer(item)"></h3>
+              <button class="fh-icon-btn fh-details-toggle" @click="toggleCardDetails(item)"
+                      :title="isCardDetailsOpen(item) ? 'Skryť detaily' : 'Zobraziť detaily'">
+                <span class="material-icons-round" x-text="isCardDetailsOpen(item) ? 'expand_less' : 'expand_more'"></span>
+              </button>
+            </div>
+            <div class="fh-card-sub-row">
+              <button class="fh-card-uploader" x-show="item.uploader" x-text="item.uploader"
+                      @click="openUploader(item)" title="Zobraziť všetky videá od tohto tvorcu"></button>
+              <span class="fh-card-added" x-show="item.added" x-text="item.added" title="Dátum pridania"></span>
+            </div>
+            <div class="fh-card-details" x-show="isCardDetailsOpen(item)" x-collapse.duration.150ms>
+              <div class="fh-card-performers" x-show="(item.performers || []).length">
+                <template x-for="name in (item.performers || [])" :key="name">
+                  <span class="fh-chip" x-text="name"></span>
+                </template>
+              </div>
+              <p class="fh-hint" x-show="!item.enrichedDetails">Načítavam detaily…</p>
+            </div>
+          </div>
+        </article>
+      </template>
+    </div>
+
+    <div class="fh-empty" x-show="!loading && !autoLoading && !visibleItems().length">
+      <span class="material-icons-round">search_off</span>
+      <p>Žiadne výsledky. Skús iný filter alebo výraz.</p>
+    </div>
+
+    <div class="fh-loadmore" x-show="!loading && !autoLoading && hasMore">
+      <button class="fh-btn" @click="loadMore()">Načítať ďalšie</button>
+    </div>
+    <div class="fh-end-of-results" x-show="!loading && !autoLoading && endOfResults && items.length">
+      <span class="material-icons-round">check_circle</span>
+      <p>Prešiel si všetky videá — <span x-text="items.length"></span> celkom.</p>
+    </div>
+    <div class="fh-spinner-wrap" x-show="loading || autoLoading">
+      <span class="material-icons-round fh-spin">progress_activity</span>
+      <p x-show="autoLoading" x-text="`Načítavam ďalšie strany: ${autoLoadProgress}`"></p>
+    </div>
+  </section>
+
+  <!-- ============================== FOR YOU ============================== -->
+  <section class="fh-view" :class="{on: tab==='foryou'}">
+    <div class="fh-section-head">
+      <h2><span class="material-icons-round">auto_awesome</span> Pre teba</h2>
+      <p class="fh-hint">Podľa toho, koho sleduješ a čo si nedávno pozeral.</p>
+    </div>
+    <div class="fh-grid" x-show="forYouItems.length">
+      <template x-for="item in forYouItems" :key="item.url">
+        <article class="fh-card">
+          <div class="fh-card-thumb" @click="openPlayer(item)">
+            <img :src="item.thumb" loading="lazy" :alt="item.title">
+            <div class="fh-card-badges-top">
+              <span class="fh-badge quality" x-show="item.quality" x-text="item.quality"></span>
+              <span class="fh-badge size" x-show="item.size_mb" x-text="formatSize(item.size_mb)"></span>
+              <span class="fh-badge size fh-badge-pending" x-show="!item.size_mb && !item.enrichedDetails">…</span>
+            </div>
+            <span class="fh-badge fh-card-duration" x-show="item.duration" x-text="item.duration"></span>
+            <div class="fh-card-hover">
+              <button class="fh-icon-btn" @click.stop="importItem(item)" :disabled="item._importState==='busy'"
+                      :title="item._importState==='done' ? 'Zaradené do knižnice' : (item._importState==='error' ? 'Import zlyhal' : 'Importovať do knižnice')">
+                <span class="material-icons-round" x-text="item._importState==='done' ? 'check_circle' : (item._importState==='error' ? 'error' : 'file_download')"></span>
+              </button>
+              <button class="fh-icon-btn" @click.stop="downloadItem(item)" :disabled="item._copyState==='busy'"
+                      :title="item._copyState==='done' ? 'Odkaz skopírovaný' : (item._copyState==='error' ? 'Odkaz sa nenašiel' : 'Skopírovať priamy odkaz na stiahnutie')">
+                <span class="material-icons-round" x-text="item._copyState==='done' ? 'check_circle' : (item._copyState==='error' ? 'error' : 'link')"></span>
+              </button>
+            </div>
+          </div>
+          <div class="fh-card-meta">
+            <h3 x-text="item.title" @click="openPlayer(item)"></h3>
+            <p class="fh-card-reason" x-show="item._reason" x-text="item._reason"></p>
+          </div>
+        </article>
+      </template>
+    </div>
+    <div class="fh-empty" x-show="!forYouItems.length">
+      <span class="material-icons-round">auto_awesome</span>
+      <p>Zatiaľ nič odporúčané — sleduj modelky/štúdiá alebo pozeraj videá a feed sa naplní.</p>
+    </div>
+  </section>
+
+  <!-- ============================== MODELS & STUDIOS ============================== -->
+  <section class="fh-view" :class="{on: tab==='models'}">
+    <div class="fh-toolbar">
+      <div class="fh-search">
+        <span class="material-icons-round">search</span>
+        <input type="text" placeholder="Hľadaj modelku alebo štúdio…" x-model="modelQuery" @keydown.enter="openModelOrStudio()">
+      </div>
+      <button class="fh-btn p" @click="openModelOrStudio()">Otvoriť</button>
+    </div>
+
+    <div class="fh-section-head">
+      <h2><span class="material-icons-round">favorite</span> Sledované</h2>
+    </div>
+    <div class="fh-follow-grid" x-show="follows.length">
+      <template x-for="f in follows" :key="f.id">
+        <div class="fh-follow-card">
+          <img :src="f.thumbnail || '/static/img/placeholder.jpg'" :alt="f.display_name">
+          <div class="fh-follow-info">
+            <strong x-text="f.display_name"></strong>
+            <span class="fh-badge" x-show="followHasNew(f)">Nové</span>
+          </div>
+          <div class="fh-follow-actions">
+            <button class="fh-btn sm" @click="openFollowVideos(f)">Videá</button>
+            <button class="fh-btn sm g" @click="unfollow(f)">Odsledovať</button>
+          </div>
+        </div>
+      </template>
+    </div>
+    <div class="fh-empty" x-show="!follows.length">
+      <span class="material-icons-round">favorite_border</span>
+      <p>Zatiaľ nikoho nesleduješ. Otvor profil modelky/štúdia a klikni "Sledovať".</p>
+    </div>
+
+    <div class="fh-section-head" x-show="currentProfile">
+      <h2 x-text="currentProfile?.name || ''"></h2>
+      <button class="fh-btn sm" x-show="currentProfile && !isFollowing(currentProfile)" @click="follow(currentProfile)">
+        <span class="material-icons-round">favorite_border</span> Sledovať
+      </button>
+      <button class="fh-btn sm g" x-show="currentProfile && isFollowing(currentProfile)" @click="unfollowByRef(currentProfile)">
+        <span class="material-icons-round">favorite</span> Sledované
+      </button>
+    </div>
+    <div class="fh-grid" x-show="profileItems.length">
+      <template x-for="item in profileItems" :key="item.url">
+        <article class="fh-card">
+          <div class="fh-card-thumb" @click="openPlayer(item)">
+            <img :src="item.thumb" loading="lazy" :alt="item.title">
+            <div class="fh-card-badges">
+              <span class="fh-badge duration" x-show="item.duration" x-text="item.duration"></span>
+            </div>
+            <div class="fh-card-hover">
+              <button class="fh-icon-btn" @click.stop="importItem(item)" :disabled="item._importState==='busy'"
+                      :title="item._importState==='done' ? 'Zaradené do knižnice' : (item._importState==='error' ? 'Import zlyhal' : 'Importovať do knižnice')">
+                <span class="material-icons-round" x-text="item._importState==='done' ? 'check_circle' : (item._importState==='error' ? 'error' : 'file_download')"></span>
+              </button>
+              <button class="fh-icon-btn" @click.stop="downloadItem(item)" :disabled="item._copyState==='busy'"
+                      :title="item._copyState==='done' ? 'Odkaz skopírovaný' : (item._copyState==='error' ? 'Odkaz sa nenašiel' : 'Skopírovať priamy odkaz na stiahnutie')">
+                <span class="material-icons-round" x-text="item._copyState==='done' ? 'check_circle' : (item._copyState==='error' ? 'error' : 'link')"></span>
+              </button>
+            </div>
+          </div>
+          <div class="fh-card-meta"><h3 x-text="item.title"></h3></div>
+        </article>
+      </template>
+    </div>
+  </section>
+
+  <!-- ============================== PLAYLISTS ============================== -->
+  <section class="fh-view" :class="{on: tab==='playlists'}">
+    <div class="fh-playlist-scope-switch" x-show="!activePlaylist && !openCommunityPl">
+      <button type="button" class="fh-scope-btn" :class="{on: playlistScope==='mine'}" @click="playlistScope='mine'">Moje playlisty</button>
+      <button type="button" class="fh-scope-btn" :class="{on: playlistScope==='community'}" @click="playlistScope='community'; refreshCrawlStatus()">Vyhľadať komunitné playlisty</button>
+    </div>
+
+    <!-- ===== Moje playlisty ===== -->
+    <div class="fh-toolbar" x-show="!activePlaylist && playlistScope==='mine'">
+      <div class="fh-search">
+        <span class="material-icons-round">search</span>
+        <input type="text" placeholder="Hľadaj playlist podľa názvu…" x-model="playlistQuery">
+      </div>
+      <button class="fh-btn p" @click="createPlaylistPrompt()">
+        <span class="material-icons-round">add</span> Nový playlist
+      </button>
+    </div>
+
+    <div class="fh-playlist-grid" x-show="!activePlaylist && playlistScope==='mine' && visiblePlaylists().length">
+      <template x-for="p in visiblePlaylists()" :key="p.id">
+        <div class="fh-playlist-card" @click="openPlaylist(p)">
+          <div class="fh-playlist-thumb">
+            <span class="material-icons-round">queue_music</span>
+          </div>
+          <div class="fh-playlist-info">
+            <strong x-text="p.name"></strong>
+            <span x-text="p.item_count + ' videí'"></span>
+          </div>
+          <button class="fh-icon-btn" @click.stop="deletePlaylist(p)" title="Zmazať">
+            <span class="material-icons-round">delete_outline</span>
+          </button>
+        </div>
+      </template>
+    </div>
+    <div class="fh-empty" x-show="!activePlaylist && playlistScope==='mine' && !playlists.length">
+      <span class="material-icons-round">playlist_add</span>
+      <p>Zatiaľ žiadny playlist. Vytvor si prvý a pridávaj videá priamo z kariet.</p>
+    </div>
+    <div class="fh-empty" x-show="!activePlaylist && playlistScope==='mine' && playlists.length && !visiblePlaylists().length">
+      <span class="material-icons-round">search_off</span>
+      <p>Žiadny playlist nezodpovedá hľadaniu.</p>
+    </div>
+
+    <!-- ===== Komunitné playlisty (iní používatelia) ===== -->
+    <div x-show="!activePlaylist && playlistScope==='community' && !openCommunityPl">
+      <div class="fh-toolbar">
+        <div class="fh-search">
+          <span class="material-icons-round">search</span>
+          <input type="text" placeholder="Napr. bbc, anal, teen…" x-model="communityQuery"
+                 @keydown.enter="searchCommunityPlaylists()">
+        </div>
+        <button class="fh-btn p" @click="searchCommunityPlaylists()" :disabled="communitySearching">
+          <span class="material-icons-round">search</span> Hľadať
+        </button>
+        <button type="button" class="fh-scope-btn" :class="{on: communityFavoritesOnly}" @click="toggleFavoritesOnly()">
+          <span class="material-icons-round">star</span> Len obľúbené
+        </button>
+      </div>
+
+      <div class="fh-crawl-status">
+        <template x-if="crawlStatus.status==='idle'">
+          <p class="fh-hint">Index komunitných playlistov ešte nebol vytvorený. <button type="button" class="fh-link-btn" @click="startCommunityCrawl()">Vytvoriť index</button> (jednorazovo, trvá cca hodinu na pozadí).</p>
+        </template>
+        <template x-if="crawlStatus.status==='running'">
+          <p class="fh-hint">Indexujem… <span x-text="crawlStatus.playlists_found"></span> playlistov nájdených (strana <span x-text="crawlStatus.current_page"></span>, <span x-text="crawlStatus.sort_mode"></span>). Toto beží na pozadí, môžeš pokračovať v prehliadaní.</p>
+        </template>
+        <template x-if="crawlStatus.status==='error'">
+          <p class="fh-hint">Indexovanie zlyhalo: <span x-text="crawlStatus.error"></span>. <button type="button" class="fh-link-btn" @click="startCommunityCrawl()">Skúsiť znova</button></p>
+        </template>
+        <template x-if="crawlStatus.status==='done' && !(crawlStatus.popular_done && crawlStatus.new_done)">
+          <p class="fh-hint">Prvá fáza hotová. <button type="button" class="fh-link-btn" @click="startCommunityCrawl()">Dokončiť index</button> (druhá fáza, ~<span x-text="crawlStatus.playlists_found"></span> playlistov zatiaľ nájdených).</p>
+        </template>
+        <template x-if="crawlStatus.popular_done && crawlStatus.new_done">
+          <p class="fh-hint">Index hotový — <span x-text="crawlStatus.playlists_found"></span> playlistov k dispozícii. <button type="button" class="fh-link-btn" @click="startCommunityCrawl()">Obnoviť</button></p>
+        </template>
+      </div>
+
+      <div class="fh-community-toolbar" x-show="communityResults.length">
+        <button type="button" class="fh-link-btn" @click="probeAllVisibleCommunityPlaylists()" :disabled="communityProbeAllRunning">
+          ⚡ Fast fetch všetky viditeľné<span x-show="communityProbeAllRunning">…</span>
+        </button>
+      </div>
+      <div class="fh-playlist-grid" x-show="communityResults.length">
+        <template x-for="p in communityResults" :key="p.code">
+          <div class="fh-playlist-card">
+            <button type="button" class="fh-favorite-star" :class="{on: p.is_favorite}"
+                    @click.stop="toggleCommunityFavorite(p)"
+                    :title="p.is_favorite ? 'Odobrať z obľúbených' : 'Pridať medzi obľúbené'">
+              <span class="material-icons-round" x-text="p.is_favorite ? 'star' : 'star_outline'"></span>
+            </button>
+            <div class="fh-playlist-thumb" @click="openCommunityPlaylist(p)">
+              <span class="material-icons-round">queue_music</span>
+            </div>
+            <div class="fh-playlist-info" @click="openCommunityPlaylist(p)">
+              <strong x-text="p.name"></strong>
+              <span x-text="p.video_count.toLocaleString() + ' videí · ' + p.published_by"></span>
+            </div>
+            <div class="fh-playlist-probe">
+              <button type="button" class="fh-mini-btn" @click.stop="probeCommunityPlaylist(p)"
+                      :disabled="communityProbes[p.code]?.loading">
+                ⚡ Fast fetch
+              </button>
+              <button type="button" class="fh-mini-btn" @click.stop="importWholeCommunityPlaylist(p)"
+                      :disabled="communityImports[p.code]?.loading" title="Naimportovať všetky videá z tohto playlistu">
+                ⬇ Import celý playlist
+              </button>
+              <span class="fh-playlist-probe-badge" x-show="communityProbes[p.code]" x-text="communityProbeLabel(p)"></span>
+              <span class="fh-playlist-probe-badge" x-show="communityImports[p.code]" x-text="communityImportLabel(p)"></span>
+            </div>
+          </div>
+        </template>
+      </div>
+      <div class="fh-empty" x-show="!communitySearching && !communityResults.length && communityQuery.trim()">
+        <span class="material-icons-round">search_off</span>
+        <p>Žiadny indexovaný playlist nezodpovedá "<span x-text="communityQuery"></span>".</p>
+      </div>
+    </div>
+
+    <!-- ===== Otvorený komunitný playlist ===== -->
+    <div x-show="openCommunityPl">
+      <div class="fh-toolbar">
+        <button type="button" class="fh-icon-btn" @click="closeCommunityPl()"><span class="material-icons-round">arrow_back</span></button>
+        <h2 class="fh-inline-title" x-text="openCommunityPl?.name"></h2>
+        <span class="fh-hint" x-text="'Publikoval: ' + (openCommunityPl?.published_by || '')"></span>
+        <div class="fh-search fh-search-narrow">
+          <span class="material-icons-round">search</span>
+          <input type="text" placeholder="Hľadaj v playliste (napr. bbc)…" x-model="communityPlItemQuery">
+        </div>
+        <select x-model="communityPlSort" title="Zoradiť">
+          <option value="none">Poradie z playlistu</option>
+          <option value="size_desc">Veľkosť ↓</option>
+          <option value="size_asc">Veľkosť ↑</option>
+          <option value="duration_desc">Dĺžka ↓</option>
+          <option value="duration_asc">Dĺžka ↑</option>
+        </select>
+        <div class="fh-spacer"></div>
+        <button type="button" class="fh-btn" @click="fetchAllCommunityPl()" :disabled="communityPlFetchAllRunning">
+          <span class="material-icons-round">bolt</span> Fetch all
+        </button>
+        <button type="button" class="fh-btn" @click="fetchSelectedCommunityPl()" :disabled="communityPlFetchAllRunning || !selectedCount">
+          <span class="material-icons-round">bolt</span> Fetch selected (<span x-text="selectedCount"></span>)
+        </button>
+        <button type="button" class="fh-btn p" @click="importSelectedCommunityPl()" :disabled="bulkImporting || !selectedCount"
+                title="Importovať len označené videá">
+          <span class="material-icons-round">file_download</span> Import selected (<span x-text="selectedCount"></span>)
+        </button>
+        <button type="button" class="fh-btn p" @click="importAllCommunityPl()" :disabled="bulkImporting || !communityPlItems.length"
+                title="Importovať všetky zatiaľ načítané videá z tohto playlistu">
+          <span class="material-icons-round">download_for_offline</span> Import all
+        </button>
+      </div>
+      <div class="fh-fetch-progress" x-show="communityPlFetchAllRunning">
+        <div class="fh-fetch-progress-bar">
+          <div :style="`width:${communityPlFetchPercent}%`"></div>
+        </div>
+        <span x-text="`Fetchujem ${communityPlFetchProgress.done} / ${communityPlFetchProgress.total} (${communityPlFetchPercent}%)`"></span>
+      </div>
+      <div class="fh-quality-filter" x-show="communityPlAvailableQualities.length > 1">
+        <span class="fh-fld-label">Kvalita:</span>
+        <template x-for="q in communityPlAvailableQualities" :key="q.quality">
+          <button type="button" class="fh-quality-chip" :class="{on: communityPlQualityFilter.has(q.quality)}"
+                  @click="toggleCommunityPlQuality(q.quality)">
+            <span x-text="q.quality"></span>
+            <span class="fh-quality-chip-count" x-text="q.count"></span>
+          </button>
+        </template>
+        <button type="button" class="fh-link-btn" x-show="communityPlQualityFilter.size" @click="clearCommunityPlQualityFilter()">
+          Zrušiť filter
+        </button>
+      </div>
+      <div class="fh-locked-toggle" x-show="communityPlLockedCount">
+        <span class="material-icons-round">lock</span>
+        <span x-text="communityPlShowLocked
+          ? `Zobrazujem ${communityPlLockedCount} nedostupné (Fanclub) — video/fetch pre ne zlyhá`
+          : `${communityPlLockedCount} skrytých — Fanclub-only, nedajú sa streamovať/fetchnúť`"></span>
+        <button type="button" class="fh-link-btn" @click="communityPlShowLocked = !communityPlShowLocked"
+                :title="communityPlShowLocked ? 'Skryť Fanclub-only videá' : 'Zobraziť Fanclub-only videá'">
+          <span x-text="communityPlShowLocked ? 'Skryť' : 'Zobraziť skryté'"></span>
+        </button>
+      </div>
+      <div class="fh-grid" x-show="!communityPlLoading && visibleCommunityPlItems().length">
+        <template x-for="item in visibleCommunityPlItems()" :key="item.url">
+          <article class="fh-card" :class="{selected: isSelected(item), locked: item.locked}">
+            <div class="fh-card-thumb" @click="openPlayer(item)">
+              <img :src="item.thumb" loading="lazy" :alt="item.title">
+              <label class="fh-card-select" @click.stop title="Vybrať pre fetch/import">
+                <input type="checkbox" :checked="isSelected(item)" @change="toggleSelect(item)">
+              </label>
+              <div class="fh-card-badges-top">
+                <span class="fh-badge quality" x-show="item.quality" x-text="item.quality"></span>
+                <span class="fh-badge size" x-show="item.size_mb" x-text="formatSize(item.size_mb)"></span>
+                <span class="fh-badge size fh-badge-pending" x-show="!item.size_mb && !item.enrichedDetails && !item.locked">…</span>
+              </div>
+              <span class="fh-badge fh-card-duration" x-show="item.duration" x-text="item.duration"></span>
+              <div class="fh-card-lock" x-show="item.locked" title="Fanclub-only — vyžaduje fan prístup k tomuto štúdiu/modelke">
+                <span class="material-icons-round">lock</span>
+              </div>
+              <div class="fh-card-hover">
+                <button type="button" class="fh-icon-btn" @click.stop="importItem(item)" :disabled="item._importState==='busy' || item.locked"
+                        :title="item.locked ? 'Fanclub-only, nedá sa importovať' : (item._importState==='done' ? 'Zaradené do knižnice' : 'Importovať do knižnice')">
+                  <span class="material-icons-round" x-text="item._importState==='done' ? 'check_circle' : (item._importState==='error' ? 'error' : 'file_download')"></span>
+                </button>
+              </div>
+            </div>
+            <div class="fh-card-meta fh-card-meta-select" @click="toggleSelect(item)" title="Klikni pre výber">
+              <h3 x-text="item.title"></h3>
+            </div>
+          </article>
+        </template>
+      </div>
+      <div class="fh-empty" x-show="!communityPlLoading && communityPlItems.length && !visibleCommunityPlItems().length">
+        <span class="material-icons-round">search_off</span>
+        <p>Žiadne video v tomto playliste nezodpovedá hľadaniu.</p>
+      </div>
+      <div class="fh-loadmore" x-show="!communityPlLoading && communityPlHasMore">
+        <button type="button" class="fh-btn" @click="loadMoreCommunityPl()">Načítať ďalšie</button>
+      </div>
+      <div class="fh-spinner-wrap" x-show="communityPlLoading">
+        <span class="material-icons-round fh-spin">progress_activity</span>
+      </div>
+    </div>
+
+    <div x-show="activePlaylist">
+      <div class="fh-toolbar">
+        <button class="fh-icon-btn" @click="activePlaylist=null"><span class="material-icons-round">arrow_back</span></button>
+        <h2 class="fh-inline-title" x-text="activePlaylist?.name"></h2>
+        <div class="fh-search fh-search-narrow">
+          <span class="material-icons-round">search</span>
+          <input type="text" placeholder="Hľadaj v playliste…" x-model="playlistItemQuery">
+        </div>
+        <div class="fh-spacer"></div>
+        <button class="fh-btn" @click="sendPlaylistToMashup()" x-show="playlistItems.length>=2">
+          <span class="material-icons-round">movie_filter</span> Mashup z playlistu
+        </button>
+      </div>
+      <div class="fh-grid" x-show="visiblePlaylistItems().length">
+        <template x-for="item in visiblePlaylistItems()" :key="item.id">
+          <article class="fh-card">
+            <div class="fh-card-thumb" @click="openPlayer(item)">
+              <img :src="item.thumbnail" loading="lazy" :alt="item.title">
+              <div class="fh-card-hover">
+                <button class="fh-icon-btn" @click.stop="importItem(item)" :disabled="item._importState==='busy'"
+                        :title="item._importState==='done' ? 'Zaradené do knižnice' : (item._importState==='error' ? 'Import zlyhal' : 'Importovať do knižnice')">
+                  <span class="material-icons-round" x-text="item._importState==='done' ? 'check_circle' : (item._importState==='error' ? 'error' : 'file_download')"></span>
+                </button>
+                <button class="fh-icon-btn" @click.stop="downloadItem(item)" :disabled="item._copyState==='busy'"
+                        :title="item._copyState==='done' ? 'Odkaz skopírovaný' : (item._copyState==='error' ? 'Odkaz sa nenašiel' : 'Skopírovať priamy odkaz na stiahnutie')">
+                  <span class="material-icons-round" x-text="item._copyState==='done' ? 'check_circle' : (item._copyState==='error' ? 'error' : 'link')"></span>
+                </button>
+              </div>
+            </div>
+            <div class="fh-card-meta">
+              <h3 x-text="item.title"></h3>
+              <button class="fh-icon-btn" @click="removeFromPlaylist(item)" title="Odstrániť z playlistu">
+                <span class="material-icons-round">close</span>
+              </button>
+            </div>
+          </article>
+        </template>
+      </div>
+      <div class="fh-empty" x-show="playlistItems.length && !visiblePlaylistItems().length">
+        <span class="material-icons-round">search_off</span>
+        <p>Žiadne video v tomto playliste nezodpovedá hľadaniu.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== HISTORY ============================== -->
+  <section class="fh-view" :class="{on: tab==='history'}">
+    <div class="fh-section-head">
+      <h2><span class="material-icons-round">play_circle</span> Pokračovať v pozeraní</h2>
+    </div>
+    <div class="fh-grid" x-show="continueWatching.length">
+      <template x-for="item in continueWatching" :key="item.id">
+        <article class="fh-card">
+          <div class="fh-card-thumb" @click="openPlayer(item)">
+            <img :src="item.thumbnail" loading="lazy" :alt="item.title">
+            <div class="fh-progress-bar">
+              <div :style="`width:${(item.position_sec / (item.duration_sec||1))*100}%`"></div>
+            </div>
+            <div class="fh-card-hover">
+              <button class="fh-icon-btn" @click.stop="importItem(item)" :disabled="item._importState==='busy'"
+                      :title="item._importState==='done' ? 'Zaradené do knižnice' : (item._importState==='error' ? 'Import zlyhal' : 'Importovať do knižnice')">
+                <span class="material-icons-round" x-text="item._importState==='done' ? 'check_circle' : (item._importState==='error' ? 'error' : 'file_download')"></span>
+              </button>
+              <button class="fh-icon-btn" @click.stop="downloadItem(item)" :disabled="item._copyState==='busy'"
+                      :title="item._copyState==='done' ? 'Odkaz skopírovaný' : (item._copyState==='error' ? 'Odkaz sa nenašiel' : 'Skopírovať priamy odkaz na stiahnutie')">
+                <span class="material-icons-round" x-text="item._copyState==='done' ? 'check_circle' : (item._copyState==='error' ? 'error' : 'link')"></span>
+              </button>
+            </div>
+          </div>
+          <div class="fh-card-meta"><h3 x-text="item.title"></h3></div>
+        </article>
+      </template>
+    </div>
+    <div class="fh-empty" x-show="!continueWatching.length">
+      <span class="material-icons-round">play_circle_outline</span>
+      <p>Nič rozpozerané.</p>
+    </div>
+
+    <div class="fh-toolbar" style="margin-top:32px">
+      <h2 class="fh-inline-title"><span class="material-icons-round">history</span> Celá história</h2>
+      <div class="fh-spacer"></div>
+      <button class="fh-btn g" @click="clearHistory()" x-show="history.length">
+        <span class="material-icons-round">delete_sweep</span> Vymazať históriu
+      </button>
+    </div>
+    <div class="fh-history-list" x-show="history.length">
+      <template x-for="row in history" :key="row.id">
+        <div class="fh-history-row">
+          <img :src="row.thumbnail" loading="lazy" :alt="row.title">
+          <div class="fh-history-info">
+            <strong x-text="row.title" @click="openPlayer(row)"></strong>
+            <span x-text="row.last_watched_at"></span>
+          </div>
+          <button class="fh-icon-btn" @click="importItem(row)" :disabled="row._importState==='busy'"
+                  :title="row._importState==='done' ? 'Zaradené do knižnice' : (row._importState==='error' ? 'Import zlyhal' : 'Importovať do knižnice')">
+            <span class="material-icons-round" x-text="row._importState==='done' ? 'check_circle' : (row._importState==='error' ? 'error' : 'file_download')"></span>
+          </button>
+          <button class="fh-icon-btn" @click="downloadItem(row)" :disabled="row._copyState==='busy'"
+                  :title="row._copyState==='done' ? 'Odkaz skopírovaný' : (row._copyState==='error' ? 'Odkaz sa nenašiel' : 'Skopírovať priamy odkaz na stiahnutie')">
+            <span class="material-icons-round" x-text="row._copyState==='done' ? 'check_circle' : (row._copyState==='error' ? 'error' : 'link')"></span>
+          </button>
+          <button class="fh-icon-btn" @click="removeHistoryRow(row)"><span class="material-icons-round">close</span></button>
+        </div>
+      </template>
+    </div>
+  </section>
+
+  <!-- ============================== MASHUP STUDIO ============================== -->
+  <section class="fh-view fh-mashup" :class="{on: tab==='mashup'}">
+    <div class="fh-mashup-shell">
+      <div class="fh-mashup-toolbar">
+        <h2 class="fh-inline-title"><span class="material-icons-round">movie_filter</span> Mashup Studio</h2>
+        <div class="fh-spacer"></div>
+        <label class="fh-fld-label">Layout</label>
+        <select x-model="mashup.layout" @change="applyMashupLayout()">
+          <option value="side-by-side">Side by side</option>
+          <option value="triple-vertical">Triple vertical</option>
+          <option value="grid-2x2">2×2 Grid</option>
+          <option value="pip">Picture-in-picture</option>
+        </select>
+        <button class="fh-btn" @click="addMashupTrackPrompt()" :disabled="mashup.tracks.length>=4">
+          <span class="material-icons-round">add</span> Pridať klip
+        </button>
+        <button class="fh-btn p" @click="renderMashup()" :disabled="mashup.tracks.length<2 || mashup.rendering">
+          <span class="material-icons-round">movie</span> Renderovať
+        </button>
+      </div>
+
+      <div class="fh-mashup-canvas-wrap">
+        <div class="fh-mashup-canvas" id="mashupCanvas">
+          <template x-for="(track, idx) in mashup.tracks" :key="track.trackId">
+            <div class="fh-mashup-tile"
+                 :style="mashupTileStyle(track)"
+                 :class="{active: mashup.selectedTrack === idx}"
+                 @click="selectMashupTrack(idx)">
+              <video :src="track.previewUrl" muted loop playsinline
+                     :ref="'mvid_'+idx"></video>
+              <div class="fh-mashup-tile-label" x-text="track.title || ('Klip ' + (idx+1))"></div>
+              <button class="fh-icon-btn fh-mashup-tile-remove" @click.stop="removeMashupTrack(idx)">
+                <span class="material-icons-round">close</span>
+              </button>
+              <button class="fh-icon-btn fh-mashup-tile-mute" @click.stop="toggleMashupMute(idx)"
+                      :title="track.mute ? 'Odmutovať' : 'Mute'">
+                <span class="material-icons-round" x-text="track.mute ? 'volume_off' : 'volume_up'"></span>
+              </button>
+              <button class="fh-mashup-audio-pick" :class="{on: mashup.activeAudioTrack===idx}"
+                      @click.stop="setActiveAudioTrack(idx)" title="Aktívny zvuk odtiaľto">
+                <span class="material-icons-round">graphic_eq</span>
+              </button>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <div class="fh-mashup-inspector" x-show="mashup.selectedTrack !== null">
+        <h3>Klip <span x-text="mashup.selectedTrack + 1"></span> — crop / zoom / pan</h3>
+        <div class="fh-mashup-crop-preview">
+          <video :src="mashup.tracks[mashup.selectedTrack]?.previewUrl" muted playsinline
+                 x-ref="cropPreviewVideo"></video>
+          <div class="fh-crop-box" :style="cropBoxStyle()" @mousedown="startCropDrag($event)"></div>
+        </div>
+        <div class="fh-mashup-kf-row">
+          <label class="fh-fld-label">Čas (s)</label>
+          <input type="number" step="0.1" min="0" x-model.number="kfTimeInput" style="width:90px">
+          <button class="fh-btn sm" @click="addCropKeyframe()">
+            <span class="material-icons-round">add_circle</span> Pridať keyframe
+          </button>
+        </div>
+        <div class="fh-kf-timeline">
+          <template x-for="kf in currentTrackCropKeyframes()" :key="kf.t">
+            <div class="fh-kf-dot" :style="`left:${(kf.t / mashupDuration())*100}%`"
+                 @click="seekMashupPreview(kf.t)" :title="'t=' + kf.t + 's'"></div>
+          </template>
+        </div>
+        <div class="fh-mashup-kf-row">
+          <label class="fh-fld-label">Zoom (crop veľkosť)</label>
+          <input type="range" min="0.2" max="1" step="0.01" x-model.number="cropDraft.cw"
+                 @input="cropDraft.ch = cropDraft.cw; syncCropDraftToActiveKeyframe()">
+        </div>
+        <p class="fh-hint">Klikni a ťahaj rámček na náhľade pre posun (pan). Nastav čas a klikni "Pridať keyframe" pre nový bod animácie — medzi bodmi sa pozícia plynulo interpoluje.</p>
+      </div>
+
+      <div class="fh-mashup-jobs" x-show="mashup.jobs.length">
+        <h3>Rendery</h3>
+        <template x-for="job in mashup.jobs" :key="job.id">
+          <div class="fh-mashup-job-row">
+            <span class="fh-badge" :class="'status-'+job.status" x-text="job.status"></span>
+            <div class="fh-job-progress"><div :style="`width:${job.progress_pct}%`"></div></div>
+            <a x-show="job.status==='done'" :href="job.output_path" target="_blank" class="fh-btn sm">Otvoriť</a>
+            <span x-show="job.status==='failed'" class="fh-job-error" x-text="job.error"></span>
+          </div>
+        </template>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============================== PLAYER MODAL ============================== -->
+<div class="fh-player-modal" x-show="player.open" x-cloak @keydown.escape.window="closePlayer()">
+  <div class="fh-player-backdrop" @click="closePlayer()"></div>
+  <div class="fh-player-box">
+    <button class="fh-icon-btn fh-player-close" @click="closePlayer()"><span class="material-icons-round">close</span></button>
+    <video x-ref="playerVideo" controls autoplay class="fh-player-video"
+           @timeupdate="onPlayerProgress($event)" @loadedmetadata="onPlayerLoaded($event)"></video>
+    <div class="fh-player-info">
+      <div class="fh-player-info-row">
+        <h2 x-text="player.item?.title"></h2>
+        <div class="fh-player-actions">
+          <button class="fh-icon-btn" @click="importItem(player.item)" :disabled="player.item?._importState==='busy'"
+                  :title="player.item?._importState==='done' ? 'Zaradené do knižnice' : (player.item?._importState==='error' ? 'Import zlyhal' : 'Importovať do knižnice')">
+            <span class="material-icons-round" x-text="player.item?._importState==='done' ? 'check_circle' : (player.item?._importState==='error' ? 'error' : 'file_download')"></span>
+          </button>
+          <button class="fh-icon-btn" @click="downloadItem(player.item)" :disabled="player.item?._copyState==='busy'"
+                  :title="player.item?._copyState==='done' ? 'Odkaz skopírovaný' : (player.item?._copyState==='error' ? 'Odkaz sa nenašiel' : 'Skopírovať priamy odkaz na stiahnutie')">
+            <span class="material-icons-round" x-text="player.item?._copyState==='done' ? 'check_circle' : (player.item?._copyState==='error' ? 'error' : 'link')"></span>
+          </button>
+          <button class="fh-icon-btn" @click="toggleWatchLater(player.item)"
+                  :title="isWatchLater(player.item) ? 'Odstrániť z Watch Later' : 'Pridať do Watch Later'">
+            <span class="material-icons-round" x-text="isWatchLater(player.item) ? 'bookmark' : 'bookmark_border'"></span>
+          </button>
+          <button class="fh-icon-btn" @click="openAddToPlaylist(player.item)" title="Pridať do playlistu">
+            <span class="material-icons-round">playlist_add</span>
+          </button>
+          <button class="fh-icon-btn" @click="sendToMashup(player.item)" title="Poslať do Mashup Studia">
+            <span class="material-icons-round">movie_filter</span>
+          </button>
+        </div>
+      </div>
+      <p class="fh-player-error" x-show="player.error" x-text="player.error"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== ADD-TO-PLAYLIST MODAL ============================== -->
+<div class="fh-mini-modal" x-show="addToPlaylistTarget" x-cloak>
+  <div class="fh-player-backdrop" @click="addToPlaylistTarget=null"></div>
+  <div class="fh-mini-modal-box">
+    <h3>Pridať do playlistu</h3>
+    <div class="fh-mini-playlist-list">
+      <template x-for="p in playlists" :key="p.id">
+        <button class="fh-btn" @click="addToPlaylist(p)" x-text="p.name"></button>
+      </template>
+    </div>
+    <button class="fh-btn g" @click="addToPlaylistTarget=null">Zavrieť</button>
+  </div>
+</div>
+
+<!-- Faphouse delivers the feature as HLS; Chromium needs hls.js to play it. -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.12/dist/hls.min.js" defer></script>
+<script src="/static/modules/faphouse_hub.js" defer></script>
+<script src="https://unpkg.com/@alpinejs/collapse@3.13.3/dist/cdn.min.js" defer></script>
+<script src="https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,741 @@
+/* ============================================================
+   CLASSIC SKINS — Aurora + Vision Glass for the Classic UI
+   ------------------------------------------------------------
+   Same ✦ toggle, same two skins as V1 (skin_aurora.css /
+   skin_vision.css), ported onto Classic's OWN layout classes
+   (.sidebar/.top-bar/.v-card/...) instead of V1's .v1-*. Classic
+   keeps its existing default look (classic_glass.css); these two
+   skins are additional options reachable from the same ✦ toggle,
+   now also present in the Classic sidebar logo row.
+
+   Pure override layer, loaded after classic_glass.css. Inert
+   until body has .skin-aurora or .skin-vision (body is always
+   .ui-classic here, never .ui-v1 — see index.html's ui_variant).
+   ============================================================ */
+
+/* ---------- 0 · The ✦ / ☀☾ toggle jewels (base look) ----------
+   V1 defines these only under body.ui-v1 (index.html's inline
+   skin script + skin_aurora.css/skin_vision.css); Classic needs
+   its own base so the buttons render correctly before/without a
+   skin, exactly like the "V1 launch" pill next to them. */
+
+body.ui-classic .nx-skin-toggle {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    color: #c9cddb;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.05);
+    transition: transform 180ms ease, border-color 180ms ease,
+                background 180ms ease, box-shadow 180ms ease, color 180ms ease;
+}
+
+body.ui-classic .nx-skin-toggle:hover {
+    transform: translateY(-1px) rotate(12deg);
+    border-color: rgba(168, 85, 247, 0.5);
+    color: #c084fc;
+    box-shadow: 0 0 14px rgba(168, 85, 247, 0.25);
+}
+
+/* tone switch only makes sense under Vision Glass */
+body.ui-classic .vg-tone-toggle { display: none; }
+
+body.ui-classic.skin-vision .vg-tone-toggle {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+    border: 1px solid var(--vg-hairline-soft);
+    background: var(--vg-glass-strong);
+    color: var(--vg-text);
+    box-shadow: var(--vg-shadow-sm);
+    transition: transform 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+body.ui-classic.skin-vision .vg-tone-toggle:hover {
+    transform: translateY(-1px);
+    border-color: var(--vg-accent);
+    color: var(--vg-accent);
+}
+
+/* ============================================================
+   1 · AURORA — "Lightbox Vault" on Classic's own layout
+   Ports skin_aurora.css §12 (already written for the classic
+   class names) verbatim, plus card/thumb rules that section
+   didn't need to cover for V1.
+   ============================================================ */
+
+body.ui-classic.skin-aurora {
+    --v1-bg: #0a0d16;
+    --v1-border: rgba(154, 168, 255, 0.09);
+    --v1-accent: #7c86ff;
+    --v1-accent-2: #a06bff;
+    --v1-shadow: 0 24px 70px rgba(3, 5, 12, 0.55);
+    --au-edge: linear-gradient(180deg,
+        rgba(196, 205, 255, 0.22) 0%,
+        rgba(154, 168, 255, 0.08) 30%,
+        rgba(154, 168, 255, 0.04) 70%,
+        rgba(120, 90, 220, 0.10) 100%);
+    --au-edge-hot: linear-gradient(160deg,
+        rgba(148, 158, 255, 0.85) 0%,
+        rgba(124, 134, 255, 0.25) 35%,
+        rgba(160, 107, 255, 0.20) 65%,
+        rgba(160, 107, 255, 0.75) 100%);
+    --au-fill: linear-gradient(180deg, rgba(27, 33, 54, 0.92), rgba(14, 18, 31, 0.97));
+    --au-fill-raised: linear-gradient(180deg, rgba(33, 40, 66, 0.92), rgba(17, 21, 36, 0.97));
+    --au-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+    background:
+        radial-gradient(ellipse 90% 55% at 18% -12%, rgba(99, 91, 255, 0.15), transparent 55%),
+        radial-gradient(ellipse 70% 45% at 88% 4%, rgba(160, 107, 255, 0.10), transparent 60%),
+        radial-gradient(ellipse 60% 50% at 70% 110%, rgba(64, 105, 224, 0.08), transparent 65%),
+        linear-gradient(180deg, #0c101c 0%, #0a0d16 45%, #090b13 100%) !important;
+    color: #eef1f8;
+}
+
+body.ui-classic.skin-aurora .vg-ambient { display: none !important; }
+
+body.ui-classic.skin-aurora .nx-skin-toggle {
+    color: #d6dbff;
+    border: 1px solid transparent;
+    background:
+        linear-gradient(135deg, rgba(124, 134, 255, 0.3), rgba(160, 107, 255, 0.12)) padding-box,
+        var(--au-edge-hot) border-box;
+    box-shadow: 0 0 18px rgba(124, 134, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    text-shadow: 0 0 10px rgba(160, 168, 255, 0.8);
+}
+
+body.ui-classic.skin-aurora .sidebar {
+    background:
+        linear-gradient(180deg, rgba(23, 28, 46, 0.78), rgba(12, 15, 26, 0.88)) padding-box,
+        var(--au-edge) border-box !important;
+    border: 1px solid transparent !important;
+    backdrop-filter: blur(22px) saturate(1.25);
+    -webkit-backdrop-filter: blur(22px) saturate(1.25);
+    box-shadow: inset 0 1px 0 rgba(214, 221, 255, 0.08), var(--v1-shadow) !important;
+}
+
+body.ui-classic.skin-aurora .logo {
+    border-bottom: 1px solid transparent;
+    border-image: linear-gradient(90deg, transparent, rgba(154, 168, 255, 0.22), transparent) 1;
+}
+
+body.ui-classic.skin-aurora nav a {
+    color: #9aa4bd;
+    transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+body.ui-classic.skin-aurora nav a:hover,
+body.ui-classic.skin-aurora nav a.active {
+    color: #eef1f8;
+    border-color: rgba(154, 168, 255, 0.16);
+    background: linear-gradient(90deg, rgba(124, 134, 255, 0.13), rgba(124, 134, 255, 0.03));
+}
+
+body.ui-classic.skin-aurora nav a.active {
+    box-shadow: inset 3px 0 0 var(--v1-accent), 0 0 18px rgba(124, 134, 255, 0.08);
+}
+
+body.ui-classic.skin-aurora .top-bar {
+    background: rgba(15, 19, 33, 0.8) !important;
+    border: 1px solid var(--v1-border);
+    border-bottom-color: var(--v1-border) !important;
+    backdrop-filter: blur(22px) saturate(1.2);
+    -webkit-backdrop-filter: blur(22px) saturate(1.2);
+    box-shadow: inset 0 1px 0 rgba(214, 221, 255, 0.05) !important;
+}
+
+body.ui-classic.skin-aurora .search-wrapper {
+    background:
+        linear-gradient(180deg, rgba(17, 19, 29, 0.66), rgba(11, 12, 19, 0.74)) padding-box,
+        linear-gradient(135deg, rgba(245, 247, 255, 0.25), rgba(184, 202, 255, 0.12), rgba(255, 145, 77, 0.11)) border-box !important;
+    border-radius: 11px;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+    -webkit-backdrop-filter: blur(18px) saturate(1.3);
+    backdrop-filter: blur(18px) saturate(1.3);
+}
+
+body.ui-classic.skin-aurora .search-wrapper:focus-within {
+    box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.25),
+        0 0 0 3px rgba(124, 134, 255, 0.14);
+}
+
+body.ui-classic.skin-aurora .top-actions > button,
+body.ui-classic.skin-aurora .top-actions > a.top-action-btn,
+body.ui-classic.skin-aurora .filter-dropdown-trigger,
+body.ui-classic.skin-aurora .view-switcher button,
+body.ui-classic.skin-aurora .btn-ghost,
+body.ui-classic.skin-aurora .batch-select,
+body.ui-classic.skin-aurora .gcb-btn {
+    border-radius: 10px;
+    border: 1px solid transparent !important;
+    background:
+        linear-gradient(180deg, rgba(36, 43, 68, 0.6), rgba(20, 25, 41, 0.72)) padding-box,
+        var(--au-edge) border-box !important;
+    color: #dfe4f2;
+    box-shadow: inset 0 1px 0 rgba(214, 221, 255, 0.06);
+}
+
+body.ui-classic.skin-aurora .btn-ghost:hover,
+body.ui-classic.skin-aurora .gcb-btn:hover,
+body.ui-classic.skin-aurora .top-actions > button:hover,
+body.ui-classic.skin-aurora .top-actions > a.top-action-btn:hover {
+    background:
+        linear-gradient(180deg, rgba(46, 55, 88, 0.7), rgba(26, 32, 52, 0.78)) padding-box,
+        var(--au-edge-hot) border-box !important;
+}
+
+body.ui-classic.skin-aurora .gcb-btn.active,
+body.ui-classic.skin-aurora .top-actions > button.active {
+    background:
+        linear-gradient(180deg, rgba(124, 134, 255, 0.3), rgba(124, 134, 255, 0.12)) padding-box,
+        var(--au-edge-hot) border-box !important;
+    color: #e9ecff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 0 16px rgba(124, 134, 255, 0.16);
+}
+
+body.ui-classic.skin-aurora .gallery-controls-bar,
+body.ui-classic.skin-aurora .filter-panel,
+body.ui-classic.skin-aurora .dashboard-command-deck,
+body.ui-classic.skin-aurora .import-monitor-strip,
+body.ui-classic.skin-aurora .fast-import-bar.compact {
+    background:
+        linear-gradient(180deg, rgba(24, 27, 39, 0.75), rgba(12, 13, 20, 0.85)) padding-box,
+        var(--au-edge) border-box !important;
+    border: 1px solid transparent !important;
+    -webkit-backdrop-filter: blur(22px) saturate(1.25);
+    backdrop-filter: blur(22px) saturate(1.25);
+    box-shadow: inset 0 1px 0 rgba(214, 221, 255, 0.06), 0 12px 34px rgba(3, 5, 12, 0.3) !important;
+}
+
+body.ui-classic.skin-aurora .v-card {
+    border-radius: 16px;
+    border: 1px solid transparent;
+    background:
+        var(--au-fill) padding-box,
+        var(--au-edge) border-box !important;
+    box-shadow:
+        inset 0 1px 0 rgba(214, 221, 255, 0.07),
+        0 14px 34px rgba(3, 5, 12, 0.38);
+    transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 260ms ease, background 260ms ease;
+}
+
+body.ui-classic.skin-aurora .v-card:hover {
+    background:
+        var(--au-fill-raised) padding-box,
+        var(--au-edge-hot) border-box !important;
+    box-shadow:
+        0 26px 60px rgba(3, 5, 12, 0.55),
+        0 0 36px rgba(124, 134, 255, 0.2);
+}
+
+body.ui-classic.skin-aurora .v-card.selected {
+    background:
+        var(--au-fill-raised) padding-box,
+        linear-gradient(160deg, #97a0ff, rgba(124, 134, 255, 0.4) 40%,
+            rgba(160, 107, 255, 0.4) 60%, #b06bff) border-box !important;
+}
+
+body.ui-classic.skin-aurora .thumb-wrapper { background: #0a0d16; }
+
+body.ui-classic.skin-aurora .v-meta {
+    background: linear-gradient(180deg, rgba(19, 24, 41, 0.92), rgba(13, 16, 28, 0.97)) !important;
+}
+
+body.ui-classic.skin-aurora .quality-chip,
+body.ui-classic.skin-aurora .duration-chip {
+    background: rgba(8, 10, 19, 0.72) !important;
+    border: 1px solid rgba(210, 218, 255, 0.15) !important;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-radius: 999px;
+    font-family: var(--au-mono);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+body.ui-classic.skin-aurora .batch-bar {
+    background: rgba(21, 23, 34, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    -webkit-backdrop-filter: blur(26px) saturate(1.3);
+    backdrop-filter: blur(26px) saturate(1.3);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 18px 50px rgba(0, 0, 0, 0.45) !important;
+}
+
+body.ui-classic.skin-aurora .nexus-empty-state,
+body.ui-classic.skin-aurora .modal-card,
+body.ui-classic.skin-aurora .settings-card {
+    background: linear-gradient(180deg, rgba(21, 26, 44, 0.85), rgba(13, 16, 29, 0.92)) !important;
+    border: 1px solid rgba(154, 168, 255, 0.16) !important;
+}
+
+body.ui-classic.skin-aurora ::selection {
+    background: rgba(124, 134, 255, 0.32);
+    color: #fff;
+}
+
+body.ui-classic.skin-aurora::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(154, 168, 255, 0.22), rgba(124, 134, 255, 0.12));
+    border-radius: 999px;
+}
+
+/* ============================================================
+   2 · VISION GLASS — visionOS-style frosted glass on Classic
+   Ports the skin_vision.css tokens/tonalities and reapplies them
+   to Classic's real class names (V1's .v1-shell/.v1-sidebar have
+   no Classic counterpart, so .sidebar/.top-bar/.v-card stand in).
+   ============================================================ */
+
+body.ui-classic.skin-vision {
+    color-scheme: only light;
+    --vg-text: #23252e;
+    --vg-dim: rgba(44, 48, 62, 0.6);
+    --vg-faint: rgba(44, 48, 62, 0.38);
+    --vg-glass: rgba(255, 255, 255, 0.5);
+    --vg-glass-strong: rgba(255, 255, 255, 0.72);
+    --vg-glass-soft: rgba(255, 255, 255, 0.3);
+    --vg-glass-hover: rgba(255, 255, 255, 0.66);
+    --vg-hairline: rgba(255, 255, 255, 0.75);
+    --vg-hairline-soft: rgba(255, 255, 255, 0.45);
+    --vg-line: rgba(30, 34, 48, 0.1);
+    --vg-accent: #0fa47d;
+    --vg-accent-bright: #2ee6a8;
+    --vg-accent-soft: rgba(15, 164, 125, 0.14);
+    --vg-primary-fill: rgba(28, 30, 40, 0.9);
+    --vg-primary-text: #ffffff;
+    --vg-blur: 24px;
+    --vg-shadow: 0 24px 70px rgba(24, 30, 52, 0.16);
+    --vg-shadow-sm: 0 10px 30px rgba(24, 30, 52, 0.1);
+
+    /* Classic's whole grid (.v-title, .v-date-display, buttons, banners, ...)
+       reads color from these --nx-* tokens (nexus_refresh.css), not from a
+       body class — remap them or every dark-theme string stays unreadable
+       on Vision Glass's light glass. */
+    --nx-bg: #eceae6;
+    --nx-bg-2: #dfe0e4;
+    --nx-surface: rgba(255, 255, 255, 0.55);
+    --nx-surface-2: rgba(255, 255, 255, 0.68);
+    --nx-elev: rgba(255, 255, 255, 0.78);
+    --nx-border: rgba(30, 34, 48, 0.14);
+    --nx-border-2: rgba(30, 34, 48, 0.22);
+    --nx-text: #23252e;
+    --nx-dim: rgba(44, 48, 62, 0.65);
+    --nx-faint: rgba(44, 48, 62, 0.45);
+
+    background:
+        radial-gradient(ellipse 80% 60% at 20% 0%, rgba(255, 252, 246, 0.9), transparent 60%),
+        radial-gradient(ellipse 70% 55% at 85% 15%, rgba(214, 222, 234, 0.8), transparent 65%),
+        linear-gradient(180deg, #eceae6 0%, #dfe0e4 55%, #d3d6dc 100%) !important;
+    color: var(--vg-text);
+}
+
+body.ui-classic.skin-vision.vision-dark {
+    color-scheme: dark;
+    --vg-text: #eef0f6;
+    --vg-dim: rgba(214, 220, 234, 0.6);
+    --vg-faint: rgba(214, 220, 234, 0.36);
+    --vg-glass: rgba(22, 24, 32, 0.52);
+    --vg-glass-strong: rgba(24, 26, 35, 0.74);
+    --vg-glass-soft: rgba(22, 24, 32, 0.32);
+    --vg-glass-hover: rgba(38, 41, 54, 0.66);
+    --vg-hairline: rgba(255, 255, 255, 0.16);
+    --vg-hairline-soft: rgba(255, 255, 255, 0.09);
+    --vg-line: rgba(255, 255, 255, 0.08);
+    --vg-accent: #2ee6a8;
+    --vg-accent-bright: #5df0bf;
+    --vg-accent-soft: rgba(46, 230, 168, 0.14);
+    --vg-primary-fill: rgba(244, 246, 250, 0.94);
+    --vg-primary-text: #16181f;
+    --vg-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+    --vg-shadow-sm: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+    background:
+        radial-gradient(ellipse 80% 60% at 20% 0%, rgba(52, 58, 78, 0.7), transparent 60%),
+        radial-gradient(ellipse 70% 55% at 85% 15%, rgba(38, 46, 64, 0.6), transparent 65%),
+        linear-gradient(180deg, #171922 0%, #12141c 55%, #0e1016 100%) !important;
+}
+
+body.ui-classic.skin-vision .bg-orb { display: none !important; }
+body.ui-classic.skin-vision .vg-ambient { display: none !important; }
+
+body.ui-classic.skin-vision .sidebar {
+    border-radius: 24px;
+    border: 1px solid var(--vg-hairline) !important;
+    background: var(--vg-glass) !important;
+    -webkit-backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), var(--vg-shadow);
+}
+
+body.ui-classic.skin-vision.vision-dark .sidebar {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), var(--vg-shadow);
+}
+
+body.ui-classic.skin-vision .logo { border-bottom: 1px solid var(--vg-line); color: var(--vg-text); }
+body.ui-classic.skin-vision .logo > div { color: var(--vg-text); }
+
+body.ui-classic.skin-vision nav a {
+    border-radius: 999px;
+    color: var(--vg-dim);
+}
+
+body.ui-classic.skin-vision nav a:hover {
+    background: var(--vg-glass-soft);
+    color: var(--vg-text);
+}
+
+body.ui-classic.skin-vision nav a.active {
+    background: var(--vg-glass-strong) !important;
+    color: var(--vg-text) !important;
+    box-shadow: var(--vg-shadow-sm);
+}
+
+body.ui-classic.skin-vision .nav-label { color: var(--vg-faint); }
+
+body.ui-classic.skin-vision .top-bar {
+    background: var(--vg-glass) !important;
+    border-bottom: 1px solid var(--vg-hairline-soft) !important;
+    -webkit-backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    box-shadow: none;
+}
+
+body.ui-classic.skin-vision .search-wrapper {
+    border-radius: 999px;
+    background: var(--vg-glass-strong) !important;
+    border: 1px solid var(--vg-hairline-soft) !important;
+    box-shadow: none !important;
+}
+
+body.ui-classic.skin-vision .search-wrapper:focus-within {
+    box-shadow: 0 0 0 3px var(--vg-accent-soft) !important;
+}
+
+body.ui-classic.skin-vision .search-wrapper input { color: var(--vg-text); }
+body.ui-classic.skin-vision .search-wrapper input::placeholder { color: var(--vg-faint); }
+
+body.ui-classic.skin-vision .top-actions > button,
+body.ui-classic.skin-vision .top-actions > a.top-action-btn,
+body.ui-classic.skin-vision .filter-dropdown-trigger,
+body.ui-classic.skin-vision .view-switcher button,
+body.ui-classic.skin-vision .btn-ghost,
+body.ui-classic.skin-vision .batch-select,
+body.ui-classic.skin-vision .gcb-btn {
+    border-radius: 999px;
+    color: var(--vg-text) !important;
+    border: 1px solid var(--vg-hairline-soft) !important;
+    background: var(--vg-glass-strong) !important;
+    box-shadow: none !important;
+}
+
+body.ui-classic.skin-vision .top-actions > button:hover,
+body.ui-classic.skin-vision .btn-ghost:hover,
+body.ui-classic.skin-vision .gcb-btn:hover {
+    border-color: var(--vg-hairline) !important;
+    background: var(--vg-glass-hover) !important;
+}
+
+body.ui-classic.skin-vision .gcb-btn.active,
+body.ui-classic.skin-vision .top-actions > button.active {
+    color: var(--vg-primary-text) !important;
+    border-color: transparent !important;
+    background: var(--vg-primary-fill) !important;
+    box-shadow: var(--vg-shadow-sm) !important;
+}
+
+body.ui-classic.skin-vision .gallery-controls-bar,
+body.ui-classic.skin-vision .filter-panel,
+body.ui-classic.skin-vision .dashboard-command-deck,
+body.ui-classic.skin-vision .import-monitor-strip,
+body.ui-classic.skin-vision .fast-import-bar.compact {
+    border-radius: 20px;
+    background: var(--vg-glass) !important;
+    border: 1px solid var(--vg-hairline-soft) !important;
+    box-shadow: var(--vg-shadow-sm) !important;
+}
+
+body.ui-classic.skin-vision .v-card {
+    border-radius: 20px;
+    border: 1px solid var(--vg-hairline) !important;
+    background: var(--vg-glass) !important;
+    box-shadow: var(--vg-shadow-sm) !important;
+}
+
+body.ui-classic.skin-vision .v-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--vg-shadow) !important;
+}
+
+body.ui-classic.skin-vision .v-card.selected {
+    border-color: var(--vg-accent) !important;
+    box-shadow: 0 0 0 1px var(--vg-accent), var(--vg-shadow) !important;
+}
+
+body.ui-classic.skin-vision .thumb-wrapper { background: rgba(18, 20, 28, 0.35); }
+
+body.ui-classic.skin-vision .v-meta {
+    background: var(--vg-glass-strong) !important;
+    color: var(--vg-text);
+}
+
+body.ui-classic.skin-vision .quality-chip,
+body.ui-classic.skin-vision .duration-chip {
+    background: rgba(16, 18, 26, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    color: #f4f6fa !important;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-radius: 999px;
+}
+
+body.ui-classic.skin-vision .batch-bar {
+    border-radius: 999px;
+    border: 1px solid var(--vg-hairline) !important;
+    background: var(--vg-glass-strong) !important;
+    box-shadow: var(--vg-shadow) !important;
+    color: var(--vg-text);
+}
+
+body.ui-classic.skin-vision .nexus-empty-state,
+body.ui-classic.skin-vision .modal-card,
+body.ui-classic.skin-vision .settings-card {
+    border: 1px solid var(--vg-hairline) !important;
+    background: var(--vg-glass-strong) !important;
+    box-shadow: var(--vg-shadow) !important;
+    color: var(--vg-text);
+}
+
+body.ui-classic.skin-vision::-webkit-scrollbar-thumb {
+    background: rgba(60, 66, 84, 0.3) !important;
+}
+
+body.ui-classic.skin-vision.vision-dark::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16) !important;
+}
+
+body.ui-classic.skin-vision ::selection { background: var(--vg-accent-soft); }
+
+/* ============================================================
+   2b · Reassert over nexus_refresh.css's "Prism Alloy" layer
+   ------------------------------------------------------------
+   nexus_refresh.css loads BEFORE classic_skins.css but pins a
+   second, hardcoded dark theme onto body.ui-classic (not gated by
+   any skin class) with !important — .v-title/.v-date-display/etc.
+   read a fixed white "--nx-porcelain" token, not --nx-text. Only
+   .skin-vision's LIGHT tonality actually breaks against it (dark
+   Aurora and vision-dark are close enough to Prism Alloy's own
+   palette to stay legible); everything here targets that case
+   and must repeat every property Prism Alloy pins, since the
+   extra .skin-vision class only wins ties it's specific enough
+   to fight — bare property values still lose to !important.
+   ============================================================ */
+
+body.ui-classic.skin-vision:not(.vision-dark) {
+    color: var(--vg-text) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .logo {
+    color: var(--vg-text) !important;
+    text-shadow: none;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .nav-label {
+    color: var(--vg-faint) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .sidebar nav a,
+body.ui-classic.skin-vision:not(.vision-dark) .sidebar .nav-link {
+    color: var(--vg-dim) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .sidebar nav a:hover,
+body.ui-classic.skin-vision:not(.vision-dark) .sidebar .nav-link:hover,
+body.ui-classic.skin-vision:not(.vision-dark) .sidebar nav a.active,
+body.ui-classic.skin-vision:not(.vision-dark) .sidebar .nav-link.active {
+    color: var(--vg-text) !important;
+    background: var(--vg-glass-soft) !important;
+    border-color: var(--vg-hairline-soft) !important;
+    box-shadow: none !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .sidebar nav .material-icons-round {
+    color: var(--vg-dim);
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .search-wrapper {
+    background: var(--vg-glass-strong) !important;
+    box-shadow: none !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .search-wrapper:focus-within {
+    box-shadow: 0 0 0 3px var(--vg-accent-soft) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .search-wrapper input {
+    color: var(--vg-text) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .search-wrapper input::placeholder {
+    color: var(--vg-faint) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .top-actions > button,
+body.ui-classic.skin-vision:not(.vision-dark) .top-actions > a.top-action-btn {
+    color: var(--vg-text) !important;
+    border-color: var(--vg-hairline-soft) !important;
+    background: var(--vg-glass-strong) !important;
+    box-shadow: none !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .top-actions > button:hover,
+body.ui-classic.skin-vision:not(.vision-dark) .top-actions > a.top-action-btn:hover {
+    color: var(--vg-text) !important;
+    border-color: var(--vg-hairline) !important;
+    background: var(--vg-glass-hover) !important;
+    box-shadow: none !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .import-monitor-kicker {
+    color: var(--vg-accent) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .import-monitor-summary-text {
+    color: var(--vg-text) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .import-monitor-summary-meta {
+    color: var(--vg-dim) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .import-monitor-summary-percent {
+    color: var(--vg-accent) !important;
+    text-shadow: none;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .fast-import-urlbar {
+    background: var(--vg-glass-strong) !important;
+    box-shadow: none !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .fast-import-urlbar input {
+    color: var(--vg-text) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .gcb-label {
+    color: var(--vg-accent) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .gcb-sep {
+    background: var(--vg-line) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .gcb-btn {
+    color: var(--vg-text) !important;
+    border-color: var(--vg-hairline-soft) !important;
+    background: var(--vg-glass-strong) !important;
+    box-shadow: none !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .gcb-btn:hover {
+    color: var(--vg-text) !important;
+    border-color: var(--vg-hairline) !important;
+    background: var(--vg-glass-hover) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .gcb-btn.active {
+    color: var(--vg-primary-text) !important;
+    border-color: transparent !important;
+    background: var(--vg-primary-fill) !important;
+    box-shadow: var(--vg-shadow-sm) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .v-title {
+    color: var(--vg-text) !important;
+    text-shadow: none;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .v-date-display,
+body.ui-classic.skin-vision:not(.vision-dark) .v-info-row .v-date-display {
+    color: var(--vg-faint) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .duration-chip,
+body.ui-classic.skin-vision:not(.vision-dark) .size-chip,
+body.ui-classic.skin-vision:not(.vision-dark) .preview-source-badge,
+body.ui-classic.skin-vision:not(.vision-dark) .status-badge {
+    border: 1px solid var(--vg-hairline) !important;
+    box-shadow: none !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .duration-chip {
+    color: #fff !important;
+    background: rgba(16, 18, 26, 0.72) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .size-chip {
+    color: var(--vg-text) !important;
+    background: var(--vg-glass-strong) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .preview-source-badge {
+    color: #fff !important;
+    background: rgba(16, 18, 26, 0.72) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .v-actions-row .btn-stream,
+body.ui-classic.skin-vision:not(.vision-dark) .btn-import {
+    color: var(--vg-primary-text) !important;
+    border: 1px solid transparent !important;
+    background: var(--vg-primary-fill) !important;
+    box-shadow: var(--vg-shadow-sm) !important;
+}
+
+body.ui-classic.skin-vision:not(.vision-dark) .v-actions-row > *:not(.btn-stream) {
+    color: var(--vg-text) !important;
+    border: 1px solid var(--vg-hairline-soft) !important;
+    background: var(--vg-glass-strong) !important;
+    box-shadow: none !important;
+}
+
+/* ---------- 3 · Performance & accessibility guards ---------- */
+
+body.ui-classic.perf-lite.skin-aurora .sidebar,
+body.ui-classic.perf-lite.skin-aurora .top-bar,
+body.ui-classic.perf-lite.skin-aurora .dashboard-command-deck,
+body.ui-classic.perf-lite.skin-aurora .import-monitor-strip,
+body.ui-classic.perf-lite.skin-aurora .fast-import-bar.compact,
+body.ui-classic.perf-lite.skin-aurora .filter-panel,
+body.ui-classic.perf-lite.skin-aurora .gallery-controls-bar,
+body.ui-classic.perf-lite.skin-aurora .search-wrapper,
+body.ui-classic.perf-lite.skin-vision .sidebar,
+body.ui-classic.perf-lite.skin-vision .top-bar,
+body.ui-classic.perf-lite.skin-vision .dashboard-command-deck,
+body.ui-classic.perf-lite.skin-vision .import-monitor-strip,
+body.ui-classic.perf-lite.skin-vision .fast-import-bar.compact,
+body.ui-classic.perf-lite.skin-vision .filter-panel,
+body.ui-classic.perf-lite.skin-vision .gallery-controls-bar,
+body.ui-classic.perf-lite.skin-vision .search-wrapper {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.ui-classic.skin-aurora .v-card,
+    body.ui-classic.skin-aurora .v-card:hover,
+    body.ui-classic.skin-vision .v-card,
+    body.ui-classic.skin-vision .v-card:hover {
+        transition: none;
+        transform: none;
+    }
+}

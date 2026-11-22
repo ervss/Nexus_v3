@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Vertical Player</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            width: 250px;
+            padding: 15px;
+            background: #1a1a1a;
+            color: #ffffff;
+            text-align: center;
+        }
+        h2 { font-size: 1.2rem; margin-bottom: 15px; color: #00ff00; }
+        button {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 10px 20px;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #00ff00;
+            color: black;
+            border-color: #00ff00;
+        }
+        .footer {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h2>Vertical Multi-Player</h2>
+    <p>Tri lokálne alebo priame URL streamy vedľa seba.</p>
+    <button id="otvoritPrehravac">Otvoriť prehrávač</button>
+    <div class="footer">Inšpirované MPC-HC & VLC</div>
+    <script src="popup.js"></script>
+</body>
+</html>

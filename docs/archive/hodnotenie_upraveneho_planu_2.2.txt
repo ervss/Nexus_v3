@@ -1,0 +1,115 @@
+Prešiel som nový Nexus Playback Engine – Master Plan v2.2 a porovnal ho s verziou 2.0 aj s pôvodným zdrojovým kódom v ZIP-e.
+
+## Moje hodnotenie
+
+Plán v1.0
+
+# 7/10
+
+Plán v2.0
+
+# 8,5/10
+
+Plán v2.2
+
+# 9/10
+
+Toto je zatiaľ najlepšia verzia plánu. Už má jasnú architektúru, samostatný `app/playback_engine.py`, bezpečnostnú fázu, kaskádový resolver aj jednotné rozhranie pre Quantum Search a Split-Screen.
+
+Najväčší pokrok oproti v2.0:
+
+- Serverová CSP ochrana embedov, nielen iframe sandbox.
+- Bezpečnejšie nastavenia cache a referera.
+- Fallback aj vtedy, keď dedikovaný extraktor zlyhá.
+- Jednorazový proxy fallback pri zlyhaní priameho prehrávania.
+- Pripravenosť na DASH popri HLS a MP4.
+- Samostatný modul Playback Engine namiesto roztrúsenej logiky.
+
+Na implementáciu by som ho už schválil pod podmienkou niekoľkých konkrétnych doplnení. Niektoré sú bezpečnostne dôležité.
+
+## Čo ešte treba doplniť do v2.2
+
+Kritické
+
+1\. SSRF a TLS stále nie sú úplne vyriešené
+
+Plán kontroluje URL po HTTP presmerovaní, ale to nestačí.
+
+V existujúcom `app/url_safety.py` sa nekontroluje DNS preklad hostname na IP adresu. Navyše v kóde zostáva `ssl=False` pri proxy požiadavkách a `verify=False` v `/embed_proxy`.
+
+Doplniť:
+
+- Kontrolu výsledných IPv4/IPv6 adries pred pripojením a pri každom presmerovaní.
+- Ochranu proti DNS rebindingu.
+- Povinné overovanie TLS certifikátov.
+- Obmedzenie veľkosti odpovedí, timeoutov a počtu presmerovaní.
+
+Toto je moja najvyššia bezpečnostná priorita.
+
+Vysoké
+
+2\. DASH nemožno len pripojiť k existujúcemu HLS proxy
+
+V2.2 pridáva podporu `dash` a `Dash.js`, ale v pláne nie je implementácia prepisovania MPD manifestov.
+
+HLS využíva `.m3u8`, DASH využíva `.mpd`, `BaseURL`, `SegmentTemplate` a ďalšie mechanizmy.
+
+Potrebný je samostatný DASH manifest resolver alebo spoločná mediálna proxy, ktorá rozumie obom formátom. DRM streamy je potrebné klasifikovať osobitne, nie automaticky považovať za prehrateľné.
+
+Vysoké
+
+3\. V kontrakte môžu unikať citlivé URL
+
+`fallback_url` obsahuje pôvodnú CDN adresu aj referer ako query parametre. Pri podpísaných streamoch môžu obsahovať dočasné prístupové tokeny.
+
+Lepšie je prideliť serverový identifikátor prehrávania s krátkou platnosťou, napríklad `/media_proxy/{playback_id}`, pričom originálna URL a potrebné hlavičky zostanú na serveri.
+
+Implementácia
+
+4\. V userscripte stále chýba jedna funkcia
+
+Skontroloval som pôvodný ZIP. `resolveViaNexusBackend()` v `nexus-universal-splitscreen.user.js` stále neexistuje.
+
+Plán musí explicitne prikázať vytvorenie tejto funkcie a jej napojenie na `resolveStreamUrl()` a `startCellPlayback()`.
+
+V `search.js` je už správne pomenovaná `_resolvePlayable()`, čo je oproti v2.0 zlepšenie.
+
+Implementácia
+
+5\. Timeout 15 sekúnd treba presne definovať
+
+Diagram má 15-sekundový timeout na extraktor aj HubAdapter. Pri viacerých fallbackoch by celkové čakanie mohlo byť oveľa dlhšie.
+
+Odporúčam spoločný časový rozpočet na celé vyriešenie URL, samostatné limity pre jednotlivé kroky a zrušenie rozpracovaných požiadaviek po vyčerpaní limitu.
+
+Testovanie
+
+6\. Rozšíriť testy o Python backend
+
+`nexus_playback_engine.test.mjs` je dobrý integračný test, ale samotný Node test nebude dostatočný na priame pokrytie Python logiky.
+
+Pridal by som `pytest` testy pre resolver, SSRF ochranu, presmerovania, HTTP Range 206, chybné MIME, expirované streamy a kaskádu fallbackov. Potom záťažový test s 8–12 súbežnými prehrávačmi.
+
+## Odporúčaný finálny stav
+
+Quantum Search · Split-Screen · Link Tester
+
+Jednotné API
+
+Nexus Playback Engine
+
+Normalizácia · klasifikácia · fallback · diagnostika
+
+Extractors
+
+HubAdapters
+
+Smart Router
+
+Bezpečná Media Proxy
+
+HLS · DASH · MP4 · izolované embedy
+
+Záver: Verziu 2.2 by som už neprepisoval od základu. Je architektonicky dobre navrhnutá. Doplnil by som uvedených šesť bodov, predovšetkým SSRF/TLS, bezpečné spracovanie tokenov a DASH.
+
+Potom by som plán považoval za dostatočne vypracovaný na systematickú implementáciu s bezpečnostnými testami pred nasadením.

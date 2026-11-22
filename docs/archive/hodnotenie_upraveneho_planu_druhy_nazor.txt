@@ -1,0 +1,85 @@
+Nový plán v2.0 je výrazne lepší než pôvodný. Porovnal som ho s predchádzajúcou verziou aj so skutočným kódom projektu v ZIP-e.
+
+Pôvodný plán
+
+# 7/10
+
+Nový plán v2.0
+
+# 8.5/10
+
+Zásadný rozdiel je, že už nejde iba o opravovanie konkrétnych zdrojov. Vzniká architektúra, ktorú bude možné rozširovať bez toho, aby sa pri každej novej stránke museli prepisovať oba prehrávače.
+
+## Čo sa mi páči
+
+- Centralizovaný Playback Engine: QS, Split-Screen a Link Tester budú využívať rovnaké rozhodnutia backendu.
+- Adaptívne proxy: Rozumný kompromis medzi výkonom a kompatibilitou pri 8–12 súčasných prehrávačoch.
+- Jednotný `playback` kontrakt: Frontend už nebude musieť hádať, či je URL video, HLS alebo embed.
+- HubAdapter bridge: Správny spôsob, ako využiť existujúce extraktory bez duplikovania logiky.
+- Diagnostika: Namiesto nefunkčného čierneho prehrávača dostane používateľ zrozumiteľnú chybu.
+
+## Čo by som ešte opravil pred implementáciou
+
+Kritické
+
+1\. Iframe sandbox ešte nestačí
+
+`sandbox` bez `allow-same-origin` je správny krok. Lenže `/embed_proxy` je stále možné otvoriť priamo ako stránku Nexusu bez iframe sandboxu.
+
+Odporúčam serverovú CSP sandbox politiku a ideálne samostatný origin pre externé embedy. Zároveň obmedziť `allow-forms` a `allow-popups-to-escape-sandbox` len na prípady, ktoré ich skutočne potrebujú.
+
+Izolácia tiež sama osebe nezaručuje ochranu proti všetkým požiadavkám meniacim stav aplikácie.
+
+Kritické
+
+2\. Chýba samostatná fáza zabezpečenia proxy
+
+V `app/url_safety.py` sa kontrolujú priame IP adresy, nie však DNS preklad a následné presmerovania. `/hls_proxy` má stále `ssl=False` a `/embed_proxy` používa `verify=False`.
+
+Doplniť kontrolu každej cieľovej IP, validáciu redirectov, štandardné overovanie TLS a obmedzenia veľkosti i času požiadaviek.
+
+Vysoké
+
+3\. Plán stále používa nesprávne názvy funkcií
+
+V priloženom ZIP-e:
+
+- `search.js` používa `_resolvePlayable()`, nie `_resolveQuantumPlayback()`.
+- Userscript neobsahuje `resolveViaNexusBackend()`.
+- `search.js` vytvára iframe dvomi cestami, pričom plán rieši iba jednu.
+
+Implementačné kroky treba prepísať podľa skutočnej štruktúry projektu.
+
+Vysoké
+
+4\. Automatický fallback na proxy potrebuje presný mechanizmus
+
+Pri `video.error` skúsiť proxy maximálne raz, bez nekonečnej slučky. Rozlišovať sieťové chyby od nepodporovaného kodeku, neplatnej autorizácie a expirovaného streamu.
+
+V kontrakte by som doplnil `fallback_playback_url`, `error_code` a `expires_at`.
+
+Vysoké
+
+5\. Citlivé údaje a cache
+
+Existujúci Link Tester už používa krátkodobé identifikátory pre serverové cookies, čo je dobré. Tento princíp treba zachovať a nerozširovať kontrakt o skutočné cookies či tokeny.
+
+V `/embed_proxy` som navyše našiel `Cache-Control: public, max-age=600` a `Referrer-Policy: unsafe-url`. Pre reláciové embed stránky sú vhodnejšie reštriktívne pravidlá, aby sa nešírili session identifikátory.
+
+## Čo by som zmenil na poradí implementácie
+
+1. Bezpečnostná fáza: SSRF, TLS, CSP, izolácia iframe, zabezpečenie relácií.
+2. Proxy stabilita: správne MIME, HTTP Range, HLS manifesty a segmenty, timeouty.
+3. Playback Engine: spoločný kontrakt, HubAdapter bridge, Smart Router.
+4. Frontend: pripojiť QS aj Split-Screen k novému kontraktu a odstrániť duplicitnú logiku.
+5. Verifikácia: automatické testy aj reálne prehrávanie s testovaním seeku, fallbackov a viacerých buniek naraz.
+
+## Verdikt
+
+Tento plán už považujem za dobrý základ na implementáciu. Ešte by som však doplnil vyššie uvedené bezpečnostné opatrenia a opravil odkazy na neexistujúce funkcie.
+
+Dôležitá je jedna zásada: jedna URL, jedno rozhodnutie backendu a rovnaké správanie prehrávača v Quantum Search aj Split-Screene.
+
+Práve tým sa Nexus môže zbaviť veľkého množstva súčasných komplikácií. Keď bude tento princíp dôsledne dodržaný, každý nový extraktor alebo HubAdapter bude automaticky využiteľný v oboch rozhraniach bez ďalšej špecifickej implementácie.
+
+Zatiaľ ide o posúdenie návrhu a statickú kontrolu kódu, nie o potvrdenie funkčnosti po implementácii.

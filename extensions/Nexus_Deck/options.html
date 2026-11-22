@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="sk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nexus Deck · nastavenia</title>
+    <link rel="stylesheet" href="fonts.css" />
+    <link rel="stylesheet" href="tokens.css" />
+    <link rel="stylesheet" href="deck.css" />
+  </head>
+  <body>
+    <main class="deck options">
+      <div class="brand">
+        <span id="logo"></span>
+        <div>
+          <p class="mark">Nexus Deck</p>
+          <p class="sub">Nastavenia rozšírenia</p>
+        </div>
+      </div>
+      <p class="lede">Pult vedľa prehliadača. Galéria ostáva na dashboarde, Deck len sleduje a posiela.</p>
+      <ol class="steps">
+        <li>Spusti Nexus Gallery a nechaj bežať adresu, ktorú sem vložíš.</li>
+        <li>V Brave otvor Deck klikom na ikonu. Panel zostane vedľa stránky.</li>
+        <li>Adresu vlož, vezmi z karty, alebo ju pošli pravým klikom.</li>
+      </ol>
+      <form id="settings-form">
+        <label class="field">
+          <span>Adresa dashboardu</span>
+          <input id="api-base" type="url" required spellcheck="false" />
+        </label>
+        <label class="field">
+          <span>Token, ak ho worker vyžaduje</span>
+          <input id="api-token" type="password" autocomplete="off" spellcheck="false" />
+        </label>
+        <div class="sheet-actions">
+          <button class="primary" type="submit">Uložiť</button>
+          <button class="ghost" id="btn-test" type="button">Otestovať</button>
+        </div>
+      </form>
+      <p class="note" id="settings-msg"></p>
+      <p class="hint">Deck číta adresy videí len z karty, ktorú mu ukážeš. Posiela ich výhradne na dashboard vyššie. Súbory neukladá.</p>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

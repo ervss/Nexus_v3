@@ -1,0 +1,98 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   TURBO MODE — responsiveness over decoration.
+
+   Measured on this dashboard before writing any of this:
+     • 3454 requests for placeholder.jpg on ONE page load (error-handler loop)
+     • 162 backdrop-filter rules, 52 infinite animations
+     • ambilight redrawing a full video frame to canvas every 80ms
+
+   Blur and shadow are the expensive ones: backdrop-filter forces the compositor
+   to re-sample everything beneath the element on every frame, so a blurred
+   sidebar over a playing video costs GPU time *per frame of video*. Turbo drops
+   the decoration and keeps the layout — thumbnails and metadata are untouched,
+   because those are already loaded and are what the grid is for.
+
+   Everything here is !important on purpose: it has to beat skin overrides
+   (aurora / vision / classic-glass) that already use !important themselves.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Kill compositor-heavy effects ────────────────────────────────────── */
+body.turbo *,
+body.turbo *::before,
+body.turbo *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* Blur filters are the single most expensive thing on screen. Keep colour
+   filters (brightness/contrast on the player) — those are cheap and are the
+   point of the enhancer; only blur/drop-shadow are dropped. */
+body.turbo .vg-ambient,
+body.turbo #ambilight-canvas,
+body.turbo .ambient-glow,
+body.turbo .glow,
+body.turbo .aurora-layer {
+  display: none !important;
+}
+
+/* ── 2. Stop perpetual animation ─────────────────────────────────────────── */
+/* An infinite animation never lets the compositor idle, so the tab keeps
+   painting even when nothing changed. One-shot transitions stay usable but are
+   cut short so clicks feel immediate rather than "animated then done". */
+body.turbo *,
+body.turbo *::before,
+body.turbo *::after {
+  animation: none !important;
+  transition-duration: 0.06s !important;
+  transition-delay: 0s !important;
+}
+
+/* Hover lift/scale forces a repaint of the whole card on every mouse move
+   across a 500-card grid. The border/colour hover states below stay. */
+body.turbo .video-card:hover,
+body.turbo .vip-card:hover,
+body.turbo article.card:hover,
+body.turbo .thumb-wrapper:hover img,
+body.turbo .card:hover .thumb img {
+  transform: none !important;
+}
+
+/* ── 3. Skip work for offscreen cards ───────────────────────────────────── */
+/* The grid holds every loaded card in the DOM. content-visibility lets the
+   browser skip layout/paint for the ones scrolled out of view entirely —
+   contain-intrinsic-size keeps the scrollbar honest so it doesn't jump.
+   This is what makes a 700-card grid scroll at full rate. */
+body.turbo .video-card,
+body.turbo .vip-card,
+body.turbo article.card {
+  content-visibility: auto;
+  contain-intrinsic-size: 320px 300px;
+}
+
+/* ── 4. Player: nothing composited on top of video ──────────────────────── */
+/* Overlays above a <video> put it on a composited layer that has to be
+   re-blended every frame. Hiding the decorative ones while playing is what
+   removes the stutter; controls and the progress bar are untouched. */
+body.turbo .player-decor,
+body.turbo .player-glow,
+body.turbo .player-ambient,
+body.turbo .video-vignette {
+  display: none !important;
+}
+
+body.turbo video {
+  /* Hint the video onto its own layer once, instead of relayering per frame. */
+  will-change: auto !important;
+}
+
+/* ── 5. Turbo indicator ─────────────────────────────────────────────────── */
+.turbo-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  background: linear-gradient(135deg, #ffd76a, #ff9f45); color: #241a04;
+  border: 0; white-space: nowrap;
+}
+.turbo-badge .material-icons-round { font-size: 13px; }

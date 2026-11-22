@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nexus · Video Enhancer</title>
+  <link rel="stylesheet" href="/static/video-enhancer/enhancer.css?v=20261011_online">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; background: #12151c; color: #f5f7fb; font: 16px system-ui, sans-serif; }
+    main { max-width: 1000px; margin: auto; }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    p { line-height: 1.5; }
+    .notice { padding: 16px; margin: 16px 0; border: 1px solid #e0a934; border-radius: 10px; background: #403016; }
+    .notice a { color: #fff; font-weight: 700; }
+    .steps { display: flex; flex-wrap: wrap; gap: 10px; padding: 0; list-style: none; }
+    .steps li { flex: 1 1 190px; padding: 12px; background: #202838; border-radius: 8px; }
+    .steps strong { display: block; color: #9fc6ff; margin-bottom: 4px; }
+    .source-picker { display: block; margin: 20px 0 12px; }
+    .player-box { position: relative; width: 100%; aspect-ratio: 16 / 10; max-height: 650px; background: #05070b; }
+    .player-box video { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .hint { color: #c7d0df; font-size: 14px; }
+    .online-source { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+    .online-source input { flex: 1 1 300px; min-width: 0; }
+    .online-source input, .online-source button { padding: 10px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Video Enhancer · ukážka</h1>
+  <div id="file-notice" class="notice" hidden>
+    <strong>Táto stránka je otvorená ako súbor, preto sa AI ovládanie nenačíta.</strong>
+    <p>V priečinku projektu spusti <code>python -m http.server 8766 --directory app</code> a otvor <a href="http://localhost:8766/test-video-enhancer.html">funkčnú ukážku</a>. Potom znovu vyber video.</p>
+  </div>
+  <div id="demo">
+    <p>Všetko spracovanie prebieha v tomto prehliadači. Video sa nikam nenahráva.</p>
+    <ol class="steps">
+      <li><strong>1 · Otvor online video</strong>Vlož MP4 alebo HLS URL, prípadne vyber verejnú ukážku.</li>
+      <li><strong>2 · Enhance</strong>Zapni AI 2×. Ukážka hneď zobrazí dve videá vedľa seba; pôvodné audio hrá ďalej.</li>
+      <li><strong>3 · Porovnaj</strong>Vľavo je celý originál, vpravo celý AI obraz. „Enhanced only“ skryje originál; „Original“ vráti pôvodné video.</li>
+      <li><strong>4 · Export</strong>„Process & Download“ spracuje krátky klip do 30 s a 128 MB. Pri veľkom rozlíšení zobrazí bezpečnostný limit.</li>
+    </ol>
+    <form id="online-source" class="online-source">
+      <input id="online-url" type="url" required aria-label="Online video URL" placeholder="https://…/video.mp4 alebo stream.m3u8">
+      <button type="submit">Prehrať online</button>
+      <button type="button" id="sample-mp4">Ukážka online MP4</button>
+      <button type="button" id="sample-hls">Ukážka online HLS 480p</button>
+    </form>
+    <label class="source-picker">Vybrať MP4 z počítača <input id="source" type="file" accept="video/mp4,video/*"></label>
+    <p id="demo-status" class="hint" aria-live="polite">Po výbere videa stlač Play a potom Enhance pod prehrávačom.</p>
+    <div class="player-overlay"><div class="player-box" data-auto-compare="true"><video controls playsinline></video></div></div>
+    <p class="hint">Ak nie je dostupné WebGPU, Enhance použije iba základné filtre a zobrazí dôvod. AI porovnanie sa vtedy neponúkne.</p>
+  </div>
+</main>
+<script src="/static/hls.min.js"></script>
+<script>
+  if (location.protocol === 'file:') {
+    document.querySelector('#file-notice').hidden = false;
+    document.querySelector('#demo').hidden = true;
+  } else {
+    const video = document.querySelector('video');
+    const status = document.querySelector('#demo-status');
+    let localUrl = null;
+    let hls = null;
+    function resetSource() {
+      video.__nexusEnhancer?.disable();
+      video.pause();
+      hls?.destroy(); hls = null;
+      if (localUrl) URL.revokeObjectURL(localUrl);
+      localUrl = null;
+      delete video.__nexusSourceFile;
+      video.removeAttribute('crossorigin');
+    }
+    function openOnline(url) {
+      const parsed = new URL(url);
+      if (!['http:', 'https:'].includes(parsed.protocol)) { status.textContent = 'Použi HTTP alebo HTTPS video URL.'; return; }
+      resetSource();
+      document.querySelector('#online-url').value = parsed.href;
+      document.querySelector('#source').value = '';
+      status.textContent = 'Načítavam online zdroj… Po spustení zapni Enhance.';
+      if (/\.m3u8$/i.test(parsed.pathname) && window.Hls?.isSupported()) {
+        // MediaSource receives CORS-authorized bytes. No video upload or AI server.
+        hls = new Hls({ maxBufferLength: 15, maxMaxBufferLength: 30 });
+        hls.on(Hls.Events.ERROR, (_event, data) => { if (data.fatal) status.textContent = `HLS sa nedá prehrať: ${data.details}. Over URL a CORS.`; });
+        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => { status.textContent = 'Zdroj je pripravený. Stlač Play a Enhance.'; }));
+        hls.loadSource(parsed.href); hls.attachMedia(video);
+      } else {
+        // Start normal playback; Enhance upgrades direct cross-origin media to CORS.
+        video.src = parsed.href; video.load();
+        video.play().catch(() => { status.textContent = 'Stlač Play. Ak sa video nenačíta, over priamy video odkaz a prístup k zdroju.'; });
+      }
+    }
+    document.querySelector('#online-source').onsubmit = event => { event.preventDefault(); openOnline(document.querySelector('#online-url').value); };
+    document.querySelector('#sample-mp4').onclick = () => openOnline('https://developer.mozilla.org/shared-assets/videos/flower.mp4');
+    document.querySelector('#sample-hls').onclick = () => openOnline('https://test-streams.mux.dev/x36xhzz/url_6/193039199_mp4_h264_aac_hq_7.m3u8');
+    document.querySelector('#source').addEventListener('change', event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      resetSource();
+      video.__nexusSourceFile = file;
+      localUrl = URL.createObjectURL(file); video.src = localUrl;
+      video.load();
+      document.querySelector('#demo-status').textContent = `Vybrané: ${file.name}. Stlač Play a potom Enhance.`;
+    });
+    video.addEventListener('error', () => { status.textContent = 'Zdroj sa nedá prehrať. Over priamu video URL, formát a oprávnenie prístupu.'; });
+    window.addEventListener('pagehide', () => { hls?.destroy(); if (localUrl) URL.revokeObjectURL(localUrl); });
+  }
+</script>
+<script type="module" src="/static/video-enhancer/bootstrap.bundle.js?v=20261011_online"></script>
+</body>
+</html>

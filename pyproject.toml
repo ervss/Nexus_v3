@@ -1,0 +1,16 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--ignore=tests/quality_hunt_ui_preview.py --ignore=tests/nexus_splitscreen_layout.test.py"
+norecursedirs = [
+    ".git",
+    ".venv",
+    "node_modules",
+    "data",
+    "logs",
+    "scratch",
+    "output",
+    "artifacts",
+    "extension",
+    "extensions",
+    "app/static/thumbnails_cache",
+]

@@ -1,0 +1,806 @@
+    <!-- ══ Fusion Hub — Eporner + WhoresHub + PornTrex ════════════════════════ -->
+    <template x-if="ephub.open">
+    <div class="eph-overlay nx-lazy-modal"
+        @keydown.escape.window="ephub.open=false" role="dialog" aria-modal="true" aria-label="Fusion Hub">
+        <div class="eph-shell" @scroll.passive="ephMaybeMore($event)">
+            <!-- top bar -->
+            <div class="eph-top">
+                <div class="eph-brand"><span class="eph-logo">FX</span><span class="eph-brandtxt">Fusion Hub</span>
+                </div>
+                <div class="eph-searchwrap" @click.outside="ephub.histOpen=false">
+                    <span class="material-icons-round">search</span>
+                    <input class="eph-search" type="text" x-model="ephub.q" @input="ephSearchDebounced()"
+                        @keydown.enter="ephub.histOpen=false; ephLoad(false)" @focus="ephub.histOpen=true"
+                        placeholder="Hľadaj čokoľvek… (milf, pov, amateur, meno hviezdy)">
+                    <button class="eph-clear" x-show="ephub.q" @click="ephub.q=''; ephLoad(false)"><span
+                            class="material-icons-round">close</span></button>
+                    <!-- recent searches dropdown -->
+                    <div class="eph-hist" x-show="ephub.histOpen && ephHistoryList().length" x-transition
+                        style="display:none;">
+                        <div class="eph-hist-head">
+                            <span>Nedávne hľadania</span>
+                            <button @click="ephClearHistory()" title="Vymazať históriu"><span
+                                    class="material-icons-round">delete_sweep</span></button>
+                        </div>
+                        <template x-for="hq in ephHistoryList()" :key="hq">
+                            <button class="eph-hist-item" @click="ephPickHistory(hq)">
+                                <span class="material-icons-round">history</span><span x-text="hq"></span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+                <div class="eph-meta" x-show="ephub.total">
+                    <b x-text="ephFilteredItems().length"></b>/<span x-text="ephub.items.length"></span>
+                    · <span x-text="(ephub.total||0).toLocaleString()"></span> celkovo
+                    · <span x-text="ephub.tookMs + 'ms'"></span>
+                </div>
+                <button class="eph-shield" x-show="ephub.source==='eporner'"
+                    :class="(ephub.net.protected || ephub.net.fallback_available) ? 'ok' : 'risk'"
+                    :disabled="ephub.torBusy" @click="ephTorPrimaryAction()"
+                    :title="ephub.net.mode === 'auto'
+                        ? 'Rýchle priame spojenie · Tor sa zapne automaticky pri blokácii'
+                        : (ephub.net.protected ? 'Tor je reálne pripojený · klikni pre novú identitu' : 'Tor nie je pripravený · klikni pre spustenie')">
+                    <span class="material-icons-round"
+                        x-text="ephub.torBusy ? 'sync' : ((ephub.net.protected || ephub.net.fallback_available) ? 'shield' : 'gpp_maybe')"></span>
+                    <span
+                        x-text="ephub.net.mode === 'auto'
+                    ? (ephub.net.fallback_available ? 'AUTO + TOR' : 'AUTO')
+                    : (ephub.net.protected ? ('TOR ' + (ephub.net.tor?.bootstrap_percent || 100) + '%')
+                    : (ephub.net.mode === 'tor-offline' ? 'TOR OFFLINE' : (ephub.net.mode ? ephub.net.mode.toUpperCase() : '…')))"></span>
+                </button>
+                <!-- Follow the current context (performer / playlist / category / search) -->
+                <button class="eph-tool" :class="{'on': ephIsFollowing()}" @click="ephToggleFollow()"
+                    :title="ephIsFollowing() ? 'Prestať sledovať' : 'Sledovať (upozorním na nové videá)'">
+                    <span class="material-icons-round"
+                        x-text="ephIsFollowing() ? 'notifications_active' : 'notification_add'"></span>
+                </button>
+                <!-- Inbox: new videos from everything you follow -->
+                <div class="eph-toolwrap" @click.outside="ephub.inbox.open=false">
+                    <button class="eph-tool" :class="{'has-new': ephInboxTotal()>0}"
+                        @click="ephub.inbox.open=!ephub.inbox.open; ephCheckInbox()" title="Novinky od sledovaných">
+                        <span class="material-icons-round">inbox</span>
+                        <span class="eph-badge-num" x-show="ephInboxTotal()>0" x-text="ephInboxTotal()"></span>
+                    </button>
+                    <div class="eph-inbox" x-show="ephub.inbox.open" x-transition style="display:none;">
+                        <div class="eph-inbox-head">
+                            <span>Sledované <b x-text="'('+ephub.follows.length+')'"></b></span>
+                            <button @click="ephCheckInbox()" :disabled="ephub.inbox.loading" title="Skontrolovať">
+                                <span class="material-icons-round"
+                                    :class="{'eph-spin': ephub.inbox.loading}">refresh</span>
+                            </button>
+                        </div>
+                        <div class="eph-inbox-empty" x-show="!ephub.follows.length">Zatiaľ nič nesleduješ. Otvor
+                            herca/playlist/kategóriu a klikni na zvonček.</div>
+                        <template x-for="f in ephub.follows" :key="f.key">
+                            <div class="eph-inbox-row" :class="{'fresh': (f.new_count||0)>0}">
+                                <button class="eph-inbox-open" @click="ephOpenFollow(f)">
+                                    <span class="material-icons-round"
+                                        x-text="{performer:'person',playlist:'playlist_play',category:'category',search:'search'}[f.kind]||'bookmark'"></span>
+                                    <span class="eph-inbox-name" x-text="f.name"></span>
+                                    <small class="eph-inbox-src" x-text="ephSourceLabel(f.source)"></small>
+                                    <span class="eph-inbox-new" x-show="(f.new_count||0)>0"
+                                        x-text="'+'+f.new_count"></span>
+                                </button>
+                                <button class="eph-inbox-del" @click="ephUnfollow(f)" title="Prestať sledovať"><span
+                                        class="material-icons-round">close</span></button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                <button class="eph-tool" :class="{'on': ephub.view==='watchlater'}"
+                    @click="ephub.view==='watchlater' ? ephBackToFeed() : ephOpenWatchLater()"
+                    :title="'Na neskôr ('+ephub.watchLater.length+')'">
+                    <span class="material-icons-round">bookmark</span>
+                    <span class="eph-badge-num" x-show="ephub.watchLater.length"
+                        x-text="ephub.watchLater.length"></span>
+                </button>
+                <button class="eph-tool" :class="{'on': ephub.view==='continue'}"
+                    @click="ephub.view==='continue' ? ephBackToFeed() : ephOpenContinue()"
+                    x-show="ephub.continueWatch.length" title="Pokračovať v pozeraní">
+                    <span class="material-icons-round">resume</span>
+                </button>
+                <button class="eph-x" @click="ephClose()"><span class="material-icons-round">close</span></button>
+            </div>
+
+            <!-- Source deck: one UI, each source keeps its own adapter and pagination. -->
+            <div class="eph-sourcebar">
+                <template x-for="src in ephub.sources" :key="src.source">
+                    <button class="eph-source" :class="['src-'+src.source, {'on': ephub.source===src.source}]"
+                        @click="ephSetSource(src.source)">
+                        <span class="eph-source-dot"></span>
+                        <span x-text="src.label"></span>
+                        <small x-show="ephub.source===src.source">LIVE</small>
+                    </button>
+                </template>
+                <button class="eph-source eph-4k" :class="{'on': ephub.activeCatName==='4K'}" @click="ephQuick4K()">
+                    <span class="material-icons-round">4k</span> 4K Recent
+                </button>
+                <span class="eph-page-readout">Strana <b x-text="ephub.page"></b> · <span
+                        x-text="ephSourceLabel()"></span></span>
+            </div>
+
+            <!-- Innovative feature: navigable history of the discovery path. -->
+            <div class="eph-trail" x-show="ephub.trail.length">
+                <span class="eph-trail-title"><span class="material-icons-round">route</span> Discovery Trail</span>
+                <template x-for="step in ephub.trail" :key="step.key">
+                    <button @click="ephTrailOpen(step)" :title="step.source + ' · strana ' + step.page">
+                        <span x-text="step.label"></span><small x-text="step.page"></small>
+                    </button>
+                </template>
+            </div>
+
+            <!-- sort + performer finder on one row -->
+            <div class="eph-controls">
+                <div class="eph-seg">
+                    <template
+                        x-for="s in [['relevance','Relevant','manage_search'],['hottest','Hottest','local_fire_department'],['recent','Recent','schedule'],['top_rated','Top Rated','star'],['most_viewed','Most Viewed','visibility'],['longest','Longest','timelapse']]"
+                        :key="s[0]">
+                        <button class="eph-segbtn" :class="{'on': ephub.sort===s[0]}" @click="ephSetSort(s[0])">
+                            <span class="material-icons-round" x-text="s[2]"></span><span x-text="s[1]"></span>
+                        </button>
+                    </template>
+                    <button class="eph-segbtn eph-refresh" @click="ephLoad(false)" :disabled="ephub.loading"
+                        title="Znovu načítať najnovšie videá">
+                        <span class="material-icons-round" :class="{'eph-spin': ephub.loading}">refresh</span>
+                    </button>
+                </div>
+                <div class="eph-seg eph-lensort">
+                    <button class="eph-segbtn" :class="{'on': ephub.lenSort==='desc'}" @click="ephSetLenSort('desc')"
+                        title="Najdlhšie prvé"><span class="material-icons-round">south</span>Dĺžka</button>
+                    <button class="eph-segbtn" :class="{'on': ephub.lenSort==='asc'}" @click="ephSetLenSort('asc')"
+                        title="Najkratšie prvé"><span class="material-icons-round">north</span>Dĺžka</button>
+                </div>
+                <!-- grid density toggle -->
+                <div class="eph-seg eph-density">
+                    <button class="eph-segbtn" :class="{'on': ephub.cols===7}" @click="ephub.cols=7"
+                        title="7 kariet v riadku"><span class="material-icons-round">view_module</span>7</button>
+                    <button class="eph-segbtn" :class="{'on': ephub.cols===5}" @click="ephub.cols=5"
+                        title="5 kariet v riadku"><span class="material-icons-round">grid_view</span>5</button>
+                    <button class="eph-segbtn" :class="{'on': ephub.cols===3}" @click="ephub.cols=3"
+                        title="3 karty v riadku"><span class="material-icons-round">view_agenda</span>3</button>
+                </div>
+                <!-- playlists entry -->
+                <button class="eph-toggle eph-pl-toggle" x-show="ephHas('playlists')"
+                    :class="{'on': ephub.view==='playlists' || ephub.view==='playlist'}"
+                    @click="ephub.view==='playlists' ? ephBackToFeed() : ephOpenPlaylists()"
+                    title="Naposledy upravené playlisty">
+                    <span class="material-icons-round">playlist_play</span> Playlisty
+                </button>
+            </div>
+
+            <!-- category + tag dropdowns (compact — they don't fit as full chip rows) -->
+            <div class="eph-dropbar" x-show="ephub.view!=='playlists'">
+                <!-- CATEGORY dropdown -->
+                <div class="eph-dd" @click.outside="ephub.catBarOpen=false">
+                    <button class="eph-dd-btn" :class="{'active': ephub.activeCat}"
+                        @click="ephub.catBarOpen=!ephub.catBarOpen">
+                        <span class="material-icons-round">category</span>
+                        <span x-text="ephub.activeCat ? ephub.activeCatName : 'Kategórie'"></span>
+                        <span class="eph-dd-badge" x-show="ephub.activeCat">1</span>
+                        <span class="material-icons-round eph-dd-caret"
+                            x-text="ephub.catBarOpen?'expand_less':'expand_more'"></span>
+                    </button>
+                    <div class="eph-dd-panel" x-show="ephub.catBarOpen" x-transition.opacity>
+                        <div class="eph-dd-search">
+                            <span class="material-icons-round">search</span>
+                            <input type="text" x-model="ephub.catFilter" placeholder="Hľadaj kategóriu…">
+                        </div>
+                        <div class="eph-dd-list">
+                            <button class="eph-dd-item eph-dd-recent" :class="{'on': !ephub.activeCat}"
+                                @click="ephClearCat(); ephub.catBarOpen=false">
+                                <span class="material-icons-round">schedule</span> Recent (najnovšie)
+                            </button>
+                            <template x-for="c in ephCatList()" :key="c.slug">
+                                <button class="eph-dd-item" :class="{'on': ephub.activeCat===c.slug}"
+                                    @click="ephSetCat(c.slug, c.name); ephub.catBarOpen=false" x-text="c.name"></button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAG dropdown (from tags on loaded tiles) -->
+                <div class="eph-dd" @click.outside="ephub.tagBarOpen=false">
+                    <button class="eph-dd-btn" :class="{'active': ephub.activeTags.length}"
+                        @click="ephub.tagBarOpen=!ephub.tagBarOpen">
+                        <span class="material-icons-round">label</span>
+                        <span
+                            x-text="ephub.activeTags.length ? (ephub.activeTags.length+' tag'+(ephub.activeTags.length>1?'y':'')) : 'Tagy'"></span>
+                        <span class="material-icons-round eph-dd-caret"
+                            x-text="ephub.tagBarOpen?'expand_less':'expand_more'"></span>
+                    </button>
+                    <div class="eph-dd-panel" x-show="ephub.tagBarOpen" x-transition.opacity>
+                        <div class="eph-dd-search">
+                            <span class="material-icons-round">search</span>
+                            <input type="text" x-model="ephub.tagFilter" placeholder="Hľadaj tag…">
+                        </div>
+                        <div class="eph-dd-chips">
+                            <template x-for="t in ephTagList()" :key="t">
+                                <button class="eph-chip" :class="{'on': ephTagOn(t)}" @click="ephToggleTag(t)"
+                                    x-text="t"></button>
+                            </template>
+                        </div>
+                        <button class="eph-dd-clear" x-show="ephub.activeTags.length" @click="ephub.activeTags=[]">
+                            <span class="material-icons-round">clear_all</span> Zmazať tagy
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- active category + performer combo indicator -->
+            <div class="eph-combo" x-show="ephub.activeCat && (ephub.view==='pornstar' || ephub.view==='playlist')">
+                <span class="material-icons-round">join_inner</span>
+                <span>Filtrujem podľa kategórie <b x-text="ephub.activeCatName"></b> v rámci
+                    <b x-text="ephub.view==='pornstar' ? ephub.psName : ephub.plName"></b></span>
+                <button class="eph-combo-clear" @click="ephClearCat()"><span
+                        class="material-icons-round">close</span></button>
+            </div>
+
+            <!-- performer finder — always visible, prominent -->
+            <div class="eph-pssearch" x-show="ephub.view==='feed' && ephHas('pornstars')">
+                <span class="material-icons-round eph-pssearch-icon">person_search</span>
+                <span class="eph-pssearch-label">Herec / Pornstar:</span>
+                <div class="eph-psinput-wrap">
+                    <input class="eph-psinput" type="text" x-model="ephub.psQuery" @keydown.enter="ephFindPornstar()"
+                        placeholder="Napíš meno herca a stlač Enter…">
+                    <button class="eph-psbtn" @click="ephFindPornstar()" :disabled="ephub.psFinding">
+                        <span class="material-icons-round" :class="{'eph-spin': ephub.psFinding}"
+                            x-text="ephub.psFinding?'progressive_activity':'search'"></span>
+                        <span x-text="ephub.psFinding ? 'Hľadám…' : 'Nájsť'"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- member finder (Camwhores uploader = posted + favourites + playlists) -->
+            <div class="eph-pssearch" x-show="ephub.view==='feed' && ephMemberSupported()"
+                style="background:rgba(14,116,144,.08);border-color:rgba(34,211,238,.28);">
+                <span class="material-icons-round eph-pssearch-icon" style="color:#22d3ee;">account_circle</span>
+                <span class="eph-pssearch-label" style="color:#7fe9f5;">Člen / Uploader:</span>
+                <div class="eph-psinput-wrap">
+                    <input class="eph-psinput" type="text" x-model="ephub.memberQuery"
+                        style="border-color:rgba(34,211,238,.25);" @keydown.enter="ephOpenMember()"
+                        placeholder="Vlož URL člena alebo ID (napr. camwhores.tv/members/7363388 alebo 7363388)…">
+                    <button class="eph-psbtn" @click="ephOpenMember()" :disabled="ephub.memberLoading"
+                        style="background:linear-gradient(135deg,#0e7490,#22d3ee);">
+                        <span class="material-icons-round" :class="{'eph-spin': ephub.memberLoading}"
+                            x-text="ephub.memberLoading?'progressive_activity':'person_search'"></span>
+                        <span x-text="ephub.memberLoading ? 'Načítavam…' : 'Otvoriť'"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- member panel (posted / favourites / playlists of one uploader) -->
+            <div class="eph-memberbar" x-show="ephub.view==='member' && ephub.member">
+                <div class="eph-member-head">
+                    <button class="eph-back" @click="ephBackToFeed()"><span
+                            class="material-icons-round">arrow_back</span> Späť</button>
+                    <img class="eph-member-avatar" x-show="ephub.member?.avatar"
+                        :src="ephMedia(ephub.member?.avatar, ephub.source)" @error="$el.style.display='none'">
+                    <div class="eph-member-info">
+                        <b x-text="ephub.member?.name"></b>
+                        <div class="eph-member-stats">
+                            <span title="Nahrané videá"><span class="material-icons-round">videocam</span> <b
+                                    x-text="(ephub.member?.posted_count||0).toLocaleString()"></b> nahrané</span>
+                            <span title="Obľúbené"><span class="material-icons-round">favorite</span> <b
+                                    x-text="(ephub.member?.favourite_count||0).toLocaleString()"></b> obľúbené</span>
+                            <span title="Verejné / Súkromné"><span class="material-icons-round">public</span> <b
+                                    x-text="ephub.member?.public_count||0"></b> / <span
+                                    x-text="ephub.member?.private_count||0"></span> súkr.</span>
+                            <a :href="ephub.member?.url" target="_blank" rel="noopener noreferrer"
+                                class="eph-member-verify" title="Otvoriť profil na stránke"><span
+                                    class="material-icons-round">open_in_new</span> Overiť</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="eph-member-tabs">
+                    <button :class="{'on': ephub.memberKind==='posted' && ephub.view==='member' && ephub.items.length}"
+                        @click="ephLoadMemberVideos('posted')">
+                        <span class="material-icons-round">videocam</span> Nahrané (<span
+                            x-text="ephub.member?.posted_count||0"></span>)
+                    </button>
+                    <button :class="{'on': ephub.memberKind==='favourites'}" @click="ephLoadMemberVideos('favourites')">
+                        <span class="material-icons-round">favorite</span> Obľúbené (<span
+                            x-text="ephub.member?.favourite_count||0"></span>)
+                    </button>
+                    <template x-for="pl in (ephub.member?.playlists||[])" :key="pl.id">
+                        <button class="eph-member-pl" @click="ephMemberOpenPlaylist(pl)" :title="pl.title">
+                            <span class="material-icons-round">playlist_play</span>
+                            <span x-text="pl.title"></span>
+                            <small x-show="pl.count" x-text="pl.count"></small>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- performer header (pornstar view) -->
+            <div class="eph-psbar" x-show="ephub.view==='pornstar'">
+                <button class="eph-back" @click="ephBackToFeed()"><span class="material-icons-round">arrow_back</span>
+                    Späť na feed</button>
+                <span class="eph-psname"><span class="material-icons-round">person</span> <b
+                        x-text="ephub.psName"></b></span>
+                <span class="eph-pshint">Filtre, kvalita, kategória aj sort platia na videá tohto herca</span>
+            </div>
+
+            <!-- playlist header (single playlist opened) -->
+            <div class="eph-psbar" x-show="ephub.view==='playlist'">
+                <button class="eph-back" @click="ephOpenPlaylists()"><span
+                        class="material-icons-round">arrow_back</span> Späť na playlisty</button>
+                <span class="eph-psname"><span class="material-icons-round">playlist_play</span> <b
+                        x-text="ephub.plName"></b></span>
+                <!-- count badge: how many videos this playlist holds (from the source) -->
+                <span class="eph-plcount" x-show="ephub.total"
+                    :title="'Playlist má ' + (ephub.total||0) + ' videí (načítaných ' + ephub.items.length + ')'">
+                    <span class="material-icons-round">videocam</span>
+                    <b x-text="ephub.items.length"></b>/<span x-text="(ephub.total||0)"></span>
+                </span>
+                <span class="eph-plcount" x-show="ephub.plLatestDate" title="Najnovší upload v tomto playliste">
+                    <span class="material-icons-round">event</span>
+                    <span x-text="'posledný upload: ' + ephub.plLatestDate"></span>
+                </span>
+                <!-- verify: open the real playlist on the source site -->
+                <a class="eph-plverify" x-show="ephPlaylistUrl()" :href="ephPlaylistUrl()" target="_blank"
+                    rel="noopener noreferrer" title="Otvoriť tento playlist priamo na stránke a overiť">
+                    <span class="material-icons-round">open_in_new</span> Overiť na <span
+                        x-text="ephSourceLabel()"></span>
+                </a>
+                <span class="eph-pshint">Videá z playlistu · filtre, kvalita aj import fungujú</span>
+            </div>
+
+            <!-- playlists finder (playlists browser) -->
+            <div class="eph-pssearch" x-show="ephub.view==='playlists'"
+                style="background:rgba(168,85,247,.06);border-color:rgba(168,85,247,.28);">
+                <span class="material-icons-round eph-pssearch-icon" style="color:#a855f7;">playlist_play</span>
+                <span class="eph-pssearch-label" style="color:#c9a8ff;">Playlist:</span>
+                <div class="eph-psinput-wrap">
+                    <input class="eph-psinput" type="text" x-model="ephub.plQuery"
+                        style="border-color:rgba(168,85,247,.25);" @keydown.enter="ephFindPlaylist()"
+                        placeholder="Vlož URL playlistu alebo hľadaj podľa názvu…">
+                    <button class="eph-psbtn" @click="ephFindPlaylist()" :disabled="ephub.plFinding"
+                        style="background:linear-gradient(135deg,#7c3aed,#a855f7);">
+                        <span class="material-icons-round" :class="{'eph-spin': ephub.plFinding}"
+                            x-text="ephub.plFinding?'progressive_activity':'search'"></span>
+                        <span x-text="ephub.plFinding ? 'Hľadám…' : 'Hľadať'"></span>
+                    </button>
+                </div>
+                <!-- multiple title matches → pick one -->
+                <div class="eph-plmatches" x-show="ephub.plMatches.length" x-transition
+                    style="width:100%;margin-top:8px;">
+                    <div style="font-size:11px;color:#c9a8ff;margin-bottom:6px;">
+                        <span x-text="ephub.plMatches.length"></span> zhôd — klikni na playlist:
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                        <template x-for="m in ephub.plMatches" :key="m.id">
+                            <button class="eph-plmatch-chip" @click="ephPickPlaylistMatch(m)"
+                                style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:10px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.08);color:#e6e8ef;cursor:pointer;font-size:12px;max-width:100%;">
+                                <img x-show="m.thumb" :src="ephMedia(m.thumb, ephub.source)"
+                                    @error="$el.style.display='none'"
+                                    style="width:40px;height:24px;object-fit:cover;border-radius:5px;flex-shrink:0;">
+                                <span style="font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                                    x-text="m.name"></span>
+                                <span x-show="m.count" style="color:#a855f7;font-weight:800;flex-shrink:0;"
+                                    x-text="m.count + ' vid'"></span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- instant client-side refinement: min/max duration + include/exclude -->
+            <div class="eph-controls eph-controls2" x-show="ephub.view!=='playlists'">
+                <div class="eph-dur">
+                    <span class="material-icons-round">timer</span>
+                    <input class="eph-durin" type="number" min="0" x-model="ephub.durMin" placeholder="Min">
+                    <span class="eph-durdash">–</span>
+                    <input class="eph-durin" type="number" min="0" x-model="ephub.durMax" placeholder="Max">
+                    <span class="eph-durunit">min</span>
+                </div>
+                <div class="eph-kw">
+                    <span class="material-icons-round">filter_alt</span>
+                    <input class="eph-kwinput" type="text" x-model.debounce.200ms="ephub.inc" placeholder="Obsahuje…">
+                </div>
+                <div class="eph-kw eph-kw-exc">
+                    <span class="material-icons-round">block</span>
+                    <input class="eph-kwinput" type="text" x-model.debounce.200ms="ephub.exc"
+                        placeholder="Bez (oddeľ čiarkou)…">
+                </div>
+                <!-- orientation filter (vertikálna detekcia ako v QS) -->
+                <div class="eph-seg eph-orient" title="Orientácia videa (podľa QS)">
+                    <button class="eph-segbtn" :class="{'on': ephub.orientation==='all'}"
+                        @click="ephSetOrientation('all')" title="Všetky orientácie">
+                        <span class="material-icons-round">screen_rotation</span> Any
+                    </button>
+                    <button class="eph-segbtn" :class="{'on': ephub.orientation==='landscape'}"
+                        @click="ephSetOrientation('landscape')" title="Na šírku (16:9)">
+                        <span class="material-icons-round">crop_landscape</span> Landscape (16:9)
+                    </button>
+                    <button class="eph-segbtn" :class="{'on': ephub.orientation==='portrait'}"
+                        @click="ephSetOrientation('portrait')" title="Potvrdené vertikálne videá (9:16)">
+                        <span class="material-icons-round">crop_portrait</span> Portrait (9:16)
+                    </button>
+                    <button class="eph-segbtn" :class="{'on': ephub.orientation==='portrait_any'}"
+                        @click="ephSetOrientation('portrait_any')" title="Potvrdené aj pravdepodobné vertikálne videá">
+                        <span class="material-icons-round">stay_current_portrait</span> Vertical (all)
+                    </button>
+                    <button class="eph-segbtn" :class="{'on': ephub.orientation==='portrait_estimate'}"
+                        @click="ephSetOrientation('portrait_estimate')" title="Len nepotvrdené odhady (názov, tagy, náhľad)">
+                        <span class="material-icons-round">auto_awesome</span> Likely vertical
+                    </button>
+                </div>
+                <button class="eph-toggle" @click="ephClearFilters()" title="Vyčistiť filtre"><span
+                        class="material-icons-round">restart_alt</span> Reset</button>
+            </div>
+
+            <!-- quality/size: enrich (parse watch page) + quality sort + min-height -->
+            <div class="eph-controls eph-controls2" x-show="ephub.view!=='playlists'">
+                <div class="eph-seg eph-min">
+                    <template x-for="q in [[720,'720p+'],[1080,'1080p+'],[1440,'2K+'],[2160,'4K']]" :key="q[0]">
+                        <button class="eph-segbtn" :class="{'on': ephub.minHeight===q[0]}"
+                            @click="ephSetMinHeight(q[0])" x-text="q[1]"></button>
+                    </template>
+                </div>
+                <!-- exact quality picks (multi-select, e.g. only 1080p + 4K) -->
+                <div class="eph-seg eph-exact" title="Presné kvality — môžeš vybrať viac naraz">
+                    <span class="eph-seg-label">Presne:</span>
+                    <template x-for="q in [[480,'SD'],[720,'720p'],[1080,'1080p'],[1440,'2K'],[2160,'4K']]" :key="q[0]">
+                        <button class="eph-segbtn" :class="{'on': ephub.qualPick.includes(q[0])}"
+                            @click="ephToggleQualPick(q[0])" x-text="q[1]"></button>
+                    </template>
+                </div>
+                <div class="eph-seg eph-qualsort">
+                    <button class="eph-segbtn" :class="{'on': ephub.qualSort==='desc'}" @click="ephSetQualSort('desc')"
+                        title="Najvyššia kvalita prvá"><span class="material-icons-round">high_quality</span>Kvalita
+                        ↓</button>
+                    <button class="eph-segbtn" :class="{'on': ephub.qualSort==='asc'}" @click="ephSetQualSort('asc')"
+                        title="Najnižšia prvá"><span class="material-icons-round">sd</span>Kvalita ↑</button>
+                </div>
+                <div class="eph-seg eph-sizesort">
+                    <button class="eph-segbtn" :class="{'on': ephub.sizeSort==='desc'}" @click="ephSetSizeSort('desc')"
+                        title="Najväčší súbor prvý"><span class="material-icons-round">save</span>Veľkosť ↓</button>
+                    <button class="eph-segbtn" :class="{'on': ephub.sizeSort==='asc'}" @click="ephSetSizeSort('asc')"
+                        title="Najmenší súbor prvý"><span class="material-icons-round">save</span>Veľkosť ↑</button>
+                </div>
+                <div class="eph-prog" x-show="ephub.enriching">
+                    <div class="eph-progbar">
+                        <div class="eph-progfill"
+                            :style="`width:${ephub.enrichTotal ? Math.round(ephub.enrichDone/ephub.enrichTotal*100) : 0}%`">
+                        </div>
+                    </div>
+                    <span class="eph-progtxt" x-text="ephub.enrichDone + ' / ' + ephub.enrichTotal"></span>
+                </div>
+                <button class="eph-toggle eph-fetch" @click="ephEnrich('view')" :disabled="ephub.enriching">
+                    <span class="material-icons-round eph-spin" x-show="ephub.enriching">progressive_activity</span>
+                    <span class="material-icons-round" x-show="!ephub.enriching">high_quality</span>
+                    Full metadata (view)
+                </button>
+                <button class="eph-toggle eph-fetch" x-show="ephub.selected.length" @click="ephEnrich('selected')"
+                    :disabled="ephub.enriching">
+                    <span class="material-icons-round">high_quality</span> Full metadata (vybrané)
+                </button>
+            </div>
+
+            <!-- select-by-enrich-status: pick fetched / failed / not-fetched cards -->
+            <div class="eph-metasel" x-show="ephub.view!=='playlists' && ephub.items.length">
+                <span class="eph-metasel-label"><span class="material-icons-round">rule</span>Vybrať podľa
+                    metadát:</span>
+                <button class="eph-metasel-btn md-ok" @click="ephSelectByStatus('ok')" title="Vybrať úspešne načítané">
+                    <span class="material-icons-round">check_circle</span> Načítané <b
+                        x-text="ephEnrichCounts().ok"></b>
+                </button>
+                <button class="eph-metasel-btn md-fail" @click="ephSelectByStatus('fail')" title="Vybrať zlyhané">
+                    <span class="material-icons-round">error</span> Zlyhané <b x-text="ephEnrichCounts().fail"></b>
+                </button>
+                <button class="eph-metasel-btn md-none" @click="ephSelectByStatus('none')" title="Vybrať nenačítané">
+                    <span class="material-icons-round">radio_button_unchecked</span> Nenačítané <b
+                        x-text="ephEnrichCounts().none"></b>
+                </button>
+                <button class="eph-metasel-btn" x-show="ephub.selected.length" @click="ephClearSelection()"
+                    title="Zrušiť výber">
+                    <span class="material-icons-round">clear</span> Zrušiť (<span
+                        x-text="ephub.selected.length"></span>)
+                </button>
+            </div>
+
+            <!-- active tag pills summary -->
+            <div class="eph-active-tags" x-show="ephub.activeTags.length && ephub.view!=='playlists'">
+                <span class="eph-active-tags-label"><span class="material-icons-round">label</span>Aktívne tagy:</span>
+                <template x-for="t in ephub.activeTags" :key="t">
+                    <button class="eph-chip on" @click="ephToggleTag(t)">
+                        <span x-text="t"></span><span class="material-icons-round eph-chip-rm">close</span>
+                    </button>
+                </template>
+                <button class="eph-toggle" @click="ephub.activeTags=[]" style="padding:4px 10px;font-size:11px;">Zmazať
+                    všetky</button>
+            </div>
+
+            <!-- playlists grid (recently updated) -->
+            <div class="eph-grid eph-cols-5 eph-plgrid" x-show="ephub.view==='playlists'">
+                <template x-for="pl in ephub.playlists" :key="pl.id">
+                    <div class="eph-card eph-plcard" @click="ephOpenPlaylist(pl.id, pl.title)">
+                        <div class="eph-thumbwrap">
+                            <img class="eph-thumb" :src="ephMedia(pl.thumb)" loading="lazy" :alt="pl.title"
+                                @error="ephImgError($event, pl.thumb)">
+                            <span class="eph-pl-count"><span class="material-icons-round">playlist_play</span><span
+                                    x-text="pl.count"></span></span>
+                            <div class="eph-play"><span class="material-icons-round">playlist_play</span></div>
+                        </div>
+                        <div class="eph-body">
+                            <div class="eph-title" x-text="pl.title" :title="pl.title"></div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            <div class="eph-more"
+                x-show="ephub.view==='playlists' && ephub.plHasMore && ephub.playlists.length && !ephub.plLoading">
+                <button @click="ephLoadMorePlaylists()"><span class="material-icons-round">expand_more</span> Ďalšie
+                    playlisty</button>
+            </div>
+            <div class="eph-more" x-show="ephub.view==='playlists' && ephub.plLoading">
+                <span class="material-icons-round eph-spin">progressive_activity</span> Načítavam playlisty…
+            </div>
+
+            <!-- grid -->
+            <div class="eph-grid" :class="'eph-cols-'+ephub.cols" x-ref="ephgrid" x-show="ephub.view!=='playlists'">
+                <template x-for="item in ephFilteredItems()" :key="item.url">
+                    <div class="eph-card"
+                        :class="['src-'+(item.source||ephub.source), 'meta-'+ephEnrichStatus(item), 'radar-'+(ephRadarStatus(item)||'none'), {'sel': ephIsSelected(item)}]">
+                        <div class="eph-thumbwrap" @click="ephPlay(item)">
+                            <img class="eph-thumb" :src="ephMedia(item.thumb,item.source)" loading="lazy"
+                                :alt="item.title" @error="ephBunkrThumbFallback($event, item)"
+                                @load="ephOnThumbLoad($event, item); if (!item.thumb && (item.source || ephub.source) === 'bunkr') ephBunkrThumbFallback($event, item)">
+                            <!-- radar: already in library / discovery queue -->
+                            <span class="eph-radar-badge" :class="'r-'+ephRadarStatus(item)"
+                                x-show="ephRadarStatus(item)==='library' || ephRadarStatus(item)==='discovered'"
+                                :title="ephRadarLabel(item)">
+                                <span class="material-icons-round"
+                                    x-text="ephRadarStatus(item)==='library' ? 'check_circle' : 'schedule'"></span>
+                                <span x-text="ephRadarStatus(item)==='library' ? 'V knižnici' : 'Vo fronte'"></span>
+                            </span>
+                            <!-- orientation evidence badge (ako v QS) -->
+                            <span class="eph-orientation-badge"
+                                :class="{'estimated': ephOrientationBadgeInfo(item).estimated}"
+                                :title="ephOrientationBadgeInfo(item).title"
+                                x-show="ephOrientationBadgeInfo(item).label"
+                                x-text="ephOrientationBadgeInfo(item).label"></span>
+                            <!-- continue-watching progress -->
+                            <div class="eph-resume" x-show="ephResumePos(item.url)>0"
+                                :style="'width:'+Math.min(100, ephResumePos(item.url)/(item.duration_sec||1)*100)+'%'">
+                            </div>
+                            <span class="eph-source-badge" :data-src="item.source || ephub.source"
+                                x-text="ephSourceLabel(item.source)"></span>
+                            <!-- enrich (Full metadata) status dot -->
+                            <span class="eph-meta-dot" :class="'md-'+ephEnrichStatus(item)"
+                                :title="{ok:'Full metadata načítané',fail:'Načítanie zlyhalo',none:'Metadata nenačítané'}[ephEnrichStatus(item)]">
+                                <span class="material-icons-round"
+                                    x-text="{ok:'check_circle',fail:'error',none:'radio_button_unchecked'}[ephEnrichStatus(item)]"></span>
+                            </span>
+                            <span class="eph-ctx-badge" x-show="ephub.view==='playlist'"
+                                title="Z otvoreného playlistu"><span class="material-icons-round">playlist_play</span>
+                                Playlist</span>
+                            <span class="eph-ctx-badge eph-ctx-model" x-show="ephub.view==='pornstar'"
+                                title="Z profilu modelky"><span class="material-icons-round">person</span> Model</span>
+                            <span class="eph-ctx-badge eph-ctx-member" x-show="ephub.view==='member'"
+                                :title="'Z profilu člena '+(ephub.member?.name||'')"><span class="material-icons-round"
+                                    x-text="ephub.memberKind==='favourites'?'favorite':'account_circle'"></span> <span
+                                    x-text="ephub.memberKind==='favourites'?'Obľúbené':'Člen'"></span></span>
+                            <span class="eph-dur-badge" x-show="item.duration" x-text="item.duration"></span>
+                            <span class="eph-qual" x-show="item.quality" x-text="item.quality"></span>
+                            <span class="eph-hd" x-show="item.hd && !item.quality">HD</span>
+                            <div class="eph-play"><span class="material-icons-round">play_arrow</span></div>
+                        </div>
+                        <div class="eph-body" @click="ephToggleSelect(item)" role="button" tabindex="0"
+                            @keydown.enter.prevent="ephToggleSelect(item)">
+                            <!-- upload date (added), shown right under the preview when known -->
+                            <div class="eph-added" x-show="item.added">
+                                <span class="material-icons-round">event</span><span
+                                    x-text="ephDate(item.added)"></span>
+                            </div>
+                            <div class="eph-title" x-text="item.title" :title="item.title"></div>
+                            <div class="eph-stats">
+                                <span x-show="item.views"><span class="material-icons-round">visibility</span><span
+                                        x-text="ephViews(item.views)"></span></span>
+                                <span x-show="item.rating"><span class="material-icons-round">star</span><span
+                                        x-text="item.rating"></span></span>
+                                <span class="eph-size-stat" x-show="item.size_mb"><span
+                                        class="material-icons-round">save</span><span
+                                        x-text="ephSizeLabel(item)"></span></span>
+                            </div>
+                            <!-- uploader (member) — from enrich; click opens their profile -->
+                            <button class="eph-uploader" x-show="item.uploader"
+                                @click.stop="ephOpenMemberFromCard(item)" :disabled="!item.uploaderId"
+                                :title="item.uploaderId ? ('Otvoriť profil člena '+item.uploader) : item.uploader">
+                                <span class="material-icons-round">account_circle</span><span
+                                    x-text="item.uploader"></span>
+                            </button>
+                            <!-- the video's OWN categories (from enrich) — click to open that category -->
+                            <div class="eph-vidcats" x-show="item.categories && item.categories.length">
+                                <template x-for="c in (item.categories||[])" :key="c.slug">
+                                    <button class="eph-vidcat" @click.stop="ephOpenCategory(c.slug, c.name)"
+                                        x-text="c.name" title="Otvoriť kategóriu"></button>
+                                </template>
+                            </div>
+                            <!-- the video's OWN tags (from enrich) — click to filter -->
+                            <div class="eph-vidtags" x-show="item.videoTags && item.videoTags.length">
+                                <template x-for="t in (item.videoTags||[])" :key="t">
+                                    <button class="eph-vidtag" :class="{'on': ephTagOn(t)}"
+                                        @click.stop="ephToggleTag(t)" x-text="t"></button>
+                                </template>
+                            </div>
+                            <!-- performer chips -->
+                            <div class="eph-stars" x-show="item.performers && item.performers.length">
+                                <template x-for="p in (item.performers||[])" :key="p.slug">
+                                    <button class="eph-star" @click.stop="ephOpenPornstar(p.slug, p.name)"
+                                        title="Zobraziť všetky videá herca">
+                                        <span class="material-icons-round">person</span><span x-text="p.name"></span>
+                                    </button>
+                                </template>
+                            </div>
+                            <!-- tag chips on card — click to filter -->
+                            <div class="eph-card-tags">
+                                <template x-for="t in (item.tags||[]).slice(0,5)" :key="t">
+                                    <button class="eph-card-tag" :class="{'on': ephTagOn(t)}"
+                                        @click.stop="ephToggleTag(t)" x-text="t"></button>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="eph-actions">
+                            <button class="eph-rel" @click.stop="ephPlay(item)" title="Prehrať + podobné videá">
+                                <span class="material-icons-round">hub</span>
+                            </button>
+                            <button class="eph-wl" :class="{'on': ephInWatchLater(item)}"
+                                @click.stop="ephToggleWatchLater(item)"
+                                :title="ephInWatchLater(item) ? 'Odobrať zo zoznamu na neskôr' : 'Uložiť na neskôr'">
+                                <span class="material-icons-round"
+                                    x-text="ephInWatchLater(item) ? 'bookmark' : 'bookmark_border'"></span>
+                            </button>
+                            <a class="eph-src" :href="item.url" target="_blank" rel="noopener noreferrer" @click.stop
+                                :title="'Otvoriť zdroj na ' + ephSourceLabel(item.source)">
+                                <span class="material-icons-round">open_in_new</span>
+                            </a>
+                            <button class="eph-sel" :class="{'on': ephIsSelected(item)}"
+                                @click.stop="ephToggleSelect(item)" title="Vybrať">
+                                <span class="material-icons-round"
+                                    x-text="ephIsSelected(item)?'check_circle':'radio_button_unchecked'"></span>
+                            </button>
+                            <button class="eph-imp" @click.stop="ephImportOne(item)" title="Import do knižnice">
+                                <span class="material-icons-round">download</span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- skeleton / empty / load more -->
+            <div class="eph-grid eph-cols-7" x-show="ephub.view!=='playlists' && ephub.loading && !ephub.items.length">
+                <template x-for="i in 14">
+                    <div class="eph-card eph-skel"></div>
+                </template>
+            </div>
+            <div class="eph-empty" x-show="ephub.view!=='playlists' && !ephub.loading && !ephFilteredItems().length">
+                <span class="material-icons-round">search_off</span>
+                <h3>Žiadne výsledky</h3>
+                <p>Skús iné kľúčové slovo alebo uvoľni filtre.</p>
+                <button class="eph-empty-btn" @click="ephClearFilters()"><span
+                        class="material-icons-round">restart_alt</span> Vyčistiť filtre</button>
+            </div>
+            <!-- Load-more: append the next page(s) UNDER the current cards (grows the grid) -->
+            <div class="eph-loadmore-wrap"
+                x-show="ephub.view!=='playlists' && ephub.items.length && ephub.hasMore && !ephub.loading">
+                <button class="eph-loadmore" @click="ephLoadMore()">
+                    <span class="material-icons-round">expand_more</span>
+                    Načítať ďalšie videá
+                    <small
+                        x-text="ephub.total ? ('· ' + ephub.items.length + ' / ' + ephub.total) : ('· ' + ephub.items.length)"></small>
+                </button>
+                <div class="eph-loadmore-n">
+                    <input type="number" min="1" max="50" x-model.number="ephub.loadMoreN"
+                        @keydown.enter="ephLoadMorePages(ephub.loadMoreN)" title="Počet strán na načítanie">
+                    <button class="eph-loadmore-nbtn" @click="ephLoadMorePages(ephub.loadMoreN)"
+                        :title="'Načítať ' + ephub.loadMoreN + ' strán naraz'">
+                        <span class="material-icons-round">playlist_add</span>
+                        <span x-text="'Načítať ' + (ephub.loadMoreN||1) + ' strán'"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="eph-more" x-show="ephub.view!=='playlists' && ephub.loading && ephub.items.length">
+                <span class="material-icons-round eph-spin">progressive_activity</span> Načítavam ďalšie…
+            </div>
+            <!-- Numbered pagination kept as a secondary way to jump around -->
+            <nav class="eph-pagination" x-show="ephub.view!=='playlists' && ephub.items.length && !ephub.loading"
+                aria-label="Stránky výsledkov">
+                <button @click="ephGoPage(ephub.page-1)" :disabled="ephub.page<=1"><span
+                        class="material-icons-round">chevron_left</span> Predchádzajúca</button>
+                <template x-for="p in ephPageNumbers()" :key="p">
+                    <button class="eph-page" :class="{'on': p===ephub.page}" @click="ephGoPage(p)" x-text="p"></button>
+                </template>
+                <button @click="ephGoPage(ephub.page+1)" :disabled="!ephub.hasMore">Ďalšia <span
+                        class="material-icons-round">chevron_right</span></button>
+            </nav>
+        </div>
+
+        <!-- in-hub player -->
+        <div class="eph-player" x-show="ephub.player.open" @click.self="ephClosePlayer()">
+            <div class="eph-player-box" :class="{'is-portrait': ephub.player.portrait}">
+                <div class="eph-player-top">
+                    <div><small x-text="ephSourceLabel(ephub.player.source)"></small><span
+                            x-text="ephub.player.title"></span></div>
+                    <button @click="ephClosePlayer()"><span class="material-icons-round">close</span></button>
+                </div>
+                <div class="eph-viewer-layout">
+                    <div class="eph-viewer-stage">
+                        <div class="eph-player-state" x-show="ephub.player.loading"><span
+                                class="material-icons-round eph-spin">progressive_activity</span> Načítavam stream…
+                        </div>
+                        <div class="eph-player-state eph-err" x-show="ephub.player.error" x-text="ephub.player.error">
+                        </div>
+                        <video x-ref="ephvideo" class="eph-video" controls playsinline
+                            x-show="!ephub.player.loading && !ephub.player.error"></video>
+                    </div>
+                    <aside class="eph-related">
+                        <div class="eph-related-tabs">
+                            <button :class="{'on':ephub.related.mode==='same'}"
+                                @click="ephLoadRelated(ephub.player.item,'same')">Z tohto webu</button>
+                            <button :class="{'on':ephub.related.mode==='cross'}"
+                                @click="ephLoadRelated(ephub.player.item,'cross')">Naprieč hubmi</button>
+                        </div>
+                        <div class="eph-related-state" x-show="ephub.related.loading"><span
+                                class="material-icons-round eph-spin">progressive_activity</span> Hľadám podobné…</div>
+                        <div class="eph-related-list" x-show="!ephub.related.loading">
+                            <template x-for="rel in ephub.related.items" :key="rel.url">
+                                <button class="eph-related-card" @click="ephPlay(rel)">
+                                    <img :src="ephMedia(rel.thumb,rel.source)"
+                                        @error="ephImgError($event,rel.thumb,rel.source)" loading="lazy">
+                                    <span><b x-text="rel.title"></b><small
+                                            x-text="ephSourceLabel(rel.source)"></small></span>
+                                </button>
+                            </template>
+                            <p x-show="!ephub.related.items.length">Nenašli sa ďalšie výsledky.</p>
+                        </div>
+                        <!-- Hub <-> library bridge: similar videos you ALREADY own -->
+                        <div class="eph-libsim" x-show="ephub.libSim.loading || ephub.libSim.items.length">
+                            <div class="eph-libsim-head">
+                                <span class="material-icons-round">video_library</span>
+                                <b>Z tvojej knižnice</b>
+                                <span class="material-icons-round eph-spin" x-show="ephub.libSim.loading"
+                                    style="margin-left:auto;font-size:15px;">progressive_activity</span>
+                            </div>
+                            <div class="eph-libsim-list">
+                                <template x-for="lv in ephub.libSim.items" :key="lv.id">
+                                    <a class="eph-libsim-card" :href="'/v1?video='+lv.id" target="_blank" rel="noopener"
+                                        :title="lv.title">
+                                        <img :src="ephLibThumb(lv)" loading="lazy"
+                                            @error.once="$event.target.src='/static/placeholder.jpg'">
+                                        <span><b x-text="lv.title"></b><small
+                                                x-text="Math.round((lv.score||0)*100)+'% zhoda'"></small></span>
+                                    </a>
+                                </template>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </div>
+
+        <!-- bulk bar -->
+        <div class="eph-bulk" x-show="ephub.selected.length" x-transition>
+            <span class="eph-focus-label"><small>FOCUS REEL</small><b
+                    x-text="ephub.selected.length + ' vybraných'"></b></span>
+            <div class="eph-focus-thumbs">
+                <template x-for="item in ephub.items.filter(i=>ephub.selected.includes(i.url)).slice(0,5)"
+                    :key="item.url">
+                    <img :src="ephMedia(item.thumb,item.source)" :alt="item.title">
+                </template>
+            </div>
+            <button class="eph-bulk-import" @click="ephImportSelected()"><span
+                    class="material-icons-round">download</span> Import do knižnice</button>
+            <button class="eph-bulk-refetch" @click="ephSplitSelected()"><span
+                    class="material-icons-round">view_column</span> Split-Screen</button>
+            <button class="eph-bulk-refetch" @click="ephRefetchSelected()" :disabled="ephub.enriching"
+                title="Znovu načítať Full metadata pre vybrané">
+                <span class="material-icons-round" :class="{'eph-spin': ephub.enriching}">sync</span> Refetch
+            </button>
+            <button class="eph-bulk-remove" @click="ephRemoveSelected()" title="Odstrániť vybrané karty z gridu">
+                <span class="material-icons-round">delete_sweep</span> Odstrániť
+            </button>
+            <button class="eph-bulk-clear" @click="ephClearSelection()">Zrušiť</button>
+        </div>
+    </div>
+</template>

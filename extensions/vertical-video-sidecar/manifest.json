@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "Vertical Video Sidecar",
+  "version": "1.2.1",
+  "description": "A compact side panel queue for videos you discover while browsing.",
+  "permissions": ["sidePanel", "storage", "contextMenus", "tabs", "downloads", "declarativeNetRequestWithHostAccess"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "service-worker.js", "type": "module" },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Add a video to Sidecar",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "side_panel": { "default_path": "sidepanel.html" },
+  "externally_connectable": {
+    "ids": ["cdndggofdoabgggdaefikebgjliknljb", "*"]
+  },
+  "web_accessible_resources": [{
+    "resources": ["sidepanel.html", "sidepanel.js", "sidepanel.css", "seek.css", "vendor/hls.min.js"],
+    "matches": ["<all_urls>"]
+  }],
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content-script.js"],
+    "run_at": "document_idle",
+    "all_frames": true
+  }],
+  "commands": {
+    "add-current-video": {
+      "suggested_key": { "default": "Alt+Shift+V" },
+      "description": "Add the last selected video to Sidecar"
+    }
+  }
+}

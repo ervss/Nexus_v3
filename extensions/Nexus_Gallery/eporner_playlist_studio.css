@@ -1,0 +1,613 @@
+:root {
+    --eps-red: #c9362b;
+    --eps-cyan: #58d4c9;
+    --eps-gold: #e0b95f;
+    --eps-ink: #e7edf2;
+    --eps-muted: #86929e;
+    --eps-panel: #15191d;
+}
+
+html.nexus-ep-studio-open,
+html.nexus-ep-studio-open body {
+    overflow: hidden !important;
+}
+
+html.nexus-ep-studio-open #float_preview,
+html.nexus-ep-studio-open #previewdiv,
+html.nexus-ep-studio-open #mbpreview,
+html.nexus-ep-studio-open #gifhover,
+html.nexus-ep-studio-open #imghover {
+    display: none !important;
+}
+
+#nexus-ep-playlist-launcher {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 2147483645;
+    width: 54px;
+    height: 54px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--eps-red);
+    color: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+    cursor: pointer;
+    font: 800 23px/1 "Segoe UI", sans-serif;
+}
+
+#nexus-ep-playlist-launcher b {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 4px;
+    border-radius: 10px;
+    background: #fff;
+    color: #111;
+    font: 800 11px/19px "Segoe UI", sans-serif;
+}
+
+.nexus-ep-playlist-picker {
+    position: absolute !important;
+    top: 6px !important;
+    left: 6px !important;
+    z-index: 30 !important;
+    display: inline-flex !important;
+    gap: 5px !important;
+    align-items: center !important;
+    padding: 4px 7px !important;
+    border: 1px solid rgba(88, 212, 201, .7) !important;
+    border-radius: 5px !important;
+    background: rgba(8, 13, 16, .92) !important;
+    color: #d8fffb !important;
+    font: 700 11px/1 "Segoe UI", sans-serif !important;
+    cursor: pointer !important;
+}
+
+.nexus-ep-playlist-picker input { accent-color: var(--eps-cyan); }
+
+.nexus-ep-playlist-fast-fetch {
+    position: absolute !important;
+    top: 6px !important;
+    right: 6px !important;
+    z-index: 30 !important;
+    border: 1px solid rgba(255, 191, 73, .75) !important;
+    border-radius: 5px !important;
+    padding: 4px 7px !important;
+    background: rgba(41, 29, 8, .94) !important;
+    color: #ffe2a0 !important;
+    font: 750 10px/1 "Segoe UI", sans-serif !important;
+    cursor: pointer !important;
+}
+.nexus-ep-playlist-fast-fetch:disabled { opacity: .62 !important; cursor: wait !important; }
+.nexus-ep-playlist-fast-summary {
+    position: absolute !important;
+    right: 6px !important;
+    bottom: 6px !important;
+    z-index: 30 !important;
+    max-width: calc(100% - 12px) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    border: 1px solid rgba(88, 212, 201, .6) !important;
+    border-radius: 4px !important;
+    padding: 4px 6px !important;
+    background: rgba(5, 12, 14, .92) !important;
+    color: #d9fffb !important;
+    font: 750 10px/1.1 "Segoe UI", sans-serif !important;
+}
+.nexus-ep-playlist-fast-summary[data-error="1"] {
+    border-color: rgba(255, 112, 100, .82) !important;
+    color: #ffd0cb !important;
+    background: rgba(47, 12, 10, .94) !important;
+}
+
+.nexus-ep-playlist-basket {
+    margin: 10px 0 2px;
+    padding: 10px;
+    border: 1px solid rgba(88, 212, 201, .25);
+    background: #0c1517;
+}
+
+.nexus-ep-playlist-basket > strong,
+.nexus-ep-playlist-basket > span {
+    display: block;
+    color: var(--eps-ink);
+    font: 750 12px/1.4 "Segoe UI", sans-serif;
+}
+
+.nexus-ep-playlist-basket > span { color: var(--eps-muted); font-weight: 500; }
+.nexus-ep-playlist-basket > div { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+.nexus-ep-playlist-basket button {
+    min-height: 31px;
+    border: 1px solid rgba(88, 212, 201, .32);
+    border-radius: 5px;
+    background: #172427;
+    color: #d8fffb;
+    font: 700 11px "Segoe UI", sans-serif;
+    cursor: pointer;
+}
+.nexus-ep-playlist-basket button:disabled { opacity: .38; cursor: default; }
+
+/* Isolate overlay from Eporner listing CSS (article/h3/img/main collapses cards into stripes). */
+#nexus-ep-playlist-studio,
+#nexus-ep-playlist-studio * {
+    box-sizing: border-box !important;
+    float: none !important;
+    max-height: none !important;
+}
+
+#nexus-ep-playlist-studio {
+    display: none !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483647 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #0b0e10 !important;
+    color: var(--eps-ink) !important;
+    font: 400 13px/1.4 "Segoe UI Variable", "Segoe UI", sans-serif !important;
+    --eps-cols: 6;
+}
+
+#nexus-ep-playlist-studio.open {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto minmax(0, 1fr) !important;
+}
+
+#nexus-ep-playlist-studio[data-layout="comfort"] { --eps-cols: 4; }
+#nexus-ep-playlist-studio[data-layout="standard"] { --eps-cols: 6; }
+#nexus-ep-playlist-studio[data-layout="compact"] { --eps-cols: 8; }
+#nexus-ep-playlist-studio[data-layout="dense"] { --eps-cols: 10; }
+#nexus-ep-playlist-studio[data-layout="list"] { --eps-cols: 1; }
+
+#nexus-ep-playlist-studio [data-role="chrome"] {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 10px 14px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #272d32 !important;
+    background: #111518 !important;
+    min-height: 52px !important;
+    height: auto !important;
+}
+
+#nexus-ep-playlist-studio [data-role="brand"] {
+    font: 800 16px/1.2 "Segoe UI", sans-serif !important;
+    color: #fff !important;
+    white-space: nowrap !important;
+    margin: 0 !important;
+}
+
+#nexus-ep-playlist-studio [data-role="summary"] {
+    display: flex !important;
+    gap: 10px !important;
+    flex: 1 !important;
+    color: var(--eps-muted) !important;
+    font-size: 11px !important;
+    overflow: auto !important;
+}
+
+#nexus-ep-playlist-studio [data-role="summary"] span { white-space: nowrap !important; }
+#nexus-ep-playlist-studio [data-role="summary"] b { color: var(--eps-ink) !important; font-weight: 800 !important; }
+
+#nexus-ep-playlist-studio input[type="search"],
+#nexus-ep-playlist-studio select {
+    min-height: 34px !important;
+    height: 34px !important;
+    border: 1px solid #343d44 !important;
+    border-radius: 5px !important;
+    background: #1a2025 !important;
+    color: var(--eps-ink) !important;
+    padding: 0 10px !important;
+    margin: 0 !important;
+}
+
+#nexus-ep-playlist-studio input[type="search"] { width: min(28vw, 360px) !important; }
+
+#nexus-ep-playlist-studio button {
+    min-height: 33px !important;
+    height: auto !important;
+    border: 1px solid #343d44 !important;
+    border-radius: 5px !important;
+    background: #1a2025 !important;
+    color: var(--eps-ink) !important;
+    padding: 0 11px !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    font: 650 12px/1 "Segoe UI", sans-serif !important;
+    width: auto !important;
+}
+
+#nexus-ep-playlist-studio button:hover,
+#nexus-ep-playlist-studio button[data-active="1"] { border-color: var(--eps-cyan) !important; color: #d8fffb !important; }
+#nexus-ep-playlist-studio [data-role="fast-scan"] { background: #16433f !important; border-color: #277c75 !important; }
+#nexus-ep-playlist-studio [data-role="deep-resolve"] { color: #ffe7a7 !important; border-color: #715b2c !important; }
+
+#nexus-ep-playlist-studio [data-role="toolbar"] {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 7px !important;
+    padding: 8px 14px 10px !important;
+    border-bottom: 1px solid #20262b !important;
+    background: #0e1215 !important;
+    min-height: 0 !important;
+    height: auto !important;
+}
+
+#nexus-ep-playlist-studio [data-role="bulk"] {
+    flex: 1 1 100% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin-top: 6px !important;
+    padding-top: 8px !important;
+    border-top: 1px solid #20262b !important;
+}
+
+#nexus-ep-playlist-studio [data-role="bulk-count"] {
+    color: var(--eps-cyan) !important;
+    font: 700 11px/1.3 "Segoe UI", sans-serif !important;
+    margin-right: 6px !important;
+}
+
+#nexus-ep-playlist-studio [data-role="bulk"] button {
+    min-height: 30px !important;
+    font-size: 11px !important;
+}
+
+#nexus-ep-playlist-studio [data-role="actions"] {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 7px !important;
+    flex: 1 1 auto !important;
+}
+
+#nexus-ep-playlist-studio [data-role="hint"] {
+    flex: 1 1 100% !important;
+    margin: 4px 0 0 !important;
+    padding: 8px 10px !important;
+    border-radius: 6px !important;
+    background: #141b20 !important;
+    color: #c5d0d6 !important;
+    font: 500 12px/1.45 "Segoe UI", sans-serif !important;
+    height: auto !important;
+}
+
+#nexus-ep-playlist-studio [data-role="status"] {
+    flex: 1 1 220px !important;
+    margin: 0 !important;
+    color: var(--eps-muted) !important;
+    font: 600 12px/1.35 "Segoe UI", sans-serif !important;
+    height: auto !important;
+}
+
+#nexus-ep-playlist-studio details { position: relative !important; }
+#nexus-ep-playlist-studio details > summary {
+    min-height: 33px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    list-style: none !important;
+    border: 1px solid #343d44 !important;
+    border-radius: 5px !important;
+    background: #1a2025 !important;
+    color: var(--eps-ink) !important;
+    padding: 0 11px !important;
+    cursor: pointer !important;
+    font: 650 12px/1 "Segoe UI", sans-serif !important;
+}
+#nexus-ep-playlist-studio details > summary::-webkit-details-marker { display: none !important; }
+#nexus-ep-playlist-studio details[open] > div {
+    position: absolute !important;
+    z-index: 6 !important;
+    top: calc(100% + 6px) !important;
+    left: 0 !important;
+    display: grid !important;
+    gap: 6px !important;
+    min-width: 220px !important;
+    padding: 8px !important;
+    border: 1px solid #343d44 !important;
+    border-radius: 6px !important;
+    background: #151b1f !important;
+}
+#nexus-ep-playlist-studio details[open] > div button { width: 100% !important; text-align: left !important; }
+
+#nexus-ep-playlist-studio .nexus-ep-studio-card[data-selected="1"] {
+    border-color: var(--eps-cyan) !important;
+    box-shadow: inset 3px 0 0 var(--eps-cyan) !important;
+}
+#nexus-ep-playlist-studio [data-role="status"][data-error="1"] { color: #ff8076 !important; }
+
+#nexus-ep-playlist-studio [data-role="grid"] {
+    display: grid !important;
+    grid-template-columns: repeat(var(--eps-cols), minmax(170px, 1fr)) !important;
+    grid-auto-rows: min-content !important;
+    align-content: start !important;
+    align-items: start !important;
+    gap: 12px !important;
+    padding: 14px !important;
+    overflow: auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    width: 100% !important;
+    background: #0b0e10 !important;
+}
+
+#nexus-ep-playlist-studio[data-layout="list"] [data-role="grid"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+}
+
+#nexus-ep-playlist-studio .nexus-ep-studio-card {
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 168px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid #242b30 !important;
+    border-radius: 8px !important;
+    background: var(--eps-panel) !important;
+    cursor: pointer !important;
+}
+
+#nexus-ep-playlist-studio .nexus-ep-studio-card:hover { border-color: #45525c !important; }
+
+#nexus-ep-playlist-studio .nexus-ep-studio-thumb {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 96px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #060708 !important;
+    flex: 0 0 auto !important;
+}
+
+/* In-flow spacer: padding-% fails when the thumb itself is border-box + height 0. */
+#nexus-ep-playlist-studio .nexus-ep-studio-ratio {
+    display: block !important;
+    width: 100% !important;
+    height: 0 !important;
+    padding: 56.25% 0 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    box-sizing: content-box !important;
+    pointer-events: none !important;
+}
+
+#nexus-ep-playlist-studio .nexus-ep-studio-thumb > img,
+#nexus-ep-playlist-studio .nexus-ep-studio-thumb > video,
+#nexus-ep-playlist-studio .nexus-ep-studio-thumb > .empty-thumb {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    object-fit: cover !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+#nexus-ep-playlist-studio .nexus-ep-studio-thumb > video { opacity: 0 !important; }
+#nexus-ep-playlist-studio .nexus-ep-studio-card:hover .nexus-ep-studio-thumb > video { opacity: 1 !important; }
+
+#nexus-ep-playlist-studio .empty-thumb {
+    display: grid !important;
+    place-items: center !important;
+    color: #5d6a74 !important;
+    font-size: 28px !important;
+    background: #101418 !important;
+}
+
+#nexus-ep-playlist-studio .nexus-ep-studio-thumb > label {
+    position: absolute !important;
+    top: 6px !important;
+    left: 6px !important;
+    z-index: 2 !important;
+    display: flex !important;
+    gap: 4px !important;
+    padding: 4px 6px !important;
+    background: rgba(5, 8, 10, .88) !important;
+    border-radius: 4px !important;
+    font: 700 10px/1 "Segoe UI", sans-serif !important;
+    color: #fff !important;
+}
+
+#nexus-ep-playlist-studio .nexus-ep-studio-thumb > label input { accent-color: var(--eps-cyan); }
+#nexus-ep-playlist-studio .nexus-ep-studio-badge {
+    position: absolute !important;
+    right: 5px !important;
+    bottom: 5px !important;
+    z-index: 2 !important;
+    padding: 2px 5px !important;
+    border-radius: 3px !important;
+    background: rgba(87, 64, 14, .9) !important;
+    color: #ffe6a0 !important;
+    font: 750 10px/1.2 "Segoe UI", sans-serif !important;
+}
+
+#nexus-ep-playlist-studio .nexus-ep-studio-body {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    padding: 8px 9px 10px !important;
+    min-height: 58px !important;
+    height: auto !important;
+}
+
+#nexus-ep-playlist-studio .nexus-ep-studio-title {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #f2f5f7 !important;
+    font: 700 12px/1.35 "Segoe UI", sans-serif !important;
+    height: auto !important;
+    max-height: 2.7em !important;
+}
+
+#nexus-ep-playlist-studio .nexus-ep-studio-meta,
+#nexus-ep-playlist-studio .nexus-ep-studio-file {
+    display: block !important;
+    margin: 0 !important;
+    color: var(--eps-muted) !important;
+    font: 500 10px/1.3 "Segoe UI", sans-serif !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    height: auto !important;
+}
+
+#nexus-ep-playlist-studio .nexus-ep-studio-empty {
+    grid-column: 1 / -1 !important;
+    padding: 12vh 20px !important;
+    text-align: center !important;
+    color: var(--eps-muted) !important;
+    font: 500 14px/1.5 "Segoe UI", sans-serif !important;
+}
+
+#nexus-ep-playlist-studio[data-layout="list"] .nexus-ep-studio-card {
+    flex-direction: row !important;
+    min-height: 118px !important;
+}
+
+#nexus-ep-playlist-studio[data-layout="list"] .nexus-ep-studio-thumb {
+    width: 210px !important;
+    flex: 0 0 210px !important;
+    height: 118px !important;
+    min-height: 118px !important;
+    padding: 0 !important;
+}
+
+#nexus-ep-playlist-studio[data-layout="list"] .nexus-ep-studio-ratio {
+    padding-top: 118px !important;
+}
+
+#nexus-ep-playlist-studio[data-layout="list"] .nexus-ep-studio-body {
+    justify-content: center !important;
+    min-height: 0 !important;
+}
+
+#nexus-ep-playlist-studio[data-layout="dense"] .nexus-ep-studio-body { min-height: 48px !important; padding: 6px 7px 8px !important; }
+#nexus-ep-playlist-studio[data-layout="dense"] .nexus-ep-studio-title { font-size: 11px !important; }
+
+#nexus-ep-playlist-studio [data-role="detail"],
+#nexus-ep-playlist-studio [data-role="help"] {
+    position: absolute !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: min(480px, 92vw) !important;
+    padding: 18px !important;
+    overflow: auto !important;
+    border: 0 !important;
+    background: #11161a !important;
+    box-shadow: 0 0 50px rgba(0, 0, 0, .45) !important;
+    transform: translateX(105%) !important;
+    transition: transform .2s ease !important;
+    z-index: 3 !important;
+}
+
+#nexus-ep-playlist-studio [data-role="detail"] {
+    right: 0 !important;
+    border-left: 1px solid #39434a !important;
+}
+
+#nexus-ep-playlist-studio [data-role="help"] {
+    left: 0 !important;
+    right: auto !important;
+    transform: translateX(-105%) !important;
+    border-right: 1px solid #39434a !important;
+}
+
+#nexus-ep-playlist-studio [data-role="detail"].open,
+#nexus-ep-playlist-studio [data-role="help"].open { transform: translateX(0) !important; }
+
+#nexus-ep-playlist-studio [data-role="detail"] > button,
+#nexus-ep-playlist-studio [data-role="help"] > button {
+    float: right !important;
+    font-size: 20px !important;
+}
+
+#nexus-ep-playlist-studio [data-role="detail"] img {
+    width: 100% !important;
+    height: auto !important;
+    margin-top: 12px !important;
+    aspect-ratio: 16/9 !important;
+    object-fit: contain !important;
+    background: #000 !important;
+}
+
+#nexus-ep-playlist-studio [data-role="detail"] .nexus-ep-studio-heading,
+#nexus-ep-playlist-studio [data-role="help"] .nexus-ep-studio-heading {
+    font: 800 18px/1.3 "Segoe UI", sans-serif !important;
+    color: #fff !important;
+    margin: 12px 0 10px !important;
+}
+
+#nexus-ep-playlist-studio [data-role="detail"] dl {
+    display: grid !important;
+    grid-template-columns: 84px 1fr !important;
+    gap: 8px !important;
+    font-size: 12px !important;
+}
+
+#nexus-ep-playlist-studio [data-role="detail"] dt { color: var(--eps-muted) !important; margin: 0 !important; }
+#nexus-ep-playlist-studio [data-role="detail"] dd { margin: 0 !important; overflow-wrap: anywhere !important; }
+#nexus-ep-playlist-studio [data-role="detail"] a,
+#nexus-ep-playlist-studio [data-role="help"] a { color: var(--eps-cyan) !important; }
+
+#nexus-ep-playlist-studio [data-role="help"] .nexus-ep-studio-help-block {
+    margin: 0 0 14px !important;
+    color: #c5d0d8 !important;
+    font: 500 13px/1.5 "Segoe UI", sans-serif !important;
+}
+
+#nexus-ep-playlist-studio [data-role="help"] .nexus-ep-studio-help-block b {
+    display: block !important;
+    color: #fff !important;
+    margin-bottom: 4px !important;
+}
+
+@media (max-width: 1200px) {
+    #nexus-ep-playlist-studio[data-layout="dense"] { --eps-cols: 8; }
+    #nexus-ep-playlist-studio[data-layout="compact"] { --eps-cols: 6; }
+}
+
+@media (max-width: 900px) {
+    #nexus-ep-playlist-studio [data-role="chrome"] { flex-wrap: wrap !important; }
+    #nexus-ep-playlist-studio [data-role="summary"] { order: 3 !important; flex-basis: 100% !important; }
+    #nexus-ep-playlist-studio [data-layout="standard"],
+    #nexus-ep-playlist-studio[data-layout="compact"],
+    #nexus-ep-playlist-studio[data-layout="dense"] { --eps-cols: 3; }
+    #nexus-ep-playlist-studio[data-layout="comfort"] { --eps-cols: 2; }
+}
+
+@media (max-width: 640px) {
+    #nexus-ep-playlist-studio:not([data-layout="list"]) { --eps-cols: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #nexus-ep-playlist-studio [data-role="detail"],
+    #nexus-ep-playlist-studio [data-role="help"] { transition: none !important; }
+}

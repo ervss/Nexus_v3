@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nexus Thread Link Hunter</title>
+  <link rel="stylesheet" href="dashboard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="header-bar">
+    <div class="header-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div>
+        <h1>Nexus Link Hunter</h1>
+        <span class="version-tag">v1.0.0 Premium Scraper</span>
+      </div>
+    </div>
+    <div class="thread-info-card">
+      <div class="thread-meta">
+        <span class="meta-label">TARGET THREAD</span>
+        <div id="thread-title" class="meta-value">Loading active tab information...</div>
+      </div>
+      <a id="source-link" href="#" target="_blank" class="source-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
+        Visit Thread
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-layout">
+    <!-- Sidebar Controls -->
+    <aside class="sidebar">
+      <!-- Crawler Panel -->
+      <div class="panel-card glass">
+        <h2 class="panel-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m12 6-6 6h12Z"/></svg>
+          Multi-Page Crawler
+        </h2>
+        
+        <div class="control-group">
+          <label class="control-label">Scraping Scope</label>
+          <div class="segmented-control">
+            <button id="scope-current" class="segment-btn active" data-scope="current">This Page</button>
+            <button id="scope-range" class="segment-btn" data-scope="range">Range</button>
+            <button id="scope-all" class="segment-btn" data-scope="all">Entire Thread</button>
+          </div>
+        </div>
+
+        <div id="range-inputs-wrapper" class="control-group hidden anim-fade-in">
+          <label class="control-label">Page Range</label>
+          <div class="range-inputs">
+            <input type="number" id="page-from" min="1" value="1" class="page-input">
+            <span>to</span>
+            <input type="number" id="page-to" min="1" value="1" class="page-input">
+          </div>
+        </div>
+
+        <div class="crawl-stats-row">
+          <span class="stats-label">Current Page: <strong id="current-page-num">-</strong></span>
+          <span class="stats-label">Total Thread Pages: <strong id="total-thread-pages">-</strong></span>
+        </div>
+
+        <button id="start-crawl-btn" class="btn primary-btn btn-glow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m7.5 10.27 4.5 2.59 4.5-2.59M12 22V12.72"/></svg>
+          <span>Scan Current Page</span>
+        </button>
+
+        <!-- Crawl Progress -->
+        <div id="crawl-progress-container" class="crawl-progress-box hidden">
+          <div class="progress-info">
+            <span id="crawl-status-text">Crawling page...</span>
+            <span id="crawl-percentage">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div id="crawl-progress-fill" class="progress-bar-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters Panel -->
+      <div class="panel-card glass">
+        <h2 class="panel-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Smart Filters
+        </h2>
+
+        <!-- Search input -->
+        <div class="control-group">
+          <label class="control-label">Search Context / URL</label>
+          <div class="search-input-wrapper">
+            <input type="text" id="search-box" placeholder="e.g. Lena Reif, 1080p, mega.nz..." class="search-input">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+        </div>
+
+        <!-- Host Filters -->
+        <div class="control-group">
+          <label class="control-label">Filter by Host</label>
+          <div id="host-filters-grid" class="filters-grid">
+            <button class="filter-chip active" data-host="all">All Hosts</button>
+            <button class="filter-chip" data-host="filester" data-color="filester">Filester</button>
+            <button class="filter-chip" data-host="mega" data-color="mega">Mega.nz</button>
+            <button class="filter-chip" data-host="fileditch" data-color="fileditch">Fileditch</button>
+            <button class="filter-chip" data-host="gofile" data-color="gofile">Gofile</button>
+            <button class="filter-chip" data-host="bunkr" data-color="bunkr">Bunkr</button>
+            <button class="filter-chip" data-host="cyberdrop" data-color="cyberdrop">Cyberdrop</button>
+            <button class="filter-chip" data-host="pixeldrain" data-color="pixeldrain">Pixeldrain</button>
+            <button class="filter-chip" data-host="whoreshub" data-color="whoreshub">Whoreshub</button>
+            <button class="filter-chip" data-host="saint" data-color="saint">Saint</button>
+            <button class="filter-chip" data-host="turbo" data-color="turbo">Turbo</button>
+            <button class="filter-chip" data-host="pixhost" data-color="pixhost">Pixhost</button>
+            <button class="filter-chip" data-host="jpg6" data-color="jpg6">Jpg6</button>
+            <button class="filter-chip" data-host="onlyfans" data-color="onlyfans">OnlyFans</button>
+            <button class="filter-chip" data-host="other">Others</button>
+          </div>
+        </div>
+
+        <!-- Content Type Filters -->
+        <div class="control-group">
+          <label class="control-label">Filter by Type</label>
+          <div id="type-filters-grid" class="filters-grid">
+            <button class="filter-chip active" data-type="all">All Types</button>
+            <button class="filter-chip" data-type="video">Video</button>
+            <button class="filter-chip" data-type="image">Image</button>
+            <button class="filter-chip" data-type="gif">GIF</button>
+            <button class="filter-chip" data-type="short">Short</button>
+            <button class="filter-chip" data-type="zip">Zip/Archive</button>
+          </div>
+        </div>
+
+        <!-- Quality Filters -->
+        <div class="control-group">
+          <label class="control-label">Content Resolution</label>
+          <div id="quality-filters-grid" class="filters-grid">
+            <button class="filter-chip active" data-quality="all">All Quality</button>
+            <button class="filter-chip" data-quality="2160p">4K / 2160p</button>
+            <button class="filter-chip" data-quality="1080p">1080p</button>
+            <button class="filter-chip" data-quality="720p">720p</button>
+            <button class="filter-chip" data-quality="photoset">Photosets</button>
+            <button class="filter-chip" data-quality="unknown">Unspecified</button>
+          </div>
+        </div>
+
+        <!-- Size Filters -->
+        <div class="control-group">
+          <label class="control-label">Filter by Size (MB)</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="number" id="filter-size-min" placeholder="Min MB" class="search-input" style="flex: 1; padding: 6px; font-size: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px;">
+            <input type="number" id="filter-size-max" placeholder="Max MB" class="search-input" style="flex: 1; padding: 6px; font-size: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px;">
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Content Results Panel -->
+    <section class="content-area">
+      <!-- Stats Dashboard -->
+      <div class="stats-dashboard">
+        <div class="stat-card glass">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </div>
+          <div class="stat-data">
+            <span class="stat-number" id="stat-total-links">0</span>
+            <span class="stat-label">Total Links Found</span>
+          </div>
+        </div>
+
+        <div class="stat-card glass">
+          <div class="stat-icon icon-unique">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <div class="stat-data">
+            <span class="stat-number" id="stat-unique-links">0</span>
+            <span class="stat-label">Unique Links</span>
+          </div>
+        </div>
+
+        <div class="stat-card glass">
+          <div class="stat-icon icon-pages">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2-2.5z"/><path d="M6 6h10M6 10h10"/></svg>
+          </div>
+          <div class="stat-data">
+            <span class="stat-number" id="stat-pages-crawled">0</span>
+            <span class="stat-label">Pages Processed</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Toolbar -->
+      <div class="action-toolbar glass">
+        <div class="selection-actions">
+          <label class="custom-checkbox select-all-wrapper">
+            <input type="checkbox" id="select-all-checkbox" checked>
+            <span class="checkmark"></span>
+            <span class="select-all-label">Select All (<span id="selected-count">0</span>)</span>
+          </label>
+        </div>
+
+        <div class="toolbar-buttons">
+          <!-- Check Status Button -->
+          <button id="check-status-btn" class="btn secondary-btn" style="border-color: rgba(251, 191, 36, 0.4); color: #fbbf24; background: rgba(251, 191, 36, 0.05);" title="Check HTTP status of all currently displayed links">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>Check Links Status</span>
+          </button>
+
+          <!-- Fetch Metadata Button -->
+          <button id="fetch-metadata-btn" class="btn secondary-btn" style="border-color: rgba(59, 130, 246, 0.4); color: #60a5fa; background: rgba(59, 130, 246, 0.05);" title="Fetch size and name metadata for selected Bunkr/Whoreshub links">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            <span>Fetch Metadata</span>
+          </button>
+
+          <!-- Delete Selected Button -->
+          <button id="delete-selected-btn" class="btn secondary-btn" style="border-color: rgba(239, 68, 68, 0.4); color: #ef4444; background: rgba(239, 68, 68, 0.05);" title="Delete selected links from the list">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/></svg>
+            <span>Delete Selected</span>
+          </button>
+
+          <!-- Copy Dropdown Button -->
+          <div class="dropdown-wrapper">
+            <button id="copy-dropdown-btn" class="btn secondary-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+              <span>Copy Selected Links</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div id="copy-dropdown-menu" class="dropdown-menu">
+              <button class="dropdown-item" data-format="raw">
+                <strong>Plain URL List</strong>
+                <span>One link per line (JDownloader friendly)</span>
+              </button>
+              <button class="dropdown-item" data-format="jdownloader">
+                <strong>JDownloader (.crawljob)</strong>
+                <span>Formats context as package folder</span>
+              </button>
+              <button class="dropdown-item" data-format="markdown">
+                <strong>Markdown Table</strong>
+                <span>Organized with Origin and Quality columns</span>
+              </button>
+              <button class="dropdown-item" data-format="json">
+                <strong>JSON Data</strong>
+                <span>Complete metadata structures</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Send to Tester Button -->
+          <button id="send-to-tester-btn" class="btn secondary-btn" style="border-color: rgba(168, 85, 247, 0.5); color: #c084fc; background: rgba(168, 85, 247, 0.1);" title="Poslať označené odkazov do Link Testeru (8000/8001/tester) a spustiť testovanie">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            <span>Tester (<span id="tester-port-label">8000</span>)</span>
+          </button>
+
+          <!-- Nexus Dashboard Direct Import -->
+          <button id="nexus-import-btn" class="btn primary-btn btn-glow-green">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Import to Nexus Dashboard
+          </button>
+        </div>
+      </div>
+
+      <!-- Results Grouped Container -->
+      <div id="results-container" class="results-container">
+        <!-- Scrape result cards will be rendered dynamically here -->
+        <div class="empty-state-card glass">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M12 22V12"/></svg>
+          <h3>Ready to Hunt Links</h3>
+          <p>Click "Scan Current Page" on the sidebar to analyze the thread and extract host links automatically.</p>
+        </div>
+      </div>
+
+      <!-- Live Diagnostics Terminal -->
+      <div id="debug-console-card" class="panel-card glass debug-card anim-fade-in" style="margin-top: 24px; padding: 18px;">
+        <h2 class="panel-title" style="margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 8px; font-family: var(--font-display); font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: white;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-cyan);"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          Live Scraper Diagnostics Panel
+        </h2>
+        <div id="debug-log-list" style="max-height: 180px; overflow-y: auto; font-family: 'Courier New', Courier, monospace; font-size: 11px; display: flex; flex-direction: column; gap: 4px; padding: 10px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 8px;">
+          <div style="color: var(--accent-cyan);">[SYSTEM] Diagnostics engine initialized. Ready to trace crawler...</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="toast-notification" class="toast-notification hidden">
+    <div class="toast-content">
+      <div class="toast-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+      </div>
+      <div id="toast-message" class="toast-message">Links copied to clipboard!</div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

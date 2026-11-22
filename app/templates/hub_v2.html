@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fusion Hub V2 — Čo je nové</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<style>
+:root{
+  --bg-1:#07131f; --bg-2:#0c2031;
+  --panel:rgba(10,24,39,.92); --panel-soft:rgba(16,35,56,.86);
+  --line:rgba(137,180,214,.16); --line-strong:rgba(115,207,197,.30);
+  --text:#edf6ff; --muted:#8ea8c0;
+  --accent:#56dec8; --accent-2:#7ec9ff; --hot:#ff3d9a; --hot-2:#b14dff;
+  --ok:#39d98a; --warn:#ffbf5a; --bad:#ff7272;
+  --shadow:0 24px 60px rgba(0,0,0,.42);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:'Manrope',sans-serif;color:var(--text);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255,61,154,.14), transparent 26%),
+    radial-gradient(circle at 88% 6%, rgba(126,201,255,.13), transparent 26%),
+    linear-gradient(135deg,var(--bg-1) 0%,var(--bg-2) 48%,#091521 100%);
+  background-attachment:fixed;
+}
+.material-icons-round{font-size:18px;line-height:1;vertical-align:-4px}
+button{font-family:inherit;cursor:pointer}
+
+.topbar{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);
+  background:linear-gradient(180deg,rgba(7,19,31,.96),rgba(7,19,31,.78));
+  border-bottom:1px solid var(--line);padding:14px 22px}
+.topbar-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;letter-spacing:.3px}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);
+  box-shadow:0 0 14px var(--accent),0 0 30px rgba(86,222,200,.6);animation:pulse 1.8s infinite}
+@keyframes pulse{50%{opacity:.45;transform:scale(.82)}}
+.brand small{font-weight:600;color:var(--muted);font-size:12px;letter-spacing:1.4px;text-transform:uppercase}
+
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:12px;
+  background:rgba(255,255,255,.05);color:var(--text);padding:9px 15px;font-weight:700;font-size:13px;transition:.18s}
+.btn:hover{border-color:var(--line-strong);transform:translateY(-1px)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn-hot{background:linear-gradient(135deg,var(--hot),var(--hot-2));border:0;color:#fff;
+  box-shadow:0 8px 24px rgba(255,61,154,.34)}
+.btn-go{background:linear-gradient(135deg,var(--accent),var(--accent-2));border:0;color:#04121b;
+  box-shadow:0 8px 22px rgba(86,222,200,.3)}
+.btn-ghost{background:transparent}
+.spin{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spacer{flex:1}
+
+select,input[type=search]{background:rgba(255,255,255,.05);border:1px solid var(--line);
+  color:var(--text);border-radius:12px;padding:9px 12px;font-family:inherit;font-size:13px;outline:none}
+select:focus,input:focus{border-color:var(--line-strong)}
+select option{background:#0c2031}
+
+.topics{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.tchip{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;
+  font-size:12.5px;font-weight:700;border:1px solid var(--line);background:rgba(255,255,255,.04);
+  color:var(--muted);transition:.16s}
+.tchip:hover{border-color:var(--line-strong);color:var(--text)}
+.tchip.active{color:#04121b;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-color:transparent}
+.tchip .n{font-size:11px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(0,0,0,.16)}
+.tchip:not(.active) .n{background:rgba(255,255,255,.08)}
+
+.wrap{padding:22px 22px 100px;max-width:1900px;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:18px}
+
+.card{position:relative;border-radius:18px;overflow:hidden;background:var(--panel-soft);
+  border:1px solid var(--line);transition:.2s;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-4px);border-color:var(--line-strong);
+  box-shadow:0 18px 44px rgba(0,0,0,.5),0 0 0 1px rgba(86,222,200,.16)}
+
+.thumb{position:relative;aspect-ratio:16/10;background:#08151f;overflow:hidden;cursor:pointer}
+.thumb img{width:100%;height:100%;object-fit:cover;transition:.35s}
+.card:hover .thumb img{transform:scale(1.06)}
+.thumb-empty{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#2f4a63}
+.thumb-empty .material-icons-round{font-size:46px}
+.play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle,rgba(0,0,0,.35),rgba(0,0,0,.7));opacity:0;transition:.2s}
+.card:hover .play-overlay{opacity:1}
+.play-overlay .material-icons-round{font-size:40px;color:#fff;
+  background:linear-gradient(135deg,var(--hot),var(--hot-2));border-radius:50%;padding:12px;
+  box-shadow:0 0 30px rgba(255,61,154,.7)}
+
+.src{position:absolute;top:10px;left:10px;font-size:10px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;
+  padding:5px 9px;border-radius:7px;background:rgba(4,18,27,.86);backdrop-filter:blur(6px);border:1px solid var(--line-strong)}
+.badges{position:absolute;bottom:10px;left:10px;right:10px;display:flex;gap:6px;flex-wrap:wrap}
+.badge{font-size:10px;font-weight:800;padding:4px 8px;border-radius:6px;backdrop-filter:blur(6px);
+  background:rgba(4,18,27,.84);border:1px solid var(--line)}
+.badge.q{color:#04121b;background:linear-gradient(135deg,var(--accent),var(--accent-2));border:0}
+
+.body{padding:13px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.title{font-size:13.5px;font-weight:700;line-height:1.35;word-break:break-word;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tops{display:flex;gap:5px;flex-wrap:wrap}
+.top{font-size:10px;font-weight:800;padding:3px 8px;border-radius:5px;color:#b6f4e8;
+  background:rgba(86,222,200,.10);border:1px solid rgba(86,222,200,.24);cursor:pointer}
+.top:hover{background:rgba(86,222,200,.22)}
+.byline{font-size:11px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px;margin-top:auto}
+.byline .material-icons-round{font-size:13px}
+
+.actions{display:grid;grid-template-columns:1fr 2fr 2fr;gap:6px;padding:0 14px 14px}
+.actions .btn{justify-content:center;padding:8px 6px;font-size:12px;border-radius:10px;min-width:0}
+.actions .btn-icon{padding:8px 0}
+.actions .btn-icon .material-icons-round{font-size:17px}
+
+.empty-state{text-align:center;padding:90px 20px;color:var(--muted)}
+.empty-state .material-icons-round{font-size:60px;opacity:.3;margin-bottom:14px}
+.empty-state h2{color:var(--text);font-size:20px;margin:0 0 8px}
+.skeleton{border-radius:18px;height:300px;background:linear-gradient(100deg,rgba(255,255,255,.03) 30%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.03) 70%);
+  background-size:220% 100%;animation:sk 1.3s infinite}
+@keyframes sk{to{background-position:-220% 0}}
+
+.sync{position:fixed;left:22px;bottom:22px;z-index:65;display:flex;align-items:center;gap:11px;
+  padding:12px 15px;border-radius:14px;background:rgba(9,22,36,.97);border:1px solid var(--line-strong);
+  box-shadow:var(--shadow);backdrop-filter:blur(16px);font-size:12.5px;font-weight:700;
+  transform:translateY(160%);transition:transform .28s cubic-bezier(.2,.9,.3,1.2);max-width:min(560px,calc(100vw - 44px))}
+.sync.visible{transform:translateY(0)}
+.sync .material-icons-round{color:var(--accent);font-size:17px}
+.sync .det{color:var(--muted);font-weight:600;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;
+  background:rgba(3,9,15,.9);backdrop-filter:blur(8px);padding:24px}
+.modal.visible{display:flex}
+.modal-inner{width:min(1180px,100%);border-radius:22px;overflow:hidden;background:#07131f;
+  border:1px solid var(--line-strong);box-shadow:var(--shadow)}
+.modal-head{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.modal-head h3{margin:0;font-size:15px;font-weight:800;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.surface{aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center}
+.surface video,.surface iframe{width:100%;height:100%;border:0;display:block}
+.surface .empty{color:var(--muted);font-size:14px;padding:24px;text-align:center;line-height:1.6}
+
+.toast{position:fixed;right:22px;bottom:22px;z-index:120;display:flex;flex-direction:column;gap:10px}
+.toast div{padding:13px 17px;border-radius:14px;font-size:13px;font-weight:700;box-shadow:var(--shadow);
+  background:#0b1e30;border:1px solid var(--line-strong);animation:slide .3s}
+.toast .ok{border-color:rgba(57,217,138,.5);color:#a7f3d0}
+.toast .bad{border-color:rgba(255,114,114,.5);color:#ffc9c9}
+@keyframes slide{from{transform:translateX(30px);opacity:0}}
+</style>
+<script src="/static/playback_activity.js?v=20260930_activity_3" defer></script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-row">
+    <a class="btn btn-ghost" href="/" title="Dashboard" style="padding:9px 11px">
+      <span class="material-icons-round">arrow_back</span></a>
+    <div class="brand"><span class="dot"></span>FUSION HUB · ČO JE NOVÉ <small id="srcCount"></small></div>
+
+    <div class="spacer"></div>
+    <select id="qualitySel" title="Minimálna kvalita">
+      <option value="0">Kvalita: všetko</option>
+      <option value="720">720p+</option>
+      <option value="1080">1080p+</option>
+      <option value="2160">4K</option>
+    </select>
+    <select id="sortSel" title="Zoradenie">
+      <option value="relevance">↓ Najlepšia zhoda</option>
+      <option value="duration">↓ Dĺžka</option>
+      <option value="quality">↓ Kvalita</option>
+    </select>
+    <input type="search" id="searchInput" placeholder="Hľadať…" style="min-width:150px">
+    <button class="btn btn-go" id="reloadBtn">
+      <span class="material-icons-round" id="reloadIcon">refresh</span> Načítať znova</button>
+  </div>
+  <div class="topics" id="topics"></div>
+</div>
+
+<div class="wrap"><div id="feed"></div></div>
+
+<div class="sync" id="syncStrip">
+  <span class="material-icons-round spin">sync</span>
+  <div>
+    <div id="syncText">Sťahujem najnovšie zo všetkých zdrojov…</div>
+    <div class="det" id="syncDet"></div>
+  </div>
+</div>
+
+<div class="modal" id="player">
+  <div class="modal-inner">
+    <div class="modal-head">
+      <h3 id="playerTitle"></h3>
+      <a class="btn btn-ghost" id="playerSource" target="_blank" rel="noreferrer">
+        <span class="material-icons-round">open_in_new</span> Zdroj</a>
+      <button class="btn btn-ghost" id="playerClose"><span class="material-icons-round">close</span></button>
+    </div>
+    <div class="surface" id="surface"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const api = async (url, opts) => {
+  const r = await fetch(url, opts);
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.detail || `HTTP ${r.status}`);
+  return body;
+};
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
+  {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* Topics live server-side (HUB_TOPICS in app/routers/hub.py) — same standing
+   interests the Forum V2 feed uses, so a topic means the same thing on both. */
+const TOPIC_ICONS = {
+  'deepthroat':'water_drop', 'fake tits':'favorite', 'bimbo':'auto_awesome',
+  'b/g':'group', 'anal':'local_fire_department', '4k':'hd',
+};
+
+const state = { items: [], topics: {}, sources: {}, topic: '', q: '', minH: 0, sort: 'relevance' };
+
+function toast(msg, kind='ok'){
+  const el = document.createElement('div'); el.className = kind; el.textContent = msg;
+  $('#toast').appendChild(el); setTimeout(() => el.remove(), 4200);
+}
+const fmtDur = s => !s ? '' : (s >= 3600
+  ? `${Math.floor(s/3600)}:${String(Math.floor(s%3600/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`
+  : `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`);
+/* Only sources whose adapter actually implements fetch_media can be proxied —
+   the rest answer 501 and the card renders blank. Their CDNs serve thumbs to
+   anyone (verified 200 without a referer), so load those straight from source
+   instead of through a proxy that cannot help them. */
+const NO_MEDIA_PROXY = new Set(['anysex','thisvid','4kporno','analdin','sxyprn']);
+const mediaUrl = (src, u) => {
+  if (!u) return '';
+  if (NO_MEDIA_PROXY.has(src)) return u;
+  return `/api/v1/hub/${encodeURIComponent(src)}/media?url=${encodeURIComponent(u)}`;
+};
+
+async function loadFeed() {
+  $('#feed').innerHTML = `<div class="grid">${'<div class="skeleton"></div>'.repeat(8)}</div>`;
+  const strip = $('#syncStrip');
+  strip.classList.add('visible');
+  $('#syncText').textContent = 'Sťahujem najnovšie zo všetkých zdrojov…';
+  $('#syncDet').textContent = state.topic ? `téma: ${state.topic}` : 'všetky témy';
+  $('#reloadBtn').disabled = true;
+  $('#reloadIcon').classList.add('spin');
+  try {
+    // NDJSON stream: paint each source's tiles the moment they land instead of
+    // waiting on the slowest site. Measured: first cards ~0.3s, all ~9s — the
+    // blocking endpoint made the grid sit empty for the entire run.
+    const p = new URLSearchParams({ per_source: '6', deadline: '45' });
+    if (state.topic) p.set('topics', state.topic);
+    state.items = [];
+    state.topics = {};
+    state.sources = {};
+    const started = performance.now();
+    let errs = 0, firstPaint = false;
+
+    const resp = await fetch('/api/v1/hub/v2/stream?' + p);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const reader = resp.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop() || '';
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        let ev; try { ev = JSON.parse(line); } catch { continue; }
+        if (ev.type === 'source') {
+          if (ev.error) errs++;
+          for (const it of ev.items || []) {
+            state.items.push(it);
+            state.sources[it.source] = (state.sources[it.source] || 0) + 1;
+            for (const t of it.topics || []) state.topics[t] = (state.topics[t] || 0) + 1;
+          }
+          if (ev.items && ev.items.length) {
+            if (!firstPaint) { firstPaint = true; $('#feed').innerHTML = ''; }
+            renderTopics();
+            render();
+            const secs = ((performance.now() - started) / 1000).toFixed(1);
+            $('#srcCount').textContent = `${state.items.length} videí · ${Object.keys(state.sources).length} zdrojov`;
+            $('#syncText').textContent = `Načítavam… ${state.items.length} videí`;
+            $('#syncDet').textContent = `${secs} s`;
+          }
+        } else if (ev.type === 'done') {
+          const secs = ((performance.now() - started) / 1000).toFixed(1);
+          $('#syncText').textContent = `Hotovo — ${state.items.length} videí z ${Object.keys(state.sources).length} zdrojov`;
+          $('#syncDet').textContent = errs ? `${errs} zdrojov neodpovedalo · ${secs} s` : `za ${secs} s`;
+        }
+      }
+    }
+    renderTopics();
+    render();
+    setTimeout(() => strip.classList.remove('visible'), 3500);
+  } catch (e) {
+    $('#feed').innerHTML = '';
+    $('#syncText').textContent = 'Načítanie zlyhalo';
+    $('#syncDet').textContent = e.message || '';
+    setTimeout(() => strip.classList.remove('visible'), 4000);
+    toast(e.message, 'bad');
+  } finally {
+    $('#reloadBtn').disabled = false;
+    $('#reloadIcon').classList.remove('spin');
+  }
+}
+
+function renderTopics() {
+  const all = `<button class="tchip ${state.topic ? '' : 'active'}" data-topic="">
+      <span class="material-icons-round" style="font-size:15px">apps</span>Všetko
+      <span class="n">${state.items.length}</span></button>`;
+  $('#topics').innerHTML = all + Object.entries(state.topics).map(([name, n]) => `
+    <button class="tchip ${state.topic === name ? 'active' : ''}" data-topic="${esc(name)}">
+      <span class="material-icons-round" style="font-size:15px">${TOPIC_ICONS[name] || 'sell'}</span>${esc(name)}
+      <span class="n">${n}</span></button>`).join('');
+  [...$('#topics').children].forEach(btn => btn.onclick = () => {
+    state.topic = btn.dataset.topic;
+    loadFeed();   // topic changes the fan-out, so it has to go back to the server
+  });
+}
+
+function visibleItems() {
+  let items = state.items;
+  if (state.q) {
+    const q = state.q.toLowerCase();
+    items = items.filter(l => (l.title || '').toLowerCase().includes(q));
+  }
+  if (state.minH) items = items.filter(l => (l.height || 0) >= state.minH);
+  if (state.sort === 'duration') return [...items].sort((a,b) => (b.duration_sec||0) - (a.duration_sec||0));
+  if (state.sort === 'quality') return [...items].sort((a,b) => (b.height||0) - (a.height||0));
+  return items;  // server already sorted by relevance
+}
+
+function render() {
+  const feed = $('#feed');
+  const items = visibleItems();
+  if (!items.length) {
+    feed.innerHTML = `<div class="empty-state">
+      <span class="material-icons-round">inbox</span>
+      <h2>Nič sa nenašlo</h2>
+      <p>Skús inú tému alebo zmierni filtre.</p></div>`;
+    return;
+  }
+  feed.innerHTML = `<div class="grid">${items.map(cardHtml).join('')}</div>`;
+}
+
+function cardHtml(l) {
+  const thumb = l.thumb ? mediaUrl(l.source, l.thumb) : '';
+  const badges = [
+    l.quality && `<span class="badge q">${esc(l.quality)}</span>`,
+    l.duration && `<span class="badge">${esc(l.duration)}</span>`,
+    !l.duration && l.duration_sec && `<span class="badge">${fmtDur(l.duration_sec)}</span>`,
+  ].filter(Boolean).join('');
+  const idx = state.items.indexOf(l);
+
+  return `<article class="card">
+    <div class="thumb" onclick="play(${idx})">
+      ${thumb
+        ? `<img loading="lazy" src="${esc(thumb)}" onerror="this.parentElement.innerHTML='<div class=thumb-empty><span class=material-icons-round>movie</span></div>'">`
+        : `<div class="thumb-empty"><span class="material-icons-round">movie</span></div>`}
+      <div class="play-overlay"><span class="material-icons-round">play_arrow</span></div>
+      <span class="src">${esc(l.source || '')}</span>
+      <div class="badges">${badges}</div>
+    </div>
+    <div class="body">
+      <div class="title">${esc(l.title)}</div>
+      ${(l.topics || []).length ? `<div class="tops">${l.topics.map(t =>
+        `<span class="top" onclick="pickTopic('${esc(t).replace(/'/g,"\\'")}')">${esc(t)}</span>`).join('')}</div>` : ''}
+      <div class="byline"><span class="material-icons-round">public</span>${esc(l.source || '')}
+        ${l.views ? ' · ' + esc(l.views) : ''}</div>
+    </div>
+    <div class="actions">
+      <a class="btn btn-icon" href="${esc(l.url)}" target="_blank" rel="noreferrer" title="Otvoriť na zdroji">
+        <span class="material-icons-round">open_in_new</span></a>
+      <button class="btn btn-hot" onclick="play(${idx})">
+        <span class="material-icons-round">play_arrow</span> Prehrať</button>
+      <button class="btn btn-go" onclick="importOne(${idx})">
+        <span class="material-icons-round">download</span> Import</button>
+    </div>
+  </article>`;
+}
+
+function pickTopic(t){ state.topic = t; loadFeed(); }
+
+async function play(idx) {
+  const l = state.items[idx];
+  if (!l) return;
+  $('#playerTitle').textContent = l.title || '';
+  $('#playerSource').href = l.url;
+  $('#surface').innerHTML = `<div class="empty"><span class="material-icons-round spin">refresh</span><br>Resolvujem stream…</div>`;
+  $('#player').classList.add('visible');
+  try {
+    const d = await api(`/api/v1/hub/${encodeURIComponent(l.source)}/resolve?url=${encodeURIComponent(l.url)}`);
+    if (!d.stream_url) throw new Error('Zdroj nevrátil stream');
+    // Same rule as the main hub: play HLS/CDN through the source's own proxy so
+    // referer-protected hosts don't reject the browser.
+    const src = `/api/v1/hub/${encodeURIComponent(l.source)}/stream?url=${encodeURIComponent(d.stream_url)}`;
+    if (d.is_hls) {
+      $('#surface').innerHTML = `<div class="empty">HLS stream — otvor radšej vo Fusion Hube alebo na zdroji.</div>`;
+      return;
+    }
+    $('#surface').innerHTML = `<video controls autoplay playsinline src="${esc(src)}"></video>`;
+  } catch (e) {
+    $('#surface').innerHTML = `<div class="empty">Prehratie zlyhalo: ${esc(e.message)}<br>Skús „Otvoriť na zdroji“.</div>`;
+  }
+}
+function closePlayer(){ $('#player').classList.remove('visible'); $('#surface').innerHTML = ''; }
+
+async function importOne(idx) {
+  const l = state.items[idx];
+  if (!l) return;
+  try {
+    await api('/api/v1/import/bulk', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ batch_name: 'Fusion Hub V2',
+        videos: [{ url: l.url, title: l.title || '', source_url: l.url, thumbnail: l.thumb || '' }] }),
+    });
+    toast('Pridané do fronty importu');
+  } catch (e) { toast(e.message, 'bad'); }
+}
+
+let searchTimer;
+$('#searchInput').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { state.q = e.target.value.trim(); render(); }, 200);
+});
+$('#qualitySel').onchange = e => { state.minH = +e.target.value; render(); };
+$('#sortSel').onchange = e => { state.sort = e.target.value; render(); };
+$('#reloadBtn').onclick = loadFeed;
+$('#playerClose').onclick = closePlayer;
+$('#player').onclick = e => { if (e.target.id === 'player') closePlayer(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayer(); });
+
+loadFeed();
+</script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!-- Creator Radar & Vault Dossier (Obsidian Vision Glass) -->
+<div id="creatorRadarOverlay" class="cradar-overlay" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="cradarTitle">
+    <div class="cradar-shell" role="document">
+        <header class="cradar-header">
+            <div class="cradar-brand">
+                <span class="cradar-brand-badge"><span class="material-icons-round" aria-hidden="true">stars</span></span>
+                <div>
+                    <h2 id="cradarTitle">Creator Radar <span class="cradar-accent">&amp; Vault Dossier</span></h2>
+                    <p>Sledovaní tvorcovia, prehľad knižnice a skryté nálezy z Local Vaultu na jednom mieste</p>
+                </div>
+            </div>
+            <div class="cradar-header-stats" id="cradarHeaderStats">
+                <span class="cradar-pill" id="cradarStatFollowed">0 sledovaných</span>
+                <span class="cradar-pill is-cyan" id="cradarStatDiscovered">0 objavených</span>
+            </div>
+            <button type="button" class="cradar-close" id="cradarCloseBtn" aria-label="Zavrieť Creator Radar" title="Zavrieť (Esc)">
+                <span class="material-icons-round" aria-hidden="true">close</span>
+            </button>
+        </header>
+
+        <div class="cradar-body">
+            <!-- Ľavý panel: Sledovaní a objavení tvorcovia -->
+            <aside class="cradar-sidebar">
+                <form class="cradar-add-form" id="cradarAddForm">
+                    <div class="cradar-input-wrap">
+                        <span class="material-icons-round" aria-hidden="true">person_add</span>
+                        <input id="cradarAddInput" type="text" placeholder="Pridať tvorcu do sledovania..." autocomplete="off" maxlength="120">
+                    </div>
+                    <button type="submit" class="cradar-btn-primary" id="cradarAddBtn" title="Pripnúť tvorcu">Pripnúť</button>
+                </form>
+
+                <div class="cradar-sidebar-controls">
+                    <div class="cradar-input-wrap is-compact">
+                        <span class="material-icons-round" aria-hidden="true">search</span>
+                        <input id="cradarSearchInput" type="search" placeholder="Filtrovať tvorcov..." autocomplete="off">
+                    </div>
+                    <div class="cradar-filter-tabs" role="tablist">
+                        <button type="button" class="cradar-seg active" data-cr-filter="all" aria-selected="true">Všetci</button>
+                        <button type="button" class="cradar-seg" data-cr-filter="followed" aria-selected="false">Sledovaní ★</button>
+                    </div>
+                </div>
+
+                <div class="cradar-creator-list" id="cradarCreatorList">
+                    <div class="cradar-empty-mini">Načítavam tvorcov...</div>
+                </div>
+            </aside>
+
+            <!-- Pravý panel: Unified Dossier tvorcu -->
+            <main class="cradar-main" id="cradarMain">
+                <div class="cradar-empty-state" id="cradarEmptyState">
+                    <div class="cradar-empty-icon"><span class="material-icons-round" aria-hidden="true">stars</span></div>
+                    <h3>Vyber alebo pripni tvorcu</h3>
+                    <p>Okamžite uvidíš všetky videá z Knižnice, ich maximálne rozlíšenie aj skryté objavy v 945k Local Vaulte pripravené na import.</p>
+                </div>
+
+                <div class="cradar-dossier" id="cradarDossier" hidden>
+                    <section class="cradar-hero" id="cradarHero"></section>
+
+                    <div class="cradar-tabs-bar">
+                        <div class="cradar-tabs" role="tablist">
+                            <button type="button" class="cradar-tab active" data-cr-tab="vault">
+                                <span class="material-icons-round" aria-hidden="true">inventory_2</span>
+                                Skryté v Trezore
+                                <span class="cradar-count-badge" id="cradarVaultTabCount">0</span>
+                            </button>
+                            <button type="button" class="cradar-tab" data-cr-tab="library">
+                                <span class="material-icons-round" aria-hidden="true">video_library</span>
+                                V Knižnici
+                                <span class="cradar-count-badge" id="cradarLibraryTabCount">0</span>
+                            </button>
+                        </div>
+                        <span class="cradar-dossier-status" id="cradarDossierStatus"></span>
+                    </div>
+
+                    <!-- Filter, Sort & Selectors / Split-Screen Toolbar -->
+                    <div class="cradar-toolbar">
+                        <div class="cradar-toolbar-filters">
+                            <div class="cradar-input-wrap is-compact cradar-filter-search">
+                                <span class="material-icons-round" aria-hidden="true">filter_list</span>
+                                <input id="cradarLocalFilterInput" type="search" placeholder="Hľadať názov, kanál, zdroj..." autocomplete="off">
+                            </div>
+                            <label class="cradar-field">
+                                <span>Zoradiť</span>
+                                <select id="cradarSortSelect" aria-label="Zoradiť videá">
+                                    <option value="default">Predvolené</option>
+                                    <option value="quality_desc">Najvyššia kvalita</option>
+                                    <option value="duration_desc">Najdlhšie</option>
+                                    <option value="size_desc">Najväčšie (MB)</option>
+                                    <option value="newest">Najnovšie</option>
+                                    <option value="title_asc">Názov A–Z</option>
+                                </select>
+                            </label>
+                            <label class="cradar-field">
+                                <span>Min kvalita</span>
+                                <select id="cradarMinQualSelect" aria-label="Minimálna kvalita">
+                                    <option value="0">Všetky</option>
+                                    <option value="720">720p+</option>
+                                    <option value="1080">1080p+</option>
+                                    <option value="1440">1440p+</option>
+                                    <option value="2160">4K</option>
+                                </select>
+                            </label>
+                            <label class="cradar-field">
+                                <span>Min dĺžka</span>
+                                <select id="cradarMinDurSelect" aria-label="Minimálna dĺžka">
+                                    <option value="0">Akákoľvek</option>
+                                    <option value="120">2m+</option>
+                                    <option value="300">5m+</option>
+                                    <option value="600">10m+</option>
+                                    <option value="1200">20m+</option>
+                                    <option value="2400">40m+</option>
+                                </select>
+                            </label>
+                            <label class="cradar-field">
+                                <span>Zdroj</span>
+                                <select id="cradarSourceSelect" aria-label="Filter zdroja">
+                                    <option value="all">Všetky zdroje</option>
+                                    <option value="telegram">Telegram</option>
+                                    <option value="forum">Fóra</option>
+                                    <option value="filester">Filester</option>
+                                    <option value="mega">MEGA Hub</option>
+                                    <option value="queue">Fronta</option>
+                                    <option value="local">Local súbory</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <div class="cradar-selection-bar">
+                            <button type="button" class="cradar-btn-glass is-sm" id="cradarSelectAllBtn" title="Označiť alebo zrušiť výber viditeľných kariet">
+                                <span class="material-icons-round" aria-hidden="true">done_all</span>
+                                <span id="cradarSelectAllLabel">Vybrať všetko</span>
+                            </button>
+                            <span class="cradar-sel-counter" id="cradarSelectedCounter">0 vybraných</span>
+                            <button type="button" class="cradar-btn-glass is-sm" id="cradarRethumbBtn" title="Zlepšiť náhľad označeným kartám (alebo kartám bez náhľadu)">
+                                <span class="material-icons-round" aria-hidden="true">auto_awesome</span>
+                                <span id="cradarRethumbLabel">Zlepšiť thumby</span>
+                            </button>
+                            <button type="button" class="cradar-btn-cyan is-sm" id="cradarSplitBtn" title="Otvoriť označené (alebo viditeľné) videá v Split-Screene">
+                                <span class="material-icons-round" aria-hidden="true">view_column</span>
+                                Split-Screen
+                            </button>
+                            <button type="button" class="cradar-btn-primary is-sm" id="cradarImportSelectedBtn" hidden title="Importovať všetky označené videá do Knižnice">
+                                <span class="material-icons-round" aria-hidden="true">download</span>
+                                Importovať vybrané (<span id="cradarImportSelectedCount">0</span>)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="cradar-grid" id="cradarResultsGrid"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Vstavaný Obsidian Glass Prehrávač v Creator Radare (HLS + JIT + Telegram + Proxy) -->
+    <div class="cradar-player-overlay" id="cradarPlayerOverlay" hidden>
+        <div class="cradar-player-box">
+            <div class="cradar-player-head">
+                <div class="cradar-player-title" id="cradarPlayerTitle">Prehrávač</div>
+                <div class="cradar-player-controls">
+                    <button type="button" class="cradar-btn-glass is-sm" id="cradarPlayerOpenMainBtn" hidden title="Otvoriť v hlavnom Nexus prehrávači">
+                        <span class="material-icons-round" aria-hidden="true">smart_display</span>
+                        Hlavný player
+                    </button>
+                    <button type="button" class="cradar-btn-glass is-sm" id="cradarPlayerRefreshBtn" hidden title="Obnoviť stream (JIT)">
+                        <span class="material-icons-round" aria-hidden="true">refresh</span>
+                        Obnoviť
+                    </button>
+                    <a class="cradar-btn-glass is-sm" id="cradarPlayerSourceLink" href="#" target="_blank" rel="noopener" hidden>
+                        <span class="material-icons-round" aria-hidden="true">open_in_new</span>
+                        Zdroj
+                    </a>
+                    <button type="button" class="cradar-btn-primary is-sm" id="cradarPlayerCloseBtn">
+                        <span class="material-icons-round" aria-hidden="true">close</span>
+                        Zavrieť
+                    </button>
+                </div>
+            </div>
+            <div class="cradar-player-status" id="cradarPlayerStatus" hidden></div>
+            <div class="cradar-player-error" id="cradarPlayerError" hidden></div>
+            <video id="cradarPlayerVideo" controls autoplay playsinline></video>
+        </div>
+    </div>
+</div>

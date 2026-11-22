@@ -1,0 +1,168 @@
+/* ===== NEXUS sxyprn Blog Gallery Importer ===== */
+
+#nexus-sx-toolbar {
+    position: fixed;
+    top: 88px;
+    right: 20px;
+    z-index: 2147483647;
+    width: min(360px, calc(100vw - 24px));
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(12, 10, 22, 0.93);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(167, 139, 250, 0.28);
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.5);
+    color: #f8fafc;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+#nexus-sx-toolbar[data-busy="1"] { opacity: 0.88; }
+
+.nsx-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #a78bfa;
+    margin-bottom: 4px;
+}
+
+.nsx-stats {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 10px;
+}
+
+/* Page navigation row */
+.nsx-pager {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.nsx-pager-label {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #c4b5fd;
+}
+
+/* Action buttons row */
+.nsx-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.nsx-actions button,
+.nsx-pager button {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 7px 10px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+}
+
+.nsx-actions button:hover,
+.nsx-pager button:hover {
+    background: rgba(167, 139, 250, 0.15);
+}
+
+.nsx-actions button.primary {
+    border-color: rgba(167, 139, 250, 0.45);
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(236, 72, 153, 0.25));
+    color: #f5f0ff;
+}
+
+.nsx-actions button.primary:hover {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.45), rgba(236, 72, 153, 0.38));
+}
+
+.nsx-actions button:disabled,
+.nsx-pager button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* ---- Card overlays ---- */
+.nsx-check {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 2147483645;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nsx-check input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+}
+
+.nsx-check span {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(7, 12, 20, 0.84);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+    transition: background 0.12s;
+}
+
+.nsx-check input:checked + span {
+    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+.nsx-card-selected {
+    outline: 2px solid rgba(167, 139, 250, 0.9);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+/* Toast */
+#nexus-sx-toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 2147483647;
+    max-width: min(420px, calc(100vw - 24px));
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(12, 10, 22, 0.96);
+    border: 1px solid rgba(167, 139, 250, 0.38);
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.45);
+    color: #fff;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.18s ease;
+    pointer-events: none;
+}
+
+#nexus-sx-toast.visible { opacity: 1; transform: translateY(0); }
+#nexus-sx-toast[data-error="1"] { border-color: rgba(239, 68, 68, 0.45); }
+
+@media (max-width: 720px) {
+    #nexus-sx-toolbar {
+        top: auto;
+        right: 12px;
+        left: 12px;
+        bottom: 64px;
+        width: auto;
+    }
+}

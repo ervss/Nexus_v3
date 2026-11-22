@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "Nexus Thread Intake",
+  "version": "2.3.1",
+  "description": "Capture unique thread links and hand them to Nexus Link Tester.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "tabs",
+    "cookies",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost/*",
+    "http://127.0.0.1/*",
+    "https://*.simpcity.cr/*",
+    "https://fileditchfiles.st/*",
+    "https://*.fileditchfiles.st/*",
+    "https://fileditch.st/*",
+    "https://*.fileditch.st/*",
+    "https://freakingfileditch.me/*",
+    "https://*.freakingfileditch.me/*",
+    "https://donotsharethesetemplinksyouidiot.st/*",
+    "https://*.donotsharethesetemplinksyouidiot.st/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    { "resources": ["player.html", "player.js", "hls.min.js"], "matches": ["https://*.simpcity.cr/*"] }
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://*.simpcity.cr/*"],
+      "js": ["content.js", "watched.js"],
+      "css": ["watched.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.simpcity.cr/search/*",
+        "https://*.simpcity.cr/watched/threads*",
+        "https://*.simpcity.cr/tags/*",
+        "https://*.simpcity.cr/forums/*"
+      ],
+      "js": ["content.js", "search.js"],
+      "css": ["search.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Thread → Tester"
+  }
+}

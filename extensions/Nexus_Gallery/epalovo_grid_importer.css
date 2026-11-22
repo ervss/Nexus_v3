@@ -1,0 +1,164 @@
+.nexus-epalovo-toolbar {
+    position: fixed;
+    top: 88px;
+    right: 20px;
+    z-index: 2147483647;
+    width: min(370px, calc(100vw - 24px));
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(12, 17, 26, 0.9);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.42);
+    color: #f8fafc;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.nexus-epalovo-toolbar[data-busy="1"] {
+    opacity: 0.88;
+}
+
+.nexus-epalovo-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #38bdf8;
+}
+
+.nexus-epalovo-stats {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #cbd5e1;
+}
+
+.nexus-epalovo-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.nexus-epalovo-actions button {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.nexus-epalovo-actions button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.nexus-epalovo-actions button.primary {
+    border-color: rgba(56, 189, 248, 0.4);
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(14, 165, 233, 0.32));
+    color: #e0f2fe;
+}
+
+.nexus-epalovo-actions button.primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.35), rgba(14, 165, 233, 0.45));
+}
+
+.nexus-epalovo-actions button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.nexus-epalovo-check {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 2147483645;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nexus-epalovo-check input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.nexus-epalovo-check span {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(7, 12, 20, 0.84);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.nexus-epalovo-check input:checked + span {
+    background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.nexus-epalovo-selected {
+    outline: 2px solid rgba(56, 189, 248, 0.92);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+.nexus-epalovo-meta {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    z-index: 2147483645;
+    padding: 5px 8px;
+    border-radius: 8px;
+    background: rgba(7, 12, 20, 0.82);
+    color: #f8fafc;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.35;
+    pointer-events: none;
+}
+
+.nexus-epalovo-toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 2147483647;
+    max-width: min(400px, calc(100vw - 24px));
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(12, 17, 26, 0.94);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.4);
+    color: #fff;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.18s ease;
+    pointer-events: none;
+}
+
+.nexus-epalovo-toast.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.nexus-epalovo-toast[data-error="1"] {
+    border-color: rgba(239, 68, 68, 0.45);
+}
+
+@media (max-width: 720px) {
+    .nexus-epalovo-toolbar {
+        top: auto;
+        right: 12px;
+        left: 12px;
+        bottom: 12px;
+        width: auto;
+    }
+}

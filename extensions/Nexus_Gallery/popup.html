@@ -1,0 +1,3500 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+                <style>
+        :root {
+            --primary: #00d4e8;
+            --secondary: #8b5cf6;
+            --accent: #f43f8e;
+            --bg: #060810;
+            --surface: rgba(10, 13, 26, 0.82);
+            --surface-strong: rgba(12, 16, 34, 0.96);
+            --glass: rgba(255, 255, 255, 0.02);
+            --glass-border: rgba(255, 255, 255, 0.07);
+            --success: #0ea572;
+            --warning: #e89d0a;
+            --danger: #e53e3e;
+            --text-main: #eef2f8;
+            --text-soft: #7a8fa8;
+            --shadow-glow: rgba(0, 212, 232, 0.1);
+        }
+
+        /* Global Visibility Fixes */
+        select { color-scheme: dark !important; }
+        option { background-color: #0b0d19 !important; color: #ffffff !important; }
+        .btn:disabled { opacity: 0.4 !important; cursor: not-allowed !important; }
+        #batch-history-select option { background-color: #0b0d19 !important; color: #ffffff !important; }
+
+        * { box-sizing: border-box; }
+
+        html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-size: calc(16px * var(--text-scale, 1.0));
+        }
+
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background:
+                radial-gradient(ellipse at 20% 0%, var(--primary-glow, rgba(0, 212, 232, 0.07)), transparent 45%),
+                radial-gradient(ellipse at 85% 5%, var(--secondary-glow, rgba(139, 92, 246, 0.07)), transparent 40%),
+                linear-gradient(180deg, var(--bg-grad-start, #070910) 0%, var(--bg-grad-mid, #080b1a) 60%, var(--bg) 100%);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.01), transparent 25%),
+                linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.01) 50%, transparent 100%);
+            opacity: 0.8;
+            z-index: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 8px 12px 10px;
+            position: relative;
+            z-index: 1;
+            gap: 0;
+        }
+
+        #tutorial-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(6, 8, 16, 0.95);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #tutorial-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .tutorial-box {
+            background: var(--surface-strong);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            transform: translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #tutorial-overlay.visible .tutorial-box {
+            transform: translateY(0);
+        }
+        .tutorial-step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            gap: 14px;
+        }
+        .tutorial-step-number {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: rgba(0, 212, 232, 0.15);
+            border: 1px solid var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: var(--primary); font-size: 1.1rem;
+            flex-shrink: 0;
+            box-shadow: 0 0 10px rgba(0, 212, 232, 0.2);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            gap: 8px;
+            padding: 0 10px;
+            height: 44px;
+            min-height: 44px;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(14, 17, 30, 0.98), rgba(8, 10, 18, 0.96));
+            backdrop-filter: blur(20px);
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.04);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        header::after {
+            content: '';
+            position: absolute;
+            inset: auto 0 0 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.18), rgba(158, 96, 255, 0.12), transparent);
+            pointer-events: none;
+        }
+
+        .logo {
+            font-size: 1.0rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            background: linear-gradient(135deg, #ffffff 0%, var(--primary) 60%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 6px rgba(0, 243, 255, 0.18));
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .header-divider {
+            width: 1px;
+            height: 20px;
+            background: rgba(255,255,255,0.08);
+            flex-shrink: 0;
+        }
+
+        #folder-name {
+            font-size: 0.76rem;
+            color: rgba(255,255,255,0.65);
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+            flex: 1;
+            min-width: 0;
+        }
+        .header-center {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+        /* Batch memory bar — compact inline */
+        .batch-memory-bar {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        #batch-history-select,
+        .batch-memory-btn {
+            height: 26px;
+            border-radius: 6px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.04);
+            color: var(--text-main);
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0 8px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        #batch-history-select {
+            max-width: 140px;
+            cursor: pointer;
+            color-scheme: dark;
+            color: rgba(255,255,255,0.5);
+        }
+        .batch-memory-btn {
+            cursor: pointer;
+            white-space: nowrap;
+            background: rgba(216, 192, 138, 0.1);
+            border-color: rgba(216, 192, 138, 0.2);
+            color: rgba(216, 192, 138, 0.8);
+        }
+        .batch-memory-btn:hover {
+            background: rgba(216, 192, 138, 0.18);
+            border-color: rgba(216, 192, 138, 0.38);
+            color: #f2e6c8;
+        }
+
+        /* ── MISSION CONTROL WIDGET ── */
+        .mission-strip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+            padding: 7px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            background: linear-gradient(135deg, rgba(10, 13, 24, 0.97), rgba(6, 8, 15, 0.94));
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            transition: max-height 0.25s ease, padding 0.25s ease, margin 0.25s ease, border-width 0.25s ease, opacity 0.2s ease;
+        }
+        .mission-strip::after {
+            content: '';
+            position: absolute;
+            inset: auto 0 0 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.25), rgba(158, 96, 255, 0.15), transparent);
+            pointer-events: none;
+        }
+        .mission-copy,
+        .mission-progress-shell {
+            position: relative;
+            z-index: 1;
+            min-width: 0;
+        }
+        .mission-copy {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+            flex: 1 1 auto;
+            overflow: hidden;
+        }
+        .mission-kicker {
+            font-size: 0.64rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.28em;
+            color: #d9c38a;
+            flex-shrink: 0;
+        }
+        .mission-headline {
+            font-size: 0.98rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #fff9ef;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .mission-detail {
+            font-size: 0.8rem;
+            line-height: 1.2;
+            color: rgba(248, 240, 225, 0.7);
+            max-width: 44ch;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1 1 auto;
+        }
+        .mission-meta-row,
+        .mission-progress-foot {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 6px;
+            flex-shrink: 0;
+            min-width: 0;
+            overflow: hidden;
+        }
+        .mission-pill,
+        .tab-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255,255,255,0.025);
+            color: rgba(200, 210, 230, 0.6);
+            font-size: 0.68rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .mission-progress-shell {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+            flex: 0 1 640px;
+            min-width: 0;
+            padding: 8px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(216, 192, 138, 0.10);
+            background:
+                radial-gradient(circle at top right, rgba(216, 192, 138, 0.08), transparent 28%),
+                linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015)),
+                rgba(255, 255, 255, 0.012);
+            backdrop-filter: blur(16px);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.06),
+                0 10px 24px rgba(0,0,0,0.16);
+        }
+        .mission-progress-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .mission-progress-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: rgba(242, 230, 200, 0.72);
+        }
+        .mission-progress-value {
+            font-size: 0.96rem;
+            font-weight: 800;
+            color: #fff7ea;
+            letter-spacing: -0.03em;
+            text-shadow: 0 0 12px rgba(216, 192, 138, 0.12);
+        }
+        .mission-progress-copy {
+            font-size: 0.76rem;
+            color: rgba(248, 240, 225, 0.72);
+            font-weight: 500;
+            min-height: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1 1 auto;
+        }
+        #progress-bar-wrap {
+            flex: 1 1 auto;
+            min-width: 140px;
+            margin-top: 0;
+            border-color: rgba(216, 192, 138, 0.10);
+            background: rgba(255,255,255,0.03);
+        }
+
+        /* ── TAB BAR ── */
+        .tab-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            padding: 3px 6px;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            background: rgba(10, 12, 22, 0.7);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            backdrop-filter: blur(16px);
+            height: 36px;
+            min-height: 36px;
+            flex-shrink: 0;
+        }
+        .tab-cluster,
+        .tab-utility {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .tab-utility {
+            justify-content: flex-end;
+            flex: 1;
+        }
+        .tab-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-soft);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.76rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            letter-spacing: 0.02em;
+            height: 28px;
+        }
+        .tab-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.03);
+            border-color: var(--glass-border);
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, rgba(0, 243, 255, 0.1), rgba(158, 96, 255, 0.08));
+            border-color: rgba(0, 243, 255, 0.25);
+            color: #fff;
+        }
+        .tab-badge {
+            background: rgba(0, 243, 255, 0.15);
+            color: var(--primary);
+            border-radius: 4px;
+            padding: 0 5px;
+            font-size: 0.64rem;
+            font-weight: 800;
+            min-width: 16px;
+            text-align: center;
+            line-height: 16px;
+            height: 16px;
+        }
+        .tab-chip strong {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        /* ── PANELS ── */
+        .panel { display: none; flex-direction: column; flex: 1; min-height: 0; }
+        .panel.active { display: flex; }
+        #tab-main {
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        /* ── SEARCH PANEL ── */
+        #ph-search-panel {
+            padding: 10px 12px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: none;
+            gap: 8px;
+            align-items: center;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+            backdrop-filter: blur(16px);
+        }
+        #ph-search-panel.visible { display: flex; }
+        #ph-search-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            padding: 6px 12px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.86rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        #ph-search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.2);
+        }
+
+        /* ── CONTROLS & BOARD ── */
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+            backdrop-filter: blur(16px);
+        }
+
+        .search-bar {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            padding: 6px 12px;
+            color: white;
+            flex-grow: 1;
+            font-size: 0.86rem;
+            outline: none;
+            transition: all 0.2s ease;
+            min-width: 0;
+        }
+        .search-bar:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+        }
+
+        .sort-select {
+            background: rgba(0,0,0,0.32);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            color: white;
+            padding: 0 10px;
+            outline: none;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            font-size: 0.82rem;
+            transition: all 0.2s ease;
+        }
+
+        .control-board {
+            display: grid;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 12px;
+            align-items: start;
+        }
+        
+        .deck-card {
+            min-width: 0;
+            border: 1px solid var(--glass-border);
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.02), transparent 45%),
+                var(--surface);
+            border-radius: 14px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+            backdrop-filter: blur(16px);
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+        .section-kicker {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            color: var(--primary);
+            margin-bottom: 2px;
+            opacity: 0.95;
+        }
+        .search-suite { grid-column: span 4; }
+        .overview-suite { grid-column: span 8; }
+        .toggle-suite { grid-column: span 5; }
+        .filter-suite { grid-column: span 7; }
+        .quick-suite { grid-column: 1 / -1; }
+
+        .compact-controls {
+            margin-bottom: 0;
+            padding: 0;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(130px, 160px);
+            align-items: center;
+            gap: 6px;
+        }
+        .compact-stats {
+            margin-bottom: 0;
+            padding: 0;
+            display: grid;
+            gap: 8px;
+        }
+        .stats-main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            min-height: 28px;
+        }
+        .stats-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .stats-meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            color: var(--text-soft);
+            font-size: 0.74rem;
+        }
+        .status-chip {
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.02);
+            font-weight: 600;
+        }
+
+        /* ── MODES CHECKBOX OVERHAUL ── */
+        .toggle-suite .mode-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+        .toggle-suite #turbo-controls,
+        .toggle-suite #bunkr-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 0;
+            padding: 10px 12px !important;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.06) !important;
+            background: rgba(255,255,255,0.01) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+        }
+        .toggle-suite #turbo-controls label,
+        .toggle-suite #bunkr-controls label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 34px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            color: var(--text-soft) !important;
+        }
+        .toggle-suite #turbo-controls label input,
+        .toggle-suite #bunkr-controls label input {
+            accent-color: var(--primary);
+            cursor: pointer;
+            width: 14px;
+            height: 14px;
+        }
+        .toggle-suite #turbo-controls label:hover,
+        .toggle-suite #bunkr-controls label:hover {
+            border-color: rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.03);
+            color: #fff !important;
+        }
+        .toggle-suite #turbo-controls label:has(input:checked),
+        .toggle-suite #bunkr-controls label:has(input:checked) {
+            background: rgba(0, 243, 255, 0.06);
+            border-color: rgba(0, 243, 255, 0.3);
+            color: #fff !important;
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.12);
+        }
+
+        .toggle-suite .modes-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+        .mode-range-shell,
+        .mode-throttle-shell {
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .mode-range-shell {
+            border-color: rgba(0, 243, 255, 0.15);
+            background: rgba(12, 17, 36, 0.6);
+        }
+        .mode-throttle-shell {
+            background: rgba(8,11,24,0.6);
+        }
+        .mode-range-topline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .mode-range-label {
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--primary);
+        }
+        .mode-range-badge {
+            padding: 2px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(158,96,255,0.2);
+            background: rgba(158,96,255,0.08);
+            color: #e8d5ff;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .mode-range-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+        .mode-range-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .mode-range-field span {
+            font-size: 0.68rem;
+            color: var(--text-soft);
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .mode-range-shell select,
+        .mode-range-shell input,
+        .mode-throttle-shell select {
+            width: 100%;
+            min-height: 32px;
+            border-radius: 6px;
+            border: 1px solid var(--glass-border);
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            padding: 4px 8px;
+            outline: none;
+            font-size: 0.8rem;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.2s ease;
+        }
+        .mode-range-shell select:focus,
+        .mode-range-shell input:focus,
+        .mode-throttle-shell select:focus {
+            border-color: var(--primary);
+        }
+        .mode-range-hint {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 0.72rem;
+            color: var(--text-soft);
+            padding-top: 4px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .mode-range-micro {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .mode-throttle-copy strong {
+            font-size: 0.76rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #fff;
+            display: block;
+        }
+        .mode-throttle-copy small {
+            font-size: 0.7rem;
+            color: var(--text-soft);
+            line-height: 1.35;
+        }
+
+        /* ── FILTERS ── */
+        .filter-suite .range-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+        .filter-suite .range-group {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.01);
+        }
+        .filter-suite .range-group.full {
+            min-height: 0;
+        }
+        .label-pipe {
+            color: var(--primary);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            display: block;
+            width: 100%;
+        }
+        
+        .filter-suite .range-group .duration-inputs,
+        .filter-suite .range-group .size-inputs {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-suite .range-group input[type="text"],
+        .filter-suite .range-group input[type="number"],
+        .filter-suite .range-group select {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            color: white;
+            border-radius: 6px;
+            padding: 4px 8px;
+            outline: none;
+            font-size: 0.8rem;
+            font-family: 'Outfit', sans-serif;
+            min-height: 32px;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        .filter-suite .range-group input:focus,
+        .filter-suite .range-group select:focus {
+            border-color: var(--primary);
+        }
+        
+        .quality-multi {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 6px;
+            width: 100%;
+            align-items: center;
+        }
+        .quality-multi label {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.01);
+            color: var(--text-soft);
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .quality-multi label input {
+            display: none;
+        }
+        .quality-multi label::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transition: all 0.2s ease;
+            display: inline-block;
+        }
+        .quality-multi label:has(input:checked) {
+            background: rgba(0, 243, 255, 0.08) !important;
+            border-color: var(--primary) !important;
+            color: #fff !important;
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.12) !important;
+        }
+        .quality-multi label:has(input:checked)::before {
+            background: var(--primary) !important;
+            box-shadow: 0 0 6px var(--primary) !important;
+        }
+
+        /* ── HOST PANEL CUSTOM ── */
+        .host-filter-wrap { position: relative; width: 100%; }
+        .host-filter-btn {
+            background: rgba(0,0,0,0.3) !important;
+            border: 1px solid var(--glass-border) !important;
+            color: white !important;
+            border-radius: 6px !important;
+            padding: 4px 10px !important;
+            font-size: 0.8rem !important;
+            font-family: 'Outfit', sans-serif;
+            min-height: 32px !important;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+        }
+        .host-filter-panel, .album-filter-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 20000;
+            background: #0b0d19;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            padding: 10px;
+            min-width: 260px;
+            max-width: min(500px, 78vw);
+            max-height: min(60vh, 500px);
+            overflow-y: auto;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+        }
+        .host-filter-actions, .album-filter-actions {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .host-filter-actions button, .album-filter-actions button {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--glass-border);
+            color: var(--text-soft);
+            border-radius: 5px;
+            padding: 3px 8px;
+            font-size: 0.72rem;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+        }
+        .host-checkbox-item, .album-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 6px;
+            color: var(--text-main);
+            font-size: 0.78rem;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .host-checkbox-item input[type="checkbox"], .album-checkbox-item input[type="checkbox"] {
+            accent-color: var(--primary);
+            width: 14px;
+            height: 14px;
+        }
+
+        /* ── BUNKR BRIDGE BUTTONS REDESIGN ── */
+        .bridge-mini-btn, .vk-mini-btn {
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            background: rgba(255, 255, 255, 0.02) !important;
+            color: var(--text-soft) !important;
+            border-radius: 6px !important;
+            padding: 6px 12px !important;
+            font-size: 0.74rem !important;
+            font-weight: 600 !important;
+            cursor: pointer;
+            transition: all 0.2s ease !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.01);
+        }
+        .bridge-mini-btn:hover, .vk-mini-btn:hover {
+            background: rgba(0, 243, 255, 0.08) !important;
+            border-color: rgba(0, 243, 255, 0.3) !important;
+            color: var(--primary) !important;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.15);
+        }
+        .bridge-actions {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+            gap: 6px !important;
+            margin-top: 6px !important;
+        }
+        .bridge-actions input[type="text"] {
+            grid-column: 1 / -1 !important;
+            background: rgba(0,0,0,0.3) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 6px !important;
+            padding: 6px 10px !important;
+            color: #fff !important;
+            font-size: 0.8rem !important;
+            outline: none;
+        }
+        .bridge-log {
+            border-radius: 8px !important;
+            background: rgba(0,0,0,0.4) !important;
+            border: 1px solid rgba(255,255,255,0.04) !important;
+            color: rgba(255,255,255,0.6) !important;
+            padding: 8px !important;
+            font-size: 0.72rem !important;
+            margin-top: 8px !important;
+        }
+
+        /* ── QUICK FILTERS ── */
+        .quick-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 10px;
+            background: rgba(0, 0, 0, 0.22);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            align-items: center;
+        }
+        .quick-filter-label {
+            color: var(--text-soft);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .quick-chip {
+            border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.02);
+            color: var(--text-soft);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 0.74rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .quick-chip:hover {
+            border-color: rgba(0,243,255,0.3);
+            color: #fff;
+        }
+        .quick-chip.active {
+            background: rgba(0,243,255,0.08);
+            border-color: rgba(0,243,255,0.5);
+            color: #e6fdff;
+        }
+
+        /* ── STREAMS & LOADING ── */
+        .stats-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-soft);
+            margin-bottom: 8px;
+            gap: 8px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            flex-wrap: wrap;
+        }
+        #stats-text { flex: 1; font-weight: 600; }
+        #page-scan-info {
+            color: #b7f3ff;
+            background: rgba(0,243,255,0.06);
+            border-color: rgba(0,243,255,0.18);
+        }
+
+        /* ── PROGRESS BAR ── */
+        #progress-bar-wrap {
+            display: block;
+            height: 6px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 999px;
+            margin-top: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        #progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary) 60%, var(--success) 100%);
+            border-radius: 999px;
+            transition: width 0.4s ease;
+            width: 0%;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.25);
+        }
+
+        #import-toast {
+            display: none;
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(5, 7, 15, 0.98);
+            border: 1px solid var(--primary);
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: #fff;
+            z-index: 10000;
+            text-align: center;
+            min-width: 260px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+            backdrop-filter: blur(12px);
+        }
+
+        /* ── SWITCHERS ── */
+        .variant-switcher {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            padding: 2px;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            height: 26px;
+        }
+        .variant-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-soft);
+            border-radius: 4px;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 0.68rem;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.15s ease;
+            height: 22px;
+            line-height: 1;
+        }
+        .variant-btn.active {
+            color: #04080e;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        #view-toggle {
+            display: flex;
+            gap: 1px;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            padding: 2px;
+            height: 26px;
+            align-items: center;
+        }
+        .view-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-soft);
+            border-radius: 4px;
+            padding: 3px 7px;
+            cursor: pointer;
+            font-size: 0.74rem;
+            transition: all 0.15s ease;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+        }
+        .view-btn.active {
+            background: rgba(0, 212, 232, 0.12);
+            color: var(--primary);
+        }
+
+        /* ── GRID & CARDS ── */
+        body.grid-size-auto { --grid-cols: 2; }
+        body.grid-size-2x2 { --grid-cols: 2; }
+        body.grid-size-2x3 { --grid-cols: 2; }
+        body.grid-size-3x2 { --grid-cols: 3; }
+        body.grid-size-3x3 { --grid-cols: 3; }
+        body.grid-size-4x2 { --grid-cols: 4; }
+        body.grid-size-5x2 { --grid-cols: 5; }
+        body.grid-size-4x3 { --grid-cols: 4; }
+        body.grid-size-5x3 { --grid-cols: 5; }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(var(--grid-cols, 2), 1fr);
+            gap: 12px;
+            overflow: visible;
+            padding-right: 4px;
+            align-content: start;
+        }
+        .video-grid.list-view {
+            grid-template-columns: 1fr !important;
+            gap: 8px;
+        }
+
+        .video-grid.focus-view {
+            grid-template-columns: repeat(var(--grid-cols, 2), minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .video-card {
+            background: var(--surface-strong);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            height: 220px;
+            min-height: 220px;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+        }
+        .video-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            box-shadow:
+                0 0 0 1px rgba(0, 243, 255, 0.15),
+                0 14px 28px rgba(0, 0, 0, 0.4);
+        }
+        .video-card.selected {
+            border: 2px solid var(--primary);
+            background: rgba(0, 243, 255, 0.04);
+        }
+
+        .video-grid.list-view .video-card {
+            height: 64px;
+            min-height: 64px;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .video-grid.focus-view .video-card {
+            height: auto !important;
+            min-height: clamp(220px, 22vw, 360px);
+            aspect-ratio: 16 / 10;
+            border-radius: 14px;
+        }
+        .video-grid.list-view .thumbnail {
+            width: 100px !important;
+            min-width: 100px;
+            height: 64px !important;
+            min-height: 64px !important;
+            border-radius: 0;
+        }
+
+        .video-grid.focus-view .thumbnail {
+            height: 100% !important;
+            min-height: 100% !important;
+            aspect-ratio: auto !important;
+        }
+        .video-grid.list-view .info { flex: 1; padding: 8px 12px; }
+
+        .thumb-bottom-panel {
+            display: none;
+        }
+
+        .thumb-bottom-title,
+        .thumb-bottom-meta,
+        .thumb-pill {
+            margin: 0;
+        }
+
+        .video-grid.focus-view .info {
+            display: none;
+        }
+
+        .video-grid.focus-view .thumb-bottom-panel {
+            display: flex;
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2;
+            padding: 12px;
+            flex-direction: column;
+            gap: 7px;
+            pointer-events: none;
+            background: linear-gradient(180deg, rgba(8, 10, 22, 0) 0%, rgba(8, 10, 22, 0.74) 52%, rgba(8, 10, 22, 0.95) 100%);
+        }
+
+        .video-grid.focus-view .thumb-bottom-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #fff;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.68);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-grid.focus-view .thumb-bottom-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .video-grid.focus-view .thumb-pill {
+            background: rgba(7, 10, 28, 0.82);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #dff9ff;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .video-grid.focus-view .thumb-pill.primary {
+            background: rgba(0, 243, 255, 0.16);
+            border-color: rgba(0, 243, 255, 0.35);
+            color: #8af2ff;
+        }
+
+        .video-grid.focus-view .thumb-pill.success {
+            background: rgba(16, 185, 129, 0.16);
+            border-color: rgba(16, 185, 129, 0.36);
+            color: #a7f3d0;
+        }
+
+        .video-grid.focus-view .smart-preview-badge {
+            top: 10px;
+            left: 10px;
+            right: auto;
+            bottom: auto;
+            width: max-content;
+            max-width: calc(100% - 96px);
+            background: rgba(7, 11, 34, 0.78);
+            border-color: rgba(0, 210, 255, 0.28);
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 130px;
+            min-height: 130px;
+            background-size: cover;
+            background-position: center;
+            background-color: #0b0d19;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .selection-overlay {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.7);
+            border-radius: 50%;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 5;
+        }
+        .video-card.selected .selection-overlay {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        .video-card.selected .selection-overlay::after {
+            content: '✓';
+            color: #05070f;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .dup-badge,
+        .queue-badge,
+        .direct-badge,
+        .meta-badge,
+        .cache-badge {
+            position: absolute;
+            z-index: 5;
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .dup-badge { display: none; top: 8px; left: 8px; background: var(--warning); color: #000; }
+        .queue-badge { display: none; bottom: 8px; left: 8px; background: var(--secondary); color: #fff; }
+        .direct-badge { display: none; top: 8px; right: 36px; background: var(--success); color: #fff; }
+        .meta-badge { display: none; top: 8px; right: 8px; background: var(--success); color: #fff; }
+        .cache-badge { display: none; top: 8px; left: 40px; background: #15803d; color: #ecfdf5; }
+        
+        .video-card.duplicate .dup-badge { display: flex; }
+        .video-card.queued .queue-badge { display: flex; }
+        .video-card.direct-ok .direct-badge { display: flex; }
+        .video-card.meta-success .meta-badge { display: flex; }
+        .video-card.cache-hit .cache-badge { display: flex; }
+
+        .smart-preview-badge {
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            background: rgba(5, 7, 15, 0.85);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: #e2e8f0;
+            font-size: 0.62rem;
+            font-weight: 600;
+            padding: 3px 6px;
+            border-radius: 5px;
+            z-index: 2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 4px;
+            backdrop-filter: blur(6px);
+        }
+        .smart-preview-album {
+            color: var(--primary);
+            font-weight: 700;
+            max-width: 45%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .info {
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
+        .title {
+            font-size: 0.86rem;
+            font-weight: 600;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            color: #ffffff;
+            min-height: 2.6em;
+        }
+        .meta-info {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            line-height: 1.2;
+        }
+        .quality-badge {
+            font-size: 0.64rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #05070f;
+            padding: 1px 6px;
+            border-radius: 5px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .host-badge {
+            font-size: 0.64rem;
+            background: rgba(255,255,255,0.03);
+            color: #bbf7ff;
+            padding: 1px 6px;
+            border-radius: 5px;
+            font-weight: 700;
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .duration {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: rgba(0, 243, 255, 0.06);
+            padding: 1px 6px;
+            border-radius: 5px;
+        }
+        .file-size {
+            font-size: 0.68rem;
+            color: var(--text-soft);
+            margin-left: auto;
+            background: rgba(255,255,255,0.02);
+            padding: 1px 6px;
+            border-radius: 5px;
+        }
+
+        /* ── FOOTER & BUTTONS ── */
+        footer {
+            margin-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+            backdrop-filter: blur(16px);
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.82rem;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.03);
+            color: #fff;
+            border-color: var(--glass-border);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.06);
+            transform: translateY(-1px);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #05070f;
+            box-shadow: 0 4px 12px rgba(0, 243, 255, 0.15);
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 243, 255, 0.25);
+        }
+        .btn-queue {
+            background: rgba(158, 96, 255, 0.12);
+            color: #e8d5ff;
+            border-color: rgba(158, 96, 255, 0.25);
+        }
+        .btn-queue:hover {
+            background: rgba(158, 96, 255, 0.2);
+            transform: translateY(-1px);
+        }
+        .btn-open-dash {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-color: rgba(16, 185, 129, 0.25);
+        }
+        .btn-open-dash:hover {
+            background: rgba(16, 185, 129, 0.18);
+            transform: translateY(-1px);
+        }
+
+        /* ── WATCHLIST PANEL ── */
+        #watchlist-panel {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .wl-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            backdrop-filter: blur(16px);
+        }
+        .wl-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+        .wl-thumb {
+            width: 64px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 5px;
+            background: #0b0d19;
+            flex-shrink: 0;
+            border: 1px solid var(--glass-border);
+        }
+        .wl-info { flex: 1; overflow: hidden; }
+        .wl-title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 600;
+            color: #fff;
+        }
+        .wl-meta { color: var(--text-soft); font-size: 0.72rem; }
+        .wl-remove {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.2);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 2px 6px;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+        }
+        .wl-remove:hover { color: var(--danger); }
+        .wl-import-btn {
+            background: rgba(0, 243, 255, 0.06);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            color: var(--primary);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+        }
+        .wl-empty {
+            text-align: center;
+            padding: 44px 20px;
+            color: var(--text-soft);
+            opacity: 0.6;
+            font-size: 0.86rem;
+        }
+        .wl-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+            backdrop-filter: blur(16px);
+        }
+
+        /* ── SPINNER ── */
+        #loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            border: 1px solid var(--glass-border);
+            background: var(--surface);
+            border-radius: 14px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+        }
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(255,255,255,0.04);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* ── 🎥 PLEX / NETFLIX STYLE DUAL-PANE DESKTOP OVERHAUL ── */
+        body.large-window .container {
+            padding: 8px 14px 10px;
+            gap: 0;
+            max-width: none !important;
+            width: 100% !important;
+            margin: 0 !important;
+            display: grid;
+            grid-template-rows: auto auto auto 1fr;
+            height: 100vh;
+            overflow: hidden;
+        }
+        body.large-window header {
+            margin-bottom: 6px;
+            height: 44px;
+            min-height: 44px;
+        }
+        body.large-window .logo {
+            font-size: clamp(0.9rem, 1.1vw, 1.1rem);
+            letter-spacing: 0.22em;
+        }
+        body.large-window .header-center {
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+        body.large-window #folder-name {
+            max-width: 280px;
+            font-size: 0.75rem;
+        }
+        body.large-window .batch-memory-bar {
+            gap: 4px;
+        }
+        body.large-window .header-actions {
+            gap: 5px;
+            flex-wrap: nowrap;
+        }
+        body.large-window .header-actions select,
+        body.large-window .header-actions button {
+            height: 26px;
+        }
+
+        /* Mission Control condensation on desktop */
+        body.large-window .mission-strip {
+            gap: 8px !important;
+            padding: 6px 10px !important;
+            border-radius: 8px !important;
+            margin-bottom: 4px !important;
+        }
+        body.large-window .mission-kicker { display: none; }
+        body.large-window .mission-copy { gap: 6px; }
+        body.large-window .mission-headline { font-size: 0.84rem; }
+        body.large-window .mission-detail { display: none; }
+        body.large-window .mission-meta-row { display: none; }
+        body.large-window .mission-progress-shell {
+            flex: 1 1 auto;
+            padding: 5px 8px;
+            border-radius: 8px;
+        }
+        body.large-window .mission-progress-copy { display: none; }
+        body.large-window .mission-progress-value { font-size: 0.84rem; }
+        body.large-window .mission-progress-foot { display: none; }
+        body.large-window #progress-bar-wrap { min-width: 160px; }
+
+        body.large-window .tab-bar {
+            margin-bottom: 6px;
+            padding: 3px 5px;
+            height: 36px;
+        }
+
+        /* ── Split-Pane Grid for videos main tab ── */
+        body.large-window #tab-main {
+            display: grid !important;
+            grid-template-columns: 320px 1fr !important;
+            grid-template-rows: 1fr auto !important;
+            gap: 16px !important;
+            height: 100% !important;
+            overflow: hidden !important;
+            align-items: stretch !important;
+            padding-right: 0 !important;
+        }
+
+        /* Left Column: Docked Vertical Sidebar Control Board */
+        body.large-window .control-board {
+            grid-column: 1 !important;
+            grid-row: 1 / span 2 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 12px !important;
+            height: 100% !important;
+            overflow-y: auto !important;
+            padding: 12px 14px 12px 2px !important;
+            background: rgba(8, 12, 28, 0.4) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 16px !important;
+            scrollbar-gutter: stable;
+        }
+        body.large-window .control-board::-webkit-scrollbar {
+            width: 4px;
+        }
+        body.large-window .control-board::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.06);
+            border-radius: 999px;
+        }
+
+        body.large-window .control-board .deck-card {
+            grid-column: span 12 !important;
+            width: 100% !important;
+            border-radius: 12px !important;
+            padding: 12px 14px !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+        }
+
+        body.large-window .search-suite .controls {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+        }
+        body.large-window .compact-controls {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+        }
+        body.large-window .search-bar {
+            min-height: 36px;
+        }
+
+        /* Right Column: Hero Video Grid */
+        body.large-window #video-grid {
+            grid-column: 2 !important;
+            grid-row: 1 !important;
+            height: 100% !important;
+            overflow-y: auto !important;
+            padding: 4px 8px 12px 2px !important;
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, minmax(580px, 1fr)) !important;
+            gap: 16px !important;
+            align-content: start !important;
+        }
+        body.large-window #video-grid .video-card {
+            height: 420px !important;
+            min-height: 420px !important;
+        }
+        body.large-window #video-grid .thumbnail {
+            height: 280px !important;
+            min-height: 280px !important;
+        }
+        body.large-window #video-grid::-webkit-scrollbar {
+            width: 5px;
+        }
+        body.large-window #video-grid::-webkit-scrollbar-thumb {
+            background: rgba(0, 243, 255, 0.15);
+            border-radius: 999px;
+        }
+
+        /* Grid Size overrides for large-window desktop
+           Keep cards flow-based (no fixed row math) to prevent large empty gaps. */
+        body.large-window #video-grid .video-card {
+            height: auto !important;
+            min-height: 0 !important;
+        }
+        body.large-window #video-grid .thumbnail {
+            height: auto !important;
+            min-height: 0 !important;
+            aspect-ratio: 16 / 9;
+            flex: 0 0 auto !important;
+        }
+
+        body.large-window.grid-size-3x2 #video-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+        body.large-window.grid-size-4x2 #video-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+        body.large-window.grid-size-5x2 #video-grid { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+        body.large-window.grid-size-4x3 #video-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+        body.large-window.grid-size-5x3 #video-grid { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+
+        #grid-size-select:hover {
+            border-color: var(--primary) !important;
+            color: #fff !important;
+            background: rgba(255,255,255,0.06) !important;
+        }
+
+
+        body.large-window #loader {
+            grid-column: 2 !important;
+            grid-row: 1 !important;
+            height: 100% !important;
+        }
+        body.large-window .empty-state {
+            grid-column: 2 !important;
+            grid-row: 1 !important;
+            margin: 40px auto;
+        }
+
+        /* Right Column Bottom Sticky Footer */
+        body.large-window footer {
+            grid-column: 2 !important;
+            grid-row: 2 !important;
+            margin-top: 0 !important;
+            width: 100% !important;
+            position: static !important;
+            border-radius: 12px !important;
+            padding: 10px 16px !important;
+            background: rgba(6, 9, 22, 0.9) !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            z-index: 20;
+        }
+        body.large-window .footer-port-row {
+            margin-bottom: 0;
+            width: auto;
+            justify-self: auto;
+        }
+        body.large-window .btn {
+            border-radius: 6px;
+            min-height: 34px;
+            font-size: 0.84rem;
+        }
+
+        /* Large Focus Mode specifics */
+        body.large-window.focus-view-mode #video-grid {
+            grid-template-columns: repeat(auto-fill, minmax(550px, 1fr)) !important;
+            gap: 16px;
+        }
+        body.large-window.focus-view-mode #video-grid .video-card {
+            aspect-ratio: 16 / 10 !important;
+            height: auto !important;
+            min-height: clamp(220px, 17.2vw, 320px) !important;
+        }
+        body.large-window.focus-view-mode #video-grid .thumbnail {
+            height: 100% !important;
+            min-height: 100% !important;
+            aspect-ratio: auto !important;
+        }
+        body.large-window.focus-view-mode.grid-size-3x2 #video-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+        body.large-window.focus-view-mode.grid-size-4x2 #video-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+        body.large-window.focus-view-mode.grid-size-5x2 #video-grid { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+        body.large-window.focus-view-mode.grid-size-4x3 #video-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+        body.large-window.focus-view-mode.grid-size-5x3 #video-grid { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+        body.large-window.focus-view-mode #video-grid:not(.list-view) {
+            grid-auto-rows: 1fr;
+        }
+
+        /* ── VIDEO PLAY PREVIEW MODAL ── */
+        #video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.93);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(16px);
+            animation: fadeIn 0.25s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .modal-content {
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            background: linear-gradient(180deg, #0d1024 0%, #050711 100%);
+            border-radius: 18px !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0,243,255,0.12);
+            display: flex;
+            flex-direction: column;
+        }
+        #video-loader {
+            inset: 0;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 28px;
+            text-align: center;
+            background: radial-gradient(circle at center, rgba(13, 23, 48, 0.92), rgba(4, 7, 17, 0.98));
+            z-index: 3;
+        }
+        #video-loader-status {
+            color: #e7fbff;
+            font-size: 0.92rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+        #video-loader-detail {
+            color: #7e91ad;
+            font-size: 0.76rem;
+            max-width: 520px;
+        }
+        #video-loader-retry {
+            display: none;
+            border: 1px solid rgba(0, 243, 255, 0.45);
+            border-radius: 9px;
+            padding: 8px 14px;
+            color: #dffcff;
+            background: rgba(0, 243, 255, 0.08);
+            cursor: pointer;
+        }
+        #video-loader.is-error .spinner { display: none; }
+        #video-loader.is-error #video-loader-status { color: #ff9d9d; }
+        #video-loader.is-error #video-loader-retry { display: inline-flex; }
+        .modal-header {
+            padding: 12px 20px !important;
+            background: rgba(255, 255, 255, 0.02) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-title {
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 80%;
+        }
+        .close-modal {
+            background: rgba(255,255,255,0.04) !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+            color: #aaa;
+            width: 30px !important;
+            height: 30px !important;
+            border-radius: 50% !important;
+            cursor: pointer;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: all 0.2s ease !important;
+            font-size: 1.1rem !important;
+        }
+        .close-modal:hover {
+            background: rgba(239,68,68,0.2) !important;
+            border-color: rgba(239,68,68,0.4) !important;
+            color: var(--danger) !important;
+        }
+        .video-container {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        #modal-video { width: 100%; height: 100%; display: block; }
+        .modal-footer {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.01);
+            font-size: 0.8rem;
+            color: var(--text-soft);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .modal-meta { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 220px; flex: 1; }
+        .modal-actions { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        #modal-video-quality-select {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            border-radius: 6px;
+            padding: 4px 10px;
+            outline: none;
+            font-size: 0.76rem;
+            font-family: 'Outfit', sans-serif;
+            min-width: 130px;
+            cursor: pointer;
+        }
+        .modal-mini-btn {
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 0.74rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .modal-mini-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(0,243,255,0.05);
+        }
+
+        /* Grid hover overlays */
+        .video-card .play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10;
+            pointer-events: auto;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+        }
+        .video-card:hover .play-overlay { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .play-overlay svg { width: 20px; height: 20px; fill: #05070f; margin-left: 2px; }
+
+        /* Cinema items for list-view */
+        .video-grid.list-view .video-card .play-overlay {
+            width: 32px !important;
+            height: 32px !important;
+            top: 50% !important;
+            left: 55px !important;
+            transform: translateY(-50%) scale(0.8) !important;
+        }
+        .video-grid.list-view .video-card:hover .play-overlay { transform: translateY(-50%) scale(1) !important; }
+        .video-grid.list-view .video-card .play-overlay svg { width: 14px !important; height: 14px !important; margin-left: 2px !important; }
+
+        /* Stable responsive grids */
+        :focus-visible { outline: 2px solid var(--primary); }
+        .panel.active { animation: panelFadeIn 0.2s ease forwards; }
+        @keyframes panelFadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Scrollbar styles */
+        #tab-main::-webkit-scrollbar { width: 4px; }
+        #tab-main::-webkit-scrollbar-track { background: transparent; }
+        #tab-main::-webkit-scrollbar-thumb { background: rgba(0,243,255,0.12); border-radius: 999px; }
+
+        .tab-chip[data-status="scanning"] {
+            background: rgba(0,243,255,0.06) !important;
+            border-color: rgba(0,243,255,0.22) !important;
+            color: var(--primary) !important;
+            animation: pulseChip 1.8s infinite;
+        }
+        .tab-chip[data-status="done"] {
+            background: rgba(16,185,129,0.06) !important;
+            border-color: rgba(16,185,129,0.25) !important;
+            color: var(--success) !important;
+        }
+        .tab-chip[data-status="error"] {
+            background: rgba(239,68,68,0.06) !important;
+            border-color: rgba(239,68,68,0.25) !important;
+            color: var(--danger) !important;
+        }
+        @keyframes pulseChip {
+            0%, 100% { box-shadow: 0 0 0 0px rgba(0,243,255,0); }
+            50% { box-shadow: 0 0 0 4px rgba(0,243,255,0.08); }
+        }
+
+        /* 16:9 thumb aspect toggling */
+        body.thumb-ratio .video-card { height: auto !important; min-height: 0 !important; }
+        body.thumb-ratio .thumbnail { height: auto !important; min-height: 0 !important; aspect-ratio: 16 / 9; }
+        body.thumb-ratio .video-grid.list-view .video-card { height: 68px !important; min-height: 68px !important; }
+        body.thumb-ratio .video-grid.list-view .thumbnail { aspect-ratio: unset !important; height: 68px !important; min-height: 68px !important; }
+
+        #thumb-ratio-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-soft);
+            border-radius: 6px;
+            padding: 0 8px;
+            cursor: pointer;
+            font-size: 0.68rem;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.15s ease;
+            height: 26px;
+            display: inline-flex;
+            align-items: center;
+        }
+        #thumb-ratio-btn:hover { color: white; border-color: rgba(255,255,255,0.14); }
+        #thumb-ratio-btn.active {
+            background: rgba(0, 212, 232, 0.1);
+            border-color: rgba(0, 212, 232, 0.28);
+            color: var(--primary);
+        }
+
+        /* Shimmer Loading animation */
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .thumbnail-loading {
+            background: linear-gradient(
+                90deg,
+                rgba(11,13,25,1) 25%,
+                rgba(23,28,58,1) 50%,
+                rgba(11,13,25,1) 75%
+            ) !important;
+            background-size: 200% 100% !important;
+            animation: shimmer 1.5s ease-in-out infinite !important;
+        }
+
+        /* Button micro styles */
+        .btn-xs { padding: 4px 10px !important; font-size: 0.72rem !important; border-radius: 5px !important; }
+        .btn-meta {
+            background: rgba(158, 96, 255, 0.12) !important;
+            border: 1px solid rgba(158, 96, 255, 0.28) !important;
+            color: #e2d5ff !important;
+        }
+        .btn-meta:hover:not(:disabled) {
+            background: rgba(158, 96, 255, 0.2) !important;
+            border-color: var(--secondary) !important;
+        }
+        .btn-danger-soft {
+            background: rgba(239,68,68,0.1) !important;
+            border: 1px solid rgba(239,68,68,0.28) !important;
+            color: #ffb6b6 !important;
+        }
+        .btn-danger-soft:hover:not(:disabled) {
+            background: rgba(239,68,68,0.18) !important;
+            border-color: var(--danger) !important;
+        }
+        .btn-ghost-soft {
+            background: rgba(255,255,255,0.02) !important;
+            border: 1px solid var(--glass-border) !important;
+            color: var(--text-soft) !important;
+        }
+        .btn-ghost-soft:hover:not(:disabled) {
+            background: rgba(255,255,255,0.05) !important;
+            border-color: rgba(255,255,255,0.15) !important;
+            color: #fff !important;
+        }
+        .btn-direct-action {
+            background: rgba(0, 243, 255, 0.06) !important;
+            border: 1px solid rgba(0, 243, 255, 0.28) !important;
+            color: #dffbff !important;
+        }
+        .btn-direct-action:hover:not(:disabled) {
+            background: rgba(0, 243, 255, 0.12) !important;
+            border-color: var(--primary) !important;
+        }
+
+        /* Collapsing control panel */
+        .mission-collapse-btn {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-soft);
+            border-radius: 5px;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            z-index: 5;
+        }
+        .mission-collapse-btn:hover { background: rgba(255,255,255,0.06); color: white; }
+        
+        .mission-strip.mission-collapsed {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            margin-bottom: 0 !important;
+            max-height: 0 !important;
+            border-width: 0 !important;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        .mission-mini-bar {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 10px;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,243,255,0.1);
+            background: rgba(8, 11, 22, 0.9);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            font-size: 0.74rem;
+            color: var(--text-soft);
+            height: 30px;
+            min-height: 30px;
+            flex-shrink: 0;
+        }
+        .mission-mini-bar.visible { display: flex !important; }
+        .mini-bar-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        .mini-bar-dot.active {
+            background: var(--primary);
+            box-shadow: 0 0 6px var(--primary);
+            animation: dotBlink 1.2s ease infinite;
+        }
+        .mini-bar-dot.done { background: var(--success); box-shadow: 0 0 6px var(--success); }
+        @keyframes dotBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        @keyframes port-live-pulse { 0%, 100% { opacity: 1; text-shadow: 0 0 6px #22c55e, 0 0 12px #22c55e88; } 50% { opacity: 0.7; text-shadow: 0 0 3px #22c55e44; } }
+        
+        #mini-bar-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; color: #fff; }
+        
+        .mini-bar-progress-wrap { width: 100px; height: 3px; background: rgba(255,255,255,0.05); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
+        .mini-bar-progress { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.3s ease; }
+        #mini-bar-pct { font-size: 0.7rem; font-weight: 700; color: var(--primary); min-width: 28px; text-align: right; }
+        
+        .mission-expand-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-soft);
+            border-radius: 5px;
+            width: 22px; height: 22px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 0.8rem;
+            transition: all 0.2s ease; flex-shrink: 0;
+        }
+        .mission-expand-btn:hover { background: rgba(255,255,255,0.06); color: white; }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 48px 20px;
+            text-align: center;
+            border: 1px dashed rgba(0, 243, 255, 0.15);
+            border-radius: 14px;
+            background: rgba(0, 243, 255, 0.01);
+            margin-top: 8px;
+            animation: panelFadeIn 0.25s ease;
+        }
+        .empty-icon { font-size: 2.5rem; filter: drop-shadow(0 0 8px rgba(0,243,255,0.15)); }
+        .empty-title { font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.8); margin: 0; }
+        .empty-sub { font-size: 0.8rem; color: var(--text-soft); max-width: 28ch; line-height: 1.45; margin: 0; }
+
+        /* Footer port radiogroups */
+        .port-segment {
+            display: inline-flex;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            padding: 2px;
+            gap: 1px;
+            align-items: center;
+        }
+        .port-segment label { position: relative; cursor: pointer; border-radius: 5px; padding: 0; }
+        .port-segment label input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+        .port-segment label span {
+            display: block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-soft);
+            transition: all 0.12s ease;
+            white-space: nowrap;
+            user-select: none;
+        }
+        .port-segment label:has(input:checked) span {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #05070f;
+            box-shadow: 0 2px 6px rgba(0, 243, 255, 0.2);
+        }
+        .port-segment label:hover span { color: #fff; background: rgba(255,255,255,0.02); }
+        .port-segment label:has(input:checked):hover span { color: #05070f; }
+
+        .footer-overflow-menu { position: relative; }
+        .footer-overflow-trigger { padding: 6px 10px !important; font-size: 1rem !important; line-height: 1; }
+        .footer-overflow-dropdown {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            right: 0;
+            background: #0b0d19;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 180px;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.6);
+            z-index: 2000;
+            animation: dropUp 0.15s ease;
+        }
+        @keyframes dropUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .footer-dd-item {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: var(--text-soft);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.12s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .footer-dd-item:hover:not(:disabled) { background: rgba(255,255,255,0.03); color: #fff; }
+        .footer-dd-item:disabled { opacity: 0.3; cursor: not-allowed; }
+        .footer-dd-item.dd-accent { color: var(--warning); }
+        .footer-dd-item.dd-accent:hover:not(:disabled) { background: rgba(245,158,11,0.06); }
+        .footer-dd-item.dd-primary { color: var(--primary); }
+        .footer-dd-item.dd-primary:hover:not(:disabled) { background: rgba(0,243,255,0.06); }
+        .footer-dd-item.dd-danger { color: var(--danger); }
+        .footer-dd-item.dd-danger:hover:not(:disabled) { background: rgba(239,68,68,0.06); }
+        .footer-dd-sep { height: 1px; background: rgba(255,255,255,0.05); margin: 3px 5px; }
+
+        .batch-overflow-menu { position: relative; display: inline-flex; }
+        .batch-overflow-trigger {
+            height: 28px !important;
+            width: 28px !important;
+            border-radius: 6px !important;
+            padding: 0 !important;
+            border: 1px solid var(--glass-border) !important;
+            background: rgba(255,255,255,0.03) !important;
+            color: var(--text-soft) !important;
+            font-size: 1rem !important;
+            cursor: pointer;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: all 0.15s ease;
+        }
+        .batch-overflow-trigger:hover { background: rgba(255,255,255,0.06) !important; color: white !important; }
+        
+        .batch-overflow-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            background: #0b0d19;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 155px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.5);
+            z-index: 5000;
+            animation: dropUp 0.12s ease-out;
+        }
+        .batch-dd-item {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: var(--text-soft);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.12s ease;
+            white-space: nowrap;
+        }
+        .batch-dd-item:hover { background: rgba(255,255,255,0.03); color: #fff; }
+        .batch-dd-item.danger { color: var(--danger); }
+        .batch-dd-item.danger:hover { background: rgba(239,68,68,0.06); }
+
+        /* ── DECK CARD ACCORDION COLLAPSE ── */
+        .deck-card.collapsed > *:not(.section-kicker) {
+            display: none !important;
+        }
+        .deck-card.collapsed {
+            padding-bottom: 8px !important;
+            gap: 0 !important;
+        }
+        .deck-card .section-kicker {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .deck-card .section-kicker::after {
+            content: '▾';
+            font-size: 0.72rem;
+            opacity: 0.65;
+            transition: transform 0.25s ease;
+            display: inline-block;
+            margin-left: 6px;
+        }
+        .deck-card.collapsed .section-kicker::after {
+            transform: rotate(-90deg);
+        }
+
+        /* ── THEME PICKER OVERLAY ── */
+        .theme-picker-panel {
+            position: absolute;
+            top: 58px;
+            right: 20px;
+            background: rgba(10, 14, 30, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 290px;
+            box-shadow: 0 20px 48px rgba(0,0,0,0.6);
+            z-index: 10000;
+            backdrop-filter: blur(20px);
+            animation: fadeInDown 0.15s ease-out;
+        }
+        .theme-color-row input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .theme-color-row input[type="color"]::-webkit-color-swatch {
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+        }
+
+        #dropdown-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 19999;
+        }
+        #dropdown-layer .host-filter-panel,
+        #dropdown-layer .album-filter-panel {
+            pointer-events: auto;
+        }
+    </style>
+
+
+
+    <style>
+        /* ── QUICK PANEL MODE OVERRIDES ── */
+        html.quick-panel-mode {
+            /* Chrome sizes action popups from their intrinsic document size.
+               Viewport units here would feed the initial tiny viewport back
+               into that calculation and collapse the popup. */
+            width: 796px !important;
+            height: 600px !important;
+            max-width: 796px !important;
+            max-height: 600px !important;
+            min-width: 796px !important;
+            min-height: 600px !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+        }
+        html.quick-panel-mode body {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 796px !important;
+            max-height: 600px !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            padding: 6px !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+        }
+
+        /* The action-popup variant above must remain constrained by Chrome.
+           A `mode=quick-window` launch runs in its own native popup window:
+           it uses the whole resizable viewport and can be moved by its title
+           bar like any other desktop window. */
+        html.quick-panel-window-mode,
+        html.quick-panel-window-mode body {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none !important;
+            max-height: none !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+        }
+        /* Show header but ONLY for pagination */
+        html.quick-panel-mode header {
+            display: flex !important;
+            flex-shrink: 0 !important;
+            padding: 4px 4px !important;
+            min-height: 36px !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            margin-bottom: 4px !important;
+            overflow: hidden !important;
+        }
+        /* Hide bloated sections */
+        html.quick-panel-mode header .logo,
+        html.quick-panel-mode header .header-center,
+        html.quick-panel-mode header .variant-switcher,
+        html.quick-panel-mode header #thumb-ratio-btn,
+        html.quick-panel-mode header #view-toggle,
+        html.quick-panel-mode header #theme-toggle-btn,
+        html.quick-panel-mode header #grid-size-select,
+        html.quick-panel-mode header #grid-pagination-select,
+        html.quick-panel-mode .control-board,
+        html.quick-panel-mode .mission-strip,
+        html.quick-panel-mode .mission-mini-bar,
+        html.quick-panel-mode .tab-bar,
+        html.quick-panel-mode footer,
+        html.quick-panel-mode .bunkr-bridge-header,
+        html.quick-panel-mode #turbo-controls,
+        html.quick-panel-mode .advanced-filters {
+            display: none !important;
+        }
+        html.quick-panel-mode header .header-actions {
+            display: flex !important;
+            align-items: center !important;
+            flex: 1 !important;
+            justify-content: flex-start !important;
+            width: auto !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            gap: 4px !important;
+            overflow: hidden !important;
+        }
+        html.quick-panel-mode #grid-page-controls {
+            display: flex !important; /* Force show pagination */
+            margin: 0 6px 0 0 !important;
+            flex: 0 0 auto !important;
+            min-width: 96px !important;
+        }
+        
+        html.quick-panel-mode .container {
+            padding: 0 !important;
+            height: 100% !important;
+            min-width: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+        }
+        html.quick-panel-mode body.large-window[class] #video-grid,
+        html.quick-panel-mode body #video-grid {
+            /* Fit two columns and two full rows into the available panel. */
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            grid-template-rows: none !important; /* Allow natural rows for scrolling */
+            grid-auto-rows: calc((100cqh - 22px) / 2) !important;
+            gap: 8px !important;
+            align-content: start !important;
+            flex: none !important;
+            margin-bottom: 0 !important;
+            height: auto !important;
+            min-height: 100% !important;
+            padding: 4px 2px 10px 2px !important;
+            overflow-x: clip !important;
+            overflow-y: visible !important;
+            contain: inline-size !important;
+            justify-self: stretch !important;
+        }
+
+        /* Keep the same 2 x 2 layout when the quick window is resized. */
+        html.quick-panel-window-mode body.large-window[class] #video-grid,
+        html.quick-panel-window-mode body #video-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            grid-auto-rows: calc((100cqh - 30px) / 2) !important;
+            gap: 10px !important;
+            padding: 6px 4px 14px !important;
+        }
+
+        /* Allow tab-main to scroll while keeping header fixed */
+        html.quick-panel-mode body.large-window[class] #tab-main {
+            display: flex !important;
+            flex-direction: column !important;
+            flex: 1 1 0 !important;
+            height: auto !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            container-type: size;
+            box-sizing: border-box !important;
+            padding-right: 6px !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+        }
+
+        /* In quick panel, stretch the card and make text overlay the thumbnail at the bottom */
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card {
+            position: relative !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            box-sizing: border-box !important;
+            border-radius: 12px !important;
+            overflow: hidden !important;
+            height: 100% !important;
+            aspect-ratio: unset !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: flex-end !important;
+            padding: 0 !important;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.42) !important;
+        }
+        
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .thumbnail {
+            position: absolute !important;
+            top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+            height: 100% !important;
+            /* Let play/checkbox controls stack above the sibling info overlay.
+               A z-index here traps them below .info, which intercepts clicks. */
+            z-index: auto !important;
+        }
+        
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .thumbnail img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            border-radius: 0 !important;
+            aspect-ratio: unset !important;
+        }
+        
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .info {
+            position: relative !important;
+            z-index: 2 !important;
+            background: linear-gradient(to top, rgba(12,16,33,0.95) 0%, rgba(12,16,33,0.7) 60%, transparent 100%) !important;
+            margin: 0 !important;
+            padding: 32px 12px 11px 12px !important;
+            flex: none !important;
+            display: flex !important;
+            flex-direction: column !important;
+            border: none !important;
+            min-width: 0 !important;
+        }
+        
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .title {
+            color: #fff !important;
+            font-size: 1.05rem !important;
+            font-weight: 700 !important;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.9) !important;
+            white-space: normal !important;
+            line-height: 1.35 !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 3 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+        }
+
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .meta-info {
+            margin-top: 6px !important;
+            font-size: 0.82rem !important;
+            gap: 5px !important;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.9) !important;
+            min-width: 0 !important;
+        }
+
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .thumb-pill,
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .quality-badge,
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .host-badge,
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .duration,
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .file-size {
+            font-size: 0.8rem !important;
+            padding: 2px 7px !important;
+        }
+
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .host-badge {
+            max-width: 170px !important;
+        }
+
+        /* Horný náhľadový pruh (kvalita·dĺžka·veľkosť·MP4) je duplicitný so
+           spodným meta riadkom → skrytý, aby sa údaje nezobrazovali 2×. */
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .smart-preview-badge {
+            display: none !important;
+        }
+
+        /* Hide the redundant internal overlay since we styled .info to overlap perfectly */
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .thumb-bottom-panel {
+            display: none !important;
+        }
+
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .play-overlay {
+            z-index: 3 !important;
+        }
+        
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .card-checkbox {
+            z-index: 4 !important;
+        }
+
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .card-checkbox input,
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .card-checkbox {
+            width: 24px !important;
+            height: 24px !important;
+        }
+
+        html.quick-panel-mode body.large-window[class] .video-grid.list-view {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 6px !important;
+        }
+
+        html.quick-panel-mode,
+        html.quick-panel-mode body,
+        html.quick-panel-mode #tab-main,
+        html.quick-panel-mode .container,
+        html.quick-panel-mode header,
+        html.quick-panel-mode body.large-window[class] #video-grid,
+        html.quick-panel-mode body #video-grid {
+            overflow-x: hidden !important;
+        }
+
+        /* ── VIDEO CARD INDEX BADGE ── */
+        .video-card-index {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(12, 16, 33, 0.85);
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .video-card-index ~ .dup-badge {
+            left: 48px !important;
+        }
+
+        /* Shift the metadata preview badge in Focus view-mode if the index is present */
+        .video-grid.focus-view .video-card-index ~ .smart-preview-badge {
+            left: 48px !important;
+            max-width: calc(100% - 134px) !important;
+        }
+
+        /* If we are in quick-panel-mode, absolute position the checkbox and shift the index badge to the right */
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .card-checkbox {
+            position: absolute !important;
+            top: 8px !important;
+            left: 8px !important;
+            z-index: 4 !important;
+        }
+        
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .video-card-index {
+            left: 40px !important;
+        }
+        
+        html.quick-panel-mode body.large-window[class] #video-grid .video-card .video-card-index ~ .dup-badge {
+            left: 80px !important;
+        }
+    </style>
+    <style>
+        /* Full Gallery: the active panel owns the remaining viewport height.
+           The header has a variable number of rows (mission bar/history). */
+        html:not(.quick-panel-mode) body.large-window .modal-content {
+            width: 95% !important;
+            max-width: 1800px !important;
+            max-height: 95vh !important;
+        }
+        html:not(.quick-panel-mode) body.large-window .video-container {
+            aspect-ratio: auto !important;
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+        html:not(.quick-panel-mode) body.large-window #modal-video {
+            object-fit: contain;
+            height: 100%;
+        }
+        html:not(.quick-panel-mode) body.large-window .modal-footer {
+            flex-shrink: 0;
+            overflow-y: auto;
+            max-height: 40vh;
+        }
+
+        html:not(.quick-panel-mode) body.large-window .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        html:not(.quick-panel-mode) body.large-window .container > :not(.panel) {
+            flex-shrink: 0;
+        }
+        html:not(.quick-panel-mode) body.large-window #tab-main {
+            flex: 1 1 0;
+            height: auto !important;
+            min-height: 0;
+            min-width: 0;
+            grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) !important;
+            grid-template-rows: minmax(0, 1fr) auto !important;
+        }
+        html:not(.quick-panel-mode) body.large-window #tab-main:not(.active) {
+            display: none !important;
+        }
+        html:not(.quick-panel-mode) body.large-window #video-grid {
+            min-width: 0;
+            min-height: 0;
+            grid-template-columns: repeat(var(--grid-cols, 2), minmax(0, 1fr)) !important;
+        }
+        html:not(.quick-panel-mode) body.large-window #video-grid.list-view {
+            grid-template-columns: minmax(0, 1fr) !important;
+        }
+        html:not(.quick-panel-mode) body.large-window footer {
+            flex-wrap: wrap;
+            gap: 8px;
+            min-width: 0;
+        }
+        html:not(.quick-panel-mode) body.large-window footer > div {
+            flex-wrap: wrap;
+            min-width: 0;
+        }
+    </style>
+</head>
+
+<body class="large-window ui-variant-classic">
+    <!-- TUTORIAL OVERLAY -->
+    <div id="tutorial-overlay">
+        <div class="tutorial-box">
+            <h2 style="margin-top:0; margin-bottom:16px; font-size:1.4rem; background:linear-gradient(135deg, #fff, var(--primary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Ako načítať viac strán?</h2>
+            <p style="margin-bottom:24px; color:var(--text-soft); font-size:0.95rem; line-height:1.4;">Pre načítanie presného počtu videí z viacerých strán naraz, nasleduj tieto 2 kroky:</p>
+            
+            <div class="tutorial-step">
+                <div class="tutorial-step-number">1</div>
+                <div>
+                    <strong style="display:block; margin-bottom:6px; font-size:1.05rem;">Zvoľ si rozsah strán</strong>
+                    <p style="margin:0; font-size:0.85rem; color:var(--text-soft); margin-bottom:10px; line-height:1.4;">V paneli "Scan options" (hore vľavo) nájdi sekciu <strong>Rozsah strán</strong>. V rozbaľovacom zozname <strong>"Do"</strong> vyber číslo strany, po ktorú sa má skenovať.</p>
+                    <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px 14px; display:inline-flex; align-items:center; gap:10px;">
+                        <span style="font-size:0.8rem; color:#aaa; font-weight:600;">Od</span>
+                        <select style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:6px; padding:4px 8px; font-size:0.85rem; outline:none; pointer-events:none;"><option>1</option></select>
+                        <span style="font-size:0.8rem; color:#aaa; font-weight:600;">Do</span>
+                        <select style="background:rgba(0, 212, 232, 0.15); border:1px solid var(--primary); color:var(--primary); font-weight:bold; border-radius:6px; padding:4px 8px; font-size:0.85rem; outline:none; cursor:pointer;" id="tutorial-demo-select">
+                            <option>1</option><option selected>5</option><option>10</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tutorial-step" style="margin-bottom:28px;">
+                <div class="tutorial-step-number">2</div>
+                <div>
+                    <strong style="display:block; margin-bottom:6px; font-size:1.05rem;">Automatické načítanie</strong>
+                    <p style="margin:0; font-size:0.85rem; color:var(--text-soft); margin-bottom:10px; line-height:1.4;">Akonáhle zmeníš hodnotu, skener sa <strong>okamžite spustí</strong> a začne postupne pridávať videá zo všetkých zvolených strán do zoznamu pod tebou.</p>
+                    <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(255,0,200,0.1); border:1px solid rgba(255,0,200,0.3); border-radius:8px; padding:8px 12px; color:#ff00c8; font-size:0.85rem; font-weight:bold;">
+                        Alebo iba zaklikni <input type="checkbox" checked style="margin:0; pointer-events:none; accent-color:#ff00c8;"> Deep scan
+                    </div>
+                </div>
+            </div>
+
+            <button id="close-tutorial-btn" style="width:100%; background:linear-gradient(135deg, var(--primary), #0096cc); border:none; border-radius:10px; padding:14px; color:#000; font-weight:800; font-size:1.05rem; cursor:pointer; font-family:inherit; transition:transform 0.1s ease, filter 0.2s ease;">Rozumiem, idem na to!</button>
+        </div>
+    </div>
+    <div id="dropdown-layer"></div>
+    <div class="container">
+        <header>
+            <div class="logo">Q</div>
+            <div class="header-divider"></div>
+            <div class="header-center">
+                <div id="folder-name" style="display:flex;align-items:center;gap:4px;">Načítavam...<button id="refresh-btn" title="Obnoviť cache" style="display:none;background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.4);font-size:0.85rem;padding:0 2px;line-height:1;">↺</button></div>
+                <div class="header-divider"></div>
+                <div class="batch-memory-bar">
+                    <select id="batch-history-select" title="História uložených batchov">
+                        <option value="">Batch...</option>
+                    </select>
+                    <button class="batch-memory-btn" id="batch-restore-btn" title="Obnoviť vybraný batch">↩</button>
+                    <div class="batch-overflow-menu">
+                        <button class="batch-overflow-trigger" id="batch-more-btn" title="Uložiť / Vymazať batch">⋮</button>
+                        <div class="batch-overflow-dropdown" id="batch-overflow-dropdown" style="display:none;">
+                            <button class="batch-dd-item" id="batch-save-btn">💾 Uložiť aktuálny</button>
+                            <button class="batch-dd-item danger" id="batch-delete-btn">🗑 Vymazať vybraný</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <select id="grid-size-select" title="Rozloženie mriežky" style="height:26px; border-radius:6px; border:1px solid var(--glass-border); background:rgba(255,255,255,0.04); color:var(--text-soft); font-size:0.7rem; font-weight:700; padding:0 6px; outline:none; cursor:pointer; font-family:'Outfit',sans-serif; transition:all 0.2s ease;">
+                    <option value="auto">Auto</option>
+                    <option value="2x2">2×2</option>
+                    <option value="2x3">2×3</option>
+                    <option value="3x2">3×2</option>
+                    <option value="4x2">4×2</option>
+                    <option value="5x2">5×2</option>
+                    <option value="4x3">4×3</option>
+                    <option value="5x3">5×3</option>
+                </select>
+                <select id="grid-pagination-select" title="Scroll alebo fixná stránka" style="height:26px; border-radius:6px; border:1px solid var(--glass-border); background:rgba(255,255,255,0.04); color:var(--text-soft); font-size:0.7rem; font-weight:700; padding:0 6px; outline:none; cursor:pointer; font-family:'Outfit',sans-serif; transition:all 0.2s ease;">
+                    <option value="scroll">Scroll</option>
+                    <option value="fixed">Fixná</option>
+                </select>
+                <div id="grid-page-controls" style="display:none; align-items:center; gap:4px;">
+                    <button id="grid-page-prev" class="view-btn" type="button" title="Predchádzajúca stránka" style="padding:2px 6px;">&lt;</button>
+                    <span id="grid-page-label" style="min-width:44px; text-align:center; font-size:0.68rem; color:var(--text-soft); font-weight:700;">1/1</span>
+                    <button id="grid-page-next" class="view-btn" type="button" title="Ďalšia stránka" style="padding:2px 6px;">&gt;</button>
+                </div>
+                <div class="header-divider"></div>
+                <div class="variant-switcher" id="variant-switcher" title="Prepni rozloženie ovládania">
+                    <button class="variant-btn active" id="variant-classic-btn" data-ui-variant="classic">Classic</button>
+                    <button class="variant-btn" id="variant-focus-btn" data-ui-variant="focus">Focus</button>
+                </div>
+                <button id="thumb-ratio-btn" title="Prepnúť thumbnail režim" style="height:26px; padding:0 7px; font-size:0.68rem;">16:9</button>
+                <div id="view-toggle" style="height:26px;">
+                    <button class="view-btn active" id="grid-view-btn" title="Grid view" style="padding:3px 7px;">⊞</button>
+                    <button class="view-btn" id="list-view-btn" title="List view" style="padding:3px 7px;">☰</button>
+                    <button class="view-btn focus-mode-btn" id="focus-view-btn" title="Cinema náhľad" style="padding:3px 7px; font-size:0.68rem;">▣</button>
+                </div>
+                <button id="theme-toggle-btn" class="view-btn" title="Prispôsobiť farby" style="font-size:0.82rem; height:26px; padding:0 7px;">🎨</button>
+            </div>
+        </header>
+
+        <!-- Theme picker panel absolute overlay -->
+        <div class="theme-picker-panel" id="theme-picker-panel" style="display: none;">
+            <div class="theme-picker-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <span class="section-kicker" style="margin-bottom:0;">Prispôsobenie vzhľadu</span>
+                <button id="theme-panel-close" style="background:none; border:none; color:rgba(255,255,255,0.4); font-size:1.2rem; cursor:pointer; padding:0; line-height:1;">&times;</button>
+            </div>
+            
+            <div class="theme-field">
+                <label class="theme-label" style="display:block; font-size:0.75rem; color:var(--text-soft); font-weight:700; text-transform:uppercase; margin-bottom:6px;">Predvolená téma</label>
+                <select id="theme-preset-select" style="width:100%; height:32px; border-radius:6px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.3); color:#fff; padding:0 8px; outline:none; font-family:'Outfit',sans-serif; cursor:pointer; font-size:0.8rem;">
+                    <option value="cyber">Default Cyber (Neon)</option>
+                    <option value="sapphire">Classic Sapphire (Modrá)</option>
+                    <option value="neon">Hot Neon (Ružovo-žltá)</option>
+                    <option value="emerald">Forest Emerald (Zelená)</option>
+                    <option value="luxury">Dark Luxury (Zlatá)</option>
+                    <option value="custom">Vlastné farby...</option>
+                </select>
+            </div>
+
+            <div class="theme-colors-list" style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
+                <!-- Background -->
+                <div class="theme-color-row" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                    <span style="font-size:0.8rem; font-weight:600; color:var(--text-main);">Pozadie</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="color" id="theme-color-bg" value="#05070f" style="width:28px; height:28px; border:none; border-radius:6px; background:none; cursor:pointer; padding:0;">
+                        <input type="text" id="theme-hex-bg" value="#05070f" style="width:72px; height:28px; text-align:center; border:1px solid var(--glass-border); background:rgba(0,0,0,0.3); border-radius:6px; color:#fff; font-size:0.75rem; font-family:'Outfit',sans-serif; font-weight:600; text-transform:uppercase;">
+                    </div>
+                </div>
+
+                <!-- Surface / Panel background color -->
+                <div class="theme-color-row" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                    <span style="font-size:0.8rem; font-weight:600; color:var(--text-main);">Panely & Karty</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="color" id="theme-color-surface" value="#0c1021" style="width:28px; height:28px; border:none; border-radius:6px; background:none; cursor:pointer; padding:0;">
+                        <input type="text" id="theme-hex-surface" value="#0C1021" style="width:72px; height:28px; text-align:center; border:1px solid var(--glass-border); background:rgba(0,0,0,0.3); border-radius:6px; color:#fff; font-size:0.75rem; font-family:'Outfit',sans-serif; font-weight:600; text-transform:uppercase;">
+                    </div>
+                </div>
+                
+                <!-- Primary Accent -->
+                <div class="theme-color-row" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                    <span style="font-size:0.8rem; font-weight:600; color:var(--text-main);">Hlavný akcent</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="color" id="theme-color-primary" value="#00f3ff" style="width:28px; height:28px; border:none; border-radius:6px; background:none; cursor:pointer; padding:0;">
+                        <input type="text" id="theme-hex-primary" value="#00f3ff" style="width:72px; height:28px; text-align:center; border:1px solid var(--glass-border); background:rgba(0,0,0,0.3); border-radius:6px; color:#fff; font-size:0.75rem; font-family:'Outfit',sans-serif; font-weight:600; text-transform:uppercase;">
+                    </div>
+                </div>
+
+                <!-- Secondary Accent -->
+                <div class="theme-color-row" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                    <span style="font-size:0.8rem; font-weight:600; color:var(--text-main);">Vedľajší akcent</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="color" id="theme-color-secondary" value="#9e60ff" style="width:28px; height:28px; border:none; border-radius:6px; background:none; cursor:pointer; padding:0;">
+                        <input type="text" id="theme-hex-secondary" value="#9e60ff" style="width:72px; height:28px; text-align:center; border:1px solid var(--glass-border); background:rgba(0,0,0,0.3); border-radius:6px; color:#fff; font-size:0.75rem; font-family:'Outfit',sans-serif; font-weight:600; text-transform:uppercase;">
+                    </div>
+                </div>
+
+                <!-- Accent -->
+                <div class="theme-color-row" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                    <span style="font-size:0.8rem; font-weight:600; color:var(--text-main);">Doplnková farba</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="color" id="theme-color-accent" value="#ff007f" style="width:28px; height:28px; border:none; border-radius:6px; background:none; cursor:pointer; padding:0;">
+                        <input type="text" id="theme-hex-accent" value="#ff007f" style="width:72px; height:28px; text-align:center; border:1px solid var(--glass-border); background:rgba(0,0,0,0.3); border-radius:6px; color:#fff; font-size:0.75rem; font-family:'Outfit',sans-serif; font-weight:600; text-transform:uppercase;">
+                    </div>
+                </div>
+
+                <!-- Text Scale (Typography sizing) -->
+                <div class="theme-color-row" style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                        <span style="font-size:0.8rem; font-weight:600; color:var(--text-main);">Veľkosť písma</span>
+                        <span id="theme-font-scale-pct" style="font-size:0.75rem; font-weight:700; color:var(--primary);">100%</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; width:100%;">
+                        <input type="range" id="theme-font-scale" min="0.8" max="1.3" step="0.05" value="1.0" style="flex:1; height:6px; border-radius:3px; background:rgba(255,255,255,0.08); accent-color:var(--primary); outline:none; cursor:pointer; margin:8px 0;">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:8px; margin-top:8px; border-top:1px solid rgba(255,255,255,0.06); padding-top:12px;">
+                <button id="theme-reset-btn" class="btn btn-secondary" style="flex:1; font-size:0.78rem; padding:6px 12px; height:32px;">Resetovať</button>
+                <button id="theme-save-btn" class="btn btn-primary" style="flex:1; font-size:0.78rem; padding:6px 12px; height:32px;">Uložiť</button>
+            </div>
+        </div>
+
+        <section class="mission-strip mission-collapsed">
+            <button class="mission-collapse-btn" id="mission-collapse-btn" title="Schovať / zobraziť Mission Control">⌃</button>
+            <div class="mission-copy">
+                <div class="mission-kicker">Mission Control</div>
+                <div class="mission-headline" id="mission-headline">Pripravené na scan</div>
+                <div class="mission-detail" id="mission-detail">Otvor stránku, spusti scan a tu budeš vidieť čo sa práve deje, koľko strán sa už načítalo a koľko videí sa spracúva.</div>
+                <div class="mission-meta-row">
+                    <span class="mission-pill" id="mission-videos-pill">0 videí</span>
+                    <span class="mission-pill" id="mission-selected-pill">0 vybraných</span>
+                    <span class="mission-pill" id="mission-pages-pill">Strany: —</span>
+                    <span class="mission-pill" id="mission-fetch-pill">Fetch: idle</span>
+                </div>
+            </div>
+            <div class="mission-progress-shell">
+                <div class="mission-progress-top">
+                    <span class="mission-progress-label" id="mission-progress-label">Scan status</span>
+                    <span class="mission-progress-value" id="mission-progress-value">0%</span>
+                </div>
+                <div class="mission-progress-copy" id="mission-progress-copy">Čakám na akciu…</div>
+                <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+                <div class="mission-progress-foot">
+                    <span class="mission-pill" id="mission-bg-pill">Background: idle</span>
+                    <span class="mission-pill" id="mission-meta-pill">Meta: idle</span>
+                    <span class="mission-pill" id="mission-dup-pill">Duplicity: off</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mission Mini Bar — zobrazí sa pri kolapse mission-strip -->
+        <div class="mission-mini-bar" id="mission-mini-bar">
+            <div class="mini-bar-dot" id="mini-bar-dot"></div>
+            <span id="mini-bar-text">Čakám na akciu…</span>
+            <div class="mini-bar-progress-wrap"><div class="mini-bar-progress" id="mini-bar-progress"></div></div>
+            <span id="mini-bar-pct">0%</span>
+            <button class="mission-expand-btn" id="mission-expand-btn" title="Zobraziť Mission Control">⌄</button>
+        </div>
+
+        <!-- TAB BAR -->
+        <div class="tab-bar">
+            <div class="tab-cluster">
+                <button class="tab-btn active" data-tab="main">🎬 Videá <span class="tab-badge" id="videos-count-badge">0</span></button>
+                <button class="tab-btn" data-tab="watchlist">🕐 Zoznam <span class="tab-badge" id="wl-count-badge">0</span></button>
+            </div>
+            <div class="tab-utility">
+                <span class="tab-chip" id="tab-status-chip"><strong>Stav:</strong> Ready</span>
+                <span class="tab-chip" id="tab-page-chip"><strong>Strany:</strong> —</span>
+                <span class="tab-chip" id="tab-selection-chip"><strong>Výber:</strong> 0</span>
+            </div>
+        </div>
+
+        <!-- ══ MAIN TAB ══ -->
+        <div class="panel active" id="tab-main">
+
+            <!-- PornHoarder inline search -->
+            <div class="control-board">
+                <section class="deck-card search-suite">
+                    <div class="section-kicker">Search</div>
+                    <div id="ph-search-panel">
+                        <span style="opacity:0.6;font-size:0.8rem;white-space:nowrap;">🔍 PH:</span>
+                        <input type="text" id="ph-search-input" placeholder="Hľadaj na PH…">
+                        <button class="btn btn-secondary" id="ph-search-btn" style="padding:6px 14px;font-size:0.8rem;">Hľadaj</button>
+                    </div>
+                    <div class="controls compact-controls">
+                        <input type="text" class="search-bar" id="search-input" placeholder="Filtrovať…">
+                        <select id="sort-select" class="sort-select">
+                            <option value="name">Názov</option>
+                            <option value="date-desc">Dátum ↓</option>
+                            <option value="date-asc">Dátum ↑</option>
+                            <option value="size-desc">Veľkosť ↓</option>
+                            <option value="size-asc">Veľkosť ↑</option>
+                            <option value="duration-desc">Dĺžka ↓</option>
+                            <option value="duration-asc">Dĺžka ↑</option>
+                            <option value="video-count-desc">Počet videí ↓</option>
+                        </select>
+                    </div>
+                </section>
+
+                <section class="deck-card overview-suite">
+                    <div class="section-kicker">Status</div>
+                    <div class="stats-bar compact-stats">
+                        <div class="stats-main">
+                            <span id="stats-text">Načítavam...</span>
+                            <span id="page-scan-info" class="status-chip"></span>
+                        </div>
+                        <div class="stats-actions">
+                            <button id="load-more-btn" class="btn btn-xs" style="display:none; background:rgba(0,243,255,0.12); border-color:rgba(0,243,255,0.4); color:#00f3ff; font-weight:700;">+ Načítaj stranu</button>
+                            <button id="fetch-meta-btn" class="btn btn-xs btn-meta" style="display:none;">Doplniť meta</button>
+                            <button id="delete-selected-btn" class="btn btn-xs btn-danger-soft">Vymazať označené</button>
+                            <button id="clean-invalid-btn" class="btn btn-xs btn-danger-soft" style="display:none;">Vyčistiť</button>
+                            <button id="reset-all-btn" class="btn btn-xs btn-ghost-soft">Reset všetko</button>
+                            <button id="find-direct-btn" class="btn btn-xs btn-direct-action" style="display:none;min-width:132px;">Direct</button>
+                        </div>
+                        <div class="stats-meta">
+                            <span id="direct-scope-chip" class="status-chip" style="color:#9be8ff;border-color:rgba(113,225,255,0.28);background:rgba(113,225,255,0.08);"></span>
+                            <span id="op-timers-stats" class="status-chip" style="color:#ffd580;border-color:rgba(255,213,128,0.35);background:rgba(255,213,128,0.10);display:none;"></span>
+                            <span id="meta-fetch-stats" style="color:#d8b4fe;display:none;font-weight:600;"></span>
+                            <span id="bg-fetch-stats" style="color:var(--primary);display:none;font-weight:600;"></span>
+                            <span id="dup-stats" style="color:var(--warning);display:none;"></span>
+                        </div>
+                    </div>
+                    <div id="ph-debug"
+                        style="display:none;padding:6px 10px;background:rgba(157,80,187,0.14);border:1px solid var(--glass-border);border-radius:8px;font-size:0.74rem;line-height:1.25;color:#e7d3ff;">
+                        PH debug: čakám na stream…
+                    </div>
+                    <div id="bunkr-bridge-panel">
+                        <div class="bridge-row">
+                            <span class="section-kicker" style="margin-bottom:0;">Bunkr Bridge</span>
+                            <span id="bunkr-bridge-status" class="bridge-status-chip">Not detected</span>
+                            <span id="bunkr-bridge-meta" class="status-chip" style="font-size:0.72rem;">Selection: 0</span>
+                        </div>
+                        <div class="bridge-actions">
+                            <button id="bunkr-bridge-read-state" class="bridge-mini-btn">LOAD</button>
+                            <button id="bunkr-bridge-fetch-selected" class="bridge-mini-btn">Fetch selected</button>
+                            <button id="bunkr-bridge-clear-bridge-cache" class="bridge-mini-btn" style="border-color: #ff4d4d; color: #ff9999;">Clear cache</button>
+                            <button id="bunkr-bridge-export-cache" class="bridge-mini-btn">Export cache</button>
+                            <button id="bunkr-bridge-load-gallery" class="bridge-mini-btn">Load into gallery</button>
+                            <button id="cw-fast-load-gallery" class="bridge-mini-btn" style="border-color: rgba(113,225,255,0.5); color:#9be8ff;">Load CW Fast export</button>
+                        </div>
+                        <div class="bridge-actions">
+                            <input id="bunkr-list-name" type="text" placeholder="My list name" style="flex:1;min-width:140px;background:rgba(255,255,255,0.06);color:#fff;border:1px solid rgba(255,255,255,0.16);border-radius:8px;padding:6px 8px;">
+                            <button id="bunkr-list-save-selected" class="bridge-mini-btn">Save selected</button>
+                            <button id="bunkr-list-load" class="bridge-mini-btn">Load list</button>
+                            <button id="bunkr-list-delete" class="bridge-mini-btn">Delete list</button>
+                        </div>
+                        <div id="bunkr-bridge-log" class="bridge-log">Bridge panel čaká na Bunkr tab.</div>
+                    </div>
+                </section>
+
+                <section class="deck-card toggle-suite">
+                    <div class="section-kicker">Modes</div>
+                    <div class="mode-grid">
+                        <div class="toggle-row" id="turbo-controls" style="margin:0; padding:0; border:none; background:transparent; box-shadow:none; backdrop-filter:none;">
+                            <label style="color:var(--primary);">
+                                <input type="checkbox" id="turbo-mode"> <span style="font-weight:600;">Turbo 4</span>
+                            </label>
+                            <label style="color:#ff00c8;">
+                                <input type="checkbox" id="deep-scan"> <span style="font-weight:600;">Deep scan</span>
+                            </label>
+                            <label title="Pre CamWhores načíta len videá, ktoré sú po userscript filtri reálne viditeľné na stránke.">
+                                <input type="checkbox" id="respect-page-filter" checked> <span style="font-weight:600;color:#9fe3ff;">Visible only</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" id="send-to-dashboard"> <span>Auto import</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" id="check-duplicates" checked> <span style="color:var(--warning);">Duplicity</span>
+                            </label>
+                        </div>
+                        <div id="bunkr-controls" style="margin:0; padding:0; border:none; background:transparent; box-shadow:none; backdrop-filter:none; display:none;">
+                            <label>
+                                <input type="checkbox" id="bunkr-fetch-direct">
+                                <span style="font-weight:600;">Bunkr MP4 priamo</span>
+                            </label>
+                            <span style="opacity:0.55;font-size:0.75rem;">Vypnuté = rýchly zoznam. Zapnuté = priame URL.</span>
+                        </div>
+                        <div class="modes-shell">
+                            <div class="mode-range-shell">
+                                <div class="mode-range-topline">
+                                    <span class="mode-range-label">Rozsah strán</span>
+                                    <span class="mode-range-badge" id="page-range-badge">Strana 1</span>
+                                </div>
+                                <div class="mode-range-grid">
+                                    <label class="mode-range-field">
+                                        <span>Od</span>
+                                        <select id="page-start-select"></select>
+                                    </label>
+                                    <label class="mode-range-field">
+                                        <span>Do</span>
+                                        <select id="page-end-select"></select>
+                                    </label>
+                                    <label class="mode-range-field">
+                                        <span>Preset</span>
+                                        <select id="page-range-preset">
+                                            <option value="current">Len aktuálna</option>
+                                            <option value="turbo">Aktuálna + 3</option>
+                                            <option value="custom" selected>Vlastný rozsah</option>
+                                            <option value="all">Všetky strany</option>
+                                        </select>
+                                    </label>
+                                </div>
+                                <div class="mode-range-hint">
+                                    <span class="page-count-hint" id="page-count-hint">Rozsah: 1 → 5</span>
+                                    <span class="mode-range-micro" id="page-range-micro">Aktuálna strana: 1</span>
+                                </div>
+                                <input type="number" id="page-count-input" class="mode-input-ghost" min="1" max="9999" step="1" value="5" aria-hidden="true" tabindex="-1">
+                            </div>
+                            <div class="mode-throttle-shell">
+                                <div class="mode-throttle-copy">
+                                    <strong>Throttle</strong>
+                                    <small>Fast je rýchlejší. Safe zvoľ pri citlivých stránkach alebo keď stránka zle reaguje.</small>
+                                </div>
+                                <select id="meta-throttle-profile">
+                                    <option value="fast" selected>Fast</option>
+                                    <option value="safe">Safe</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="deck-card vk-suite" id="vk-scan-suite">
+                    <div class="section-kicker">VK Scanner</div>
+                    <div class="vk-status-line">
+                        <span id="vk-status-text">VK scanner pripravený.</span>
+                        <strong id="vk-progress-text">Idle</strong>
+                    </div>
+                    <div class="vk-actions">
+                        <button type="button" class="vk-mini-btn" id="vk-scan-current-btn">Načítať komunity / stránku</button>
+                        <button type="button" class="vk-mini-btn secondary" id="vk-scan-visible-btn">Načítať viditeľné videá</button>
+                        <button type="button" class="vk-mini-btn secondary" id="vk-autoscroll-btn">Posúvať a zbierať</button>
+                        <button type="button" class="vk-mini-btn secondary" id="vk-load-next-btn" style="display:none;">Načítať ďalších 100</button>
+                        <button type="button" class="vk-mini-btn secondary" id="vk-export-json-btn">Export JSON</button>
+                        <button type="button" class="vk-mini-btn warn" id="vk-import-btn">Importovať vybrané</button>
+                    </div>
+                    <div class="vk-playlist-chip" id="vk-playlist-chip">Playlist batch loader pripraveny.</div>
+                    <div class="vk-sources-shell">
+                        <div class="vk-sources-toolbar">
+                            <button type="button" class="vk-mini-btn secondary" id="vk-select-all-sources-btn">Označiť všetko</button>
+                            <button type="button" class="vk-mini-btn secondary" id="vk-clear-sources-btn">Zrušiť výber</button>
+                            <button type="button" class="vk-mini-btn" id="vk-scan-sources-btn">Scan označených komunít</button>
+                            <span class="vk-sources-count" id="vk-sources-count">0 sources</span>
+                        </div>
+                        <div class="vk-sources-list" id="vk-sources-list">
+                            <div class="vk-empty-note">Open a VK or VK Video page to scan followed sources or visible videos.</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="deck-card filter-suite">
+                    <div class="section-kicker">Filters</div>
+                    <div class="range-grid">
+                        <div class="range-group">
+                            <span class="label-pipe">Dĺžka</span>
+                            <input type="number" id="min-duration" placeholder="Min">
+                            <span>–</span>
+                            <input type="number" id="max-duration" placeholder="Max">
+                        </div>
+                        <div class="range-group">
+                            <span class="label-pipe">Veľkosť</span>
+                            <input type="number" id="min-size" placeholder="Min">
+                            <span>–</span>
+                            <input type="number" id="max-size" placeholder="Max">
+                        </div>
+                        <div class="range-group">
+                            <span class="label-pipe">Dátum</span>
+                            <input type="text" id="date-filter" placeholder="napr. 2024" style="min-width: 100px;">
+                        </div>
+                        <div class="range-group full">
+                            <span class="label-pipe">Kvality</span>
+                            <div class="quality-multi" id="quality-filter-multi">
+                                <label><input type="checkbox" class="quality-opt" value="2160">2160p</label>
+                                <label><input type="checkbox" class="quality-opt" value="1440">1440p</label>
+                                <label><input type="checkbox" class="quality-opt" value="1080">1080p</label>
+                                <label><input type="checkbox" class="quality-opt" value="720">720p</label>
+                                <label><input type="checkbox" class="quality-opt" value="480">480p</label>
+                                <label><input type="checkbox" class="quality-opt" value="360">360p</label>
+                                <label><input type="checkbox" class="quality-opt" value="240">240p</label>
+                                <label><input type="checkbox" class="quality-opt" value="unknown">?</label>
+                                <label><input type="checkbox" id="missing-meta-filter">Chýba meta</label>
+                            </div>
+                        </div>
+                        <div class="range-group">
+                            <span class="label-pipe">Hosting</span>
+                            <div class="host-filter-wrap">
+                                <button type="button" class="host-filter-btn" id="host-filter-btn">
+                                    <span id="host-filter-label">Všetky hosty</span>
+                                    <span class="host-filter-arrow">▾</span>
+                                </button>
+                                <div class="host-filter-panel" id="host-filter-panel" style="display:none">
+                                    <div class="host-filter-actions">
+                                        <button type="button" id="host-select-all">Všetky</button>
+                                        <button type="button" id="host-deselect-all">Žiadne</button>
+                                    </div>
+                                    <div id="host-checkboxes"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="range-group" id="album-filter-container" style="display:none;">
+                            <span class="label-pipe">Album</span>
+                            <div class="host-filter-wrap">
+                                <button type="button" class="host-filter-btn" id="album-filter-btn">
+                                    <span id="album-filter-label">Všetky albumy</span>
+                                    <span class="host-filter-arrow">▾</span>
+                                </button>
+                                <div class="album-filter-panel" id="album-filter-panel" style="display:none">
+                                    <div class="album-filter-actions">
+                                        <button type="button" id="album-select-all">Všetky</button>
+                                        <button type="button" id="album-deselect-all">Žiadne</button>
+                                    </div>
+                                    <div id="album-checkboxes"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="range-group">
+                            <span class="label-pipe">Kategória</span>
+                            <input type="text" id="category-filter" placeholder="napr. POV">
+                        </div>
+                        <div class="range-group full">
+                            <span class="label-pipe">Tag</span>
+                            <input type="text" id="tag-filter" placeholder="napr. spring break">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="deck-card quick-suite">
+                    <div class="section-kicker">Quick filters</div>
+                    <div class="quick-filters" id="quick-filters"></div>
+                </section>
+            </div>
+
+            <div id="loader">
+                <div class="spinner"></div>
+                <p style="margin-top:12px;color:rgba(255,255,255,0.4);font-size:0.85rem;">Pripravujem...</p>
+            </div>
+
+            <div class="video-grid" id="video-grid" style="display:none;"></div>
+
+            <!-- Empty State — zobrazí sa keď filtre nenájdu nič -->
+            <div class="empty-state" id="empty-state" style="display:none;">
+                <div class="empty-icon">🎬</div>
+                <p class="empty-title">Žiadne videá nenájdené</p>
+                <p class="empty-sub">Skús upraviť filtre alebo spusti nový scan</p>
+                <button class="btn btn-secondary" id="empty-clear-filters-btn" style="font-size:0.82rem;padding:6px 16px;">Vymazať text filter</button>
+            </div>
+
+            <footer>
+                <div style="display:flex;gap:6px;">
+                    <button class="btn btn-secondary" id="select-all" title="Označí všetky zobrazené videá; po označení ich týmto tlačidlom zrušíš">✓ Označiť všetko</button>
+                    <button class="btn btn-secondary" id="select-hd-btn">📺 Označiť HD</button>
+                    <button class="btn btn-secondary" id="select-long-btn">⏳ Označiť dlhé</button>
+                    <button class="btn btn-secondary" id="deselect-all">✗ Zrušiť výber</button>
+                    <button class="btn btn-queue" id="queue-btn" disabled>+ Queue</button>
+                </div>
+                <div class="port-row footer-port-row" style="display:flex; flex-direction:column; align-items:flex-start; gap:4px;">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span style="opacity:0.6; font-size:0.75rem;">Port:</span>
+                        <div class="port-segment">
+                            <label><input type="radio" name="dashboard-port" value="8000" checked><span>8000</span></label>
+                            <label><input type="radio" name="dashboard-port" value="8001"><span>8001</span></label>
+                            <label><input type="radio" name="dashboard-port" value="8002"><span>8002</span></label>
+                            <label><input type="radio" name="dashboard-port" value="8003"><span>8003</span></label>
+                            <label><input type="radio" name="dashboard-port" value="8004"><span>8004</span></label>
+                            <label><input type="radio" name="dashboard-port" value="8005"><span>8005</span></label>
+                        </div>
+                    </div>
+                    <!-- Live Import Progress Bar -->
+                    <div id="import-progress-bar-wrap" style="display:none; width:100%; min-width:180px; margin-top:2px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:var(--text-soft); font-weight:700; margin-bottom:2px;">
+                            <span id="import-progress-status">Importujem (0/0)...</span>
+                            <span id="import-progress-pct">0%</span>
+                        </div>
+                        <div style="width:100%; height:4px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden;">
+                            <div id="import-progress-bar" style="width:0%; height:100%; background:linear-gradient(90deg, var(--primary), var(--secondary)); transition:width 0.15s ease;"></div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1px;">
+                            <span id="import-progress-speed" style="font-size:0.62rem; color:rgba(255,255,255,0.4);">0.0 v/s</span>
+                            <span id="import-progress-eta" style="font-size:0.65rem; color:var(--text-soft);">Zostáva: --:--</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-actions">
+                    <button class="btn btn-open-dash" id="open-dash-btn">↗ Panel</button>
+                    <div class="footer-overflow-menu">
+                        <button class="btn btn-secondary footer-overflow-trigger" id="footer-more-btn" title="Ďalšie akcie">···</button>
+                        <div class="footer-overflow-dropdown" id="footer-overflow-dropdown" style="display:none;">
+                            <button class="footer-dd-item dd-primary" id="open-annotator-btn">🖊 Annotate UI</button>
+                            <div class="footer-dd-sep"></div>
+                            <button class="footer-dd-item" id="copy-btn" disabled title="Kopíruje stránku videa. Pre stream použi Kopírovať direct.">📋 Kopírovať stránku</button>
+                            <button class="footer-dd-item dd-primary" id="copy-direct-btn" disabled>⚡ Kopírovať direct</button>
+                            <button class="footer-dd-item dd-primary" id="send-jdownloader-btn" disabled>⇩ Send to JDownloader</button>
+                            <button class="footer-dd-item" id="save-crawljob-btn" disabled title="Uloží .crawljob súbor pre JDownloader Folder Watch (bez odoslania cez API)">💾 Uložiť .crawljob</button>
+                            <div class="footer-dd-sep"></div>
+                            <button class="footer-dd-item dd-accent" id="import-filtered-btn" disabled>🔽 Import filter (0)</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="import-btn" disabled>Import (0)</button>
+                </div>
+            </footer>
+        </div>
+
+        <!-- ══ WATCHLIST TAB ══ -->
+        <div class="panel" id="tab-watchlist">
+            <div class="wl-actions">
+                <button class="btn btn-primary" id="wl-import-all-btn" style="font-size:0.8rem;padding:7px 14px;">⬆ Import všetko</button>
+                <button class="btn btn-secondary" id="wl-clear-btn" style="font-size:0.8rem;padding:7px 14px;">🗑 Vymazať</button>
+            </div>
+            <div id="watchlist-panel">
+                <div class="wl-empty" id="wl-empty">Zoznam je prázdny.<br>Vyber videá a klikni "+ Queue".</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import result toast -->
+    <div id="import-toast"></div>
+
+    <!-- Video Player Modal -->
+    <div id="video-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-video-title">Video Preview</div>
+                <button class="close-modal" id="close-video-modal">&times;</button>
+            </div>
+            <div class="video-container">
+                <video id="modal-video" controls autoplay playsinline></video>
+                <div id="video-loader" style="display:none; position:absolute;">
+                    <div class="spinner"></div>
+                    <div id="video-loader-status">Pripravujem prehrávač…</div>
+                    <div id="video-loader-detail">Overujem dostupný stream.</div>
+                    <button type="button" id="video-loader-retry">Skúsiť znova</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="modal-meta">
+                    <span id="modal-video-host"></span>
+                    <span id="modal-video-quality"></span>
+                    <span id="modal-video-size"></span>
+                    <span id="modal-video-date"></span>
+                    <div id="modal-video-taxonomy" style="width:100%;font-size:0.75rem;color:#8ab4f8;margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;"></div>
+                </div>
+                <div class="modal-actions">
+                    <select id="modal-video-quality-select" disabled>
+                        <option value="">Kvalita: auto</option>
+                    </select>
+                    <button class="modal-mini-btn" id="modal-zoom-out-btn">Zoom -</button>
+                    <button class="modal-mini-btn" id="modal-zoom-reset-btn">Zoom 100%</button>
+                    <button class="modal-mini-btn" id="modal-zoom-in-btn">Zoom +</button>
+                    <button class="modal-mini-btn" id="modal-copy-direct-btn" disabled>Copy direct URL</button>
+                    <button class="modal-mini-btn" id="modal-open-direct-btn" disabled>Open direct</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="hls.min.js"></script>
+    <script src="vk_scanner.js"></script>
+    <script src="popup.js"></script>
+    <script src="ui-annotator.js"></script>
+
+    <!-- ═══ NEXUS UI/UX REDESIGN — Externa interaktivita ═══ -->
+    <script src="popup_redesign_interactivity.js"></script>
+
+</body>
+</html>
+

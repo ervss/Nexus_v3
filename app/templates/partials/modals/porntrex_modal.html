@@ -1,0 +1,217 @@
+    <!-- Porntrex Smart Discovery Modal -->
+    <template x-if="showPorntrexDiscoveryModal">
+    <div class="modal-wrap nx-lazy-modal" role="dialog" aria-modal="true" aria-label="Porntrex Smart Discovery">
+        <div class="modal-card" style="min-width:90vw;max-width:95vw;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
+                <h3><span class="material-icons-round">search</span>🔍 Smart Porntrex Discovery</h3>
+                <button @click="showPorntrexDiscoveryModal = false"><span
+                        class="material-icons-round">close</span></button>
+            </div>
+            <div class="modal-body" style="padding:20px;">
+                <!-- Discovery Form -->
+                <div style="background:#1e293b;padding:20px;border-radius:8px;margin-bottom:20px;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
+                        <div>
+                            <label style="display:block;margin-bottom:5px;color:#cbd5e1;">Keyword</label>
+                            <input type="text" x-model="porntrexDiscovery.keyword"
+                                placeholder="e.g., 'bbc', 'deepthroat' (filters category results)"
+                                style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;"
+                                @keydown.enter="searchPorntrexDiscovery()">
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:5px;color:#cbd5e1;">Category</label>
+                            <input type="text" x-model="porntrexDiscovery.category"
+                                placeholder="e.g., '4K', 'anal', 'asian' (optional)"
+                                style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;"
+                                @keydown.enter="searchPorntrexDiscovery()">
+                        </div>
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <label style="display:block;margin-bottom:5px;color:#cbd5e1;">PornTrex URL</label>
+                        <input type="text" x-model="porntrexDiscovery.sourceUrl"
+                            placeholder="e.g., https://www.porntrex.com/members/3058740/videos/"
+                            style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;"
+                            @keydown.enter="searchPorntrexDiscovery()">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:15px;margin-bottom:15px;">
+                        <div>
+                            <label style="display:block;margin-bottom:5px;color:#cbd5e1;">Min Quality</label>
+                            <select x-model.number="porntrexDiscovery.minQuality"
+                                style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;">
+                                <option value="2160">4K (2160p)</option>
+                                <option value="1440">2K (1440p)</option>
+                                <option value="1080" selected>Full HD (1080p)</option>
+                                <option value="720">HD (720p)</option>
+                                <option value="480">SD (480p)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:5px;color:#cbd5e1;">Pages to Scan</label>
+                            <input type="number" x-model.number="porntrexDiscovery.pages" min="1" max="100"
+                                style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;">
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:5px;color:#cbd5e1;">Upload Type</label>
+                            <select x-model="porntrexDiscovery.uploadType"
+                                style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;">
+                                <option value="all">All</option>
+                                <option value="user">User Uploads</option>
+                                <option value="studio">Studio Content</option>
+                            </select>
+                        </div>
+                        <div style="display:flex;align-items:end;">
+                            <label style="display:flex;align-items:center;color:#cbd5e1;cursor:pointer;">
+                                <input type="checkbox" x-model="porntrexDiscovery.autoSkipLowQuality"
+                                    style="margin-right:8px;">
+                                Auto-skip low quality
+                            </label>
+                        </div>
+                    </div>
+                    <div style="text-align:center;">
+                        <button @click="searchPorntrexDiscovery()"
+                            :disabled="porntrexDiscovery.loading || (!porntrexDiscovery.keyword.trim() && !porntrexDiscovery.category.trim() && !porntrexDiscovery.sourceUrl.trim())"
+                            style="padding:12px 30px;background:#ec4899;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;"
+                            :style="porntrexDiscovery.loading || (!porntrexDiscovery.keyword.trim() && !porntrexDiscovery.category.trim() && !porntrexDiscovery.sourceUrl.trim()) ? 'opacity:0.6;cursor:not-allowed;' : ''"
+                            @mouseover="$event.target.style.background='#db2777'"
+                            @mouseout="$event.target.style.background='#ec4899'">
+                            <span class="material-icons-round" x-show="!porntrexDiscovery.loading">search</span>
+                            <span class="material-icons-round" x-show="porntrexDiscovery.loading"
+                                style="animation:spin 1s linear infinite;">sync</span>
+                            <span x-text="porntrexDiscovery.loading ? 'Searching...' : 'Search'"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Header -->
+                <div x-show="porntrexDiscovery.results.length > 0" style="margin-top:20px;">
+                    <div
+                        style="display:flex;justify-content:space-between;align-items:center;padding:15px;background:#1e293b;border-radius:8px;margin-bottom:15px;">
+                        <div style="color:#cbd5e1;">
+                            <strong style="color:#ec4899;font-size:18px;">
+                                Found <span x-text="getPorntrexMatchingResults().length"></span>/<span
+                                    x-text="porntrexDiscovery.total"></span> videos
+                            </strong>
+                            <br>
+                            <span style="font-size:13px;">
+                                Keyword: <span
+                                    x-text="porntrexDiscovery.sourceUrl || porntrexDiscovery.keyword || porntrexDiscovery.category"
+                                    style="color:#ec4899;font-weight:600;"></span> | Min Quality: <span
+                                    x-text="porntrexDiscovery.minQuality + 'p'" style="color:#22c55e;"></span>
+                            </span>
+                            <br>
+                            <span style="font-size:13px;color:#94a3b8;">
+                                Showing <span x-text="getPorntrexFilteredResults().length"></span> visible results
+                                <span x-show="!porntrexDiscovery.showAllResults">with the current filters</span>
+                                <span x-show="porntrexDiscovery.showAllResults">from the full result set</span>
+                            </span>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+                            <label
+                                style="display:flex;align-items:center;gap:8px;color:#cbd5e1;font-size:12px;cursor:pointer;">
+                                <input type="checkbox" x-model="porntrexDiscovery.showAllResults"
+                                    style="width:16px;height:16px;">
+                                Show all results
+                            </label>
+                            <button @click="selectAllPorntrex()"
+                                style="padding:10px 20px;background:rgba(236,72,153,0.18);color:#fff;border:1px solid rgba(236,72,153,0.35);border-radius:6px;font-weight:600;cursor:pointer;">
+                                Select All Matching
+                            </button>
+                            <button @click="importSelectedPorntrex()"
+                                :disabled="porntrexDiscovery.selected.length === 0"
+                                :style="porntrexDiscovery.selected.length === 0 ? 'opacity:0.5;cursor:not-allowed;' : ''"
+                                style="padding:10px 20px;background:#ec4899;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer;">
+                                Import Selected (<span x-text="porntrexDiscovery.selected.length"></span>)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Results Grid -->
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:15px;">
+                        <template x-for="video in getPorntrexFilteredResults()" :key="video.url">
+                            <div @click="porntrexDiscovery.selected.includes(video.url) ? porntrexDiscovery.selected = porntrexDiscovery.selected.filter(u => u !== video.url) : porntrexDiscovery.selected.push(video.url)"
+                                :class="porntrexDiscovery.selected.includes(video.url) ? 'porntrex-card-selected' : ''"
+                                style="position:relative;border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid rgba(255,255,255,0.1);transition:all 0.2s;"
+                                class="porntrex-discovery-card"
+                                @mouseover="$event.currentTarget.style.borderColor='#ec4899'"
+                                @mouseout="$event.currentTarget.style.borderColor=porntrexDiscovery.selected.includes(video.url) ? '#ec4899' : 'rgba(255,255,255,0.1)'">
+                                <img :src="video.thumbnail || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22%3E%3Crect fill=%22%231e293b%22 width=%22320%22 height=%22180%22/%3E%3C/svg%3E'"
+                                    @error="$event.target.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22%3E%3Crect fill=%22%231e293b%22 width=%22320%22 height=%22180%22/%3E%3C/svg%3E'; $event.target.onerror=null;"
+                                    :alt="video.title" loading="lazy"
+                                    style="width:100%;height:180px;object-fit:cover;background:#1e293b;">
+                                <div style="position:absolute;top:8px;left:8px;display:flex;gap:5px;">
+                                    <div :style="porntrexDiscovery.selected.includes(video.url) ? 'background:#ec4899;border-color:#ec4899;' : 'background:rgba(0,0,0,0.6);border-color:rgba(255,255,255,0.3);'"
+                                        style="width:24px;height:24px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">
+                                        <span class="material-icons-round"
+                                            x-show="porntrexDiscovery.selected.includes(video.url)"
+                                            style="font-size:16px;color:#fff;">check</span>
+                                    </div>
+                                </div>
+                                <div style="position:absolute;top:8px;right:8px;display:flex;gap:5px;">
+                                    <span x-show="video.quality"
+                                        style="background:#ec4899;color:#fff;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:700;"
+                                        x-text="video.quality"></span>
+                                    <span x-show="video.upload_type === 'user'"
+                                        style="background:#3b82f6;color:#fff;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:700;">USER</span>
+                                    <span x-show="video.upload_type === 'studio'"
+                                        style="background:#8b5cf6;color:#fff;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:700;">STUDIO</span>
+                                </div>
+                                <div
+                                    style="position:absolute;bottom:8px;left:8px;display:flex;gap:5px;align-items:center;flex-wrap:wrap;">
+                                    <div x-show="video.file_size_human"
+                                        style="background:rgba(0,0,0,0.82);color:#fff;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:3px;">
+                                        <span class="material-icons-round" style="font-size:12px;">sd_card</span>
+                                        <span x-text="video.file_size_human"></span>
+                                    </div>
+                                    <div x-show="video.duration > 0"
+                                        style="background:rgba(0,0,0,0.8);color:#fff;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:600;display:inline-block;"
+                                        x-text="Math.floor(video.duration / 60) + ':' + String(video.duration % 60).padStart(2, '0')">
+                                    </div>
+                                </div>
+                                <div style="padding:10px 12px;background:#0f172a;">
+                                    <p style="margin:0;font-size:12px;font-weight:600;color:#fff;line-height:1.3;"
+                                        x-text="video.title.length > 60 ? video.title.substring(0, 60) + '...' : video.title">
+                                    </p>
+                                    <div
+                                        style="display:flex;align-items:center;gap:8px;margin-top:6px;color:#94a3b8;font-size:10px;flex-wrap:wrap;">
+                                        <span x-show="video.upload_date"
+                                            style="display:flex;align-items:center;gap:3px;">
+                                            <span class="material-icons-round"
+                                                style="font-size:12px;">calendar_today</span>
+                                            <span x-text="video.upload_date"></span>
+                                        </span>
+                                        <span x-show="video.file_size_human"
+                                            style="display:flex;align-items:center;gap:3px;">
+                                            <span class="material-icons-round" style="font-size:12px;">sd_card</span>
+                                            <span
+                                                x-text="(video.best_quality_label || video.quality || '') + ', ' + video.file_size_human"></span>
+                                        </span>
+                                        <span x-show="video.views > 0" style="display:flex;align-items:center;gap:3px;">
+                                            <span class="material-icons-round" style="font-size:12px;">visibility</span>
+                                            <span x-text="video.views.toLocaleString()"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div x-show="!porntrexDiscovery.loading && porntrexDiscovery.results.length === 0 && (porntrexDiscovery.sourceUrl || porntrexDiscovery.keyword || porntrexDiscovery.category)"
+                    style="text-align:center;padding:60px 20px;color:#94a3b8;">
+                    <span class="material-icons-round"
+                        style="font-size:64px;opacity:0.3;margin-bottom:15px;">search_off</span>
+                    <p style="font-size:16px;margin:0;">No videos found. Try different keywords or lower quality filter.
+                    </p>
+                </div>
+                <div x-show="!porntrexDiscovery.loading && porntrexDiscovery.results.length > 0 && getPorntrexFilteredResults().length === 0 && (porntrexDiscovery.sourceUrl || porntrexDiscovery.keyword || porntrexDiscovery.category)"
+                    style="text-align:center;padding:60px 20px;color:#94a3b8;">
+                    <span class="material-icons-round"
+                        style="font-size:64px;opacity:0.3;margin-bottom:15px;">search_off</span>
+                    <p style="font-size:16px;margin:0;">No videos match the current filters. Try lowering quality or
+                        changing the search text.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

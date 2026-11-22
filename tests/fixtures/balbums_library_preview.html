@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Balbums fetched library preview</title>
+  <style>
+    *{box-sizing:border-box} body{margin:0;background:#08090b;color:#e9edf0;font-family:Inter,system-ui,sans-serif} nav{height:72px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid #20242a;background:#0a0b0d} nav strong{font-size:20px} nav span{margin-left:38px;color:#8d939c;font-size:13px} main.cont{margin:0 auto;padding:18px 0 60px}.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}.rounded-xl{min-height:160px;padding:14px;border:1px solid #292e35;border-radius:12px;background:#111318}.rounded-xl a{color:#e8ecef;text-decoration:none}.rounded-xl p{margin:8px 0 0;color:#8b929b;font-size:12px}
+  </style>
+  <script>
+    const albumNames=['Bunkr Archive — Studio Sessions','Night Shift Collection','Lost Weekend Vault'];
+    const colours=['#265e6a','#6a3f67','#6a5631','#31566a','#5e3651','#3f6555'];
+    const entries={};
+    for(let a=0;a<3;a++){
+      const files=[];
+      for(let i=0;i<6;i++){
+        const n=a*6+i+1; const bg=colours[i];
+        const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400"><defs><linearGradient id="g"><stop stop-color="${bg}"/><stop offset="1" stop-color="#111820"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/><circle cx="${120+i*55}" cy="${155+a*35}" r="95" fill="#ffffff" opacity=".06"/><text x="32" y="340" fill="#dfe9e8" opacity=".8" font-family="Arial" font-size="24">ARCHIVE FRAME ${String(n).padStart(2,'0')}</text></svg>`;
+        files.push({href:`/v/demo-${n}`,title:['Backstage camera roll','Poolside afternoon','Late night studio cut','Private room session','Unreleased scene','After hours edit'][i]+` ${String(n).padStart(2,'0')}.mp4`,size:`${420+n*37} MB`,isVideo:true,thumbSrc:`data:image/svg+xml,${encodeURIComponent(svg)}`,timestamp:Date.now()-n*86400000});
+      }
+      entries[`/a/${1001+a}`]={albumName:albumNames[a],fileCount:6,totalBytes:files.reduce((s,f)=>s+parseInt(f.size)*1048576,0),oldestTimestamp:files[5].timestamp,newestTimestamp:files[0].timestamp,previewIndex:files.map(f=>f.title.toLowerCase()).join(' '),files,fetchedAt:Date.now()};
+    }
+    window.GM_getValue=()=>({version:2,entries});
+    window.GM_setValue=()=>{};
+  </script>
+</head>
+<body>
+  <nav><strong>Bunkr</strong><span>Search</span><span>Albums</span><span>Videos</span></nav>
+  <main class="cont">
+    <div class="grid auto-rows-max gap-1.5">
+      <article class="rounded-xl bg-mute border-b"><a href="/a/1001"><h3>Bunkr Archive — Studio Sessions</h3></a><p class="text-xs"><span>6 files</span></p></article>
+      <article class="rounded-xl bg-mute border-b"><a href="/a/1002"><h3>Night Shift Collection</h3></a><p class="text-xs"><span>6 files</span></p></article>
+      <article class="rounded-xl bg-mute border-b"><a href="/a/1003"><h3>Lost Weekend Vault</h3></a><p class="text-xs"><span>6 files</span></p></article>
+    </div>
+  </main>
+  <script src="../../userscripts/bunkr-albums-enhanced.user.js"></script>
+</body>
+</html>

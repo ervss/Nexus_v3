@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stiahnuť video – HotContainer</title>
+  <link rel="stylesheet" href="direct.css">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">HotContainer · HLS video</p>
+    <h1>Stiahnuť video ako MP4</h1>
+    <p>Video sa uloží v pôvodnej kvalite. Nexus musí zostať spustený počas sťahovania.</p>
+    <label for="name">Názov súboru</label>
+    <input id="name" maxlength="120" value="HotContainer video">
+    <button id="download" disabled>Stiahnuť MP4</button>
+    <button id="copy" disabled>Kopírovať URL</button>
+    <p id="status" role="status" aria-live="polite">Kontrolujem odkaz…</p>
+    <details><summary>Zdroj videa</summary><p id="source"></p></details>
+  </main>
+  <script src="qualities.js"></script>
+  <script src="direct.js"></script>
+</body>
+</html>

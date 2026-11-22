@@ -1,0 +1,1057 @@
+<!-- Jednotný Split-Pane Related Search Workspace (zdieľaný pre Classic, V1 aj Netflix) -->
+<div class="modal-wrap" x-show="galleryRelatedOpen" style="display: none;" x-transition.opacity @click.self="closeGalleryRelated()">
+    <div class="modal-card nx-rel-modal-card"
+        x-ref="relatedModalCard"
+        :style="relatedModalStyle()"
+        :class="{ 'nx-rel-resizing': galleryRelatedModalResizing }">
+        <!-- Horná lišta -->
+        <div class="nx-rel-header">
+            <div class="nx-rel-title-wrap">
+                <h3>
+                    <span class="material-icons-round" style="color:#22d3ee;">hub</span>
+                    Related Search
+                    <span x-show="galleryRelatedUnifiedCached" class="cbir-cache-badge" style="font-size:10px;">
+                        <span class="material-icons-round">inventory_2</span> z cache
+                    </span>
+                </h3>
+                <div class="nx-rel-subtitle" x-show="galleryRelatedVideo" x-text="formatCardTitle(galleryRelatedVideo)"></div>
+            </div>
+
+            <!-- Prepínač režimov jedným klikom -->
+            <div class="nx-rel-mode-tabs" role="tablist" aria-label="Režim vyhľadávania">
+                <button type="button" @click="setUnifiedRelatedMode('hybrid')" :class="galleryRelatedUnifiedMode === 'hybrid' ? 'active' : ''">
+                    <span class="material-icons-round" style="font-size:15px;">auto_awesome</span> Hybrid
+                </button>
+                <button type="button" @click="setUnifiedRelatedMode('visual')" :class="galleryRelatedUnifiedMode === 'visual' ? 'active' : ''">
+                    <span class="material-icons-round" style="font-size:15px;">image_search</span> Vizuálne (CBIR)
+                </button>
+                <button type="button" @click="setUnifiedRelatedMode('library')" :class="galleryRelatedUnifiedMode === 'library' ? 'active' : ''">
+                    <span class="material-icons-round" style="font-size:15px;">video_library</span> Knižnica
+                </button>
+                <button type="button" @click="setUnifiedRelatedMode('web')" :class="galleryRelatedUnifiedMode === 'web' ? 'active' : ''">
+                    <span class="material-icons-round" style="font-size:15px;">public</span> Web &amp; Fóra
+                </button>
+            </div>
+
+            <div class="nx-rel-header-actions">
+                <select x-model="galleryRelatedIntent" @change="onRelatedIntentChange()"
+                    aria-label="Čo hľadáš?" title="Čo má mať prednosť vo výsledkoch? (Okamžité preradenie)">
+                    <option value="similar">Podobné videá</option>
+                    <option value="same_video">Rovnaké video</option>
+                    <option value="same_creator">Od tohto tvorcu</option>
+                    <option value="upgrade">Lepšia kvalita (Upgrade)</option>
+                </select>
+                <button type="button"
+                    class="btn-ghost nx-rel-guide-btn"
+                    :class="{ 'is-open': galleryRelatedGuideOpen }"
+                    @click="toggleRelatedGuide()"
+                    title="Návod ako najlepšie vyhľadávať, Tipy &amp; Triky a odporúčané nastavenia">
+                    <span class="material-icons-round" style="font-size:15px;">tips_and_updates</span>
+                    <span>Návod &amp; Tipy</span>
+                </button>
+                <button type="button"
+                    class="btn-ghost"
+                    style="padding:5px 10px;font-size:11px;gap:5px;display:inline-flex;align-items:center;"
+                    @click="toggleRelatedHistory()"
+                    :class="{ 'is-open': galleryRelatedHistoryOpen }"
+                    title="História nedávnych hľadaní (okamžité načítanie)">
+                    <span class="material-icons-round" style="font-size:15px;">history</span>
+                    <span x-text="`História (${galleryRelatedHistory.length})`"></span>
+                </button>
+                <button type="button"
+                    class="nx-rel-gpu-pill"
+                    :class="galleryRelatedVisualIndexStatus?.indexed_videos > 0 ? '' : 'idle'"
+                    @click="syncUnifiedVisualIndex()"
+                    :title="galleryRelatedVisualIndexStatus?.available ? 'Synchronizovať GPU SigLIP2 index knižnice' : 'GPU index nie je dostupný'">
+                    <span class="material-icons-round" style="font-size:14px;" x-text="galleryRelatedVisualIndexStatus?.syncing ? 'hourglass_top' : 'memory'"></span>
+                    <span x-text="galleryRelatedVisualIndexStatus?.syncing ? 'Indexujem GPU...' : (galleryRelatedVisualIndexStatus?.indexed_videos > 0 ? `SigLIP2 (${galleryRelatedVisualIndexStatus.indexed_videos})` : 'Indexovať knižnicu')"></span>
+                </button>
+                <button type="button" class="btn-ghost"
+                    @click="toggleRelatedModalMaximize()"
+                    @dblclick="resetRelatedModalSize()"
+                    :title="galleryRelatedModalMaximized ? 'Obnoviť veľkosť okna (2× klik = pôvodná)' : 'Maximalizovať okno (2× klik = pôvodná)'">
+                    <span class="material-icons-round" x-text="galleryRelatedModalMaximized ? 'fullscreen_exit' : 'fullscreen'"></span>
+                </button>
+                <button type="button" class="btn-ghost" @click="closeGalleryRelated()" title="Zavrieť">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- História hľadaní Drawer -->
+        <div class="nx-rel-history-panel" x-show="galleryRelatedHistoryOpen" x-transition.opacity @click.outside="galleryRelatedHistoryOpen = false">
+            <div class="nx-rel-history-head">
+                <strong style="font-size:12px;color:#f8fafc;display:inline-flex;align-items:center;gap:6px;">
+                    <span class="material-icons-round" style="font-size:16px;color:#22d3ee;">history</span>
+                    História hľadaní
+                </strong>
+                <div style="display:flex;gap:6px;align-items:center;">
+                    <button type="button" class="btn-ghost" style="padding:3px 8px;font-size:10px;color:#fca5a5;"
+                        x-show="galleryRelatedHistory.length > 0"
+                        @click="clearRelatedHistory()">Vymazať všetko</button>
+                    <button type="button" class="btn-ghost" style="padding:3px 6px;" @click="galleryRelatedHistoryOpen = false">
+                        <span class="material-icons-round" style="font-size:15px;">close</span>
+                    </button>
+                </div>
+            </div>
+            <div class="nx-rel-history-list">
+                <div x-show="galleryRelatedHistoryLoading" style="padding:20px;text-align:center;font-size:12px;color:#94a3b8;">
+                    Načítavam históriu...
+                </div>
+                <div x-show="!galleryRelatedHistoryLoading && galleryRelatedHistory.length === 0"
+                    style="padding:26px 14px;text-align:center;font-size:12px;color:#64748b;">
+                    Zatiaľ tu nie sú žiadne uložené hľadania.
+                </div>
+                <template x-for="h in galleryRelatedHistory" :key="'hist-'+(h.id || h.cache_key)">
+                    <div class="nx-rel-history-item" @click="restoreRelatedHistoryItem(h, false)">
+                        <img :src="h.thumbnail_path ? proxifyUrl(h.thumbnail_path) : '/static/placeholder.jpg'"
+                            @error="$event.target.src='/static/placeholder.jpg'">
+                        <div style="min-width:0;display:flex;flex-direction:column;gap:2px;">
+                            <div style="font-size:11.5px;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                                x-text="h.video_title || `Video #${h.video_id}`"></div>
+                            <div style="font-size:10px;color:#94a3b8;display:flex;gap:6px;flex-wrap:wrap;">
+                                <span x-text="h.mode === 'visual' ? 'Vizuálne' : (h.mode === 'library' ? 'Knižnica' : (h.mode === 'web' ? 'Web' : 'Hybrid'))"
+                                    style="color:#67e8f9;font-weight:700;"></span>
+                                <span x-text="`${h.count || 0} výsledkov`"></span>
+                                <span x-show="(h.creators || []).length" style="color:#c4b5fd;" x-text="h.creators[0]?.name || ''"></span>
+                                <span x-text="formatHistoryAge(h.ts)"></span>
+                            </div>
+                            <div x-show="(h.queries || []).length"
+                                style="font-size:10px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                                x-text="(h.queries || []).join(' · ')"></div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:3px;">
+                            <button type="button" class="btn-ghost" style="padding:3px 6px;" title="Spustiť znova naživo"
+                                @click.stop="restoreRelatedHistoryItem(h, true)">
+                                <span class="material-icons-round" style="font-size:13px;">refresh</span>
+                            </button>
+                            <button type="button" class="btn-ghost" style="padding:3px 6px;" title="Odstrániť z histórie"
+                                @click.stop="removeRelatedHistoryItem(h.id)">
+                                <span class="material-icons-round" style="font-size:13px;">delete_outline</span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Interaktívna Info Bublina: Návod, Tipy & Triky a Odporúčané nastavenia -->
+        <div class="nx-rel-guide-panel" x-show="galleryRelatedGuideOpen" x-transition.opacity @click.outside="galleryRelatedGuideOpen = false">
+            <div class="nx-rel-guide-head">
+                <strong style="font-size:12.5px;color:#f8fafc;display:inline-flex;align-items:center;gap:6px;">
+                    <span class="material-icons-round" style="font-size:17px;color:#fbbf24;">tips_and_updates</span>
+                    Sprievodca Related Search · Ako nájsť presne to, čo hľadáš
+                </strong>
+                <button type="button" class="btn-ghost" style="padding:3px 6px;" @click="galleryRelatedGuideOpen = false" title="Zavrieť návod">
+                    <span class="material-icons-round" style="font-size:15px;">close</span>
+                </button>
+            </div>
+
+            <div class="nx-rel-guide-tabs">
+                <button type="button" @click="galleryRelatedGuideTab = 'scenarios'" :class="galleryRelatedGuideTab === 'scenarios' ? 'active' : ''">
+                    <span class="material-icons-round" style="font-size:14px;">track_changes</span> Podľa toho, čo hľadáš
+                </button>
+                <button type="button" @click="galleryRelatedGuideTab = 'tips'" :class="galleryRelatedGuideTab === 'tips' ? 'active' : ''">
+                    <span class="material-icons-round" style="font-size:14px;">bolt</span> Tipy &amp; Triky
+                </button>
+                <button type="button" @click="galleryRelatedGuideTab = 'recommended'" :class="galleryRelatedGuideTab === 'recommended' ? 'active' : ''">
+                    <span class="material-icons-round" style="font-size:14px;">tune</span> Odporúčané nastavenie
+                </button>
+            </div>
+
+            <div class="nx-rel-guide-body">
+                <!-- TAB 1: Podľa cieľa -->
+                <div x-show="galleryRelatedGuideTab === 'scenarios'" class="nx-rel-guide-grid">
+                    <div class="nx-rel-guide-card">
+                        <div class="nx-rel-guide-card-top">
+                            <strong>🎬 Chcem totožné video v lepšej kvalite (1080p/4K) alebo na inom webe</strong>
+                            <span class="nx-rel-guide-badge tone-cyan">Presné zrkadlo</span>
+                        </div>
+                        <p>Prepni na <b>Vizuálne (CBIR)</b> + zapni <b>Deep (3 snímky)</b>. Cez <b>Vybrať oblasť</b> orež tvár/scénu bez loga stránky. Po výsledkoch klikni na <b>Probe všetkých</b> a zoraď podľa <b>Najvyššia kvalita</b>.</p>
+                        <button type="button" class="btn-primary nx-rel-guide-apply" @click="applyRelatedGuidePreset('exact_mirror', true)">
+                            <span class="material-icons-round" style="font-size:13px;">play_circle</span> Použiť &amp; hľadať (Vizuálne + Deep)
+                        </button>
+                    </div>
+
+                    <div class="nx-rel-guide-card">
+                        <div class="nx-rel-guide-card-top">
+                            <strong>🕵️ Neviem meno modelky / tvorcu a chcem ho zistiť</strong>
+                            <span class="nx-rel-guide-badge tone-violet">Identifikácia</span>
+                        </div>
+                        <p>Ak je na náhľade viac osôb alebo rušivé pozadie, najskôr cez <b>Vybrať oblasť</b> ohranič tvár. Potom spusti <b>Tvorca</b> (alebo nechaj zapnuté <b>Auto-dohľadať tvorcu</b> v Hybrid režime) a zistené meno ulož cez <b>+ Uložiť</b>.</p>
+                        <button type="button" class="btn-primary nx-rel-guide-apply" @click="applyRelatedGuidePreset('find_creator', true)">
+                            <span class="material-icons-round" style="font-size:13px;">person_search</span> Zistiť tvorcu teraz
+                        </button>
+                    </div>
+
+                    <div class="nx-rel-guide-card">
+                        <div class="nx-rel-guide-card-top">
+                            <strong>🔤 Mám nezmyselný / hashový názov súboru (napr. 0h7zr0nly..., IMG_4921)</strong>
+                            <span class="nx-rel-guide-badge tone-amber">Oprava dopytov</span>
+                        </div>
+                        <p>Textové vyhľadávače hash nenájdu. Klikni na <b>✨ AI Analýza</b> — AI z obrazu vytiahne popis, tagy aj performerku a automaticky nahradí dopyty, potom spustí čisté vyhľadávanie.</p>
+                        <button type="button" class="btn-primary nx-rel-guide-apply" @click="applyRelatedGuidePreset('bad_filename', true)">
+                            <span class="material-icons-round" style="font-size:13px;">auto_awesome</span> Spustiť AI Analýzu &amp; hľadať
+                        </button>
+                    </div>
+
+                    <div class="nx-rel-guide-card">
+                        <div class="nx-rel-guide-card-top">
+                            <strong>📚 Chcem overiť duplikáty alebo podobné scény iba v mojej knižnici</strong>
+                            <span class="nx-rel-guide-badge tone-green">Lokálny index</span>
+                        </div>
+                        <p>Režim <b>Knižnica</b> porovnáva všetky zaindexované videá na GPU (<b>SigLIP2</b> + dHash presná zhoda snímky). Ideálne na rýchle nájdenie kópií bez čakania na externé weby.</p>
+                        <button type="button" class="btn-primary nx-rel-guide-apply" @click="applyRelatedGuidePreset('library_dupes', true)">
+                            <span class="material-icons-round" style="font-size:13px;">video_library</span> Prehľadať knižnicu (Vizuálne)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB 2: Tipy & Triky -->
+                <div x-show="galleryRelatedGuideTab === 'tips'" class="nx-rel-guide-tips">
+                    <div class="nx-rel-guide-tip">
+                        <span class="material-icons-round">crop</span>
+                        <div><b>Orež vodotlač a čierne okraje:</b> Klikni na <b>Vybrať oblasť</b> a potiahni rámček iba cez hlavnú scénu alebo tvár — Yandex aj Google Lens dávajú výrazne čistejšie zhody.</div>
+                    </div>
+                    <div class="nx-rel-guide-tip">
+                        <span class="material-icons-round">edit_note</span>
+                        <div><b>Menej slov = viac zásahov:</b> V sekcii <i>Vyhľadávacie dopyty</i> vymaž šum (čísla, <code>1080p</code>, názvy portálov) a nechaj buď <b>samotné meno tvorcu</b>, alebo 2–3 kľúčové slová.</div>
+                    </div>
+                    <div class="nx-rel-guide-tip">
+                        <span class="material-icons-round">speed</span>
+                        <div><b>Dávkové Probe všetkých + zoradenie:</b> Mnohé portály neudávajú rozlíšenie v náhľade. Klikni <b>Probe všetkých</b> a hneď zoraď podľa <b>Najvyššia kvalita</b> alebo <b>Najdlhšie</b> (často nájdeš plnú verziu namiesto ukážky).</div>
+                    </div>
+                    <div class="nx-rel-guide-tip">
+                        <span class="material-icons-round">play_circle</span>
+                        <div><b>Okamžité prehranie bez importu:</b> Tlačidlo <b>Prehrať</b> na karte či náhľade spustí aj externé video priamo v prehrávači nad týmto oknom — po zavretí ti výsledky zostanú presne tak, ako boli.</div>
+                    </div>
+                    <div class="nx-rel-guide-tip">
+                        <span class="material-icons-round">extension</span>
+                        <div><b>Chrome Lens Bridge pri blokáciách:</b> Ak má video lokálne vyextrahovaný náhľad alebo externé API naráža na limit/Cloudflare, spusti vľavo dole <b>Lens Tab</b> alebo <b>Yandex Tab</b> cez tvoje Chrome rozšírenie.</div>
+                    </div>
+                    <div class="nx-rel-guide-tip">
+                        <span class="material-icons-round">open_in_full</span>
+                        <div><b>Zmena veľkosti okna:</b> Potiahni pravý/ľavý dolný roh pre zväčšenie kariet a náhľadov (dvojklikom na roh vrátiš pôvodnú veľkosť, ikona vľavo od krížika maximalizuje na celú obrazovku).</div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: Odporúčané nastavenie -->
+                <div x-show="galleryRelatedGuideTab === 'recommended'" class="nx-rel-guide-rec">
+                    <div class="nx-rel-guide-rec-row">
+                        <span>Predvolený režim</span>
+                        <b>Hybrid (Knižnica + CBIR + Web)</b>
+                        <small>Najlepší pomer presnosti a rýchlosti — spojí lokálny SigLIP2, vizuálne hľadanie aj webové zdroje.</small>
+                    </div>
+                    <div class="nx-rel-guide-rec-row">
+                        <span>Snímky na analýzu</span>
+                        <b>Fast (bežne) · Deep 3 snímky (ťažké prípady)</b>
+                        <small>Pri dlhých videách alebo všeobecnom úvodnom náhľade prepni na <b>Deep (3 snímky)</b>.</small>
+                    </div>
+                    <div class="nx-rel-guide-rec-row">
+                        <span>Auto-dohľadať tvorcu</span>
+                        <b>Zapnuté (ON)</b>
+                        <small>Automaticky odhalí meno tvorcu z vizuálneho CBIR (≥ 50 % istota) a spustí 2. kolo hľadania jeho videí.</small>
+                    </div>
+                    <div class="nx-rel-guide-rec-row">
+                        <span>Aktívne zdroje</span>
+                        <b>Yandex + Lens/SerpApi + Vision + hlavné tube portály</b>
+                        <small>Vizuálne zdroje nájdu scénu aj bez názvu; PornTrex/WhoresHub/Eporner/CamWhores doplnia plné verzie.</small>
+                    </div>
+                    <div class="nx-rel-guide-rec-row">
+                        <span>GPU SigLIP2 index</span>
+                        <b>Zelený pill v hlavičke</b>
+                        <small>Po každom väčšom importe raz klikni na <b>SigLIP2</b> pilulku v hlavičke na doindexovanie nových videí.</small>
+                    </div>
+
+                    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px;">
+                        <button type="button" class="btn-primary" @click="applyRelatedGuidePreset('optimal_default', true)">
+                            <span class="material-icons-round" style="font-size:15px;">tune</span>
+                            Aplikovať odporúčané optimum &amp; spustiť
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hlavné rozdelenie: Pripnutý ľavý sidebar + Pravá výsledková plocha -->
+        <div class="nx-rel-body">
+            <!-- ĽAVÝ PANEL -->
+            <aside class="nx-rel-sidebar">
+                <!-- Náhľad s možnosťou výrezu oblasti (Region Crop) -->
+                <div>
+                    <div class="nx-rel-crop-stage"
+                        :class="{ 'crop-active': galleryRelatedCropSelecting }"
+                        x-ref="relatedCropStage"
+                        @mousedown="startRelatedCrop($event)"
+                        @mousemove="moveRelatedCrop($event)"
+                        @mouseup="endRelatedCrop($event)">
+                        <img :src="galleryRelatedVideo?.thumbnail_path ? proxifyUrl(galleryRelatedVideo.thumbnail_path) : '/static/placeholder.jpg'"
+                            @error.once="$event.target.src='/static/placeholder.jpg'">
+                        <div class="nx-rel-crop-box"
+                            x-show="galleryRelatedCropBox"
+                            :style="galleryRelatedCropStyle()"></div>
+                    </div>
+                    <div class="nx-rel-crop-bar">
+                        <span style="font-size:11px;color:#94a3b8;"
+                            x-text="`${formatDuration(galleryRelatedVideo?.duration || 0)} · ${galleryRelatedVideo?.height ? galleryRelatedVideo.height + 'p' : 'SD'}`"></span>
+                        <div style="display:flex;gap:5px;">
+                            <button type="button" class="btn-ghost" style="padding:3px 8px;font-size:11px;gap:4px;"
+                                @click="galleryRelatedCropSelecting = !galleryRelatedCropSelecting"
+                                :style="galleryRelatedCropSelecting ? 'border-color:#22d3ee;color:#67e8f9;' : ''">
+                                <span class="material-icons-round" style="font-size:13px;">crop</span>
+                                <span x-text="galleryRelatedCropSelecting ? 'Ťahaj myšou...' : 'Vybrať oblasť'"></span>
+                            </button>
+                            <button type="button" class="btn-ghost" style="padding:3px 8px;font-size:11px;"
+                                x-show="galleryRelatedCropBox"
+                                @click="clearRelatedCrop()">Celý obrázok</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hlavné tlačidlo spustenia -->
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                    <button type="button" class="btn-primary nx-rel-cta"
+                        @click="runUnifiedRelatedSearch(false)"
+                        :disabled="galleryRelatedUnifiedLoading">
+                        <span class="material-icons-round" style="font-size:18px;"
+                            x-text="galleryRelatedUnifiedLoading ? 'hourglass_top' : 'travel_explore'"></span>
+                        <span x-text="galleryRelatedUnifiedLoading ? 'Vyhľadávam...' : 'Spustiť Related Search'"></span>
+                    </button>
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#94a3b8;flex-wrap:wrap;gap:6px;">
+                        <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;">
+                            <input type="checkbox" x-model="galleryRelatedForceRefresh"> Obnoviť bez cache
+                        </label>
+                        <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;" title="Rýchle (1 snímka) vs Hĺbkové (3 snímky z videa)">
+                            <input type="checkbox"
+                                :checked="galleryRelatedSearchMode === 'deep'"
+                                @change="galleryRelatedSearchMode = $event.target.checked ? 'deep' : 'fast'"> Deep (3 snímky)
+                        </label>
+                        <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;" title="Ak vizuálne hľadanie rozpozná modelku/tvorcu, automaticky dohľadá aj jej ďalšie videá">
+                            <input type="checkbox" x-model="galleryRelatedAutoCreatorPivot"> Auto-dohľadať tvorcu
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Tagy a AI analýza -->
+                <div class="nx-rel-panel">
+                    <div class="nx-rel-panel-title">
+                        <span>Tagy &amp; Modelky</span>
+                        <div style="display:flex;gap:4px;">
+                            <button type="button" class="btn-ghost" style="padding:2px 7px;font-size:10px;"
+                                @click="galleryRelatedAutoTag()" :disabled="galleryRelatedAutoTagging">
+                                <span x-text="galleryRelatedAutoTagging ? '...' : 'Auto-tag'"></span>
+                            </button>
+                            <button type="button" class="btn-ghost" style="padding:2px 7px;font-size:10px;color:#c4b5fd;border-color:rgba(167,139,250,.4);"
+                                @click="discoverUnifiedCreator(false)" :disabled="galleryRelatedDiscoveringCreator"
+                                title="Zistiť z vizuálnych zhôd a AI kto na videu účinkuje">
+                                <span x-text="galleryRelatedDiscoveringCreator ? 'Hľadám...' : '🕵️ Tvorca'"></span>
+                            </button>
+                            <button type="button" class="btn-ghost" style="padding:2px 7px;font-size:10px;color:#93c5fd;border-color:rgba(96,165,250,.35);"
+                                @click="runUnifiedAiAnalyze()" :disabled="galleryRelatedAiAnalyzing">
+                                <span x-text="galleryRelatedAiAnalyzing ? 'AI...' : '✨ AI Analýza'"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="nx-rel-chips">
+                        <template x-for="chip in galleryRelatedTagChips()" :key="'unchip-'+chip.value">
+                            <span class="nx-rel-chip"
+                                :class="{ 'model': chip.field === 'models', 'off': galleryRelatedKeywordDisabled(chip.value) }"
+                                @click="galleryRelatedToggleKeyword(chip.value)">
+                                <span x-text="chip.value"></span>
+                                <span class="material-icons-round" style="font-size:12px;"
+                                    @click.stop="galleryRelatedRemoveTag(chip)" title="Odstrániť tag">close</span>
+                            </span>
+                        </template>
+                        <span x-show="galleryRelatedTagChips().length === 0" style="font-size:11px;color:#64748b;font-style:italic;">
+                            Žiadne tagy — spusti ✨ AI Analýzu alebo dopíš nižšie
+                        </span>
+                    </div>
+                    <div style="display:flex;gap:5px;">
+                        <input type="text" x-model="galleryRelatedTagInput" @keydown.enter.prevent="galleryRelatedAddTags()"
+                            placeholder="Pridať tag / meno..."
+                            style="flex:1;min-width:0;background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.14);border-radius:7px;padding:4px 8px;font-size:11px;">
+                        <button type="button" class="btn-ghost" style="padding:4px 8px;font-size:11px;"
+                            @click="galleryRelatedAddTags()" :disabled="!galleryRelatedTagInput.trim()">+</button>
+                    </div>
+                </div>
+
+                <!-- Aktívne search queries -->
+                <div class="nx-rel-panel">
+                    <div class="nx-rel-panel-title">
+                        <span>Vyhľadávacie dopyty</span>
+                        <span style="font-size:10px;color:#64748b;" x-text="`${galleryRelatedUnifiedQueries.length}`"></span>
+                    </div>
+                    <div class="nx-rel-chips">
+                        <template x-for="(q, qidx) in galleryRelatedUnifiedQueries" :key="'uq-'+qidx">
+                            <span class="nx-rel-query-pill">
+                                <span x-text="q"></span>
+                                <button type="button" @click="removeUnifiedQuery(qidx)" title="Odstrániť dopyt">
+                                    <span class="material-icons-round" style="font-size:13px;">close</span>
+                                </button>
+                            </span>
+                        </template>
+                    </div>
+                    <div style="display:flex;gap:5px;">
+                        <input type="text" x-model="galleryRelatedCustomQueryInput" @keydown.enter.prevent="addUnifiedQuery()"
+                            placeholder="Vlastný search dopyt..."
+                            style="flex:1;min-width:0;background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.14);border-radius:7px;padding:4px 8px;font-size:11px;">
+                        <button type="button" class="btn-ghost" style="padding:4px 8px;font-size:11px;"
+                            @click="addUnifiedQuery()" :disabled="!galleryRelatedCustomQueryInput.trim()">+</button>
+                    </div>
+                </div>
+
+                <!-- Zdroje & Pokročilé filtre (rozbaľovacie) -->
+                <details class="nx-rel-panel" :open="galleryRelatedUnifiedMode === 'web' || galleryRelatedUnifiedMode === 'visual'">
+                    <summary class="nx-rel-panel-title" style="cursor:pointer;list-style:none;">
+                        <span>Enginy, Zdroje &amp; Filtre</span>
+                        <span class="material-icons-round" style="font-size:15px;">tune</span>
+                    </summary>
+                    <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
+                        <div style="font-size:11px;color:#94a3b8;font-weight:700;">CBIR &amp; Rýchle enginy</div>
+                        <div class="nx-rel-chips">
+                            <template x-for="src in galleryRelatedCbirSourceOptions" :key="'un-cbir-'+src">
+                                <button type="button" class="nx-rel-chip"
+                                    :class="{ 'off': !galleryRelatedCbirSources.includes(src) }"
+                                    :disabled="!cbirSourceConfigured(src)"
+                                    @click="galleryRelatedToggleCbirSource(src)">
+                                    <span x-text="cbirSourceLabel(src)"></span>
+                                </button>
+                            </template>
+                        </div>
+                        <div style="display:flex;gap:6px;align-items:center;" x-show="galleryRelatedCbirSources.includes('yandex')">
+                            <span style="font-size:10px;color:#facc15;font-weight:800;">Yandex site:</span>
+                            <input type="text" x-model="galleryRelatedYandexSite" placeholder="vk.com, porntrex.com..."
+                                style="flex:1;min-width:0;background:#0f172a;color:#e2e8f0;border:1px solid rgba(250,204,21,.25);border-radius:6px;padding:3px 7px;font-size:11px;">
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                            <label style="font-size:11px;color:#94a3b8;display:flex;flex-direction:column;gap:3px;">
+                                Min. dĺžka (min)
+                                <input type="number" x-model.number="galleryRelatedMinDuration" min="0" max="300" class="nx-rel-select">
+                            </label>
+                            <label style="font-size:11px;color:#94a3b8;display:flex;flex-direction:column;gap:3px;">
+                                Min. kvalita
+                                <select x-model.number="galleryRelatedMinHeight" class="nx-rel-select">
+                                    <option value="0">Akákoľvek</option>
+                                    <option value="480">480p+</option>
+                                    <option value="720">720p+</option>
+                                    <option value="1080">1080p+</option>
+                                    <option value="2160">4K</option>
+                                </select>
+                            </label>
+                        </div>
+                        <label style="font-size:11px;color:#cbd5e1;display:flex;align-items:center;gap:6px;cursor:pointer;">
+                            <input type="checkbox" x-model="galleryRelatedHideLibrary"> Skryť videá už v knižnici
+                        </label>
+                    </div>
+                </details>
+
+                <!-- Browser Assist Bridge -->
+                <div class="nx-rel-panel">
+                    <div class="nx-rel-panel-title">
+                        <span style="display:inline-flex;align-items:center;gap:5px;">
+                            <span class="cbir-bridge-dot" :class="galleryLensBridgeReady ? 'ready' : ''"></span>
+                            Chrome Lens Bridge
+                        </span>
+                        <span style="font-size:10px;color:#64748b;" x-text="galleryLensBridgeReady ? 'Pripojený' : 'Offline'"></span>
+                    </div>
+                    <div x-show="galleryLensBridgeStatus" style="font-size:11px;color:#94a3b8;" x-text="galleryLensBridgeStatus"></div>
+                    <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                        <button type="button" class="btn-ghost" style="flex:1;font-size:11px;padding:4px 7px;"
+                            @click="galleryStartBrowserAssist(false)" :disabled="!galleryRelatedVideo?.thumbnail_path">Lens Tab</button>
+                        <button type="button" class="btn-ghost" style="flex:1;font-size:11px;padding:4px 7px;"
+                            @click="galleryStartBrowserAssist(true)" :disabled="!galleryRelatedVideo?.thumbnail_path">Na pozadí</button>
+                        <button type="button" class="btn-ghost" style="flex:1;font-size:11px;padding:4px 7px;"
+                            @click="galleryOpenBrowserVisualSearch('yandex')" :disabled="!galleryRelatedVideo?.thumbnail_path">Yandex Tab</button>
+                        <button type="button" class="btn-ghost" style="flex:1;font-size:11px;padding:4px 7px;color:#86efac;border-color:rgba(134,239,172,.35);"
+                            @click="galleryOpenBrowserVisualSearch('namethatporn')" :disabled="!galleryRelatedVideo?.thumbnail_path"
+                            title="Otvoriť priame reverzné hľadanie náhľadu na NameThatPorn.com v novom tabe">NTP Tab</button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- PRAVÝ HLAVNÝ PRIESTOR -->
+            <section class="nx-rel-main">
+                <!-- Živý Status & Info Panel (čas, priebeh 14/32, aktuálna položka, ETA a štatistiky) -->
+                <div class="nx-rel-status-panel"
+                    x-show="galleryRelatedTask && galleryRelatedTask.status !== 'idle' && !galleryRelatedTask.dismissed"
+                    :class="`is-${galleryRelatedTask?.status || 'idle'}`"
+                    x-transition.opacity>
+                    <div class="nx-rel-status-top">
+                        <div class="nx-rel-status-title-group">
+                            <span class="material-icons-round nx-rel-status-icon"
+                                :class="{ 'spin': galleryRelatedTask?.active }"
+                                x-text="galleryRelatedTask?.active ? 'sync' : (galleryRelatedTask?.status === 'done' ? 'check_circle' : (galleryRelatedTask?.status === 'stopped' ? 'stop_circle' : 'error'))"></span>
+                            <div style="min-width:0;display:flex;flex-direction:column;gap:1px;">
+                                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                    <strong class="nx-rel-status-title" x-text="galleryRelatedTask?.title || ''"></strong>
+                                    <span class="nx-rel-status-phase" x-text="galleryRelatedTask?.phase || ''"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nx-rel-status-controls">
+                            <span class="nx-rel-status-counter"
+                                x-show="(galleryRelatedTask?.total || 0) > 0"
+                                x-text="`${galleryRelatedTask?.done || 0} / ${galleryRelatedTask?.total || 0} (${relatedTaskPercent()}%)`"></span>
+                            <span class="nx-rel-status-timer" title="Celkový čas behu">
+                                <span class="material-icons-round" style="font-size:13px;">schedule</span>
+                                <span x-text="formatTaskElapsed(galleryRelatedTask?.elapsedMs || 0)"></span>
+                            </span>
+                            <button type="button" class="nx-rel-status-stop"
+                                x-show="galleryRelatedTask?.active && ['probe', 'search'].includes(galleryRelatedTask?.kind)"
+                                @click="stopActiveRelatedTask()"
+                                title="Zastaviť prebiehajúcu úlohu">
+                                <span class="material-icons-round" style="font-size:13px;">stop</span> Zastaviť
+                            </button>
+                            <button type="button" class="nx-rel-status-close"
+                                x-show="!galleryRelatedTask?.active"
+                                @click="dismissRelatedTask()"
+                                title="Skryť info panel">
+                                <span class="material-icons-round" style="font-size:14px;">close</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="nx-rel-status-bar">
+                        <div class="nx-rel-status-bar-fill"
+                            :class="{
+                                'indeterminate': galleryRelatedTask?.active && !(galleryRelatedTask?.total > 0),
+                                'anim': galleryRelatedTask?.active && (galleryRelatedTask?.total > 0)
+                            }"
+                            :style="(galleryRelatedTask?.total || 0) > 0 ? `width:${relatedTaskPercent()}%` : ''"></div>
+                    </div>
+
+                    <div class="nx-rel-status-meta">
+                        <span class="nx-rel-status-current"
+                            x-show="galleryRelatedTask?.currentItem"
+                            x-text="galleryRelatedTask?.currentItem"></span>
+                        <span class="nx-rel-status-current"
+                            x-show="!galleryRelatedTask?.currentItem && galleryRelatedTask?.lastHighlight"
+                            x-text="`Posledné zistenie: ${galleryRelatedTask?.lastHighlight}`"></span>
+                        <div class="nx-rel-status-chips">
+                            <span class="nx-rel-status-chip" x-show="relatedTaskEtaText()" x-text="relatedTaskEtaText()"></span>
+                            <span class="nx-rel-status-chip tone-green"
+                                x-show="(galleryRelatedTask?.okCount || 0) > 0"
+                                x-text="galleryRelatedTask?.kind === 'probe' ? `OK: ${galleryRelatedTask.okCount}` : `Zdroje OK: ${galleryRelatedTask.okCount}`"></span>
+                            <span class="nx-rel-status-chip tone-red"
+                                x-show="(galleryRelatedTask?.failCount || 0) > 0"
+                                x-text="galleryRelatedTask?.kind === 'probe' ? `Nedostupné: ${galleryRelatedTask.failCount}` : `Chyby: ${galleryRelatedTask.failCount}`"></span>
+                            <span class="nx-rel-status-chip tone-cyan"
+                                x-show="(galleryRelatedTask?.hdCount || 0) > 0"
+                                x-text="`720p+: ${galleryRelatedTask.hdCount}`"></span>
+                            <span class="nx-rel-status-chip tone-violet"
+                                x-show="(galleryRelatedTask?.foundCount || 0) > 0"
+                                x-text="`Nálezy: ${galleryRelatedTask.foundCount}`"></span>
+                            <span class="nx-rel-status-chip tone-amber"
+                                x-show="galleryRelatedTask?.currentItem && galleryRelatedTask?.lastHighlight"
+                                x-text="galleryRelatedTask.lastHighlight"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Živý stav enginov -->
+                <div class="nx-rel-engine-strip" x-show="Object.keys(galleryRelatedUnifiedEngines || {}).length > 0">
+                    <template x-for="eng in unifiedEngineList()" :key="'ueng-'+eng.name">
+                        <span class="nx-rel-eng-pill" :class="eng.status" :title="eng.error || ''">
+                            <span class="material-icons-round" style="font-size:12px;"
+                                x-text="eng.status === 'ok' ? 'check_circle' : (eng.status === 'running' ? 'sync' : (eng.status === 'empty' ? 'remove_circle_outline' : 'error'))"></span>
+                            <span x-text="`${eng.label}: ${eng.status === 'running' ? '...' : (eng.count + (eng.latency_ms ? ' · ' + (eng.latency_ms >= 1000 ? (eng.latency_ms/1000).toFixed(1)+'s' : eng.latency_ms+'ms') : ''))}`"></span>
+                        </span>
+                    </template>
+                </div>
+
+                <!-- Rozpoznaný tvorca / performer z vizuálneho CBIR a AI -->
+                <div class="nx-rel-creator-strip"
+                    x-show="galleryRelatedDiscoveringCreator || (galleryRelatedDetectedCreators && galleryRelatedDetectedCreators.length > 0)">
+                    <span style="font-size:11px;font-weight:800;color:#ddd6fe;display:inline-flex;align-items:center;gap:4px;">
+                        <span class="material-icons-round" style="font-size:15px;">person_search</span>
+                        <span x-text="galleryRelatedDiscoveringCreator ? 'Identifikujem tvorcu z náhľadu a CBIR...' : 'Rozpoznaný tvorca:'"></span>
+                    </span>
+                    <template x-for="cr in (galleryRelatedDetectedCreators || [])" :key="'ucr-'+cr.name">
+                        <div class="nx-rel-creator-pill">
+                            <strong x-text="cr.name"></strong>
+                            <span x-show="cr.alias" style="color:#38bdf8;font-size:10.5px;font-weight:600;" x-text="`@${String(cr.alias || '').replace(/^@/, '')}`"></span>
+                            <span style="color:#a78bfa;font-weight:700;" x-text="`${cr.confidence || 75}%`"></span>
+                            <span x-show="cr.mentions > 1" style="color:#67e8f9;font-size:10px;" x-text="`(${cr.mentions}×)`"></span>
+                            <button type="button" class="btn-primary" @click="searchCreatorVideos(cr.name)" title="Dohľadať ďalšie videá tohto tvorcu">
+                                Dohľadať videá
+                            </button>
+                            <button type="button" class="btn-ghost" @click="saveDetectedCreator(cr.name)" title="Uložiť meno tvorcu k tomuto videu">
+                                + Uložiť
+                            </button>
+                            <button type="button" class="btn-ghost" @click="followRelatedCreator(cr.name)" title="Sledovať tvorcu vo Watchliste">
+                                <span class="material-icons-round" style="font-size:12px;">notifications_active</span> Sledovať
+                            </button>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Faceted Filter Toolbar -->
+                <div class="nx-rel-toolbar" x-show="galleryRelatedUnifiedResults.length > 0 || galleryRelatedUnifiedLoading">
+                    <div class="nx-rel-facet-tabs">
+                        <button type="button" @click="galleryRelatedFacet = 'all'" :class="galleryRelatedFacet === 'all' ? 'active' : ''"
+                            x-text="`Všetky (${galleryRelatedUnifiedResults.length})`"></button>
+                        <button type="button" @click="galleryRelatedFacet = 'strong'" :class="galleryRelatedFacet === 'strong' ? 'active' : ''"
+                            x-text="`Presné / Silné (${unifiedFacetCount('strong')})`"></button>
+                        <button type="button" @click="galleryRelatedFacet = 'library'" :class="galleryRelatedFacet === 'library' ? 'active' : ''"
+                            x-text="`V knižnici (${unifiedFacetCount('library')})`"></button>
+                        <button type="button" @click="galleryRelatedFacet = 'external'" :class="galleryRelatedFacet === 'external' ? 'active' : ''"
+                            x-text="`Externé (${unifiedFacetCount('external')})`"></button>
+                        <button type="button" @click="galleryRelatedFacet = 'selected'" :class="galleryRelatedFacet === 'selected' ? 'active' : ''"
+                            x-text="`Vybrané (${galleryRelatedImageSelection.length})`"></button>
+                    </div>
+                    <div class="nx-rel-toolbar-right">
+                        <select x-model="galleryRelatedImageSourceFilter" class="nx-rel-select">
+                            <option value="all" x-text="`Zdroj: Všetky (${galleryRelatedUnifiedResults.length})`"></option>
+                            <template x-for="src in unifiedAvailableSources()" :key="'ufsrc-'+src">
+                                <option :value="src" x-text="`${cbirSourceLabel(src)} (${unifiedSourceCount(src)})`"></option>
+                            </template>
+                        </select>
+                        <select x-model="galleryRelatedSortBy" class="nx-rel-select">
+                            <option value="confidence">Zoradiť: Najlepšia zhoda</option>
+                            <option value="visual">Zoradiť: Vizuálna zhoda</option>
+                            <option value="quality">Zoradiť: Najvyššia kvalita</option>
+                            <option value="size">Zoradiť: Najväčší súbor</option>
+                            <option value="duration">Zoradiť: Najdlhšie</option>
+                        </select>
+                        <button type="button"
+                            class="btn-ghost nx-rel-probe-all-btn"
+                            :class="{ 'is-probing': galleryRelatedProbing }"
+                            x-show="unifiedFacetCount('external') > 0"
+                            @click="probeAllUnifiedResults()"
+                            title="Dávkovo overiť dĺžku, rozlíšenie a veľkosť súboru všetkých externých výsledkov">
+                            <span class="material-icons-round" style="font-size:14px;"
+                                x-text="galleryRelatedProbing ? 'stop_circle' : 'speed'"></span>
+                            <span x-text="galleryRelatedProbing
+                                ? `Zastaviť Probe (${galleryRelatedTask.done}/${galleryRelatedTask.total})`
+                                : (unprobedExternalResults(true).length > 0
+                                    ? `Probe všetkých (${unprobedExternalResults(true).length})`
+                                    : 'Preveriť znova')"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lišta selektorov pre hromadný výber a import výsledkov -->
+                <div class="nx-rel-select-bar" x-show="unifiedFacetCount('external') > 0">
+                    <div class="nx-rel-select-group">
+                        <button type="button" class="nx-rel-sel-btn"
+                            :class="{ 'active': unifiedAllVisibleSelected() }"
+                            @click="toggleSelectAllVisibleUnified()"
+                            title="Označiť alebo odznačiť všetky aktuálne zobrazené importovateľné výsledky">
+                            <span class="material-icons-round" style="font-size:14px;"
+                                x-text="unifiedAllVisibleSelected() ? 'check_box' : 'check_box_outline_blank'"></span>
+                            <span x-text="unifiedAllVisibleSelected() ? 'Odznačiť zobrazené' : `Vybrať zobrazené (${unifiedImportableVisible().length})`"></span>
+                        </button>
+                        <button type="button" class="nx-rel-sel-btn" @click="selectStrongUnifiedResults()"
+                            title="Vybrať len presné a silné zhody (≥ 80 %)">
+                            <span class="material-icons-round" style="font-size:13px;color:#a78bfa;">verified</span>
+                            <span>TOP ≥80%</span>
+                        </button>
+                        <button type="button" class="nx-rel-sel-btn" @click="selectHdUnifiedResults()"
+                            title="Vybrať všetky overené HD videá (720p+)">
+                            <span class="material-icons-round" style="font-size:13px;color:#22d3ee;">hd</span>
+                            <span>HD (720p+)</span>
+                        </button>
+                        <button type="button" class="nx-rel-sel-btn" @click="selectAllExternalUnifiedResults()"
+                            title="Vybrať všetky importovateľné externé výsledky naprieč filtrami">
+                            <span class="material-icons-round" style="font-size:13px;color:#34d399;">select_all</span>
+                            <span x-text="`Všetky (${unifiedFacetCount('external')})`"></span>
+                        </button>
+                        <button type="button" class="nx-rel-sel-btn"
+                            x-show="galleryRelatedImageSelection.length > 0"
+                            @click="galleryCbirClearSelection()"
+                            style="color:#fca5a5;border-color:rgba(248,113,113,.3);">
+                            <span class="material-icons-round" style="font-size:13px;">deselect</span>
+                            <span>Zrušiť výber</span>
+                        </button>
+                    </div>
+                    <div class="nx-rel-select-group" x-show="galleryRelatedImageSelection.length > 0">
+                        <span style="font-size:11px;color:#94a3b8;" x-text="`Vybrané: ${galleryRelatedImageSelection.length}`"></span>
+                        <button type="button" class="btn-primary" style="padding:4px 11px;font-size:11px;"
+                            @click="galleryImportSelectedImageResults()"
+                            :disabled="galleryRelatedImageImportingSelected">
+                            <span class="material-icons-round" style="font-size:14px;">download</span>
+                            <span x-text="galleryRelatedImageImportingSelected ? 'Importujem...' : `Importovať (${galleryRelatedImageSelection.length})`"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Prázdny / Skeleton stav -->
+                <div x-show="galleryRelatedUnifiedLoading && unifiedVisibleResults().length === 0" class="nx-rel-grid">
+                    <template x-for="n in 8" :key="'un-skel-'+n">
+                        <div class="nx-rel-card" style="opacity:.6;">
+                            <div class="nx-rel-card-thumb rel-skel-box"></div>
+                            <div class="nx-rel-card-body">
+                                <div class="rel-skel-line"></div>
+                                <div class="rel-skel-line short"></div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div x-show="!galleryRelatedUnifiedLoading && unifiedVisibleResults().length === 0"
+                    style="text-align:center;padding:70px 20px;color:#94a3b8;display:flex;flex-direction:column;align-items:center;gap:10px;">
+                    <span class="material-icons-round" style="font-size:44px;color:#475569;">search_off</span>
+                    <strong style="color:#e2e8f0;" x-text="galleryRelatedImageError || 'Žiadne výsledky pre aktuálne filtre'"></strong>
+                    <span style="font-size:12px;">Skús spustiť ✨ AI Analýzu, zmeniť režim alebo uvoľniť filtre.</span>
+                </div>
+
+                <!-- Hlavný Grid výsledkov -->
+                <div class="nx-rel-grid" x-show="unifiedVisibleResults().length > 0">
+                    <template x-for="item in unifiedVisibleResults()" :key="'uitem-'+galleryCbirResultKey(item)">
+                        <article class="nx-rel-card"
+                            :class="{ 'is-selected': galleryCbirIsSelected(item) }"
+                            x-data="{ hover: false }"
+                            @mouseenter="hover = true; relatedHoverPrefetch(item)"
+                            @mouseleave="hover = false; relatedHoverCancel()">
+                            <div class="nx-rel-card-thumb">
+                                <a :href="item.is_library ? '#' : item.url"
+                                    @click="if (item.is_library) { $event.preventDefault(); playUnifiedResult(item); }"
+                                    target="_blank" rel="noopener noreferrer"
+                                    style="display:block;width:100%;height:100%;">
+                                    <img :src="item.thumbnail ? proxifyUrl(item.thumbnail) : '/static/placeholder.jpg'"
+                                        @error="$event.target.src='/static/placeholder.jpg'">
+                                    <video x-show="hover && item.preview_url" x-cloak muted loop autoplay playsinline
+                                        :src="hover && item.preview_url ? proxifyUrl(item.preview_url) : ''"></video>
+                                </a>
+
+                                <button type="button"
+                                    class="nx-rel-thumb-playbtn"
+                                    :class="{ 'resolving': item._resolving }"
+                                    x-show="item.is_library || item.importability !== 'unsupported'"
+                                    @click.stop.prevent="playUnifiedResult(item)"
+                                    title="Prehrať priamo v prehrávači">
+                                    <span class="material-icons-round" x-text="item._resolving ? 'hourglass_top' : 'play_arrow'"></span>
+                                </button>
+
+                                <div class="nx-rel-badge-tl">
+                                    <span class="nx-rel-pill"
+                                        :class="`conf-${item.tier || 'similar'}`"
+                                        x-text="`${item.confidence || 0}%`"></span>
+                                    <span class="nx-rel-pill" x-text="cbirSourceLabel(item.source)"></span>
+                                    <span class="nx-rel-pill"
+                                        x-show="item.importability === 'unsupported'"
+                                        style="background:rgba(148,163,184,.28);color:#cbd5e1;"
+                                        x-text="item.kind === 'image' ? 'Obrázok' : 'Webstránka'"></span>
+                                </div>
+
+                                <div class="nx-rel-badge-tr">
+                                    <button type="button" class="nx-rel-card-iconbtn"
+                                        @click.stop="openUnifiedCompare(item)" title="Porovnať vedľa seba">
+                                        <span class="material-icons-round" style="font-size:15px;">compare</span>
+                                    </button>
+                                    <button type="button" class="nx-rel-card-iconbtn"
+                                        x-show="!item.is_library && item.importability !== 'unsupported'"
+                                        :class="{ 'selected': galleryCbirIsSelected(item) }"
+                                        @click.stop="galleryCbirToggleSelection(item)" title="Vybrať pre hromadnú akciu">
+                                        <span class="material-icons-round" style="font-size:15px;"
+                                            x-text="galleryCbirIsSelected(item) ? 'check' : 'add'"></span>
+                                    </button>
+                                </div>
+
+                                <span class="nx-rel-pill nx-rel-badge-bl" x-show="item.height > 0 || item.quality"
+                                    x-text="item.height >= 2160 ? '4K' : (item.height ? item.height + 'p' : item.quality)"></span>
+                                <span class="nx-rel-pill nx-rel-badge-br" x-show="item.duration > 0"
+                                    x-text="formatDuration(item.duration)"></span>
+                            </div>
+
+                            <div class="nx-rel-card-body">
+                                <div class="nx-rel-card-title" x-text="item.title || item.domain || item.url"></div>
+                                <div class="nx-rel-card-meta">
+                                    <span x-text="cbirResultDomain(item)" x-show="cbirResultDomain(item)"></span>
+                                    <span x-show="item.views > 0" x-text="`${Number(item.views).toLocaleString()} views`"></span>
+                                    <span x-show="item.file_size > 0"
+                                        style="color:#67e8f9;font-weight:700;"
+                                        x-text="formatRelatedFileSize(item.file_size, item.file_size_approx)"></span>
+                                </div>
+                                <div class="nx-rel-reasons">
+                                    <template x-for="(r, ridx) in (item.match_reasons || [])" :key="'mr-'+ridx">
+                                        <span class="nx-rel-reason" :class="`tone-${r.tone || 'slate'}`" x-text="r.label"></span>
+                                    </template>
+                                </div>
+                                <div x-show="(item._alternateVersions || []).length > 0"
+                                    style="margin-top:4px;padding:5px 7px;background:rgba(15,23,42,.65);border:1px solid rgba(34,211,238,.25);border-radius:7px;font-size:10.5px;display:flex;flex-direction:column;gap:4px;">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+                                        <button type="button" class="btn-ghost" style="padding:1px 5px;font-size:10px;color:#67e8f9;"
+                                            @click.stop="item._expandedVersions = !item._expandedVersions">
+                                            <span class="material-icons-round" style="font-size:12px;"
+                                                x-text="item._expandedVersions ? 'expand_less' : 'expand_more'"></span>
+                                            <span x-text="`Potvrdené verzie (+${(item._alternateVersions || []).length})`"></span>
+                                        </button>
+                                        <button type="button" class="btn-ghost" style="padding:1px 5px;font-size:10px;color:#94a3b8;"
+                                            @click.stop="toggleUngroupRelatedVersion(item)"
+                                            title="Zrušiť zoskupenie a zobraziť jednotlivé odkazy samostatne">
+                                            Rozdeliť
+                                        </button>
+                                    </div>
+                                    <div x-show="item._expandedVersions" style="display:flex;flex-direction:column;gap:3px;">
+                                        <template x-for="(alt, aidx) in (item._alternateVersions || [])" :key="'altv-'+aidx">
+                                            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;padding:3px 5px;background:rgba(2,6,23,.55);border-radius:5px;">
+                                                <span style="color:#e2e8f0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                                                    x-text="`${cbirSourceLabel(alt.source)} · ${alt.height ? alt.height + 'p' : 'Video'} · ${formatDuration(alt.duration || 0)}`"></span>
+                                                <div style="display:flex;gap:4px;flex-shrink:0;">
+                                                    <button type="button" class="btn-ghost" style="padding:1px 5px;font-size:10px;"
+                                                        @click.stop="openUnifiedCompare(alt)">Porovnať</button>
+                                                    <a :href="alt.url" target="_blank" rel="noopener noreferrer" class="btn-ghost" style="padding:1px 5px;font-size:10px;">Web ↗</a>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div class="nx-rel-card-actions">
+                                    <button type="button" class="btn-primary"
+                                        x-show="item.is_library || item.importability !== 'unsupported'"
+                                        @click="playUnifiedResult(item)"
+                                        :disabled="Boolean(item._resolving)"
+                                        title="Prehrať priamo v prehrávači Nexusu">
+                                        <span class="material-icons-round" style="font-size:13px;"
+                                            x-text="item._resolving ? 'hourglass_top' : 'play_arrow'"></span>
+                                        <span x-text="item._resolving ? '...' : 'Prehrať'"></span>
+                                    </button>
+                                    <button type="button" class="btn-ghost"
+                                        x-show="!item.is_library && item.importability !== 'unsupported'"
+                                        :disabled="Boolean(item._probing)"
+                                        @click="probeUnifiedItems([item])" title="Overiť rozlíšenie, dĺžku a veľkosť súboru v najvyššej kvalite">
+                                        <span class="material-icons-round" style="font-size:13px;"
+                                            :class="{ 'spin': item._probing }"
+                                            x-text="item._probing ? 'sync' : 'speed'"></span>
+                                        <span x-text="item._probing ? 'Probe...' : (item.probe_ok ? 'Re-Probe' : 'Probe')"></span>
+                                    </button>
+                                    <button type="button" class="btn-ghost"
+                                        @click="stashUnifiedRelatedItem(item)"
+                                        :title="item._stashed ? 'Odložené v kolekcii na neskôr' : 'Odložiť do kolekcie na neskôr (bez importu)'">
+                                        <span class="material-icons-round" style="font-size:13px;"
+                                            x-text="item._stashed ? 'bookmark' : 'bookmark_border'"></span>
+                                        <span x-text="item._stashed ? 'Odložené' : 'Odložiť'"></span>
+                                    </button>
+                                    <button type="button" class="btn-ghost"
+                                        @click="shareUnifiedRelatedItem(item)"
+                                        title="Skopírovať odkaz na zdieľanie">
+                                        <span class="material-icons-round" style="font-size:13px;">share</span>
+                                    </button>
+                                    <a :href="item.url" target="_blank" rel="noopener noreferrer" class="btn-ghost" x-show="!item.is_library">
+                                        <span class="material-icons-round" style="font-size:13px;">open_in_new</span> Web
+                                    </a>
+                                    <button type="button" class="btn-ghost"
+                                        x-show="!item.is_library && item.importability !== 'unsupported'"
+                                        @click="galleryImportImageResult(item)" :disabled="Boolean(item._imported)"
+                                        :class="{ 'nx-btn-imported': item._imported }"
+                                        style="border-color:rgba(6,182,212,.38);color:#67e8f9;">
+                                        <span class="material-icons-round" style="font-size:13px;"
+                                            x-text="item._imported ? 'check' : 'download'"></span>
+                                        <span x-text="item._imported ? 'Pridané' : 'Import'"></span>
+                                    </button>
+                                    <span x-show="!item.is_library && item.importability === 'unsupported'"
+                                        style="font-size:10px;color:#64748b;margin-left:auto;align-self:center;">
+                                        Iba odkaz
+                                    </span>
+                                </div>
+                            </div>
+                        </article>
+                    </template>
+                </div>
+
+                <!-- Plávajúca spodná akčná lišta pre multi-select -->
+                <div class="nx-rel-bulk-bar" x-show="galleryRelatedImageSelection.length > 0">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <strong style="color:#f8fafc;font-size:12px;" x-text="`Vybrané: ${galleryRelatedImageSelection.length}`"></strong>
+                        <button type="button" class="btn-ghost" style="padding:4px 9px;font-size:11px;" @click="galleryCbirSelectVisible()">Vybrať zobrazené</button>
+                        <button type="button" class="btn-ghost" style="padding:4px 9px;font-size:11px;" @click="selectAllExternalUnifiedResults()">Vybrať všetky</button>
+                        <button type="button" class="btn-ghost" style="padding:4px 9px;font-size:11px;" @click="selectHdUnifiedResults()">Len HD+</button>
+                        <button type="button" class="btn-ghost" style="padding:4px 9px;font-size:11px;" @click="galleryCbirClearSelection()">Zrušiť výber</button>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <button type="button" class="btn-ghost" style="padding:6px 11px;font-size:11px;"
+                            @click="stashSelectedUnifiedRelatedItems()">
+                            <span class="material-icons-round" style="font-size:14px;">bookmark_add</span>
+                            <span>Odložiť výber</span>
+                        </button>
+                        <button type="button" class="btn-ghost" style="padding:6px 11px;font-size:11px;"
+                            @click="probeUnifiedItems(galleryCbirSelectedResults())"
+                            :disabled="galleryRelatedProbing">
+                            <span class="material-icons-round" style="font-size:14px;">speed</span>
+                            <span x-text="galleryRelatedProbing ? 'Overujem...' : 'Overiť kvalitu (Probe)'"></span>
+                        </button>
+                        <button type="button" class="btn-primary" style="padding:6px 14px;font-size:12px;"
+                            @click="galleryImportSelectedImageResults()"
+                            :disabled="galleryRelatedImageImportingSelected">
+                            <span class="material-icons-round" style="font-size:15px;">download</span>
+                            <span x-text="galleryRelatedImageImportingSelected ? 'Importujem...' : `Importovať (${galleryRelatedImageSelection.length})`"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Side-by-Side Porovnanie vedľa seba -->
+                <div class="nx-rel-compare-backdrop" x-show="galleryRelatedCompareItem" @click.self="galleryRelatedCompareItem = null">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <strong style="font-size:15px;color:#f8fafc;display:flex;align-items:center;gap:8px;">
+                            <span class="material-icons-round" style="color:#22d3ee;">compare</span>
+                            Porovnanie zdrojového videa a nájdeného výsledku
+                        </strong>
+                        <button type="button" class="btn-ghost" @click="galleryRelatedCompareItem = null">
+                            <span class="material-icons-round">close</span> Zavrieť
+                        </button>
+                    </div>
+                    <template x-if="galleryRelatedCompareItem">
+                        <div style="display:flex;flex-direction:column;gap:10px;">
+                            <div style="padding:8px 12px;border-radius:8px;background:rgba(15,23,42,.85);border:1px solid rgba(56,189,248,.3);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <span class="nx-rel-reason" :class="`tone-${relatedCompareRelationInfo(galleryRelatedCompareItem).tone}`"
+                                        x-text="relatedCompareRelationInfo(galleryRelatedCompareItem).label"></span>
+                                    <span style="font-size:12px;color:#cbd5e1;"
+                                        x-text="relatedCompareRelationInfo(galleryRelatedCompareItem).detail"></span>
+                                </div>
+                                <button type="button" class="btn-ghost" style="padding:3px 9px;font-size:11px;"
+                                    x-show="!galleryRelatedCompareItem.is_library"
+                                    @click="probeUnifiedItems([galleryRelatedCompareItem])">
+                                    <span class="material-icons-round" style="font-size:13px;">speed</span> Overiť dĺžku a kvalitu (Probe)
+                                </button>
+                            </div>
+                            <div class="nx-rel-compare-cols">
+                                <div class="nx-rel-compare-pane">
+                                    <span style="font-size:11px;font-weight:800;color:#67e8f9;text-transform:uppercase;">Originál v knižnici</span>
+                                    <img :src="galleryRelatedVideo?.thumbnail_path ? proxifyUrl(galleryRelatedVideo.thumbnail_path) : '/static/placeholder.jpg'">
+                                    <div x-show="galleryRelatedVideo?.sprite_path" style="margin-top:4px;">
+                                        <span style="font-size:10px;color:#94a3b8;display:block;margin-bottom:2px;">Storyboard (Originál):</span>
+                                        <img :src="galleryRelatedVideo?.sprite_path" style="width:100%;max-height:74px;object-fit:cover;border-radius:6px;border:1px solid rgba(148,163,184,.2);">
+                                    </div>
+                                    <div style="font-size:13px;font-weight:700;color:#f8fafc;" x-text="galleryRelatedVideo?.title || '—'"></div>
+                                    <div style="font-size:12px;color:#94a3b8;"
+                                        x-text="`Dĺžka: ${formatDuration(galleryRelatedVideo?.duration || 0)} · Kvalita: ${galleryRelatedVideo?.height ? galleryRelatedVideo.height + 'p' : 'neznáma'}`"></div>
+                                </div>
+                                <div class="nx-rel-compare-pane">
+                                    <span style="font-size:11px;font-weight:800;color:#c4b5fd;text-transform:uppercase;"
+                                        x-text="`Nájdený výsledok (${cbirSourceLabel(galleryRelatedCompareItem.source)})`"></span>
+                                    <img :src="galleryRelatedCompareItem.thumbnail ? proxifyUrl(galleryRelatedCompareItem.thumbnail) : '/static/placeholder.jpg'">
+                                    <div x-show="galleryRelatedCompareItem.storyboard_url || galleryRelatedCompareItem.sprite_path" style="margin-top:4px;">
+                                        <span style="font-size:10px;color:#94a3b8;display:block;margin-bottom:2px;">Storyboard (Kandidát):</span>
+                                        <img :src="proxifyUrl(galleryRelatedCompareItem.storyboard_url || galleryRelatedCompareItem.sprite_path)" style="width:100%;max-height:74px;object-fit:cover;border-radius:6px;border:1px solid rgba(148,163,184,.2);">
+                                    </div>
+                                    <div style="font-size:13px;font-weight:700;color:#f8fafc;" x-text="galleryRelatedCompareItem.title || galleryRelatedCompareItem.url"></div>
+                                    <div style="font-size:12px;color:#94a3b8;"
+                                        x-text="`Zhoda: ${galleryRelatedCompareItem.confidence || 0}% · Dĺžka: ${formatDuration(galleryRelatedCompareItem.duration || 0)} · Kvalita: ${galleryRelatedCompareItem.height ? galleryRelatedCompareItem.height + 'p' : 'neznáma'}${galleryRelatedCompareItem.file_size ? ' · Veľkosť: ' + formatRelatedFileSize(galleryRelatedCompareItem.file_size, galleryRelatedCompareItem.file_size_approx) : ''}`"></div>
+                                    <div class="nx-rel-reasons">
+                                        <template x-for="(r, ridx) in (galleryRelatedCompareItem.match_reasons || [])" :key="'cmr-'+ridx">
+                                            <span class="nx-rel-reason" :class="`tone-${r.tone || 'slate'}`" x-text="r.label"></span>
+                                        </template>
+                                    </div>
+                                    <div style="display:flex;gap:8px;margin-top:auto;">
+                                        <button type="button" class="btn-primary" style="flex:1;justify-content:center;"
+                                            x-show="galleryRelatedCompareItem.is_library || galleryRelatedCompareItem.importability !== 'unsupported'"
+                                            @click="playUnifiedResult(galleryRelatedCompareItem)">
+                                            <span class="material-icons-round" style="font-size:15px;">play_arrow</span> Prehrať
+                                        </button>
+                                        <a :href="galleryRelatedCompareItem.url" target="_blank" rel="noopener noreferrer" class="btn-ghost"
+                                            x-show="!galleryRelatedCompareItem.is_library" style="flex:1;justify-content:center;">Otvoriť na webe</a>
+                                        <button type="button" class="btn-ghost" style="flex:1;justify-content:center;border-color:rgba(6,182,212,.4);color:#67e8f9;"
+                                            x-show="!galleryRelatedCompareItem.is_library && galleryRelatedCompareItem.importability !== 'unsupported'"
+                                            @click="galleryImportImageResult(galleryRelatedCompareItem)">Importovať</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </section>
+        </div>
+
+        <!-- Interaktívne úchyty na zmenu veľkosti okna (okno + obsah sa proporcionálne škálujú) -->
+        <div class="nx-rel-resize-e" @pointerdown.prevent="startRelatedModalResize($event, 'e')" title="Rozšíriť / zúžiť okno"></div>
+        <div class="nx-rel-resize-s" @pointerdown.prevent="startRelatedModalResize($event, 's')" title="Zvýšiť / znížiť okno"></div>
+        <div class="nx-rel-resize-sw" @pointerdown.prevent="startRelatedModalResize($event, 'sw')" title="Zmeniť veľkosť okna"></div>
+        <div class="nx-rel-resize-se" @pointerdown.prevent="startRelatedModalResize($event, 'se')" @dblclick="resetRelatedModalSize()" title="Potiahni roh pre zmenu veľkosti (2× klik = pôvodná)">
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+                <path d="M11 3L3 11M11 7L7 11M11 10.5L10.5 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<!-- Potvrdzovací dialóg NameThatPorn identifikácie z hlavnej galérie -->
+<div class="modal-wrap" x-show="ntpIdentifyModal && ntpIdentifyModal.open" style="display: none; z-index: 12000;" x-transition.opacity @click.self="ntpIdentifyModal.open = false">
+    <div class="modal-card" style="max-width: 680px; width: 94vw; padding: 18px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+            <strong style="font-size: 15px; color: #f8fafc; display: inline-flex; align-items: center; gap: 8px;">
+                <span class="material-icons-round" style="color: #4ade80;">person_search</span>
+                NameThatPorn · Sedí toto meno k videu?
+            </strong>
+            <button type="button" class="btn-ghost" @click="ntpIdentifyModal.open = false" title="Zavrieť">
+                <span class="material-icons-round">close</span>
+            </button>
+        </div>
+
+        <template x-if="ntpIdentifyModal && ntpIdentifyModal.open">
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <!-- Porovnanie náhľadu videa a najlepšej zhody na NameThatPorn -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div style="background: rgba(15,23,42,.7); border: 1px solid rgba(148,163,184,.2); border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+                        <span style="font-size: 10px; font-weight: 800; color: #67e8f9; text-transform: uppercase;">
+                            Tvoje video
+                            <span x-show="ntpIdentifyModal.data?.thumbnail_generated" style="color: #86efac;">(náhľad vytvorený)</span>
+                        </span>
+                        <img :src="ntpIdentifyModal.video?.thumbnail_path ? proxifyUrl(ntpIdentifyModal.video.thumbnail_path) : '/static/placeholder.jpg'"
+                            style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 7px; background: #020617;">
+                        <div style="font-size: 11.5px; color: #e2e8f0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                            x-text="formatCardTitle(ntpIdentifyModal.video)"></div>
+                    </div>
+
+                    <div style="background: rgba(15,23,42,.7); border: 1px solid rgba(74,222,128,.35); border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+                        <span style="font-size: 10px; font-weight: 800; color: #86efac; text-transform: uppercase;"
+                            x-text="`NameThatPorn (${(ntpIdentifyModal.data?.matches || [])[0]?.visual_score || 0}% zhoda)`"></span>
+                        <img :src="(ntpIdentifyModal.data?.matches || [])[0]?.thumbnail ? proxifyUrl((ntpIdentifyModal.data?.matches || [])[0].thumbnail) : '/static/placeholder.jpg'"
+                            style="width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 7px; background: #020617;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                            <span style="font-size: 11px; color: #cbd5e1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                                x-text="(ntpIdentifyModal.data?.matches || [])[0]?.scene_title || 'Vyriešené vlákno'"></span>
+                            <a x-show="(ntpIdentifyModal.data?.matches || [])[0]?.post_url"
+                                :href="(ntpIdentifyModal.data?.matches || [])[0]?.post_url"
+                                target="_blank" rel="noopener noreferrer"
+                                style="font-size: 11px; color: #67e8f9; white-space: nowrap;">Otvoriť NTP ↗</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nájdené mená na potvrdenie -->
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <span style="font-size: 11.5px; font-weight: 700; color: #cbd5e1;">Zistené mená tvorcov (kliknutím vyber/zruš):</span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        <template x-for="cr in (ntpIdentifyModal.data?.creators || [])" :key="'ntpid-'+cr.name">
+                            <button type="button" class="nx-rel-sel-btn"
+                                :class="{ 'active': (ntpIdentifyModal.selectedModels || []).some(m => m.toLowerCase() === cr.name.toLowerCase()) }"
+                                @click="toggleNtpIdentifyModel(cr.name)">
+                                <span class="material-icons-round" style="font-size: 14px;"
+                                    x-text="(ntpIdentifyModal.selectedModels || []).some(m => m.toLowerCase() === cr.name.toLowerCase()) ? 'check_circle' : 'radio_button_unchecked'"></span>
+                                <strong x-text="cr.name"></strong>
+                                <span x-show="cr.alias" style="color: #38bdf8;" x-text="`@${String(cr.alias || '').replace(/^@/, '')}`"></span>
+                                <span style="color: #a78bfa;" x-text="`${cr.confidence || 80}%`"></span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Voliteľná aktualizácia názvu ak NTP vrátil názov scény -->
+                <label x-show="ntpIdentifyModal.data?.scene_title"
+                    style="display: flex; align-items: flex-start; gap: 8px; font-size: 11.5px; color: #cbd5e1; background: rgba(15,23,42,.55); padding: 8px 10px; border-radius: 8px; cursor: pointer;">
+                    <input type="checkbox" x-model="ntpIdentifyModal.updateTitle" style="margin-top: 2px;">
+                    <span>
+                        <b>Prepísať aj názov videa na:</b>
+                        <span style="color: #93c5fd;" x-text="ntpIdentifyModal.data?.scene_title"></span>
+                    </span>
+                </label>
+
+                <!-- Akčné tlačidlá -->
+                <div style="display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; padding-top: 4px;">
+                    <button type="button" class="btn-ghost" @click="ntpIdentifyModal.open = false">Nie / Zrušiť</button>
+                    <button type="button" class="btn-ghost" @click="openNtpIdentifyInRelatedSearch()"
+                        style="border-color: rgba(6,182,212,.4); color: #67e8f9;">
+                        <span class="material-icons-round" style="font-size: 15px;">hub</span> Otvoriť v Related Search
+                    </button>
+                    <button type="button" class="btn-primary" @click="confirmSaveNtpIdentify()"
+                        :disabled="ntpIdentifyModal.saving || (!(ntpIdentifyModal.selectedModels || []).length && !ntpIdentifyModal.updateTitle)">
+                        <span class="material-icons-round" style="font-size: 15px;">check</span>
+                        <span x-text="ntpIdentifyModal.saving ? 'Ukladám...' : 'Áno, uložiť meno k videu'"></span>
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>

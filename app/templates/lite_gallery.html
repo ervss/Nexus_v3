@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus LITE — Ingest Hub & Live Gallery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="/static/lite_gallery.css?v=2.2">
+    <script src="/static/hls.min.js?v=1.4.12" defer></script>
+    <script src="/static/playback_activity.js?v=20260930_activity_3" defer></script>
+    <script src="/static/lite_gallery.js?v=2.7_mega_hub" defer></script>
+    <script src="/static/modules/mega_hub.js?v=8" defer></script>
+    <link rel="stylesheet" href="/static/mega_hub.css?v=5">
+</head>
+<body>
+    <div class="lite-app">
+        <!-- ======== TOPBAR ======== -->
+        <header class="lite-topbar">
+            <div class="brand-wrap">
+                <a href="/" class="brand-logo">
+                    NEXUS<span class="badge-lite">LITE</span>
+                </a>
+                <div class="pulse-status" title="Server beží na pozadí">
+                    <span class="pulse-dot"></span>
+                    <span class="status-label">Ingest Live</span>
+                </div>
+            </div>
+
+            <div class="search-bar">
+                <span class="material-icons-round search-icon">search</span>
+                <input type="text" id="filter-input" placeholder="Hľadať v knižnici (názov, tagy, batch)..." autocomplete="off">
+                <kbd id="clear-search" class="search-kbd" style="display:none;">ESC</kbd>
+            </div>
+
+            <div class="top-actions">
+                <button type="button" class="btn-action ghost" data-open-mega-hub title="MEGA Hub (Ctrl+M)" aria-keyshortcuts="Control+M">
+                    <span class="material-icons-round">folder_open</span>
+                    <span>MEGA Hub</span>
+                </button>
+                <button id="btn-toggle-import" class="btn-action primary">
+                    <span class="material-icons-round">bolt</span>
+                    <span>Rýchly Import</span>
+                </button>
+                <button id="btn-toggle-jobs" class="btn-action ghost" title="Zobraziť bežiace úlohy">
+                    <span class="material-icons-round">view_timeline</span>
+                    <span id="job-badge" class="badge-counter" style="display:none;">0</span>
+                </button>
+                <button id="btn-refresh" class="btn-action icon-only" title="Obnoviť knižnicu">
+                    <span class="material-icons-round">refresh</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- ======== FAST IMPORT EXPANDABLE PANEL ======== -->
+        <section id="fast-import-panel" class="import-drawer collapsed">
+            <div class="drawer-header">
+                <div class="drawer-title">
+                    <span class="material-icons-round">add_link</span>
+                    <h3>Rýchle vloženie odkazov (Fast Intake)</h3>
+                </div>
+                <button id="btn-close-import" class="btn-close-drawer">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="drawer-body">
+                <textarea id="import-urls" placeholder="Vložte URL adresy (každú na nový riadok)...&#10;Podporované: Bunkr, GoFile, Mega, FapHouse, VK, Eporner, XVideos, PornHub, ..."></textarea>
+                <div class="drawer-controls">
+                    <input type="text" id="import-batch" placeholder="Názov balíčka / batch (voliteľné)">
+                    <button id="btn-submit-import" class="btn-primary-large">
+                        <span class="material-icons-round">cloud_upload</span>
+                        <span>Odoslať do fronty</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======== STATS & LIVE METRICS BAR ======== -->
+        <section class="metrics-bar">
+            <div class="stat-pill">
+                <span class="material-icons-round pill-icon">video_library</span>
+                <div>
+                    <strong id="stat-total">--</strong>
+                    <small>Celkovo videí</small>
+                </div>
+            </div>
+            <div class="stat-pill accent-lime">
+                <span class="material-icons-round pill-icon">today</span>
+                <div>
+                    <strong id="stat-today">--</strong>
+                    <small>Pridané dnes</small>
+                </div>
+            </div>
+            <div class="stat-pill accent-orange" id="queue-stat-card">
+                <span class="material-icons-round pill-icon">hourglass_empty</span>
+                <div>
+                    <strong id="stat-pending">0</strong>
+                    <small>Vo fronte</small>
+                </div>
+            </div>
+            <div class="subbar-nav">
+                <button class="filter-pill active" data-filter="all">Všetky</button>
+                <button class="filter-pill" data-filter="today">Dnes pridané</button>
+                <button class="filter-pill" data-filter="ready">Pripravené</button>
+                <button class="filter-pill" data-filter="pending">Spracováva sa</button>
+                <button class="filter-pill" data-filter="error">Chyby</button>
+            </div>
+            <div class="lite-scope-filters" aria-label="Filtrovanie knižnice">
+                <label>
+                    <span class="material-icons-round">inventory_2</span>
+                    <select id="lite-batch-filter" aria-label="Filtrovať podľa batchu">
+                        <option value="">Všetky batchy</option>
+                    </select>
+                </label>
+                <label>
+                    <span class="material-icons-round">folder_special</span>
+                    <select id="lite-source-board-filter" aria-label="Filtrovať podľa Source Boardu">
+                        <option value="">Všetky Source Boardy</option>
+                    </select>
+                </label>
+                <button id="lite-clear-scope-filters" class="lite-clear-filters" type="button" hidden>Vyčistiť</button>
+            </div>
+            <div class="lite-sort-filters" aria-label="Triedenie a filter kvality">
+                <label>
+                    <span class="material-icons-round">sort</span>
+                    <select id="lite-sort-by" aria-label="Zoradiť podľa">
+                        <option value="date">Najnovšie</option>
+                        <option value="duration">Dĺžka</option>
+                        <option value="size">Veľkosť</option>
+                        <option value="quality">Kvalita</option>
+                    </select>
+                </label>
+                <label>
+                    <span class="material-icons-round">high_quality</span>
+                    <select id="lite-quality-filter" aria-label="Filtrovať podľa kvality">
+                        <option value="">Všetky kvality</option>
+                        <option value="4k">4K</option>
+                        <option value="1080p">1080p+</option>
+                        <option value="720p">720p+</option>
+                        <option value="480p">480p / SD</option>
+                        <option value="hd">HD</option>
+                        <option value="sd">SD</option>
+                    </select>
+                </label>
+                <button id="lite-sort-order" class="lite-sort-order" type="button" title="Zmeniť smer triedenia" aria-label="Zmeniť smer triedenia">Najväčšie</button>
+            </div>
+        </section>
+
+        <!-- ======== LIVE JOBS CONSOLE (EXPANDABLE) ======== -->
+        <section id="jobs-drawer" class="jobs-drawer collapsed">
+            <div class="jobs-head">
+                <h4><span class="material-icons-round">hourglass_top</span> Aktívne úlohy a spracovanie</h4>
+                <span id="jobs-count-text">0 úloh</span>
+            </div>
+            <div id="jobs-list" class="jobs-list">
+                <div class="empty-jobs">Žiadne prebiehajúce úlohy vo fronte.</div>
+            </div>
+        </section>
+
+        <!-- ======== GALLERY CARDS GRID ======== -->
+        <main class="gallery-section">
+            <div id="gallery-grid" class="cards-grid">
+                <!-- Dynamicky generované karty -->
+            </div>
+            <div id="gallery-empty" class="empty-state" style="display: none;">
+                <span class="material-icons-round empty-icon">movie_filter</span>
+                <h3>Žiadne videá</h3>
+                <p>Knižnica je zatiaľ prázdna alebo zadanému filtru nezodpovedá žiadny záznam.</p>
+                <button id="btn-empty-import" class="btn-action primary">Importovať prvé video</button>
+            </div>
+            <div id="gallery-loading" class="loading-state">
+                <div class="spinner"></div>
+                <p>Načítavam karty...</p>
+            </div>
+        </main>
+    </div>
+
+    <aside id="lite-batch-bar" class="lite-batch-bar" hidden aria-live="polite">
+        <strong><span id="lite-selected-count">0</span> označené</strong>
+        <div class="lite-batch-actions">
+            <button type="button" data-lite-action="copy-direct"><span class="material-icons-round">content_copy</span>Copy direct</button>
+            <button type="button" data-lite-action="copy-source"><span class="material-icons-round">link</span>Copy source</button>
+            <button type="button" data-lite-action="refresh_links"><span class="material-icons-round">sync</span>Refresh links</button>
+            <button type="button" data-lite-action="rethumb"><span class="material-icons-round">image</span>Rethumb</button>
+            <button type="button" data-lite-action="favorite"><span class="material-icons-round">favorite</span>Favorite</button>
+            <button type="button" class="danger" data-lite-action="delete"><span class="material-icons-round">delete</span>Delete</button>
+            <button type="button" class="quiet" data-lite-action="clear"><span class="material-icons-round">close</span>Clear</button>
+        </div>
+        <span id="lite-batch-message" class="lite-batch-message"></span>
+    </aside>
+
+    <!-- ======== MODAL VIDEO PLAYER ======== -->
+    <div id="video-modal" class="video-modal hidden">
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-top">
+                <div class="modal-title-wrap">
+                    <span class="material-icons-round">play_circle</span>
+                    <h3 id="modal-video-title">Prehrávanie videa</h3>
+                </div>
+                <div class="modal-tools">
+                    <a id="modal-source-btn" href="#" target="_blank" class="btn-tool" title="Otvoriť originálny zdroj">
+                        <span class="material-icons-round">open_in_new</span>
+                    </a>
+                    <button id="modal-close-btn" class="btn-tool" title="Zavrieť (Esc)">
+                        <span class="material-icons-round">close</span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-player-wrap">
+                <video id="lite-player" controls autoplay playsinline preload="auto">
+                    Váš prehliadač nepodporuje HTML5 video.
+                </video>
+            </div>
+            <div class="modal-footer">
+                <div class="modal-meta-row">
+                    <span id="modal-quality-badge" class="meta-badge">HD</span>
+                    <span id="modal-duration-badge" class="meta-badge">--:--</span>
+                    <span id="modal-size-badge" class="meta-badge">-- MB</span>
+                    <span id="modal-batch-badge" class="meta-badge sub">Batch</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include "partials/mega_hub.html" %}
+</body>
+</html>

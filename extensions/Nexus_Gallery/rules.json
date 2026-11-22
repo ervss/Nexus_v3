@@ -1,0 +1,283 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "Cross-Origin-Resource-Policy",
+          "operation": "remove"
+        },
+        {
+          "header": "Cross-Origin-Embedder-Policy",
+          "operation": "remove"
+        }
+      ]
+    },
+    "condition": {
+      "resourceTypes": [
+        "image",
+        "xmlhttprequest",
+        "media"
+      ],
+      "urlFilter": "||58img.top/*"
+    }
+  },
+  {
+    "id": 2,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "Cross-Origin-Resource-Policy",
+          "operation": "remove"
+        },
+        {
+          "header": "Cross-Origin-Embedder-Policy",
+          "operation": "remove"
+        }
+      ]
+    },
+    "condition": {
+      "resourceTypes": [
+        "image",
+        "xmlhttprequest",
+        "media"
+      ],
+      "urlFilter": "||hornysimp*"
+    }
+  },
+  {
+    "id": 3,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "Cross-Origin-Resource-Policy",
+          "operation": "remove"
+        },
+        {
+          "header": "Cross-Origin-Embedder-Policy",
+          "operation": "remove"
+        }
+      ]
+    },
+    "condition": {
+      "resourceTypes": [
+        "xmlhttprequest",
+        "media",
+        "image"
+      ],
+      "urlFilter": "||nsfwclips.co/*"
+    }
+  },
+  {
+    "id": 4,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "Cross-Origin-Resource-Policy",
+          "operation": "remove"
+        }
+      ]
+    },
+    "condition": {
+      "resourceTypes": [
+        "xmlhttprequest"
+      ],
+      "regexFilter": "(streamsb|dood|filemoon)\\."
+    }
+  },
+  {
+    "id": 5,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://www.erome.com/"
+        },
+        {
+          "header": "Origin",
+          "operation": "set",
+          "value": "https://www.erome.com"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://*.erome.com/*",
+      "resourceTypes": [
+        "xmlhttprequest",
+        "media",
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 6,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "Access-Control-Allow-Origin",
+          "operation": "set",
+          "value": "*"
+        },
+        {
+          "header": "Access-Control-Allow-Methods",
+          "operation": "set",
+          "value": "GET, POST, OPTIONS"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://*.vidara.so/*",
+      "resourceTypes": [
+        "xmlhttprequest",
+        "media"
+      ]
+    }
+  },
+  {
+    "id": 7,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://sxyprn.net/"
+        },
+        {
+          "header": "Origin",
+          "operation": "set",
+          "value": "https://sxyprn.net"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://*.vidara.so/*",
+      "resourceTypes": [
+        "xmlhttprequest",
+        "media"
+      ]
+    }
+  },
+  {
+    "id": 8,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "Access-Control-Allow-Origin",
+          "operation": "set",
+          "value": "*"
+        },
+        {
+          "header": "Access-Control-Allow-Methods",
+          "operation": "set",
+          "value": "GET, POST, OPTIONS"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://s.bunkr.ru/*",
+      "resourceTypes": [
+        "xmlhttprequest"
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://baddiehub.com/"
+        },
+        {
+          "header": "Origin",
+          "operation": "set",
+          "value": "https://baddiehub.com"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://*.baddiehub.com/*",
+      "resourceTypes": [
+        "xmlhttprequest",
+        "media",
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 10,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://faphouse.com/"
+        },
+        {
+          "header": "Origin",
+          "operation": "set",
+          "value": "https://faphouse.com"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://*.flixcdn.com/*",
+      "resourceTypes": [
+        "xmlhttprequest",
+        "media",
+        "image",
+        "main_frame",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 11,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://leakedzone.com/"
+        },
+        {
+          "header": "Origin",
+          "operation": "set",
+          "value": "https://leakedzone.com"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://*.b-cdn.net/*",
+      "resourceTypes": [
+        "xmlhttprequest",
+        "media",
+        "image"
+      ]
+    }
+  }
+]

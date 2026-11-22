@@ -1,0 +1,47 @@
+Áno, Nexus môže byť veľmi rýchly. 🚀 A keďže je pre teba rýchlosť jedna z hlavných priorít, v pláne v2.3 by som ešte upravil niekoľko vecí.
+
+Aktuálna architektúra je dobrá, ale zatiaľ nezaručuje maximálne rýchle spustenie videa.
+
+## Akú rýchlosť by som cielil?
+
+Video s už známou URL
+
+Cieľ do 0,5 s
+
+Bežný zdroj cez extraktor
+
+Cieľ 0,5–2 s
+
+Komplikovanejší zdroj
+
+Cieľ 2–5 s
+
+Orientačné výkonnostné ciele pre začiatok prehrávania, nie garantované časy. Závisia aj od zdrojového webu, siete a bufferovania.
+
+## Čo by som ešte pridal do plánu v2.3
+
+1\. FAST PATH: Ak Quantum Search už pozná platnú stream URL, okamžite spustiť prehrávanie bez opätovného volania extraktora.
+
+2\. Inteligentná cache: Ukladať krátkodobo vyriešené streamy a metadáta. Pri opätovnom otvorení neextrahovať zbytočne to isté video. Rešpektovať expiráciu tokenov.
+
+3\. Adaptívne proxy: Verejné MP4 prehrávať priamo. Proxy používať iba tam, kde je potrebná. To už plán čiastočne obsahuje.
+
+4\. Rýchly resolver: Aktuálny celkový limit 20 sekúnd je dobrý ako núdzová hranica, ale nie ako bežná odozva. Preferoval by som veľmi rýchly prvý pokus a až potom postupné fallbacky.
+
+5\. Optimalizácia Split-Screenu: Pri 8–12 videách používať asynchrónne streamovanie, zdieľané HTTP spojenia a riadené načítavanie, aby sa server zbytočne nepreťažil.
+
+6\. Okamžitý seek: Správna podpora HTTP Range (206) a HLS segmentov, aby posun vo videu nezačínal celé sťahovanie odznova.
+
+### Ešte jedna dôležitá vec
+
+V pláne máš kaskádu:
+
+`Extractor 7 s → HubAdapter 7 s → Smart Router 6 s → HTTP Probe`
+
+Ak všetky prvé tri kroky vyčerpajú svoje limity, zostane 0 sekúnd pre HTTP Probe. To treba upraviť, aby bol globálny limit skutočne funkčný.
+
+Môj návrh: Do finálneho plánu by som pridal samostatnú fázu Performance & Ultra-Fast Playback, vrátane merania času od kliknutia po prvý obraz (`time-to-first-frame`) a odozvy pri seeku.
+
+A ešte: zapnuté TLS overovanie by som kvôli rýchlosti nevypínal. Pri správnom opätovnom používaní spojení by nemalo predstavovať zásadnú brzdu.
+
+Chcem, aby cieľ Nexusu bol jednoduchý: klikneš na ▶ a video sa spustí čo najskôr, bez zbytočného čakania na resolver. To je dosiahnuteľný návrhový cieľ, ale reálnu rýchlosť bude treba potvrdiť meraním na konkrétnych zdrojoch.

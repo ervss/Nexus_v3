@@ -1,0 +1,12 @@
+<!doctype html><meta charset="utf-8"><title>Test výrezu</title>
+<style>body{font:20px sans-serif;background:#eef1f7;margin:0}article{position:absolute;left:100px;top:180px;width:480px;height:240px;background:#fff;padding:20px;border:2px solid #7655c9}#preview{max-width:600px}#result{position:absolute;left:750px;top:170px;background:white;padding:20px}</style>
+<article><h2>Testovacia karta</h2><p>Vyber iba túto oblasť.</p><button>Play</button></article>
+<div id="result"><button id="open">Otvoriť anotátor</button><p id="receipt"></p><img id="preview"></div>
+<script>
+let listener;
+window.chrome={storage:{local:{get:async()=>({}),set:async()=>{}}},runtime:{onMessage:{addListener(fn){listener=fn}},async sendMessage(message){
+if(message.type==='NLA_CAPTURE_VISIBLE'){
+const c=document.createElement('canvas');c.width=innerWidth;c.height=innerHeight;const x=c.getContext('2d');x.fillStyle='#eef1f7';x.fillRect(0,0,c.width,c.height);x.fillStyle='#fff';x.fillRect(100,180,524,284);x.fillStyle='#171923';x.font='bold 28px sans-serif';x.fillText('Testovacia karta',120,240);x.font='20px sans-serif';x.fillText('Vyber iba túto oblasť.',120,285);x.fillText('▶ Play',120,330);return {ok:true,dataUrl:c.toDataURL('image/png')};
+}if(message.type==='NLA_SAVE_ANNOTATION'){document.querySelector('#preview').src=message.dataUrl;document.querySelector('#receipt').textContent='Výrez vytvorený (testovací screenshot; schránka simulovaná).';return {ok:true,copied:true};}}}};
+document.querySelector('#open').onclick=()=>listener({type:'NLA_TOGGLE'},{},()=>{});
+</script><script src="export.js"></script><script src="content.js"></script>

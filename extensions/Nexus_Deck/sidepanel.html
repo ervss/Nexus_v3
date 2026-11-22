@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="sk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nexus Deck</title>
+    <link rel="stylesheet" href="fonts.css" />
+    <link rel="stylesheet" href="tokens.css" />
+    <link rel="stylesheet" href="deck.css" />
+    <link rel="stylesheet" href="player.css" />
+    <link rel="icon" href="icons/icon32.png" />
+  </head>
+  <body>
+    <div class="deck">
+      <div class="rail" id="rail"></div>
+      <header class="top">
+        <div class="brand">
+          <span id="logo"></span>
+          <div>
+            <p class="mark">Nexus Deck</p>
+            <p class="sub" id="conn-sub">Pripájam sa…</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <button class="ghost" id="btn-offline-flush" type="button" hidden title="Odoslať čakajúce importy po obnovení servera">Fronta (0)</button>
+          <button class="icon-btn" id="btn-refresh" type="button" aria-label="Obnoviť"></button>
+          <button class="icon-btn" id="btn-settings" type="button" aria-label="Nastavenia"></button>
+        </div>
+      </header>
+
+      <section class="now" aria-live="polite">
+        <p class="label">Práve na dashboarde</p>
+        <h1 class="now-title" id="now-title">Pripájam sa</h1>
+        <p class="now-sub" id="now-sub">Hľadám Nexus Gallery.</p>
+        <div class="bar-row">
+          <div class="bar" aria-hidden="true"><span id="now-bar"></span></div>
+          <span class="pct" id="now-pct"></span>
+        </div>
+        <p class="now-meta" id="now-meta"></p>
+      </section>
+
+      <form class="composer" id="composer">
+        <label class="section-label" for="urls">Odoslať do galérie</label>
+        <textarea id="urls" spellcheck="false" placeholder="https://cdn…/tvorca/video.mp4&#10;https://cdn…/tvorca/video.mp4?token=…&#10;https://studio…/tvorca/prispevok"></textarea>
+        <div class="composer-actions">
+          <button class="ghost" id="btn-tab" type="button"></button>
+          <button class="ghost" id="btn-page" type="button"></button>
+        </div>
+        <ul class="preflight" id="preflight"></ul>
+        <button class="primary" id="btn-send" type="submit">Vlož adresu</button>
+        <p class="note" id="composer-note"></p>
+        <p class="hint">Server pri importe preverí duplicitné odkazy. <kbd>Ctrl</kbd> + <kbd>Enter</kbd></p>
+      </form>
+
+      <nav class="tabs" aria-label="Pohľady">
+        <button type="button" data-tab="imports" class="on">Importy <span class="count"></span></button>
+        <button type="button" data-tab="play">Prehrať <span class="count"></span></button>
+        <button type="button" data-tab="log">Denník <span class="count"></span></button>
+      </nav>
+
+      <section id="pane-imports">
+        <input class="filter" id="filter" type="search" placeholder="Filtrovať podľa názvu alebo adresy" aria-label="Filtrovať importy" />
+        <div id="import-list"></div>
+      </section>
+
+      <section id="pane-play" hidden>
+        <div class="composer-actions">
+          <button class="ghost" id="play-all" type="button">Prehrať všetko</button>
+          <button class="ghost" id="queue-reset" type="button">Obnoviť poradie</button>
+          <button class="ghost" id="queue-clear" type="button">Vyprázdniť</button>
+        </div>
+        <div class="player-shell" id="player-shell" hidden>
+          <div class="stage-media" id="stage-media">
+            <div class="media-surface" id="media-surface"><video id="player-video" playsinline crossorigin="anonymous"></video><canvas id="player-canvas" hidden></canvas></div>
+            <iframe id="player-frame" hidden allow="autoplay; fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" title="Prehrávač"></iframe>
+            <div class="fallback" id="player-fallback" hidden></div>
+            <div class="zoom-badge" id="zoom-badge" hidden>1.0×</div>
+            <button class="player-mode" id="player-mode" type="button" title="Prepnúť FIT/FILL">FIT</button>
+            <div class="radar-map" id="radar-map" hidden title="Kliknutím posuň výrez"><span id="radar-box"></span></div>
+            <div class="stage-hud"><span id="player-time">0:00 / 0:00</span><button id="player-expand" type="button" title="Veľký prehrávač">⛶</button></div>
+            <input id="player-seek" class="player-seek" type="range" min="0" max="0" step="0.1" value="0" aria-label="Pozícia videa" />
+          </div>
+          <div class="player-meta">
+            <h2 id="player-title"></h2>
+            <p class="row-sub" id="player-sub"></p>
+          </div>
+          <div class="player-controls">
+            <button class="icon-btn" id="play-prev" type="button" aria-label="Predchádzajúce"></button>
+            <button class="ghost" id="player-toggle" type="button">Prehrať</button>
+            <button class="icon-btn" id="play-next" type="button" aria-label="Ďalšie"></button>
+            <button class="ghost" id="player-drawer-toggle" type="button" aria-expanded="false" aria-controls="player-drawer">Ovládanie ▾</button>
+            <button class="ghost" id="player-download" type="button">Stiahnuť</button>
+            <a class="ghost" id="open-source" href="" target="_blank" rel="noreferrer">Zdroj</a>
+            <label class="sync" style="display:none"><input id="sync" type="checkbox" /> S dashboardom</label>
+          </div>
+          <div id="player-drawer" class="player-drawer" hidden>
+            <div class="player-grid">
+              <label>Rýchlosť <select id="player-rate"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option></select></label>
+              <label>Hlasitosť <input id="player-volume" type="range" min="0" max="1" step="0.05" value="0.8" /></label>
+              <label>Kvalita <select id="player-quality"><option value="-1">Auto</option></select></label>
+            </div>
+            <div class="player-buttons"><button id="player-loop" type="button" aria-pressed="false">Slučka</button><button id="player-ab" type="button">A–B</button><button id="player-mute" type="button" aria-pressed="false">Stlmiť</button><button id="player-fit" type="button">FILL</button><button id="player-fx" type="button" aria-pressed="false">FX</button></div>
+            <fieldset class="player-scan"><legend>Výrez a posun</legend>
+              <div class="player-buttons"><button type="button" data-pan-preset="L">◂ Vľavo</button><button type="button" data-pan-preset="C">● Stred</button><button type="button" data-pan-preset="R">Vpravo ▸</button><button id="player-reset" type="button">Reset</button></div>
+              <label>Zoom <input id="player-zoom" type="range" min="1" max="4" step="0.05" value="1" /></label>
+              <label>Vodorovne <input id="player-pan-x" type="range" min="-100" max="100" step="1" value="0" /></label>
+              <label>Zvisle <input id="player-pan-y" type="range" min="-100" max="100" step="1" value="0" /></label>
+              <label>Otočenie <select id="player-rotation"><option value="0">0°</option><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></label>
+              <button id="player-mirror" type="button" aria-pressed="false">Zrkadliť</button>
+            </fieldset>
+            <details class="player-tuning"><summary>Obraz · jas, farba, ostrosť</summary>
+              <label>Jas <input id="player-brightness" type="range" min="0.5" max="1.5" step="0.05" value="1" /></label>
+              <label>Kontrast <input id="player-contrast" type="range" min="0.5" max="1.7" step="0.05" value="1" /></label>
+              <label>Sýtosť <input id="player-saturation" type="range" min="0" max="2" step="0.05" value="1" /></label>
+              <label>Odtieň <input id="player-hue" type="range" min="-180" max="180" step="1" value="0" /></label>
+              <label>Zjemnenie <input id="player-blur" type="range" min="0" max="3" step="0.1" value="0" /></label>
+              <label>Ostrosť <input id="player-sharpness" type="range" min="0" max="1" step="0.05" value="0.25" /></label>
+            </details>
+          </div>
+        </div>
+        <details class="playback-history"><summary>História prehrávania <span id="history-count">0</span></summary><ol id="history-list"></ol><button id="history-clear" type="button">Vymazať históriu</button></details>
+        <div id="queue"></div>
+      </section>
+
+      <section id="pane-log" hidden>
+        <ul class="log" id="log-list"></ul>
+      </section>
+    </div>
+
+    <div class="sheet" id="settings" hidden>
+      <div class="sheet-card">
+        <div class="sheet-head">
+          <h2>Nastavenia</h2>
+          <button class="icon-btn" id="sheet-close" type="button" aria-label="Zavrieť"></button>
+        </div>
+        <p class="hint">Deck hovorí s dashboardom Nexus Gallery. Import si pamätá adresu a názov, súbor nekopíruje.</p>
+        <form id="settings-form">
+          <label class="field">
+            <span>Adresa dashboardu</span>
+            <input id="api-base" type="url" required spellcheck="false" />
+          </label>
+          <label class="field">
+            <span>Token, ak ho worker vyžaduje</span>
+            <input id="api-token" type="password" autocomplete="off" spellcheck="false" />
+          </label>
+          <div class="sheet-actions">
+            <button class="primary" type="submit">Uložiť</button>
+            <button class="ghost" id="btn-test" type="button">Otestovať</button>
+          </div>
+        </form>
+        <p class="note" id="settings-msg"></p>
+      </div>
+    </div>
+    <script src="vendor/hls.min.js"></script>
+    <script type="module" src="sidepanel.js"></script>
+  </body>
+</html>

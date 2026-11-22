@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "CamWhores URL Fixer",
+  "version": "1.2.0",
+  "description": "Strips language subdomains, decodes Linkvertise dynamic?r= Base64 links locally, rotates Speedy-Links bypass providers (bypass.city / bypass.vip / keybypass), and normalizes XVideos, CamWhores, Bunkr, SimpCity, Filester, Social Media Girls, and VK mirrors.",
+  "permissions": ["storage", "tabs", "webNavigation", "declarativeNetRequest", "offscreen"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "xvideos_redirects",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "CamWhores URL Fixer"
+  }
+}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Importer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .checkbox-container {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Select Videos to Import</h2>
+    <div id="video-list"></div>
+    <button onclick="submitSelections()">Import Selected</button>
+
+    <script>
+        const videoList = document.getElementById('video-list');
+        const selectedVideos = [];
+
+        function displayVideos(videos) {
+            videos.forEach(video => {
+                const checkboxContainer = document.createElement('div');
+                checkboxContainer.className = 'checkbox-container';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = video;
+                checkbox.onchange = () => {
+                    if (checkbox.checked) {
+                        selectedVideos.push(checkbox.value);
+                    } else {
+                        selectedVideos.splice(selectedVideos.indexOf(checkbox.value), 1);
+                    }
+                };
+                const label = document.createElement('label');
+                label.htmlFor = checkbox.id;
+                label.textContent = video;
+                checkboxContainer.appendChild(checkbox);
+                checkboxContainer.appendChild(label);
+                videoList.appendChild(checkboxContainer);
+            });
+        }
+
+        function submitSelections() {
+            // Here you would call a backend endpoint to import the selected videos
+            console.log('Selected Videos:', selectedVideos);
+            window.close();
+        }
+
+        // Example data (replace with actual video list from scan_mega_folder)
+        const exampleVideos = [
+            'video1.mp4',
+            'video2.avi',
+            'video3.mkv'
+        ];
+        displayVideos(exampleVideos);
+    </script>
+</body>
+</html>

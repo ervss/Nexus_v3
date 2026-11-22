@@ -1,0 +1,81 @@
+/* Discovery Hub's V1 skin. Functionality and the classic theme remain shared. */
+body.ui-v1 .dhub-overlay {
+    background: rgba(4, 5, 12, .78);
+    backdrop-filter: blur(16px) saturate(120%);
+}
+body.ui-v1 .dhub-container {
+    color: #e7eaf5;
+    border: 1px solid rgba(198, 204, 238, .20);
+    border-radius: 20px;
+    background: radial-gradient(ellipse at 52% -20%, rgba(119, 80, 173, .22), transparent 48%),
+        linear-gradient(160deg, rgba(27, 30, 49, .98), rgba(12, 14, 24, .99) 62%);
+    box-shadow: inset 0 1px rgba(255,255,255,.10), 0 32px 90px rgba(0,0,0,.65);
+}
+body.ui-v1 .dhub-header {
+    gap: 10px;
+    padding: 14px 18px;
+    background: linear-gradient(90deg, rgba(34,37,58,.92), rgba(19,21,36,.90));
+    border-color: rgba(190,198,229,.12);
+}
+body.ui-v1 .dhub-logo { color: #f5f3ff; letter-spacing: .01em; }
+body.ui-v1 .dhub-logo .material-icons-round { background: linear-gradient(135deg,#d8c4ff,#ffac77); -webkit-background-clip: text; }
+body.ui-v1 .dhub-logo-accent { color: #d0b8ff; }
+body.ui-v1 .dhub-search { min-width: 140px; }
+body.ui-v1 .dhub-search input {
+    box-sizing: border-box; background: rgba(7,9,18,.70); border-color: rgba(190,198,229,.18);
+    color: #f5f4ff; box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+body.ui-v1 .dhub-search input::placeholder { color: #929bb3; }
+body.ui-v1 .dhub-search .material-icons-round { color: #a5afc9; }
+body.ui-v1 .dhub-search input:focus, body.ui-v1 .dhub-control :is(input,select):focus {
+    border-color: #af98fa; box-shadow: 0 0 0 3px rgba(169,141,255,.13); outline: none;
+}
+body.ui-v1 .dhub-header-btn, body.ui-v1 .dhub-filter-reset,
+body.ui-v1 .dhub-sel-btn, body.ui-v1 .dhub-btn-loadmore {
+    border-radius: 10px; border: 1px solid rgba(195,204,235,.18);
+    color: #dfe4f4; background: linear-gradient(180deg,rgba(49,52,72,.92),rgba(23,25,39,.96));
+    box-shadow: inset 0 1px rgba(255,255,255,.08);
+}
+body.ui-v1 .dhub-header-btn-search, body.ui-v1 .dhub-btn-loadmore {
+    color: #211825; border-color: rgba(255,212,176,.65);
+    background: linear-gradient(135deg,#ffe0bf,#ffab73); font-weight: 800;
+}
+body.ui-v1 .dhub-header-btn-import, body.ui-v1 .dhub-sel-btn-import { color: #a4f0cf; border-color: rgba(104,224,170,.30) !important; background: rgba(36,135,94,.16); }
+body.ui-v1 .dhub-header-btn-enrich { color: #d3c3ff; border-color: rgba(180,150,255,.30) !important; background: rgba(116,83,186,.16); }
+body.ui-v1 .dhub-header-btn:hover:not(:disabled), body.ui-v1 .dhub-filter-reset:hover, body.ui-v1 .dhub-sel-btn:hover { filter: brightness(1.18); }
+body.ui-v1 .dhub-header-btn:focus-visible, body.ui-v1 .dhub-mode-tab:focus-visible, body.ui-v1 .dhub-src-pill:focus-visible, body.ui-v1 .dhub-card button:focus-visible { outline: 2px solid #d4b9ff; outline-offset: 2px; }
+body.ui-v1 .dhub-mode-tabs { background: rgba(13,15,26,.55); border-color: rgba(196,204,238,.12); gap: 6px; padding: 5px 18px 0; }
+body.ui-v1 .dhub-mode-tab { color: #a4aec5; padding: 11px 14px; border-bottom-width: 2px; }
+body.ui-v1 .dhub-mode-tab:hover { color: #f1efff; background: rgba(191,177,255,.06); }
+body.ui-v1 .dhub-mode-tab.active { color: #f4e7ff; border-bottom-color: #c4a5ff; background: linear-gradient(0deg,rgba(154,118,231,.18),transparent); }
+body.ui-v1 .dhub-src-pill { color: #aab3c9; background: rgba(255,255,255,.035); border-color: rgba(197,205,232,.14); }
+body.ui-v1 .dhub-src-pill.active { color: #e0d3ff; border-color: rgba(188,162,255,.45); background: rgba(145,111,211,.20); }
+body.ui-v1 .dhub-controls, body.ui-v1 .dhub-history, body.ui-v1 .dhub-footer { background: rgba(9,11,21,.46); border-color: rgba(190,198,229,.11); }
+body.ui-v1 .dhub-control { color: #a8b2c8; }
+body.ui-v1 .dhub-control select, body.ui-v1 .dhub-control input, body.ui-v1 .dhub-history-filters input {
+    color: #edf0fb; background: rgba(22,25,40,.94); border: 1px solid rgba(194,204,237,.18); border-radius: 9px;
+}
+body.ui-v1 .dhub-control select option { background: #191c2c; color: #f2f2fa; }
+body.ui-v1 .dhub-body { scrollbar-color: rgba(184,166,242,.42) transparent; }
+body.ui-v1 .dhub-card {
+    background: linear-gradient(160deg,rgba(34,37,56,.96),rgba(17,19,32,.98));
+    border: 1px solid rgba(188,199,232,.15); border-radius: 14px;
+    box-shadow: inset 0 1px rgba(255,255,255,.06), 0 8px 24px rgba(0,0,0,.22);
+}
+body.ui-v1 .dhub-card:hover { border-color: rgba(203,177,255,.55); box-shadow: 0 12px 30px rgba(0,0,0,.38), 0 0 18px rgba(141,105,210,.1); }
+body.ui-v1 .dhub-card-title, body.ui-v1 .dhub-state-title { color: #f0eefb; }
+body.ui-v1 .dhub-state-sub, body.ui-v1 .dhub-card-subtitle { color: #aab3c9; }
+body.ui-v1 .dhub-card.is-selected { border-color: #c7aaff !important; }
+body.ui-v1 .dhub-selection-bar { background: rgba(135,104,201,.18); border-color: rgba(190,160,255,.28); }
+body.ui-v1 .dhub-history-row { background: rgba(31,34,52,.75); border-color: rgba(192,200,230,.12); }
+body.ui-v1 .dhub-btn-import:not(.is-done):not(:disabled) { background: linear-gradient(135deg,#a77cf4,#8863e9); color: white; }
+body.ui-v1 .dhub-btn-open, body.ui-v1 .dhub-btn-browse, body.ui-v1 .dhub-btn-refetch, body.ui-v1 .dhub-btn-play { background: rgba(49,52,72,.8); border-color: rgba(190,198,229,.2); color: #e1e6f5; }
+@media (max-width: 1100px) {
+    body.ui-v1 .dhub-header { flex-wrap: wrap; }
+    body.ui-v1 .dhub-search { flex: 1 1 260px; }
+}
+/* Skip offscreen card layout and painting while retaining selection and scroll. */
+.dhub-grid > .dhub-card {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto 260px;
+}

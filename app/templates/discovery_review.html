@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Discovered Videos - Nexus Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/theme.css?v=nx_v2">
+    <link rel="stylesheet" href="/static/app_shell.css?v=nx_v2">
+    <script src="https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
+    <script src="/static/app_shell.js?v=nx_v2" defer></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .review-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: var(--accent-color, #a855f7);
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-color, #a855f7);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .video-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .video-card.selected {
+            border-color: var(--accent-color, #a855f7);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+        }
+
+        .video-card.imported {
+            opacity: 0.6;
+            border-color: #22c55e;
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #1a1a2e;
+            display: block;
+            opacity: 0;
+            transition: opacity 0.18s ease;
+        }
+
+        .video-thumbnail.loaded {
+            opacity: 1;
+        }
+
+        .thumb-shell {
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(40, 33, 74, 0.95) 0%, rgba(16, 18, 24, 0.95) 100%);
+        }
+
+        .thumb-shell.loading {
+            animation: reviewPulse 1.1s ease-in-out infinite alternate;
+        }
+
+        @keyframes reviewPulse {
+            from { opacity: 0.72; }
+            to { opacity: 1; }
+        }
+
+        .video-info {
+            padding: 12px;
+        }
+
+        .video-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            color: white;
+        }
+
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 10px;
+        }
+
+        .checkbox-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 0, 0, 0.75);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            pointer-events: all;
+            transition: background 0.15s, transform 0.12s;
+        }
+
+        .checkbox-overlay:hover {
+            background: rgba(168, 85, 247, 0.55);
+            transform: scale(1.12);
+        }
+
+        .checkbox-overlay input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #a855f7;
+            pointer-events: none;
+        }
+
+        /* Filter bar */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 18px;
+        }
+        .filter-bar select,
+        .filter-bar input[type="text"] {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            color: white;
+            padding: 6px 12px;
+            font-size: 0.82rem;
+            outline: none;
+        }
+        .filter-bar select:focus,
+        .filter-bar input[type="text"]:focus {
+            border-color: #a855f7;
+        }
+        .filter-bar label {
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.65);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+        .filter-bar label input[type="checkbox"] {
+            accent-color: #a855f7;
+        }
+        .filter-stat {
+            margin-left: auto;
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.45);
+        }
+
+        /* Keybinding legend */
+        .kb-legend {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.38);
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+        }
+        .kb-legend kbd {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-size: 0.72rem;
+            font-family: monospace;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .imported-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #22c55e;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .source-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: rgba(168, 85, 247, 0.2);
+            color: var(--accent-color, #a855f7);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-color, #a855f7);
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .empty-state h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .meta-status-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .meta-status-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .meta-progress-track {
+            width: 100%;
+            height: 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .meta-progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #06b6d4 0%, #a855f7 100%);
+            transition: width 0.25s ease;
+        }
+
+        .meta-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.72);
+        }
+
+        .meta-pill {
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+        }
+
+        .video-card-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .mini-btn {
+            border: none;
+            border-radius: 8px;
+            padding: 7px 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .mini-btn-danger {
+            background: rgba(239, 68, 68, 0.16);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .video-card.meta-missing {
+            box-shadow: inset 0 0 0 1px rgba(6, 182, 212, 0.24);
+        }
+
+        .meta-missing-note {
+            font-size: 0.72rem;
+            color: #67e8f9;
+            margin-top: 6px;
+        }
+
+        .video-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+        }
+
+        .video-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            border-color: var(--card-accent, rgba(168, 85, 247, 0.5));
+            box-shadow: 0 12px 30px var(--card-glow, rgba(168, 85, 247, 0.28)), 0 0 15px rgba(6, 182, 212, 0.15);
+        }
+
+        .focused-card {
+            border-color: #ec4899 !important;
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.5), 0 12px 30px var(--card-glow, rgba(168, 85, 247, 0.2)) !important;
+            outline: 2px solid #ec4899 !important;
+            transform: translateY(-4px) scale(1.01);
+        }
+
+        /* Glassmorphic Side Drawer Styles (for performers/other drawers if needed, but updated for related-modal) */
+        .glass-drawer {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 420px;
+            height: 100%;
+            background: rgba(13, 10, 25, 0.95);
+            backdrop-filter: blur(24px) saturate(190%);
+            border-left: 1px solid rgba(168, 85, 247, 0.24);
+            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-y: auto;
+            padding: 30px 24px;
+            color: white;
+        }
+
+        .glass-drawer.open {
+            right: 0;
+        }
+
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1999;
+            backdrop-filter: blur(8px);
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+        }
+
+        .drawer-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #06b6d4 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .drawer-close {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            font-size: 1.1rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .drawer-close:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+            transform: rotate(90deg);
+        }
+
+        /* Related Gallery Modal Styles */
+        .related-modal-container {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .related-modal-content {
+            background: rgba(18, 14, 36, 0.95);
+            backdrop-filter: blur(30px) saturate(200%);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 1280px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 30px rgba(168, 85, 247, 0.25);
+            color: white;
+            overflow: hidden;
+            animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .related-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .related-modal-body {
+            padding: 30px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .related-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        @media (max-width: 1024px) {
+            .related-gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .related-gallery-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .related-gallery-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .related-gallery-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(168, 85, 247, 0.5);
+            background: rgba(168, 85, 247, 0.06);
+            box-shadow: 0 10px 25px rgba(168, 85, 247, 0.2);
+        }
+
+        .related-gallery-thumb-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #090714;
+            overflow: hidden;
+        }
+
+        .related-gallery-thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .related-gallery-card:hover .related-gallery-thumb {
+            transform: scale(1.05);
+        }
+
+        .related-gallery-duration {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            backdrop-filter: blur(4px);
+        }
+
+        .related-gallery-relevancy {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(6, 182, 212, 0.9);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 10px rgba(6, 182, 212, 0.3);
+        }
+
+        .related-gallery-info {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .related-gallery-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            line-height: 1.4;
+            color: white;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 2.8em;
+        }
+
+        .related-gallery-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .related-gallery-reason {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            max-width: 100%;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: rgba(6, 182, 212, 0.12);
+            border: 1px solid rgba(6, 182, 212, 0.25);
+            color: #67e8f9;
+            font-size: 0.72rem;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .related-gallery-action {
+            width: 100%;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s;
+        }
+
+        .related-gallery-card:hover .related-gallery-action {
+            background: rgba(168, 85, 247, 0.2);
+            border-color: rgba(168, 85, 247, 0.4);
+            color: white;
+        }
+
+        .related-gallery-card.imported {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .related-gallery-card.imported .related-gallery-action {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+        }
+    </style>
+    </style>
+<script src="/static/playback_activity.js?v=20260930_activity_3" defer></script>
+</head>
+<body class="nx-page">
+    <div class="review-container" x-data="reviewApp({{ profile_id }})" x-cloak>
+        <a href="/discovery" class="back-link">← Back to Discovery Profiles</a>
+
+        <div class="header">
+            <div>
+                <h1 x-text="profileName">Review Discovered Videos</h1>
+                <p style="color: rgba(255,255,255,0.6); margin-top: 5px;" x-text="`Profile ID: ${profileId}`"></p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button @click="removeSelected()" class="btn btn-danger" :disabled="selectedCount === 0">Remove Selected</button>
+                <button @click="fetchMissingMetadata(true)" class="btn btn-secondary" :disabled="metadataBusy || selectedMetadataMissingCount === 0">Metadata Fetch / Direct</button>
+                <button @click="startSwipeReview()" class="btn btn-primary" title="Swipe review mode">Swipe review</button>
+                <button @click="clearImported()" class="btn btn-secondary">Clear Imported</button>
+                <button @click="location.href='/discovery'" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" x-text="videos.length"></div>
+                <div class="stat-label">Total Found</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" x-text="notImportedCount"></div>
+                <div class="stat-label">Not Imported</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" x-text="selectedCount"></div>
+                <div class="stat-label">Selected</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" x-text="importedCount"></div>
+                <div class="stat-label">Already Imported</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" x-text="metadataCoveragePercent + '%'"></div>
+                <div class="stat-label">Metadata Ready</div>
+            </div>
+        </div>
+
+        <div class="meta-status-card">
+            <div class="meta-status-head">
+                <div>
+                    <div style="font-size: 1rem; font-weight: 700; color: white;">Metadata Progress</div>
+                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.65);" x-text="metadataBusy ? 'Fetching quality, size and missing data...' : 'Metadata runs only when you click Fetch buttons.'"></div>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button @click="fetchMissingMetadata(false, false, 20)" class="btn btn-secondary" :disabled="metadataBusy || metadataMissingCount === 0">Fetch 20</button>
+                    <button @click="fetchMissingMetadata(false, false, null)" class="btn btn-secondary" :disabled="metadataBusy || metadataMissingCount === 0">Fetch All</button>
+                    <button @click="fetchMissingMetadata(true, false, 20)" class="btn btn-secondary" :disabled="metadataBusy || selectedMetadataMissingCount === 0">Fetch Selected 20</button>
+                </div>
+            </div>
+            <div class="meta-progress-track">
+                <div class="meta-progress-fill" :style="`width: ${metadataCoveragePercent}%`"></div>
+            </div>
+            <div class="meta-badges">
+                <span class="meta-pill"><strong x-text="metadataCoveragePercent"></strong>% complete</span>
+                <span class="meta-pill">Missing quality: <strong x-text="missingQualityCount"></strong></span>
+                <span class="meta-pill">Missing size: <strong x-text="missingSizeCount"></strong></span>
+                <span class="meta-pill">Missing duration: <strong x-text="missingDurationCount"></strong></span>
+                <span class="meta-pill">Cards still incomplete: <strong x-text="metadataMissingCount"></strong></span>
+            </div>
+        </div>
+
+        <!-- Filter / Sort bar -->
+        <div class="filter-bar">
+            <label>
+                <input type="checkbox" @change="toggleSelectAll()" :checked="allSelected"> Select All
+            </label>
+            <label>
+                <input type="checkbox" x-model="hideImported"> Hide Imported
+            </label>
+            <label>
+                <input type="checkbox" x-model="filterOnlyMissing"> Only Missing Metadata
+            </label>
+            <label>
+                <input type="checkbox" x-model="filterOnlyDuplicates"> Only Duplicates
+            </label>
+            <input type="text" x-model="searchQuery" placeholder="🔍 Hľadať podľa titulu..." style="min-width:180px;">
+            <select x-model="filterSource">
+                <option value="">Všetky zdroje</option>
+                <template x-for="src in availableSources" :key="src">
+                    <option :value="src" x-text="src"></option>
+                </template>
+            </select>
+            <select x-model="sortBy">
+                <option value="newest">Najnovšie</option>
+                <option value="oldest">Najstaršie</option>
+                <option value="title">Podľa titulu</option>
+            </select>
+            <span class="filter-stat" x-text="`${filteredVideos.length} z ${videos.length} videa`"></span>
+        </div>
+
+        <!-- Keyboard shortcut legend -->
+        <div class="kb-legend">
+            <span><kbd>J</kbd>/<kbd>K</kbd> pohyb</span>
+            <span><kbd>F</kbd>/<kbd>Enter</kbd> označiť</span>
+            <span><kbd>Space</kbd> preview</span>
+            <span><kbd>R</kbd> related</span>
+            <span><kbd>I</kbd> importovať vybrané</span>
+            <span><kbd>Del</kbd> odstrániť</span>
+        </div>
+
+        <div class="controls-bar">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button @click="removeSelected()" class="btn btn-danger" :disabled="selectedCount === 0">
+                    Remove Selected (<span x-text="selectedCount"></span>)
+                </button>
+                <button @click="importSelected()" class="btn btn-primary" :disabled="selectedCount === 0">
+                    Import Selected (<span x-text="selectedCount"></span>)
+                </button>
+            </div>
+        </div>
+
+        <div class="videos-grid" x-show="!isLoading && filteredVideos.length > 0" x-cloak>
+            <template x-for="video in filteredVideos" :key="video.id">
+                <div class="video-card" :data-id="video.id" :class="{ 'selected': selectedVideos.includes(video.id), 'imported': video.imported, 'meta-missing': !video.metadata_complete, 'focused-card': filteredVideos[focusedIndex]?.id === video.id }">
+                    <div class="checkbox-overlay" x-show="!video.imported" @click.stop="toggleSelect(video.id)" :title="selectedVideos.includes(video.id) ? 'Zrušiť výber' : 'Vybrať'">
+                        <input type="checkbox" :checked="selectedVideos.includes(video.id)" @click.stop="toggleSelect(video.id)" tabindex="-1">
+                    </div>
+
+                    <div class="imported-badge" x-show="video.imported">Imported</div>
+
+                    <div class="thumb-shell" :class="{ 'loading': !video.thumbLoaded }"
+                         style="position: relative;"
+                         @mouseenter="playPreview(video, $event)"
+                         @mouseleave="stopPreview(video, $event)"
+                         @mousemove="scrubPreview(video, $event)">
+                         
+                        <img :src="thumbSrc(video)"
+                             class="video-thumbnail"
+                             :class="{ 'loaded': video.thumbLoaded, 'hidden': video.isPlayingPreview }"
+                             :alt="video.title"
+                             loading="lazy"
+                             decoding="async"
+                             @load="markThumbLoaded(video, $event)"
+                             @error="markThumbError(video, $event)">
+                             
+                        <video x-show="video.isPlayingPreview"
+                               class="video-preview-player"
+                               style="width: 100%; height: 180px; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 5; pointer-events: none;"
+                               muted
+                               loop
+                               playsinline
+                               :src="video.preview_mp4_url || ''"
+                               @canplay="video.previewReady = true"
+                               @error="video.previewFailed = true; video.isPlayingPreview = false;">
+                        </video>
+                    </div>
+
+                    <div class="video-info">
+                        <div class="video-title" x-text="video.title"></div>
+                        <div class="video-meta">
+                            <span x-text="formatDuration(video.duration)"></span>
+                            <span x-text="qualityLabel(video)"></span>
+                        </div>
+                        <div class="video-meta" style="margin-top: -4px;">
+                            <span x-text="formatSize(video.file_size_mb)"></span>
+                            <span x-text="video.metadata_complete ? 'Ready' : 'Missing data'"></span>
+                        </div>
+                        
+                        <!-- Visual Duplicate Badge -->
+                        <div style="background: rgba(239, 68, 68, 0.16); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; margin-bottom: 8px; display: flex; flex-direction: column; gap: 2px;" x-show="video.duplicate_of">
+                            <span style="color: #ef4444; font-size: 0.75rem;">⚠️ Visual Duplicate</span>
+                            <span style="font-size: 0.68rem; opacity: 0.85;" x-text="video.duplicate_title || `Library Video #${video.duplicate_of}`"></span>
+                        </div>
+                        
+                        <!-- Categories and Models Badges -->
+                        <div style="margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 4px;" x-show="video.models || video.categories">
+                            <template x-for="model in (video.models || '').split(',').map(s => s.trim()).filter(Boolean)" :key="model">
+                                <span class="model-badge" style="background: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.4); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; cursor: pointer;" @click.stop="openModelHub(model)">
+                                    👤 <span x-text="model"></span>
+                                </span>
+                            </template>
+                            <template x-for="cat in (video.categories || '').split(',').map(s => s.trim()).filter(Boolean)" :key="cat">
+                                <span class="category-badge" style="background: rgba(6, 182, 212, 0.2); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.4); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">
+                                    🏷️ <span x-text="cat"></span>
+                                </span>
+                            </template>
+                        </div>
+
+                        <div style="margin-bottom: 8px;">
+                            <span class="source-badge" x-text="video.source"></span>
+                        </div>
+                        <div class="meta-missing-note" x-show="!video.metadata_complete">
+                            Missing: <span x-text="video.missing_metadata.join(', ')"></span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">
+                            <span x-text="new Date(video.discovered_at).toLocaleDateString()"></span>
+                        </div>
+                        <div class="video-card-actions" style="margin-top: 12px; display: flex; justify-content: space-between;">
+                            <button class="mini-btn mini-btn-danger" @click.stop="removeVideo(video.id)" style="pointer-events: all;">Remove</button>
+                            <button
+                                class="mini-btn"
+                                style="background: linear-gradient(135deg, #06b6d4 0%, #a855f7 100%); color: white; border: none; padding: 7px 10px; pointer-events: all;"
+                                @click.stop="openRelatedDrawer(video)"
+                                title="Načítať podobné videá naprieč zdrojmi"
+                            >
+                                🌀 Related (8+)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div class="empty-state" x-show="isLoading" x-cloak>
+            <h2>Loading review...</h2>
+            <p>Fetching discovered videos and thumbnails.</p>
+        </div>
+
+        <div class="empty-state" x-show="!isLoading && filteredVideos.length === 0" x-cloak>
+            <h2>No videos to review</h2>
+            <p>All discovered videos have been imported or no matches found yet.</p>
+        </div>
+
+        <!-- DRAWERS OVERLAYS AND DOM ELEMENTS -->
+        <!-- Overlay -->
+        <div class="drawer-overlay" x-show="isRelatedDrawerOpen || isModelDrawerOpen" @click="closeDrawers()" x-cloak></div>
+
+        <!-- 1. Related Recommendations Modal (Pop-up Gallery View 3x3) -->
+        <div class="related-modal-container" x-show="isRelatedDrawerOpen" x-cloak>
+            <!-- Custom Backdrop for Modal only (to keep it beautiful) -->
+            <div class="drawer-overlay" style="z-index: 1999;" @click="closeDrawers()"></div>
+            
+            <div class="related-modal-content" style="z-index: 2000;">
+                <div class="related-modal-header">
+                    <div>
+                        <div class="drawer-title" style="font-size: 1.5rem;">🌀 Recommendations</div>
+                        <div style="font-size:0.82rem; color:rgba(255,255,255,0.45); margin-top:4px;" x-show="!isRelatedLoading && activeVideo">
+                            <span x-show="relatedVideos.length > 0" x-text="`${relatedVideos.length} nájdených odporúčaní · zdroj: ${activeVideo?.source || ''}`"></span>
+                            <span x-show="relatedVideos.length === 0 && relatedLoadedFor" x-text="`zdroj: ${activeVideo?.source || ''}`"></span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <!-- Import All button inside header to save space -->
+                        <button
+                            x-show="!isRelatedLoading && relatedVideos.length > 0"
+                            @click="importAllRelated()"
+                            class="btn btn-primary"
+                            style="font-size: 0.85rem; padding: 8px 16px;"
+                            :disabled="relatedImportingAll"
+                        >
+                            <span x-show="!relatedImportingAll">⬇️ Importovať všetky (<span x-text="relatedVideos.length"></span>)</span>
+                            <span x-show="relatedImportingAll">Importujem...</span>
+                        </button>
+                        <div class="drawer-close" @click="closeDrawers()">×</div>
+                    </div>
+                </div>
+
+                <div class="related-modal-body">
+                    <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;margin-bottom:18px;padding:14px;border:1px solid rgba(255,255,255,0.08);border-radius:14px;background:rgba(255,255,255,0.03);">
+                        <label style="display:flex;flex-direction:column;gap:6px;min-width:120px;">
+                            <span style="font-size:12px;color:rgba(255,255,255,0.65);font-weight:700;">Počet výsledkov</span>
+                            <select x-model.number="relatedLimit" @change="applyRelatedFilters(true)" style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,0.14);border-radius:10px;padding:8px 10px;">
+                                <template x-for="limit in relatedLimitOptions" :key="'discovery-related-limit-'+limit">
+                                    <option :value="limit" x-text="limit"></option>
+                                </template>
+                            </select>
+                        </label>
+                        <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-width:260px;">
+                            <div style="font-size:12px;color:rgba(255,255,255,0.65);font-weight:700;">Zdroje</div>
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                                <button class="btn btn-secondary" @click="relatedSelectedSources = []; applyRelatedFilters(true)" type="button" style="font-size:12px;padding:6px 10px;">Všetky</button>
+                                <template x-for="source in relatedSourceOptions" :key="'discovery-related-source-'+source.id">
+                                    <label style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(15,23,42,0.75);font-size:12px;color:#e2e8f0;cursor:pointer;">
+                                        <input type="checkbox" :value="source.id" x-model="relatedSelectedSources" @change="applyRelatedFilters(true)">
+                                        <span x-text="source.label"></span>
+                                    </label>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="color: rgba(255,255,255,0.7); font-size: 0.95rem; margin-top: 0; margin-bottom: 24px;">
+                        Podobné videá nájdené na základe kontextu zdrojovej stránky:
+                    </p>
+
+                    <!-- Loading state -->
+                    <div x-show="isRelatedLoading && relatedVideos.length === 0" style="text-align: center; padding: 80px 0;">
+                        <div style="border: 3px solid rgba(168, 85, 247, 0.2); border-top: 3px solid #a855f7; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 16px auto;"></div>
+                        <p style="color: rgba(255,255,255,0.6); font-size: 0.95rem;">Načítavam hybridné odporúčania naprieč zdrojmi...</p>
+                        <p x-show="relatedProgressMsg" style="color: rgba(255,255,255,0.45); font-size: 0.82rem; margin: 8px 0 0;" x-text="relatedProgressMsg"></p>
+                        <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+                    </div>
+
+                    <div x-show="isRelatedLoading && relatedVideos.length > 0" style="margin-bottom:16px;padding:12px 14px;border:1px solid rgba(255,255,255,0.08);border-radius:12px;background:rgba(15,23,42,0.45);">
+                        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:12px;color:rgba(255,255,255,0.72);margin-bottom:8px;">
+                            <span x-text="relatedProgressMsg || 'Priebežne načítavam ďalšie výsledky...'"></span>
+                            <span x-text="`${Math.round(relatedProgressPct || 0)}%`"></span>
+                        </div>
+                        <div style="height:6px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;">
+                            <div :style="`width:${Math.max(0, Math.min(100, relatedProgressPct || 0))}%;height:100%;background:linear-gradient(90deg,#a855f7,#22d3ee);transition:width .25s ease;`"></div>
+                        </div>
+                    </div>
+
+                    <!-- Empty state -->
+                    <div x-show="!isRelatedLoading && relatedVideos.length === 0 && relatedLoadedFor" style="text-align: center; padding: 60px 0;">
+                        <div style="font-size: 3rem; margin-bottom: 16px;">🔍</div>
+                        <div style="color: rgba(255,255,255,0.7); font-size: 1.1rem; margin-bottom: 8px; font-weight: 600;">Žiadne odporúčania pre toto video.</div>
+                        <div style="color: rgba(255,255,255,0.45); font-size: 0.85rem;" x-show="activeVideo">
+                            Zdroj: <strong style="color:#a855f7;" x-text="activeVideo?.source || ''"></strong>
+                            <span x-show="activeVideo && (activeVideo.source || '').toLowerCase().includes('pornhub')">
+                                <br>Pornhub API nevrátilo výsledky pre titul/model tohto videa.
+                            </span>
+                            <span x-show="activeVideo && (activeVideo.source || '').toLowerCase().includes('camwhores')">
+                                <br>Video nemá dostupné related_src alebo stránka nevrátila výsledky.
+                            </span>
+                            <br>Hybridné vyhľadávanie nenašlo dostatočne podobné výsledky naprieč zdrojmi.
+                        </div>
+                    </div>
+
+                    <!-- Gallery Grid -->
+                    <div class="related-gallery-grid" x-show="relatedVideos.length > 0" :style="isRelatedLoading ? 'opacity:.7;pointer-events:none;' : ''">
+                        <template x-for="item in relatedVideos" :key="item.url">
+                            <div class="related-gallery-card" :class="{ 'imported': item._imported }" @click="importRelated(item)">
+                                <div class="related-gallery-thumb-wrapper">
+                                    <img :src="item.thumbnail" class="related-gallery-thumb" alt="Thumb" loading="lazy" @error="$event.target.src='/static/placeholder.jpg'">
+                                    <span class="related-gallery-duration" x-text="formatDuration(item.duration)"></span>
+                                    <span class="related-gallery-relevancy" x-show="item.relevancy_score > 0" x-text="`⭐ ${item.relevancy_score}%`"></span>
+                                </div>
+                                <div class="related-gallery-info">
+                                    <div class="related-gallery-title" :title="item.title" x-text="item.title"></div>
+                                    <div class="related-gallery-meta">
+                                        <span x-text="item.source || 'pornhub'"></span>
+                                        <span x-show="item.views" x-text="`${item.views} videní`" style="opacity: 0.75;"></span>
+                                    </div>
+                                    <div class="related-gallery-reason" x-show="item.reason" x-text="item.reason"></div>
+                                    <div class="related-gallery-action">
+                                        <span x-show="!item._imported" style="color: #a855f7;">Kliknúť pre import</span>
+                                        <span x-show="item._imported" style="color: #22c55e;">✓ Importované</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div x-show="relatedDiagnostics && !isRelatedLoading" style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+                            <strong style="font-size:12px;color:rgba(255,255,255,0.75);">Diagnostika</strong>
+                            <span style="font-size:12px;color:rgba(255,255,255,0.45);" x-text="`hits: ${relatedDiagnostics?.summary?.sources_with_hits || 0} · fail: ${relatedDiagnostics?.summary?.failed_sources || 0} · empty: ${relatedDiagnostics?.summary?.empty_sources || 0}`"></span>
+                        </div>
+                        <div x-show="relatedDiagnostics?.error" style="margin-top:8px;font-size:12px;color:#fca5a5;" x-text="relatedDiagnostics.error"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Performer Profile Drawer -->
+        <div class="glass-drawer" :class="{ 'open': isModelDrawerOpen }" x-cloak>
+            <div class="drawer-header">
+                <div class="drawer-title" x-text="`👤 Performers: ${activeModel}`"></div>
+                <div class="drawer-close" @click="closeDrawers()">×</div>
+            </div>
+
+            <p style="color: rgba(255,255,255,0.75); font-size: 0.95rem; margin-bottom: 24px;">
+                You are viewing details for model <strong style="color: #ec4899;" x-text="activeModel"></strong>. 
+            </p>
+
+            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 16px; margin-bottom: 20px;">
+                <h4 style="margin-top: 0; color: #67e8f9; font-size: 0.95rem;">Model Hub shortcuts</h4>
+                <p style="font-size: 0.85rem; color: rgba(255,255,255,0.65); line-height: 1.4; margin-bottom: 14px;">
+                    Instantly trigger a new active discovery run or browse model collections on the site.
+                </p>
+                
+                <button class="btn btn-primary" style="width: 100%; padding: 8px; font-size: 0.85rem; margin-bottom: 8px;" @click="triggerModelDiscovery()">
+                    🚀 Run Discovery search for this Model
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function reviewApp(profileId) {
+            return {
+                profileId: profileId,
+                profileName: '',
+                videos: [],
+                selectedVideos: [],
+                hideImported: true,
+                isLoading: true,
+                metadataBusy: false,
+
+                // Filter & sort state
+                searchQuery: '',
+                filterSource: '',
+                filterOnlyMissing: false,
+                filterOnlyDuplicates: false,
+                sortBy: 'newest',
+
+                // New UI drawer and preview variables
+                isRelatedDrawerOpen: false,
+                isModelDrawerOpen: false,
+                activeVideo: null,
+                activeModel: '',
+                relatedVideos: [],
+                relatedCache: {},
+                relatedPrefetching: {},
+                relatedLoadedFor: null,
+                isRelatedLoading: false,
+                relatedRequestToken: 0,
+                relatedImportingAll: false,
+                relatedDiagnostics: null,
+                relatedProgressPct: 0,
+                relatedProgressMsg: '',
+                relatedLimit: 24,
+                relatedLimitOptions: [8, 12, 24, 36, 48],
+                relatedSelectedSources: [],
+                relatedSourceOptions: [],
+                hoverTimeout: null,
+                focusedIndex: -1,
+
+                init() {
+                    this.loadVideos();
+                    this.loadRelatedSourceOptions();
+                    this.setupKeyboardShortcuts();
+                },
+
+                async loadRelatedSourceOptions() {
+                    if (Array.isArray(this.relatedSourceOptions) && this.relatedSourceOptions.length) return;
+                    try {
+                        const response = await fetch('/api/v1/discovery/search-sources');
+                        const data = await response.json();
+                        this.relatedSourceOptions = Array.isArray(data.discovery_sources) ? data.discovery_sources : [];
+                    } catch (e) {
+                        console.error('Failed to load related source options', e);
+                        this.relatedSourceOptions = [];
+                    }
+                },
+
+                getRelatedCacheKey(videoId) {
+                    const limit = Number(this.relatedLimit || 24);
+                    const src = (this.relatedSelectedSources || []).slice().sort().join(',');
+                    return `${videoId}|${limit}|${src || 'all'}`;
+                },
+
+                getRelatedCacheEntry(cacheKey) {
+                    const cached = this.relatedCache[cacheKey];
+                    if (!cached) return null;
+                    if (Array.isArray(cached)) {
+                        return { videos: cached, diagnostics: null };
+                    }
+                    return {
+                        videos: Array.isArray(cached.videos) ? cached.videos : [],
+                        diagnostics: cached.diagnostics || null,
+                    };
+                },
+
+                async applyRelatedFilters(refresh = true) {
+                    if (!this.activeVideo?.id) return;
+                    await this.loadRelatedFor(this.activeVideo, { open: true, refresh });
+                },
+
+                async loadVideos() {
+                    this.isLoading = true;
+                    try {
+                        const response = await fetch(`/api/v1/discovery/review/${this.profileId}`);
+                        const data = await response.json();
+                        this.videos = (data.discovered_videos || []).map(v => ({
+                            ...v,
+                            rawThumbUrl: this.normalizeThumbUrl(v.thumbnail, v),
+                            thumbLoaded: false,
+                            thumbFailed: false,
+                            isPlayingPreview: false,
+                            previewReady: false,
+                            previewFailed: false
+                        }));
+
+                        if (this.videos.length > 0) {
+                            this.profileName = this.videos[0].profile_name;
+                        }
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                normalizeThumbUrl(url, video = null) {
+                    const raw = (url || '').trim();
+                    if (!raw || raw.startsWith('data:image')) return '';
+                    if (raw.startsWith('/static/') || raw.startsWith('/api/')) return raw;
+                    if (raw.startsWith('blob:')) return raw;
+                    if (raw.startsWith('//')) return `https:${raw}`;
+
+                    const base = (video && (video.source_url || video.url)) || '';
+                    try {
+                        if (raw.startsWith('http://') || raw.startsWith('https://')) {
+                            return raw;
+                        }
+                        if (base) {
+                            return new URL(raw, base).toString();
+                        }
+                    } catch (e) {}
+
+                    return raw.startsWith('/') ? raw : '';
+                },
+
+                proxifyThumb(url, video = null) {
+                    const normalized = this.normalizeThumbUrl(url, video);
+                    if (!normalized) return '/static/placeholder.jpg';
+                    if (normalized.startsWith('/')) return normalized;
+                    if (normalized.includes('/api/v1/proxy?url=')) return normalized;
+                    if (normalized.startsWith('http://localhost:') || normalized.startsWith('http://127.0.0.1:')) {
+                        return normalized;
+                    }
+                    if (normalized.startsWith('http://') || normalized.startsWith('https://')) {
+                        return `/api/v1/proxy?url=${encodeURIComponent(normalized)}`;
+                    }
+                    return '/static/placeholder.jpg';
+                },
+
+                thumbSrc(video) {
+                    if (!video || video.thumbFailed) {
+                        return '/static/placeholder.jpg';
+                    }
+                    return this.proxifyThumb(video.rawThumbUrl || video.thumbnail, video);
+                },
+
+                markThumbLoaded(video, event) {
+                    video.thumbLoaded = true;
+                    video.thumbFailed = false;
+
+                    // Dynamic Ambient Glow from average color of thumbnail!
+                    if (event && event.target) {
+                        try {
+                            const img = event.target;
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            canvas.width = 10;
+                            canvas.height = 10;
+                            ctx.drawImage(img, 0, 0, 10, 10);
+                            const data = ctx.getImageData(0, 0, 10, 10).data;
+                            
+                            let r = 0, g = 0, b = 0;
+                            for (let i = 0; i < data.length; i += 4) {
+                                r += data[i];
+                                g += data[i+1];
+                                b += data[i+2];
+                            }
+                            r = Math.floor(r / (data.length / 4));
+                            g = Math.floor(g / (data.length / 4));
+                            b = Math.floor(b / (data.length / 4));
+                            
+                            const card = img.closest('.video-card');
+                            if (card) {
+                                card.style.setProperty('--card-glow', `rgba(${r}, ${g}, ${b}, 0.28)`);
+                                card.style.setProperty('--card-accent', `rgb(${r}, ${g}, ${b})`);
+                            }
+                        } catch (e) {
+                            console.log("Ambient color extraction failed: ", e);
+                        }
+                    }
+                },
+
+                scrubPreview(video, event) {
+                    if (!video.isPlayingPreview) return;
+                    try {
+                        const shell = event.currentTarget;
+                        const vElem = shell.querySelector('video');
+                        if (vElem && vElem.duration) {
+                            const rect = shell.getBoundingClientRect();
+                            const x = event.clientX - rect.left;
+                            const percentage = Math.max(0, Math.min(1, x / rect.width));
+                            vElem.currentTime = percentage * vElem.duration;
+                        }
+                    } catch (e) {
+                        console.log("Timeline scrubbing failed: ", e);
+                    }
+                },
+
+                setupKeyboardShortcuts() {
+                    window.addEventListener('keydown', (e) => {
+                        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+                        
+                        const key = e.key.toLowerCase();
+                        if (key === 'j') {
+                            e.preventDefault();
+                            this.navigateFocus(1);
+                        } else if (key === 'k') {
+                            e.preventDefault();
+                            this.navigateFocus(-1);
+                        } else if (e.key === ' ' || key === 'spacebar') {
+                            e.preventDefault();
+                            this.toggleFocusedPreview();
+                        } else if (key === 'f' || e.key === 'Enter') {
+                            e.preventDefault();
+                            this.toggleFocusedSelect();
+                        } else if (key === 'i') {
+                            e.preventDefault();
+                            this.importSelected();
+                        } else if (key === 'r') {
+                            e.preventDefault();
+                            this.openFocusedRelated();
+                        } else if (e.key === 'Delete' || e.key === 'Backspace') {
+                            e.preventDefault();
+                            this.removeFocused();
+                        }
+                    });
+                },
+
+                navigateFocus(direction) {
+                    const visibleVideos = this.filteredVideos;
+                    if (visibleVideos.length === 0) return;
+                    
+                    this.focusedIndex = (this.focusedIndex + direction + visibleVideos.length) % visibleVideos.length;
+                    const targetVideo = visibleVideos[this.focusedIndex];
+                    
+                    this.$nextTick(() => {
+                        const card = document.querySelector(`.video-card[data-id="${targetVideo.id}"]`);
+                        if (card) {
+                            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    });
+                },
+
+                toggleFocusedPreview() {
+                    const visibleVideos = this.filteredVideos;
+                    if (this.focusedIndex < 0 || this.focusedIndex >= visibleVideos.length) return;
+                    const video = visibleVideos[this.focusedIndex];
+                    if (video.preview_mp4_url && !video.previewFailed) {
+                        video.isPlayingPreview = !video.isPlayingPreview;
+                    }
+                },
+
+                toggleFocusedSelect() {
+                    const visibleVideos = this.filteredVideos;
+                    if (this.focusedIndex < 0 || this.focusedIndex >= visibleVideos.length) return;
+                    const video = visibleVideos[this.focusedIndex];
+                    if (!video.imported) {
+                        this.toggleSelect(video.id);
+                    }
+                },
+
+                openFocusedRelated() {
+                    const visibleVideos = this.filteredVideos;
+                    if (this.focusedIndex < 0 || this.focusedIndex >= visibleVideos.length) return;
+                    const video = visibleVideos[this.focusedIndex];
+                    this.openRelatedDrawer(video);
+                },
+
+                async removeFocused() {
+                    const visibleVideos = this.filteredVideos;
+                    if (this.focusedIndex < 0 || this.focusedIndex >= visibleVideos.length) return;
+                    const video = visibleVideos[this.focusedIndex];
+                    if (confirm(`Remove "${video.title}" from this review list?`)) {
+                        const currentId = video.id;
+                        await this.removeVideo(currentId);
+                        this.focusedIndex = Math.max(0, this.focusedIndex - 1);
+                    }
+                },
+
+                markThumbError(video, event) {
+                    if (event && event.target) {
+                        const fallbackTried = event.target.dataset.fallbackTried === '1';
+                        const rawThumb = video ? video.rawThumbUrl : '';
+                        if (!fallbackTried && rawThumb && rawThumb !== event.target.src) {
+                            event.target.dataset.fallbackTried = '1';
+                            event.target.src = rawThumb;
+                            return;
+                        }
+                        event.target.onerror = null;
+                        event.target.src = '/static/placeholder.jpg';
+                    }
+                    video.thumbLoaded = true;
+                    video.thumbFailed = true;
+                },
+
+                get availableSources() {
+                    const sources = [...new Set(this.videos.map(v => v.source).filter(Boolean))];
+                    return sources.sort();
+                },
+
+                get filteredVideos() {
+                    let list = this.videos;
+                    if (this.hideImported) {
+                        list = list.filter(v => !v.imported);
+                    }
+                    if (this.filterSource) {
+                        list = list.filter(v => v.source === this.filterSource);
+                    }
+                    if (this.filterOnlyMissing) {
+                        list = list.filter(v => !v.metadata_complete);
+                    }
+                    if (this.filterOnlyDuplicates) {
+                        list = list.filter(v => v.duplicate_of);
+                    }
+                    if (this.searchQuery.trim()) {
+                        const q = this.searchQuery.trim().toLowerCase();
+                        list = list.filter(v => (v.title || '').toLowerCase().includes(q));
+                    }
+                    if (this.sortBy === 'oldest') {
+                        list = [...list].sort((a, b) => new Date(a.discovered_at) - new Date(b.discovered_at));
+                    } else if (this.sortBy === 'title') {
+                        list = [...list].sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+                    }
+                    // 'newest' is default (already ordered by backend)
+                    return list;
+                },
+
+                get notImportedCount() {
+                    return this.videos.filter(v => !v.imported).length;
+                },
+
+                get importedCount() {
+                    return this.videos.filter(v => v.imported).length;
+                },
+
+                get metadataMissingCount() {
+                    return this.videos.filter(v => !v.metadata_complete).length;
+                },
+
+                get metadataCoveragePercent() {
+                    if (this.videos.length === 0) return 100;
+                    return Math.round(((this.videos.length - this.metadataMissingCount) / this.videos.length) * 100);
+                },
+
+                get missingQualityCount() {
+                    return this.videos.filter(v => (v.missing_metadata || []).includes('quality')).length;
+                },
+
+                get missingSizeCount() {
+                    return this.videos.filter(v => (v.missing_metadata || []).includes('size')).length;
+                },
+
+                get missingDurationCount() {
+                    return this.videos.filter(v => (v.missing_metadata || []).includes('duration')).length;
+                },
+
+                get selectedCount() {
+                    return this.selectedVideos.length;
+                },
+
+                get selectedMetadataMissingCount() {
+                    return this.videos.filter(v => this.selectedVideos.includes(v.id) && !v.metadata_complete).length;
+                },
+
+                get allSelected() {
+                    const notImported = this.videos.filter(v => !v.imported);
+                    return notImported.length > 0 && this.selectedVideos.length === notImported.length;
+                },
+
+                toggleSelect(videoId) {
+                    const index = this.selectedVideos.indexOf(videoId);
+                    if (index > -1) {
+                        this.selectedVideos.splice(index, 1);
+                    } else {
+                        this.selectedVideos.push(videoId);
+                        const video = this.videos.find(v => v.id === videoId);
+                        if (video) {
+                            this.prefetchRelated(video);
+                        }
+                    }
+                },
+
+                toggleSelectAll() {
+                    const notImported = this.videos.filter(v => !v.imported);
+                    if (this.allSelected) {
+                        this.selectedVideos = [];
+                    } else {
+                        this.selectedVideos = notImported.map(v => v.id);
+                        notImported.slice(0, 8).forEach(video => this.prefetchRelated(video));
+                    }
+                },
+
+                mergeVideos(updatedVideos) {
+                    const byId = new Map(updatedVideos.map(v => [v.id, {
+                        ...v,
+                        rawThumbUrl: this.normalizeThumbUrl(v.thumbnail, v),
+                        thumbLoaded: false,
+                        thumbFailed: false,
+                        isPlayingPreview: false,
+                        previewReady: false,
+                        previewFailed: false
+                    }]));
+                    this.videos = this.videos.map(existing => byId.get(existing.id) || existing);
+                },
+
+                // Preview player hovering functions
+                playPreview(video, event) {
+                    if (!video.preview_mp4_url || video.previewFailed) return;
+                    
+                    if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
+                    this.hoverTimeout = setTimeout(() => {
+                        video.isPlayingPreview = true;
+                        const card = event.target.closest('.video-card') || event.target;
+                        const vElem = card.querySelector('video');
+                        if (vElem) {
+                            vElem.currentTime = 0;
+                            vElem.play().catch(e => {
+                                console.log("Hover preview play blocked: ", e);
+                            });
+                        }
+                    }, 400);
+                },
+
+                stopPreview(video, event) {
+                    if (this.hoverTimeout) {
+                        clearTimeout(this.hoverTimeout);
+                        this.hoverTimeout = null;
+                    }
+                    video.isPlayingPreview = false;
+                    const card = event.target.closest('.video-card') || event.target;
+                    const vElem = card.querySelector('video');
+                    if (vElem) {
+                        vElem.pause();
+                    }
+                },
+
+                // Drawer navigation functions
+                closeDrawers() {
+                    this.isRelatedDrawerOpen = false;
+                    this.isModelDrawerOpen = false;
+                    this.activeVideo = null;
+                    this.activeModel = '';
+                    this.relatedRequestToken += 1;
+                    this.relatedProgressPct = 0;
+                    this.relatedProgressMsg = '';
+                },
+
+                canOpenRelated(video) {
+                    return !!(video && video.id);
+                },
+
+                showRelatedUnavailable(video) {
+                    // Pre non-CW zdroje otvor drawer s vysvetlením
+                    this.activeVideo = video;
+                    this.relatedVideos = [];
+                    this.relatedLoadedFor = video.id;
+                    this.isRelatedLoading = false;
+                    this.relatedDiagnostics = null;
+                    this.relatedProgressPct = 0;
+                    this.relatedProgressMsg = '';
+                    this.isRelatedDrawerOpen = true;
+                },
+
+                async prefetchRelated(video) {
+                    const cacheKey = this.getRelatedCacheKey(video.id);
+                    if (!this.canOpenRelated(video) || this.relatedCache[cacheKey] || this.relatedPrefetching[cacheKey]) return;
+                    this.relatedPrefetching[cacheKey] = true;
+                    try {
+                        await this.loadRelatedFor(video, { open: false });
+                    } catch(e) {
+                        console.debug("Related prefetch skipped", e);
+                    } finally {
+                        delete this.relatedPrefetching[cacheKey];
+                    }
+                },
+
+                async openRelatedDrawer(video) {
+                    await this.loadRelatedFor(video, { open: true });
+                },
+
+                async loadRelatedFor(video, options = {}) {
+                    if (!this.canOpenRelated(video)) return;
+                    const shouldOpen = options.open !== false;
+                    const shouldRefresh = options.refresh === true;
+                    this.activeVideo = video;
+                    if (shouldOpen) {
+                        this.isRelatedDrawerOpen = true;
+                        this.relatedLoadedFor = null;
+                    }
+                    const cacheKey = this.getRelatedCacheKey(video.id);
+                    const requestToken = ++this.relatedRequestToken;
+
+                    const cachedEntry = !shouldRefresh ? this.getRelatedCacheEntry(cacheKey) : null;
+                    if (cachedEntry) {
+                        if (shouldOpen) {
+                            this.relatedVideos = cachedEntry.videos;
+                            this.relatedDiagnostics = cachedEntry.diagnostics;
+                            this.relatedLoadedFor = video.id;
+                            this.isRelatedLoading = false;
+                        }
+                        return cachedEntry.videos;
+                    }
+
+                    if (shouldOpen) {
+                        this.isRelatedLoading = true;
+                        this.relatedVideos = [];
+                        this.relatedDiagnostics = null;
+                        this.relatedProgressPct = 0;
+                        this.relatedProgressMsg = 'Pripájam sa...';
+                    }
+                    try {
+                        const params = new URLSearchParams();
+                        params.set('limit', String(Number(this.relatedLimit || 24)));
+                        if (Array.isArray(this.relatedSelectedSources) && this.relatedSelectedSources.length) {
+                            params.set('sources', this.relatedSelectedSources.join(','));
+                        }
+                        if (shouldRefresh) {
+                            params.set('refresh', 'true');
+                        }
+                        if (!shouldOpen) {
+                            const candidates = [
+                                `/api/v1/discovery/video/${video.id}/related?${params.toString()}`,
+                                `/api/discovery/video/${video.id}/related?${params.toString()}`
+                            ];
+                            let data = null;
+                            let lastError = null;
+                            for (const url of candidates) {
+                                try {
+                                    const response = await fetch(url, {
+                                        headers: { 'Accept': 'application/json' }
+                                    });
+                                    if (!response.ok) {
+                                        lastError = new Error(`Related request failed: ${response.status}`);
+                                        continue;
+                                    }
+                                    data = await response.json();
+                                    break;
+                                } catch (err) {
+                                    lastError = err;
+                                }
+                            }
+                            if (!data) {
+                                throw lastError || new Error('No related endpoint responded');
+                            }
+                            const videos = (data.related_videos || []).map(v => ({ ...v, _imported: false }));
+                            this.relatedCache[cacheKey] = {
+                                videos,
+                                diagnostics: data.diagnostics || null,
+                            };
+                            return videos;
+                        }
+
+                        const streamUrl = `/api/v1/discovery/video/${video.id}/related/stream?${params.toString()}`;
+                        const data = await new Promise((resolve, reject) => {
+                            const es = new EventSource(streamUrl);
+                            const cleanup = () => { try { es.close(); } catch(_) {} };
+                            const timeoutId = setTimeout(() => {
+                                cleanup();
+                                reject(new Error('timeout'));
+                            }, 40000);
+
+                            es.onmessage = (ev) => {
+                                try {
+                                    const msg = JSON.parse(ev.data);
+                                    if (requestToken !== this.relatedRequestToken) {
+                                        clearTimeout(timeoutId);
+                                        cleanup();
+                                        reject(new Error('stale'));
+                                        return;
+                                    }
+                                    if (msg.type === 'progress' || msg.type === 'start' || msg.type === 'pct') {
+                                        this.relatedProgressPct = msg.pct || 0;
+                                        this.relatedProgressMsg = msg.msg || '';
+                                    } else if (msg.type === 'batch') {
+                                        this.relatedVideos = (msg.related_videos || []).map(v => ({ ...v, _imported: !!v._imported }));
+                                        this.relatedDiagnostics = msg.diagnostics || this.relatedDiagnostics;
+                                    } else if (msg.type === 'done') {
+                                        this.relatedProgressPct = 100;
+                                        this.relatedProgressMsg = 'Hotovo!';
+                                        clearTimeout(timeoutId);
+                                        cleanup();
+                                        resolve(msg.result);
+                                    } else if (msg.type === 'error') {
+                                        clearTimeout(timeoutId);
+                                        cleanup();
+                                        reject(new Error(msg.msg || 'SSE error'));
+                                    }
+                                } catch (err) {
+                                    clearTimeout(timeoutId);
+                                    cleanup();
+                                    reject(err);
+                                }
+                            };
+                            es.onerror = () => {
+                                clearTimeout(timeoutId);
+                                cleanup();
+                                reject(new Error('SSE connection failed'));
+                            };
+                        });
+
+                        if (requestToken !== this.relatedRequestToken) return [];
+                        const videos = (data.related_videos || []).map(v => ({ ...v, _imported: false }));
+                        this.relatedCache[cacheKey] = {
+                            videos,
+                            diagnostics: data.diagnostics || null,
+                        };
+                        this.relatedVideos = videos;
+                        this.relatedDiagnostics = data.diagnostics || this.relatedDiagnostics || null;
+                        return videos;
+                    } catch(e) {
+                        if (e.message === 'stale' || requestToken !== this.relatedRequestToken) return [];
+                        console.error("Failed to load recommendations", e);
+                        if (shouldOpen) {
+                            this.relatedVideos = [];
+                            this.relatedDiagnostics = {
+                                queries: [],
+                                summary: { sources_with_hits: 0, failed_sources: 1, empty_sources: 0 },
+                                found_urls: [],
+                                error: String(e),
+                            };
+                        }
+                        return [];
+                    } finally {
+                        if (shouldOpen && requestToken === this.relatedRequestToken) {
+                            this.isRelatedLoading = false;
+                            this.relatedLoadedFor = video.id;
+                        }
+                    }
+                },
+                
+                openModelHub(modelName) {
+                    this.activeModel = modelName;
+                    this.isModelDrawerOpen = true;
+                },
+
+                async importRelated(item) {
+                    if (item._imported) return;
+                    try {
+                        const response = await fetch('/api/v1/import/text', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                urls: [item.url],
+                                batch_name: 'Discovery Related Import',
+                                parser: 'yt-dlp'
+                            })
+                        });
+                        if (response.ok) {
+                            item._imported = true;
+                        } else {
+                            // Fallback to legacy endpoint
+                            const resp2 = await fetch('/api/v1/import/camwhores_discovery/import', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify([item.url])
+                            });
+                            if (resp2.ok) {
+                                item._imported = true;
+                            } else {
+                                alert('Nepodarilo sa importovať video.');
+                            }
+                        }
+                    } catch(e) {
+                        alert('Chyba pri importe: ' + String(e));
+                    }
+                },
+
+                async importAllRelated() {
+                    const toImport = this.relatedVideos.filter(v => !v._imported);
+                    if (!toImport.length) return;
+                    this.relatedImportingAll = true;
+                    for (const item of toImport) {
+                        await this.importRelated(item);
+                    }
+                    this.relatedImportingAll = false;
+                },
+
+                async triggerModelDiscovery() {
+                    try {
+                        const response = await fetch('/api/v1/import/camwhores_discovery', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                keyword: this.activeModel,
+                                min_quality: 720,
+                                min_duration: 0,
+                                max_duration: 0,
+                                pages: 1,
+                                sort_by: 'newest',
+                                only_public: true,
+                                auto_skip_low_quality: true
+                            })
+                        });
+                        if (response.ok) {
+                            alert(`Discovery profile search queued for model: ${this.activeModel}! Check the Discovery Profiles hub shortly.`);
+                            this.closeDrawers();
+                        } else {
+                            alert("Failed to trigger model discovery.");
+                        }
+                    } catch(e) {
+                        alert("Error triggering model discovery: " + String(e));
+                    }
+                },
+
+                async importSelected() {
+                    if (this.selectedCount === 0) return;
+
+                    const response = await fetch('/api/v1/discovery/import-selected', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.selectedVideos)
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        alert(`Successfully imported ${data.imported_count} videos!`);
+
+                        // Mark as imported in local state
+                        this.videos.forEach(v => {
+                            if (this.selectedVideos.includes(v.id)) {
+                                v.imported = true;
+                                v.imported_at = new Date().toISOString();
+                            }
+                        });
+
+                        this.selectedVideos = [];
+                    }
+                },
+
+                async removeVideo(videoId) {
+                    this.selectedVideos = [videoId];
+                    await this.removeSelected();
+                },
+
+                async removeSelected() {
+                    if (this.selectedCount === 0) return;
+                    if (!confirm(`Remove ${this.selectedCount} selected videos and never offer them again for this profile?`)) return;
+
+                    const response = await fetch('/api/v1/discovery/remove-selected', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ video_ids: this.selectedVideos })
+                    });
+
+                    if (response.ok) {
+                        const removedIds = new Set(this.selectedVideos);
+                        this.videos = this.videos.filter(v => !removedIds.has(v.id));
+                        this.selectedVideos = [];
+                    }
+                },
+
+                async clearImported() {
+                    if (!confirm('Remove all imported videos from this review list?')) return;
+
+                    const response = await fetch(`/api/v1/discovery/clear-imported/${this.profileId}`, {
+                        method: 'POST'
+                    });
+
+                    if (response.ok) {
+                        this.loadVideos();
+                    }
+                },
+
+                async fetchMissingMetadata(selectedOnly = false, silent = false, maxItems = 20) {
+                    let targetIds = [];
+                    if (selectedOnly) {
+                        targetIds = this.videos
+                            .filter(v => this.selectedVideos.includes(v.id) && !v.metadata_complete)
+                            .map(v => v.id);
+                    }
+
+                    if (!selectedOnly && this.metadataMissingCount === 0) {
+                        return;
+                    }
+                    if (selectedOnly && targetIds.length === 0) {
+                        return;
+                    }
+
+                    this.metadataBusy = true;
+                    try {
+                        const response = await fetch(`/api/v1/discovery/review/${this.profileId}/metadata`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(selectedOnly
+                                ? { video_ids: targetIds.slice(0, maxItems || targetIds.length), batch_size: 5, only_missing: true, max_items: maxItems }
+                                : { all_missing: true, batch_size: 5, only_missing: true, max_items: maxItems }
+                            )
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.mergeVideos(data.videos || []);
+                            if (!silent && data.updated_count > 0) {
+                                console.log(`Discovery metadata updated: ${data.updated_count}`);
+                            }
+                        }
+                    } finally {
+                        this.metadataBusy = false;
+                    }
+                },
+
+                formatDuration(seconds) {
+                    if (!seconds) return 'Unknown';
+                    const mins = Math.floor(seconds / 60);
+                    const secs = Math.floor(seconds % 60);
+                    return `${mins}:${secs.toString().padStart(2, '0')}`;
+                },
+
+                qualityLabel(video) {
+                    if (video.quality_label) return video.quality_label;
+                    if (video.width && video.height) return `${video.height}p`;
+                    return 'Unknown';
+                },
+
+                formatSize(sizeMb) {
+                    const size = Number(sizeMb || 0);
+                    if (!size) return 'Size pending';
+                    if (size >= 1024) return `${(size / 1024).toFixed(2)} GB`;
+                    return `${size.toFixed(1)} MB`;
+                },
+
+                startSwipeReview() {
+                    if (!window.NXShell || !window.NXShell.swipe) {
+                        alert('Swipe review is still loading — try again in a second.');
+                        return;
+                    }
+                    const items = this.videos
+                        .filter(v => !v.imported)
+                        .map(v => ({
+                            id: v.id,
+                            title: v.title,
+                            thumbnail: this.thumbSrc(v),
+                            source: v.source,
+                            source_url: v.source_url || v.url,
+                            duration_display: this.formatDuration(v.duration),
+                        }));
+                    if (!items.length) {
+                        alert('Nothing to review.');
+                        return;
+                    }
+                    const approved = [];
+                    window.NXShell.swipe.open(items, async (item, kind) => {
+                        if (kind === 'approve') approved.push(item.id);
+                        // On the last item, submit the batch
+                        const remaining = items.length - (approved.length + 0);
+                        if (item === items[items.length - 1] && approved.length) {
+                            try {
+                                const res = await fetch('/api/v1/discovery/import-selected', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(approved),
+                                });
+                                if (res.ok) {
+                                    const data = await res.json();
+                                    this.videos.forEach(v => {
+                                        if (approved.includes(v.id)) {
+                                            v.imported = true;
+                                            v.imported_at = new Date().toISOString();
+                                        }
+                                    });
+                                    setTimeout(() => window.NXShell.swipe.close(), 1200);
+                                }
+                            } catch (e) {}
+                        }
+                    });
+                }
+            };
+        }
+    </script>
+</body>
+</html>

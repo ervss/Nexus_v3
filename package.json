@@ -1,0 +1,25 @@
+{
+  "name": "nexuspwc-frontend",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Frontend build tooling for the Nexus dashboard and video enhancer.",
+  "scripts": {
+    "start": "node server/index.mjs",
+    "build": "npm run build:main && npm run build:css && npm run build:enhancer && npm run sync:extensions",
+    "build:css": "esbuild app/static/dashboard.css --minify --outfile=app/static/dashboard.min.css",
+    "build:enhancer": "node scripts/build_video_enhancer.mjs",
+    "build:main": "esbuild app/static/main.js --bundle --minify --legal-comments=none --outfile=app/static/main.min.js",
+    "sync:extensions": "node scripts/sync_shared_extensions.mjs",
+    "test": "npm run test:js",
+    "test:js": "node scripts/run_js_tests.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  },
+  "dependencies": {
+    "@websr/websr": "^0.0.16",
+    "mp4-muxer": "^5.2.2",
+    "mp4box": "^2.4.1"
+  }
+}

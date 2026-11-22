@@ -1,0 +1,205 @@
+    <!-- PornOne Smart Discovery Modal -->
+    <template x-if="showPornOneDiscoveryModal">
+    <div class="modal-wrap nx-lazy-modal" role="dialog" aria-modal="true" aria-label="PornOne Smart Discovery">
+        <div class="modal-card" style="min-width:90vw;max-width:95vw;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
+                <h3><span class="material-icons-round">search</span>🔥 PornOne Smart Discovery</h3>
+                <button @click="showPornOneDiscoveryModal = false"><span
+                        class="material-icons-round">close</span></button>
+            </div>
+            <div class="modal-body" style="padding:20px;">
+                <div style="background:#1e293b;padding:20px;border-radius:8px;margin-bottom:20px;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
+                        <div>
+                            <label style="display:block;margin-bottom:5px;color:#cbd5e1;">Keyword / Search</label>
+                            <input type="text" x-model="pornoneDiscovery.keyword"
+                                placeholder="e.g., 'amateur', 'blonde'"
+                                style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;"
+                                @keydown.enter="searchPornOneDiscovery()">
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:5px;color:#cbd5e1;">Category (optional)</label>
+                            <input type="text" x-model="pornoneDiscovery.category" placeholder="e.g., 'anal', 'lesbian'"
+                                style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;"
+                                @keydown.enter="searchPornOneDiscovery()">
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:15px;margin-bottom:15px;">
+                        <div>
+                            <label style="display:block;margin-bottom:5px;color:#cbd5e1;">Min Quality</label>
+                            <select x-model.number="pornoneDiscovery.minQuality"
+                                style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;">
+                                <option value="2160">4K (2160p)</option>
+                                <option value="1080">Full HD (1080p)</option>
+                                <option value="720" selected>HD (720p)</option>
+                                <option value="480">SD (480p)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:5px;color:#cbd5e1;">Min Duration</label>
+                            <select x-model.number="pornoneDiscovery.minDuration"
+                                style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;">
+                                <option value="0">Any</option>
+                                <option value="180">3 min</option>
+                                <option value="300" selected>5 min</option>
+                                <option value="600">10 min</option>
+                                <option value="900">15 min</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:5px;color:#cbd5e1;">Sort By</label>
+                            <select x-model="pornoneDiscovery.sortBy"
+                                style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;">
+                                <option value="newest">Newest</option>
+                                <option value="most-viewed">Most Viewed</option>
+                                <option value="top-rated">Top Rated</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:5px;color:#cbd5e1;">Pages to Scan</label>
+                            <input type="number" x-model.number="pornoneDiscovery.pages" min="1" max="50" value="3"
+                                style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;">
+                        </div>
+                    </div>
+                    <div style="text-align:center;">
+                        <button @click="searchPornOneDiscovery()" :disabled="pornoneDiscovery.loading"
+                            style="padding:12px 30px;background:#f97316;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;"
+                            :style="pornoneDiscovery.loading ? 'opacity:0.6;cursor:not-allowed;' : ''">
+                            <span class="material-icons-round" x-show="!pornoneDiscovery.loading">search</span>
+                            <span class="material-icons-round" x-show="pornoneDiscovery.loading"
+                                style="animation:spin 1s linear infinite;">sync</span>
+                            <span x-text="pornoneDiscovery.loading ? 'Scanning PornOne...' : 'Discover Videos'"></span>
+                        </button>
+                    </div>
+                    <div x-show="pornoneDiscovery.statusMsg" x-text="pornoneDiscovery.statusMsg"
+                        style="margin-top:12px;text-align:center;color:#94a3b8;font-size:13px;"></div>
+                </div>
+                <!-- Results -->
+                <template x-if="pornoneDiscovery.results.length > 0">
+                    <div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                            <h4 style="margin:0;color:#f97316;">
+                                Found <span x-text="pornoneDiscovery.results.length"></span> videos
+                                <span style="color:#64748b;font-weight:400;"
+                                    x-show="pornoneDiscovery.total > pornoneDiscovery.results.length">
+                                    (of <span x-text="pornoneDiscovery.total"></span> scanned)
+                                </span>
+                            </h4>
+                            <div style="display:flex;gap:10px;">
+                                <button @click="pornoneDiscovery.selected = pornoneDiscovery.results.map(r=>r.page_url)"
+                                    style="padding:8px 16px;background:#1e293b;color:#cbd5e1;border:1px solid #475569;border-radius:6px;cursor:pointer;font-size:12px;">
+                                    Select All
+                                </button>
+                                <button @click="pornoneDiscovery.selected = []"
+                                    style="padding:8px 16px;background:#1e293b;color:#cbd5e1;border:1px solid #475569;border-radius:6px;cursor:pointer;font-size:12px;">
+                                    Clear
+                                </button>
+                                <button @click="importPornOneDiscovery()"
+                                    :disabled="pornoneDiscovery.selected.length === 0 || pornoneDiscovery.importing"
+                                    style="padding:8px 20px;background:#f97316;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px;"
+                                    :style="(pornoneDiscovery.selected.length === 0 || pornoneDiscovery.importing) ? 'opacity:0.5;cursor:not-allowed;' : ''">
+                                    <span
+                                        x-text="pornoneDiscovery.importing ? 'Importing...' : `Import ${pornoneDiscovery.selected.length} Selected`"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;">
+                            <template x-for="result in pornoneDiscovery.results" :key="result.page_url">
+                                <div @click="togglePornOneDiscoveryResult(result.page_url)"
+                                    style="border-radius:10px;overflow:hidden;cursor:pointer;transition:all 0.2s;border:2px solid transparent;"
+                                    :style="pornoneDiscovery.selected.includes(result.page_url) ? 'border-color:#f97316;box-shadow:0 0 14px rgba(249,115,22,0.4);' : 'border-color:rgba(100,116,139,0.2);'">
+                                    <div style="position:relative;aspect-ratio:16/9;background:#0f172a;">
+                                        <img :src="result.thumbnail" :alt="result.title"
+                                            style="width:100%;height:100%;object-fit:cover;"
+                                            @error.once="$event.target.src='/static/placeholder.jpg'">
+                                        <!-- selected check -->
+                                        <div x-show="pornoneDiscovery.selected.includes(result.page_url)"
+                                            style="position:absolute;top:6px;right:6px;background:#f97316;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;z-index:3;">
+                                            <span class="material-icons-round"
+                                                style="font-size:15px;color:#fff;">check</span>
+                                        </div>
+                                        <!-- quality top-left -->
+                                        <div x-show="result.quality"
+                                            style="position:absolute;top:5px;left:5px;background:rgba(249,115,22,0.92);backdrop-filter:blur(4px);padding:2px 7px;border-radius:5px;font-size:11px;font-weight:700;color:#fff;z-index:2;"
+                                            x-text="result.quality + 'p'"></div>
+                                        <!-- duration bottom-right -->
+                                        <div x-show="result.duration"
+                                            style="position:absolute;bottom:5px;right:5px;background:rgba(0,0,0,0.82);backdrop-filter:blur(4px);padding:2px 7px;border-radius:5px;font-size:11px;color:#fff;z-index:2;"
+                                            x-text="formatDuration(result.duration)"></div>
+                                        <!-- views bottom-left -->
+                                        <div x-show="result.views"
+                                            style="position:absolute;bottom:5px;left:5px;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);padding:2px 7px;border-radius:5px;font-size:10px;color:#94a3b8;z-index:2;"
+                                            x-text="result.views ? result.views.toLocaleString() + ' views' : ''"></div>
+                                    </div>
+                                    <div style="padding:7px 9px 9px;background:#1a2535;">
+                                        <div style="font-size:12px;color:#e2e8f0;font-weight:600;line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;"
+                                            x-text="result.title"></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ IMPORT PREVIEW POPUP ═══ -->
+
+    <div class="ip-overlay" x-show="importPreview.show" style="display:none;" x-transition.opacity
+        @keydown.escape.window="cancelImportPreview()">
+        <div class="ip-card" @click.stop>
+
+            <!-- Loading state -->
+            <div class="ip-loading" x-show="importPreview.loading">
+                <span class="material-icons-round ip-spin"
+                    style="font-size:28px;color:#38bdf8;">progress_activity</span>
+                Načítavam metadáta…
+            </div>
+
+            <!-- Loaded state -->
+            <template x-if="!importPreview.loading">
+                <div>
+                    <!-- Thumbnail -->
+                    <div class="ip-thumb-wrap">
+                        <template x-if="importPreview.thumbnail">
+                            <img :src="importPreview.thumbnail" @error="$el.style.display='none'">
+                        </template>
+                        <div class="ip-thumb-placeholder" x-show="!importPreview.thumbnail">
+                            <span class="material-icons-round">movie</span>
+                        </div>
+                        <span x-show="importPreview.quality" class="ip-badge ip-badge-quality"
+                            :class="importPreview.quality==='4K'?'q4k':''" x-text="importPreview.quality"></span>
+                        <span x-show="importPreview.duration > 0" class="ip-badge ip-badge-dur"
+                            x-text="formatDuration(importPreview.duration)"></span>
+                        <span x-show="importPreview.source_type" class="ip-badge ip-badge-src"
+                            x-text="importPreview.source_type"></span>
+                    </div>
+
+                    <!-- Info -->
+                    <div class="ip-body">
+                        <div class="ip-error" x-show="importPreview.error" x-text="importPreview.error"></div>
+                        <div class="ip-title" x-text="importPreview.title || importPreview.url"></div>
+                        <div class="ip-meta" x-show="importPreview.uploader">
+                            <b>Autor:</b> <span x-text="importPreview.uploader"></span>
+                        </div>
+                        <div class="ip-meta" x-show="importPreview.count > 1">
+                            <b>Hromadný import:</b> <span
+                                x-text="`${importPreview.count} odkazov — náhľad je z prvého`"></span>
+                        </div>
+                        <div class="ip-actions">
+                            <button class="ip-btn ip-btn-cancel" @click="cancelImportPreview()">
+                                <span class="material-icons-round">close</span>Zrušiť
+                            </button>
+                            <button class="ip-btn ip-btn-confirm" @click="confirmImportPreview()">
+                                <span class="material-icons-round">move_to_inbox</span><span
+                                    x-text="importPreview.count > 1 ? `Importovať ${importPreview.count}` : 'Importovať'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+        </div>
+    </div>
+</template>

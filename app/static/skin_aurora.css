@@ -1,0 +1,1035 @@
+/* ============================================================
+   NEXUS · AURORA "LIGHTBOX VAULT" SKIN  (v2)
+   ------------------------------------------------------------
+   Full visual upgrade layer for the V1 Archive Console.
+   Scoped 100% under body.ui-v1.skin-aurora — inert until the
+   ✦ toggle adds the class. Original design untouched.
+
+   Concept: the archive as a lightbox — every card is a glass
+   slide lit from within. Gradient hairline borders that ignite
+   on hover, doubled edges (outer gradient border + inner light
+   hairline + projector glow), living aurora ambience, mono
+   numerals for data, shine-sweep CTAs.
+
+   Type: Syne (display, already loaded) · Manrope (UI) ·
+         IBM Plex Mono (data/meta).
+   ============================================================ */
+
+/* ---------- 0 · Tokens ---------- */
+
+body.ui-v1.skin-aurora {
+    --v1-bg: #0a0d16;
+    --v1-shell: #10141f;
+    --v1-panel: #141927;
+    --v1-panel-2: #1a2030;
+    --v1-border: rgba(154, 168, 255, 0.09);
+    --v1-border-strong: rgba(163, 176, 255, 0.16);
+    --v1-text: #eef1f8;
+    --v1-dim: #98a1b8;
+    --v1-accent: #7c86ff;
+    --v1-accent-2: #a06bff;
+    --v1-accent-soft: rgba(124, 134, 255, 0.14);
+    --v1-accent-glow: rgba(124, 134, 255, 0.28);
+    --v1-warm: #f0a44a;
+    --v1-warm-soft: rgba(240, 164, 74, 0.14);
+    --v1-shadow: 0 24px 70px rgba(3, 5, 12, 0.55);
+    /* gradient-border building blocks */
+    --au-edge: linear-gradient(180deg,
+        rgba(196, 205, 255, 0.22) 0%,
+        rgba(154, 168, 255, 0.08) 30%,
+        rgba(154, 168, 255, 0.04) 70%,
+        rgba(120, 90, 220, 0.10) 100%);
+    --au-edge-hot: linear-gradient(160deg,
+        rgba(148, 158, 255, 0.85) 0%,
+        rgba(124, 134, 255, 0.25) 35%,
+        rgba(160, 107, 255, 0.20) 65%,
+        rgba(160, 107, 255, 0.75) 100%);
+    --au-fill: linear-gradient(180deg, rgba(27, 33, 54, 0.92), rgba(14, 18, 31, 0.97));
+    --au-fill-raised: linear-gradient(180deg, rgba(33, 40, 66, 0.92), rgba(17, 21, 36, 0.97));
+    --au-mono: "IBM Plex Mono", ui-monospace, monospace;
+    --au-display: "Syne", "Manrope", sans-serif;
+
+    background:
+        radial-gradient(ellipse 90% 55% at 18% -12%, rgba(99, 91, 255, 0.15), transparent 55%),
+        radial-gradient(ellipse 70% 45% at 88% 4%, rgba(160, 107, 255, 0.10), transparent 60%),
+        radial-gradient(ellipse 60% 50% at 70% 110%, rgba(64, 105, 224, 0.08), transparent 65%),
+        linear-gradient(180deg, #0c101c 0%, #0a0d16 45%, #090b13 100%);
+    color: var(--v1-text);
+}
+
+/* ---------- 1 · Living ambience ----------
+   Two extra fixed layers: a slow-drifting aurora bloom and a
+   fine noise grain that kills gradient banding. Both inert to
+   input and switched off for reduced-motion users. */
+
+body.ui-v1.skin-aurora::before {
+    background:
+        linear-gradient(rgba(163, 176, 255, 0.026) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(163, 176, 255, 0.026) 1px, transparent 1px);
+    background-size: 140px 140px;
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent 72%);
+    opacity: 0.45;
+}
+
+body.ui-v1.skin-aurora::after {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 34% 26% at 26% 18%, rgba(112, 104, 255, 0.10), transparent 70%),
+        radial-gradient(ellipse 30% 24% at 74% 30%, rgba(168, 106, 255, 0.07), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 55% 85%, rgba(70, 120, 255, 0.05), transparent 70%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+    background-size: auto, auto, auto, 160px 160px;
+    background-blend-mode: normal, normal, normal, overlay;
+    opacity: 0.9;
+    animation: au-drift 46s ease-in-out infinite alternate;
+    mix-blend-mode: screen;
+}
+
+@keyframes au-drift {
+    0%   { transform: translate3d(-1.5%, -1%, 0) scale(1); }
+    50%  { transform: translate3d(1.5%, 1.5%, 0) scale(1.04); }
+    100% { transform: translate3d(-0.5%, 2%, 0) scale(1.02); }
+}
+
+/* ---------- 2 · Shell panels: glass with a lit top edge ---------- */
+
+body.ui-v1.skin-aurora .v1-sidebar,
+body.ui-v1.skin-aurora .v1-stage {
+    border-radius: 22px;
+    border: 1px solid transparent;
+    background:
+        linear-gradient(180deg, rgba(23, 28, 46, 0.78), rgba(12, 15, 26, 0.88)) padding-box,
+        var(--au-edge) border-box;
+    backdrop-filter: blur(22px) saturate(1.25);
+    box-shadow:
+        inset 0 1px 0 rgba(214, 221, 255, 0.08),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+        0 1px 0 rgba(0, 0, 0, 0.25),
+        var(--v1-shadow);
+}
+
+/* ---------- 3 · Brand: display face + glowing sigil ---------- */
+
+body.ui-v1.skin-aurora .v1-brand {
+    border-bottom: 1px solid transparent;
+    border-image: linear-gradient(90deg, transparent, rgba(154, 168, 255, 0.22), transparent) 1;
+    position: relative;
+}
+
+body.ui-v1.skin-aurora .v1-brand-mark {
+    background:
+        linear-gradient(135deg, rgba(124, 134, 255, 0.30), rgba(160, 107, 255, 0.10)) padding-box,
+        var(--au-edge-hot) border-box;
+    border: 1px solid transparent;
+    color: #d6dbff;
+    box-shadow:
+        0 0 22px rgba(124, 134, 255, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    text-shadow: 0 0 12px rgba(160, 168, 255, 0.65);
+    font-family: var(--au-display);
+    font-weight: 800;
+}
+
+body.ui-v1.skin-aurora .v1-brand-name {
+    font-family: var(--au-display);
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.01em;
+    background: linear-gradient(120deg, #f6f8ff 20%, #b9c2ff 65%, #d0b7ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+body.ui-v1.skin-aurora .v1-brand-sub {
+    color: #6f7994;
+    letter-spacing: 0.22em;
+}
+
+/* section labels: micro-label with a trailing hairline */
+body.ui-v1.skin-aurora .v1-nav-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #656f8d;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+}
+
+body.ui-v1.skin-aurora .v1-nav-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(154, 168, 255, 0.18), transparent);
+}
+
+/* ---------- 4 · Controls: doubled edges, tactile motion ---------- */
+
+body.ui-v1.skin-aurora .v1-nav-btn,
+body.ui-v1.skin-aurora .v1-soft-btn,
+body.ui-v1.skin-aurora .v1-icon-btn,
+body.ui-v1.skin-aurora .v1-filter-btn,
+body.ui-v1.skin-aurora .v1-chip,
+body.ui-v1.skin-aurora .v1-select,
+body.ui-v1.skin-aurora .v1-date,
+body.ui-v1.skin-aurora .v1-ghost,
+body.ui-v1.skin-aurora .v1-pill-btn,
+body.ui-v1.skin-aurora .v1-sidebar-toggle {
+    border: 1px solid transparent;
+    background:
+        linear-gradient(180deg, rgba(36, 43, 68, 0.6), rgba(20, 25, 41, 0.72)) padding-box,
+        var(--au-edge) border-box;
+    color: #dfe4f2;
+    border-radius: 11px;
+    box-shadow: inset 0 1px 0 rgba(214, 221, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.25);
+    transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 160ms ease, color 160ms ease,
+                background 160ms ease, border-color 160ms ease;
+}
+
+body.ui-v1.skin-aurora .v1-nav-btn:hover,
+body.ui-v1.skin-aurora .v1-soft-btn:hover,
+body.ui-v1.skin-aurora .v1-icon-btn:hover,
+body.ui-v1.skin-aurora .v1-filter-btn:hover,
+body.ui-v1.skin-aurora .v1-chip:hover,
+body.ui-v1.skin-aurora .v1-ghost:hover,
+body.ui-v1.skin-aurora .v1-sidebar-toggle:hover {
+    background:
+        linear-gradient(180deg, rgba(46, 55, 88, 0.7), rgba(26, 32, 52, 0.78)) padding-box,
+        var(--au-edge-hot) border-box;
+    color: #eef1ff;
+    transform: translateY(-1px);
+    box-shadow:
+        inset 0 1px 0 rgba(214, 221, 255, 0.1),
+        0 6px 18px rgba(6, 9, 22, 0.5),
+        0 0 16px rgba(124, 134, 255, 0.14);
+}
+
+body.ui-v1.skin-aurora .v1-nav-btn:active,
+body.ui-v1.skin-aurora .v1-chip:active,
+body.ui-v1.skin-aurora .v1-icon-btn:active,
+body.ui-v1.skin-aurora .v1-ghost:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* icons carry the accent on interaction */
+body.ui-v1.skin-aurora .v1-nav-btn .material-icons-round {
+    transition: color 160ms ease, transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+    color: #8d97b8;
+}
+
+body.ui-v1.skin-aurora .v1-nav-btn:hover .material-icons-round {
+    color: #aeb7ff;
+    transform: translateX(1px);
+}
+
+/* nav active: filled beam + glowing edge dot */
+body.ui-v1.skin-aurora .v1-nav-btn.active {
+    position: relative;
+    background:
+        linear-gradient(90deg, rgba(124, 134, 255, 0.20), rgba(124, 134, 255, 0.04) 60%,
+            rgba(160, 107, 255, 0.07)) padding-box,
+        var(--au-edge-hot) border-box;
+    color: #e9ecff;
+    box-shadow:
+        inset 0 1px 0 rgba(214, 221, 255, 0.1),
+        0 0 22px rgba(124, 134, 255, 0.12);
+}
+
+body.ui-v1.skin-aurora .v1-nav-btn.active::before {
+    content: "";
+    position: absolute;
+    left: -1px;
+    top: 22%;
+    bottom: 22%;
+    width: 3px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--v1-accent), var(--v1-accent-2));
+    box-shadow: 0 0 12px rgba(124, 134, 255, 0.8), 0 0 3px rgba(124, 134, 255, 0.9);
+}
+
+body.ui-v1.skin-aurora .v1-nav-btn.active .material-icons-round {
+    color: #b6bdff;
+}
+
+/* chips / pill toggles active */
+body.ui-v1.skin-aurora .v1-icon-btn.active,
+body.ui-v1.skin-aurora .v1-chip.active,
+body.ui-v1.skin-aurora .v1-pill-btn.active {
+    background:
+        linear-gradient(180deg, rgba(124, 134, 255, 0.30), rgba(124, 134, 255, 0.10)) padding-box,
+        var(--au-edge-hot) border-box;
+    color: #eef0ff;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 0 18px rgba(124, 134, 255, 0.20);
+    text-shadow: 0 0 10px rgba(160, 168, 255, 0.4);
+}
+
+/* ---------- 5 · Primary CTAs: gradient core + shine sweep ---------- */
+
+body.ui-v1.skin-aurora .v1-import-btn,
+body.ui-v1.skin-aurora .v1-primary-btn {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: linear-gradient(135deg, #6d7bff 0%, #8a5fff 55%, #a05cff 100%);
+    border: 1px solid rgba(186, 178, 255, 0.5);
+    color: #fff;
+    border-radius: 11px;
+    box-shadow:
+        0 6px 22px rgba(114, 106, 255, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        inset 0 -6px 14px rgba(60, 40, 160, 0.35);
+    text-shadow: 0 1px 2px rgba(30, 20, 90, 0.4);
+    transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 160ms ease, filter 160ms ease;
+}
+
+body.ui-v1.skin-aurora .v1-import-btn::before,
+body.ui-v1.skin-aurora .v1-primary-btn::before {
+    content: "";
+    position: absolute;
+    inset: -40% -60%;
+    z-index: -1;
+    background: linear-gradient(115deg,
+        transparent 42%, rgba(255, 255, 255, 0.28) 50%, transparent 58%);
+    transform: translateX(-70%) skewX(-8deg);
+    transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+}
+
+body.ui-v1.skin-aurora .v1-import-btn:hover::before,
+body.ui-v1.skin-aurora .v1-primary-btn:hover::before {
+    transform: translateX(70%) skewX(-8deg);
+}
+
+body.ui-v1.skin-aurora .v1-import-btn:hover,
+body.ui-v1.skin-aurora .v1-primary-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.07) saturate(1.1);
+    box-shadow:
+        0 10px 32px rgba(114, 106, 255, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+body.ui-v1.skin-aurora .v1-import-btn:active,
+body.ui-v1.skin-aurora .v1-primary-btn:active {
+    transform: translateY(0) scale(0.97);
+}
+
+/* ---------- 6 · Sidebar meta + footer ---------- */
+
+body.ui-v1.skin-aurora .v1-batch-meta {
+    background: rgba(154, 168, 255, 0.04);
+    border: 1px solid var(--v1-border);
+    border-radius: 12px;
+    box-shadow: inset 0 1px 0 rgba(214, 221, 255, 0.04);
+}
+
+body.ui-v1.skin-aurora .v1-batch-meta div {
+    font-family: var(--au-mono);
+    font-size: 11px;
+    letter-spacing: -0.01em;
+}
+
+body.ui-v1.skin-aurora .v1-batch-meta span { color: #7f8aa6; }
+
+body.ui-v1.skin-aurora .v1-sidebar-foot {
+    border-top: 1px solid transparent;
+    border-image: linear-gradient(90deg, transparent, rgba(154, 168, 255, 0.22), transparent) 1;
+}
+
+/* ---------- 7 · Header / command bars ---------- */
+
+body.ui-v1.skin-aurora .v1-header,
+body.ui-v1.skin-aurora .v1-command,
+body.ui-v1.skin-aurora .v1-grid-shell {
+    border-radius: 18px;
+    border: 1px solid transparent;
+    background:
+        linear-gradient(180deg, rgba(21, 26, 44, 0.70), rgba(12, 15, 26, 0.84)) padding-box,
+        var(--au-edge) border-box;
+    backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow:
+        inset 0 1px 0 rgba(214, 221, 255, 0.06),
+        0 12px 40px rgba(3, 5, 12, 0.35);
+}
+
+body.ui-v1.skin-aurora .v1-search-wrap,
+body.ui-v1.skin-aurora .v1-import-wrap {
+    background: rgba(9, 12, 22, 0.6);
+    border: 1px solid var(--v1-border);
+    border-radius: 11px;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+body.ui-v1.skin-aurora .v1-search-wrap .material-icons-round,
+body.ui-v1.skin-aurora .v1-import-wrap .material-icons-round {
+    color: #6f7994;
+    transition: color 180ms ease;
+}
+
+body.ui-v1.skin-aurora .v1-search-wrap:focus-within,
+body.ui-v1.skin-aurora .v1-import-wrap:focus-within {
+    border-color: rgba(150, 160, 255, 0.5);
+    background: rgba(11, 14, 27, 0.75);
+    box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.25),
+        0 0 0 3px rgba(124, 134, 255, 0.14),
+        0 0 24px rgba(124, 134, 255, 0.10);
+}
+
+body.ui-v1.skin-aurora .v1-search-wrap:focus-within .material-icons-round,
+body.ui-v1.skin-aurora .v1-import-wrap:focus-within .material-icons-round {
+    color: #9aa4ff;
+}
+
+/* status card: breathing live dot */
+body.ui-v1.skin-aurora .v1-status-card {
+    background: rgba(11, 14, 26, 0.65);
+    border: 1px solid var(--v1-border);
+    border-radius: 11px;
+    box-shadow: inset 0 1px 0 rgba(214, 221, 255, 0.05);
+}
+
+body.ui-v1.skin-aurora .v1-status-dot {
+    background: #4ade80;
+    box-shadow: 0 0 0 5px rgba(74, 222, 128, 0.12), 0 0 12px rgba(74, 222, 128, 0.55);
+    animation: au-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes au-pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.10), 0 0 10px rgba(74, 222, 128, 0.45); }
+    50%      { box-shadow: 0 0 0 7px rgba(74, 222, 128, 0.16), 0 0 16px rgba(74, 222, 128, 0.7); }
+}
+
+body.ui-v1.skin-aurora .v1-status-title { color: #eef1f8; }
+body.ui-v1.skin-aurora .v1-status-copy {
+    color: #8b95b0;
+    font-family: var(--au-mono);
+    font-size: 10.5px;
+}
+
+body.ui-v1.skin-aurora .v1-intake-rail {
+    border: 1px solid transparent;
+    background:
+        linear-gradient(90deg, rgba(124, 134, 255, 0.08), rgba(12, 15, 26, 0.66) 45%) padding-box,
+        var(--au-edge) border-box;
+    border-radius: 14px;
+}
+
+body.ui-v1.skin-aurora .v1-intake-title { color: #e9edff; letter-spacing: 0.08em; }
+body.ui-v1.skin-aurora .v1-intake-text { color: #8b95b0; }
+
+/* popovers: elevated glass */
+body.ui-v1.skin-aurora .v1-filter-pop {
+    border: 1px solid transparent;
+    background:
+        linear-gradient(180deg, rgba(27, 33, 55, 0.97), rgba(15, 18, 32, 0.99)) padding-box,
+        var(--au-edge-hot) border-box;
+    backdrop-filter: blur(26px) saturate(1.3);
+    border-radius: 14px;
+    box-shadow:
+        0 28px 80px rgba(3, 5, 12, 0.65),
+        0 0 34px rgba(124, 134, 255, 0.08),
+        inset 0 1px 0 rgba(214, 221, 255, 0.08);
+}
+
+body.ui-v1.skin-aurora .v1-filter-actions button {
+    color: #d9dff0;
+    border: 1px solid var(--v1-border);
+    background: rgba(154, 168, 255, 0.06);
+    border-radius: 9px;
+    transition: background 150ms ease, border-color 150ms ease;
+}
+
+body.ui-v1.skin-aurora .v1-filter-actions button:hover {
+    background: rgba(154, 168, 255, 0.12);
+    border-color: rgba(154, 168, 255, 0.3);
+}
+
+/* ---------- 8 · Grid header: display type ---------- */
+
+body.ui-v1.skin-aurora .v1-grid-head h2 {
+    font-family: var(--au-display);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    background: linear-gradient(120deg, #f6f8ff 30%, #c3caff 80%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+body.ui-v1.skin-aurora .v1-kicker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #7d87ff;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+}
+
+body.ui-v1.skin-aurora .v1-kicker::before {
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--v1-accent), transparent);
+    box-shadow: 0 0 8px rgba(124, 134, 255, 0.6);
+}
+
+/* ============================================================
+   9 · THE CARD — signature element
+   Doubled edge: gradient hairline border (lit from the top)
+   + inner light seam + projector glow underneath. Thumbnail
+   gets a readability scrim; on hover the edge ignites, the
+   slide lifts toward the light and the image blooms.
+   ============================================================ */
+
+body.ui-v1.skin-aurora .v1-card {
+    position: relative;
+    border-radius: 16px;
+    border: 1px solid transparent;
+    background:
+        var(--au-fill) padding-box,
+        var(--au-edge) border-box;
+    box-shadow:
+        inset 0 1px 0 rgba(214, 221, 255, 0.07),
+        0 2px 6px rgba(3, 5, 12, 0.4),
+        0 14px 34px rgba(3, 5, 12, 0.38);
+    transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 260ms ease, background 260ms ease;
+    contain-intrinsic-size: auto 340px;
+}
+
+/* inner light seam — the second edge of the "double border" */
+body.ui-v1.skin-aurora .v1-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 5;
+    box-shadow:
+        inset 0 0 0 1px rgba(214, 221, 255, 0.045),
+        inset 0 1px 0 rgba(214, 221, 255, 0.08);
+    transition: box-shadow 260ms ease;
+}
+
+body.ui-v1.skin-aurora .v1-card:hover {
+    transform: translateY(-5px) scale(1.014);
+    background:
+        var(--au-fill-raised) padding-box,
+        var(--au-edge-hot) border-box;
+    box-shadow:
+        inset 0 1px 0 rgba(214, 221, 255, 0.1),
+        0 3px 8px rgba(3, 5, 12, 0.45),
+        0 26px 60px rgba(3, 5, 12, 0.55),
+        0 0 36px rgba(124, 134, 255, 0.22);
+}
+
+body.ui-v1.skin-aurora .v1-card:hover::after {
+    box-shadow:
+        inset 0 0 0 1px rgba(214, 221, 255, 0.09),
+        inset 0 1px 0 rgba(214, 221, 255, 0.14);
+}
+
+body.ui-v1.skin-aurora .v1-card.selected {
+    background:
+        var(--au-fill-raised) padding-box,
+        linear-gradient(160deg, #97a0ff, rgba(124, 134, 255, 0.4) 40%,
+            rgba(160, 107, 255, 0.4) 60%, #b06bff) border-box;
+    box-shadow:
+        0 0 0 1px rgba(150, 160, 255, 0.35),
+        0 22px 52px rgba(3, 5, 12, 0.55),
+        0 0 42px rgba(124, 134, 255, 0.32);
+}
+
+/* thumbnail: scrim for pill readability + hover bloom */
+body.ui-v1.skin-aurora .v1-thumb { background: #0a0d16; }
+
+body.ui-v1.skin-aurora .v1-thumb::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background:
+        linear-gradient(180deg, rgba(6, 8, 16, 0.42) 0%, transparent 22%),
+        linear-gradient(0deg, rgba(6, 8, 16, 0.5) 0%, transparent 26%);
+    transition: opacity 240ms ease;
+}
+
+body.ui-v1.skin-aurora .v1-thumb img {
+    transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1), filter 300ms ease;
+}
+
+body.ui-v1.skin-aurora .v1-card:hover .v1-thumb img {
+    transform: scale(1.045);
+    filter: brightness(1.08) saturate(1.12) contrast(1.02);
+}
+
+body.ui-v1.skin-aurora .v1-hover-video { background: #0a0d16; }
+
+/* thumbnail pills: glass chips with semantic marker dots */
+body.ui-v1.skin-aurora .v1-source-pill,
+body.ui-v1.skin-aurora .v1-quality-pill,
+body.ui-v1.skin-aurora .v1-time-pill,
+body.ui-v1.skin-aurora .v1-size-pill,
+body.ui-v1.skin-aurora .v1-idx-pill {
+    background: rgba(8, 10, 19, 0.66);
+    border: 1px solid rgba(210, 218, 255, 0.15);
+    backdrop-filter: blur(14px) saturate(1.4);
+    color: #eef1f8;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-family: var(--au-mono);
+    font-size: 9.5px;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 2px 8px rgba(3, 5, 12, 0.4);
+    gap: 5px;
+}
+
+body.ui-v1.skin-aurora .v1-source-pill::before,
+body.ui-v1.skin-aurora .v1-quality-pill::before,
+body.ui-v1.skin-aurora .v1-size-pill::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    flex: 0 0 auto;
+}
+
+body.ui-v1.skin-aurora .v1-source-pill {
+    color: #ffce96;
+    border-color: rgba(240, 164, 74, 0.30);
+}
+
+body.ui-v1.skin-aurora .v1-source-pill::before {
+    background: var(--v1-warm);
+    box-shadow: 0 0 8px rgba(240, 164, 74, 0.9);
+}
+
+body.ui-v1.skin-aurora .v1-quality-pill {
+    color: #d3d8ff;
+    border-color: rgba(150, 160, 255, 0.32);
+}
+
+body.ui-v1.skin-aurora .v1-quality-pill::before {
+    background: var(--v1-accent);
+    box-shadow: 0 0 8px rgba(124, 134, 255, 0.9);
+}
+
+body.ui-v1.skin-aurora .v1-size-pill {
+    color: #b5f5d0;
+    border-color: rgba(74, 222, 128, 0.26);
+}
+
+body.ui-v1.skin-aurora .v1-size-pill::before {
+    background: #4ade80;
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.9);
+}
+
+body.ui-v1.skin-aurora .v1-idx-pill { color: rgba(190, 205, 255, 0.85); }
+
+body.ui-v1.skin-aurora .v1-selected-badge {
+    background: rgba(8, 10, 19, 0.66);
+    border: 1px solid rgba(210, 218, 255, 0.15);
+    backdrop-filter: blur(14px);
+    transition: color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+body.ui-v1.skin-aurora .v1-selected-badge:hover { transform: scale(1.08); }
+
+body.ui-v1.skin-aurora .v1-selected-badge.active {
+    color: #d6dbff;
+    border-color: rgba(150, 160, 255, 0.65);
+    box-shadow: 0 0 0 1px rgba(150, 160, 255, 0.3), 0 0 16px rgba(124, 134, 255, 0.45);
+}
+
+body.ui-v1.skin-aurora .v1-striper-badge {
+    color: #dbe0ff;
+    background: rgba(8, 10, 19, 0.82);
+    border: 1px solid rgba(150, 160, 255, 0.32);
+    backdrop-filter: blur(10px);
+    font-family: var(--au-mono);
+}
+
+/* card body: typographic hierarchy + hairline seams */
+body.ui-v1.skin-aurora .v1-card-body h3 {
+    color: #eef1f8;
+    font-weight: 650;
+    letter-spacing: -0.005em;
+    transition: color 200ms ease;
+}
+
+body.ui-v1.skin-aurora .v1-card:hover .v1-card-body h3 { color: #ffffff; }
+
+body.ui-v1.skin-aurora .v1-card-meta {
+    color: #7f8aa6;
+    font-family: var(--au-mono);
+    font-size: 10.5px;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+}
+
+body.ui-v1.skin-aurora .v1-card-tags span {
+    background: rgba(154, 168, 255, 0.065);
+    border: 1px solid rgba(154, 168, 255, 0.13);
+    color: #b9c2dd;
+    font-weight: 600;
+    transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+body.ui-v1.skin-aurora .v1-card-tags span:hover {
+    background: rgba(154, 168, 255, 0.14);
+    border-color: rgba(154, 168, 255, 0.32);
+    color: #dde2ff;
+}
+
+body.ui-v1.skin-aurora .v1-card-tags .v1-tag-action {
+    background: rgba(160, 107, 255, 0.15);
+    border: 1px solid rgba(160, 107, 255, 0.36);
+    color: #dcc5ff;
+}
+
+/* actions row: separated by a lit seam; play = mini CTA */
+body.ui-v1.skin-aurora .v1-card-actions {
+    padding-top: 10px;
+    border-top: 1px solid transparent;
+    border-image: linear-gradient(90deg, transparent, rgba(154, 168, 255, 0.16), transparent) 1;
+}
+
+body.ui-v1.skin-aurora .v1-play {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: linear-gradient(135deg, #6d7bff 0%, #9a5cff 100%);
+    border: 1px solid rgba(178, 168, 255, 0.42);
+    box-shadow:
+        0 4px 14px rgba(114, 106, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.24);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 2px rgba(30, 20, 90, 0.35);
+    transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 150ms ease, filter 150ms ease;
+}
+
+body.ui-v1.skin-aurora .v1-play::before {
+    content: "";
+    position: absolute;
+    inset: -40% -60%;
+    z-index: -1;
+    background: linear-gradient(115deg, transparent 42%, rgba(255, 255, 255, 0.3) 50%, transparent 58%);
+    transform: translateX(-70%) skewX(-8deg);
+    transition: transform 550ms cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+}
+
+body.ui-v1.skin-aurora .v1-play:hover::before { transform: translateX(70%) skewX(-8deg); }
+
+body.ui-v1.skin-aurora .v1-play:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 6px 20px rgba(114, 106, 255, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    transform: translateY(-1px);
+}
+
+body.ui-v1.skin-aurora .v1-play:active { transform: scale(0.96); }
+
+body.ui-v1.skin-aurora .v1-ghost {
+    transition: transform 150ms ease, box-shadow 150ms ease, color 150ms ease, background 150ms ease;
+}
+
+/* ---------- 10 · Empty / skeleton / batch dock / scrollbar ---------- */
+
+body.ui-v1.skin-aurora .v1-empty {
+    border: 1px dashed rgba(154, 168, 255, 0.2);
+    background:
+        radial-gradient(ellipse 60% 70% at 50% 20%, rgba(124, 134, 255, 0.05), transparent 70%),
+        rgba(154, 168, 255, 0.025);
+    border-radius: 20px;
+}
+
+body.ui-v1.skin-aurora .v1-empty span {
+    color: #7d87ff;
+    text-shadow: 0 0 24px rgba(124, 134, 255, 0.45);
+}
+
+body.ui-v1.skin-aurora .v1-skeleton {
+    background:
+        linear-gradient(90deg, rgba(154, 168, 255, 0.04), rgba(154, 168, 255, 0.1), rgba(154, 168, 255, 0.04));
+    background-size: 200% 100%;
+    border-radius: 16px;
+}
+
+body.ui-v1.skin-aurora .batch-bar {
+    backdrop-filter: blur(24px) saturate(1.3);
+}
+
+body.ui-v1.skin-aurora .batch-selection-chip,
+body.ui-v1.skin-aurora .batch-selection-more {
+    color: #d9dff0;
+    background: rgba(154, 168, 255, 0.08);
+    border: 1px solid rgba(154, 168, 255, 0.17);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+body.ui-v1.skin-aurora .v1-filter-list::-webkit-scrollbar { width: 8px; height: 8px; }
+
+body.ui-v1.skin-aurora .v1-filter-list::-webkit-scrollbar-thumb,
+body.ui-v1.skin-aurora::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(154, 168, 255, 0.22), rgba(124, 134, 255, 0.12));
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+body.ui-v1.skin-aurora::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(154, 168, 255, 0.36), rgba(124, 134, 255, 0.22));
+    background-clip: padding-box;
+}
+
+/* ---------- 11 · Keyboard focus (a11y floor) ---------- */
+
+body.ui-v1.skin-aurora .v1-nav-btn:focus-visible,
+body.ui-v1.skin-aurora .v1-chip:focus-visible,
+body.ui-v1.skin-aurora .v1-icon-btn:focus-visible,
+body.ui-v1.skin-aurora .v1-play:focus-visible,
+body.ui-v1.skin-aurora .v1-import-btn:focus-visible,
+body.ui-v1.skin-aurora .v1-primary-btn:focus-visible,
+body.ui-v1.skin-aurora .v1-ghost:focus-visible,
+body.ui-v1.skin-aurora .nx-skin-toggle:focus-visible {
+    outline: 2px solid rgba(150, 160, 255, 0.8);
+    outline-offset: 2px;
+}
+
+/* ---------- 12 · Classic-layout classes reachable under /v1 ---------- */
+
+body.ui-v1.skin-aurora .sidebar {
+    background:
+        linear-gradient(180deg, rgba(23, 28, 46, 0.78), rgba(12, 15, 26, 0.88)) padding-box,
+        var(--au-edge) border-box;
+    border: 1px solid transparent;
+    backdrop-filter: blur(22px) saturate(1.25);
+    box-shadow: inset 0 1px 0 rgba(214, 221, 255, 0.08), var(--v1-shadow);
+}
+
+body.ui-v1.skin-aurora .logo {
+    border-bottom: 1px solid transparent;
+    border-image: linear-gradient(90deg, transparent, rgba(154, 168, 255, 0.22), transparent) 1;
+}
+
+body.ui-v1.skin-aurora nav a {
+    color: #9aa4bd;
+    transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+body.ui-v1.skin-aurora nav a:hover,
+body.ui-v1.skin-aurora nav a.active {
+    color: #eef1f8;
+    border-color: rgba(154, 168, 255, 0.16);
+    background: linear-gradient(90deg, rgba(124, 134, 255, 0.13), rgba(124, 134, 255, 0.03));
+}
+
+body.ui-v1.skin-aurora nav a.active {
+    box-shadow: inset 3px 0 0 var(--v1-accent), 0 0 18px rgba(124, 134, 255, 0.08);
+}
+
+body.ui-v1.skin-aurora .content::before {
+    border: 1px solid transparent;
+    background:
+        linear-gradient(180deg, rgba(19, 24, 41, 0.76), rgba(10, 13, 23, 0.9)) padding-box,
+        var(--au-edge) border-box;
+    box-shadow: inset 0 1px 0 rgba(214, 221, 255, 0.05), var(--v1-shadow);
+}
+
+body.ui-v1.skin-aurora .top-bar {
+    background: rgba(15, 19, 33, 0.8);
+    border: 1px solid var(--v1-border);
+    backdrop-filter: blur(22px) saturate(1.2);
+    box-shadow: inset 0 1px 0 rgba(214, 221, 255, 0.05);
+}
+
+body.ui-v1.skin-aurora .search-wrapper input {
+    background: rgba(9, 12, 22, 0.6);
+    border: 1px solid var(--v1-border);
+    border-radius: 11px;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+body.ui-v1.skin-aurora .search-wrapper input:focus {
+    border-color: rgba(150, 160, 255, 0.5);
+    box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.25),
+        0 0 0 3px rgba(124, 134, 255, 0.14);
+}
+
+body.ui-v1.skin-aurora .top-actions button,
+body.ui-v1.skin-aurora .filter-dropdown-trigger,
+body.ui-v1.skin-aurora a.top-action-btn,
+body.ui-v1.skin-aurora .top-actions .view-switcher button,
+body.ui-v1.skin-aurora .btn-ghost,
+body.ui-v1.skin-aurora .batch-select,
+body.ui-v1.skin-aurora .gcb-btn {
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background:
+        linear-gradient(180deg, rgba(36, 43, 68, 0.6), rgba(20, 25, 41, 0.72)) padding-box,
+        var(--au-edge) border-box;
+    color: #dfe4f2;
+    box-shadow: inset 0 1px 0 rgba(214, 221, 255, 0.06);
+}
+
+body.ui-v1.skin-aurora .btn-import {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #6d7bff 0%, #8a5fff 55%, #a05cff 100%);
+    color: #fff;
+    border: 1px solid rgba(186, 178, 255, 0.5);
+    border-radius: 10px;
+    box-shadow: 0 6px 22px rgba(114, 106, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+body.ui-v1.skin-aurora .btn-import:hover {
+    filter: brightness(1.08);
+    background: linear-gradient(135deg, #6d7bff 0%, #8a5fff 55%, #a05cff 100%);
+}
+
+body.ui-v1.skin-aurora .btn-ghost:hover,
+body.ui-v1.skin-aurora .gcb-btn:hover,
+body.ui-v1.skin-aurora .top-actions button:hover {
+    border-color: transparent;
+    background:
+        linear-gradient(180deg, rgba(46, 55, 88, 0.7), rgba(26, 32, 52, 0.78)) padding-box,
+        var(--au-edge-hot) border-box;
+}
+
+body.ui-v1.skin-aurora .gcb-btn.active,
+body.ui-v1.skin-aurora .top-actions button.active {
+    background:
+        linear-gradient(180deg, rgba(124, 134, 255, 0.3), rgba(124, 134, 255, 0.12)) padding-box,
+        var(--au-edge-hot) border-box;
+    border: 1px solid transparent;
+    color: #e9ecff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 0 16px rgba(124, 134, 255, 0.16);
+}
+
+body.ui-v1.skin-aurora .gallery-controls-bar,
+body.ui-v1.skin-aurora .filter-panel {
+    background: rgba(13, 16, 29, 0.8);
+    border: 1px solid var(--v1-border);
+    border-top: none;
+}
+
+body.ui-v1.skin-aurora .gcb-sep { background: rgba(154, 168, 255, 0.14); }
+
+body.ui-v1.skin-aurora .quick-import-widget,
+body.ui-v1.skin-aurora .batch-info-display {
+    background: linear-gradient(180deg, rgba(21, 26, 44, 0.88), rgba(13, 16, 29, 0.92)) !important;
+    border: 1px solid var(--v1-border) !important;
+    box-shadow: inset 0 1px 0 rgba(214, 221, 255, 0.05) !important;
+}
+
+body.ui-v1.skin-aurora .v-card {
+    border-radius: 16px;
+    border: 1px solid transparent;
+    background:
+        var(--au-fill) padding-box,
+        var(--au-edge) border-box;
+    box-shadow:
+        inset 0 1px 0 rgba(214, 221, 255, 0.07),
+        0 14px 34px rgba(3, 5, 12, 0.38);
+    transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 260ms ease, background 260ms ease;
+}
+
+body.ui-v1.skin-aurora .v-card:hover {
+    background:
+        var(--au-fill-raised) padding-box,
+        var(--au-edge-hot) border-box;
+    box-shadow:
+        0 26px 60px rgba(3, 5, 12, 0.55),
+        0 0 36px rgba(124, 134, 255, 0.2);
+}
+
+body.ui-v1.skin-aurora .thumb-wrapper { background: #0a0d16; }
+
+body.ui-v1.skin-aurora .v-meta {
+    background: linear-gradient(180deg, rgba(19, 24, 41, 0.92), rgba(13, 16, 28, 0.97));
+}
+
+body.ui-v1.skin-aurora .quality-chip,
+body.ui-v1.skin-aurora .duration-chip {
+    background: rgba(8, 10, 19, 0.72);
+    border: 1px solid rgba(210, 218, 255, 0.15);
+    backdrop-filter: blur(12px);
+    border-radius: 999px;
+    font-family: var(--au-mono);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+body.ui-v1.skin-aurora .nexus-empty-state {
+    background: linear-gradient(180deg, rgba(21, 26, 44, 0.85), rgba(13, 16, 29, 0.92)) !important;
+    border: 1px dashed rgba(154, 168, 255, 0.2) !important;
+}
+
+/* ---------- 13 · The ✦ toggle: a small jewel ---------- */
+
+body.ui-v1 .nx-skin-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    color: #d7dee8;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(29, 34, 40, 0.96), rgba(18, 22, 28, 0.98));
+    transition: transform 180ms ease, border-color 180ms ease,
+                background 180ms ease, box-shadow 180ms ease, color 180ms ease;
+}
+
+body.ui-v1 .nx-skin-toggle:hover {
+    transform: translateY(-1px) rotate(12deg);
+    border-color: rgba(124, 134, 255, 0.5);
+    color: #c3caff;
+    box-shadow: 0 0 18px rgba(124, 134, 255, 0.3);
+}
+
+body.ui-v1.skin-aurora .nx-skin-toggle {
+    color: #d6dbff;
+    border: 1px solid transparent;
+    background:
+        linear-gradient(135deg, rgba(124, 134, 255, 0.3), rgba(160, 107, 255, 0.12)) padding-box,
+        var(--au-edge-hot) border-box;
+    box-shadow: 0 0 18px rgba(124, 134, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    text-shadow: 0 0 10px rgba(160, 168, 255, 0.8);
+}
+
+body.ui-v1 .v1-shell.is-sidebar-collapsed .nx-skin-toggle { display: none; }
+
+/* ---------- 14 · Reduced motion: keep it calm ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+    body.ui-v1.skin-aurora::after { animation: none; }
+    body.ui-v1.skin-aurora .v1-status-dot { animation: none; }
+    body.ui-v1.skin-aurora .v1-card,
+    body.ui-v1.skin-aurora .v1-card:hover,
+    body.ui-v1.skin-aurora .v1-thumb img,
+    body.ui-v1.skin-aurora .v1-card:hover .v1-thumb img {
+        transition: none;
+        transform: none;
+    }
+    body.ui-v1.skin-aurora .v1-import-btn::before,
+    body.ui-v1.skin-aurora .v1-primary-btn::before,
+    body.ui-v1.skin-aurora .v1-play::before { display: none; }
+}

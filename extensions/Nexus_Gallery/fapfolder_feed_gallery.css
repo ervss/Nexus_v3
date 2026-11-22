@@ -1,0 +1,272 @@
+html.nexus-ff-feed-gallery .container.mt20.offcanvas {
+    width: calc(100% - 32px) !important;
+    max-width: none !important;
+}
+
+html.nexus-ff-feed-gallery .offcanvas-sidebar {
+    position: fixed !important;
+    inset: 100px auto 0 0;
+    z-index: 2147482999;
+    width: min(320px, 85vw) !important;
+    max-width: none !important;
+    overflow-y: auto;
+    background: #17151b;
+    box-shadow: 16px 0 42px rgba(0, 0, 0, 0.55);
+    transform: translateX(-105%) !important;
+    visibility: hidden !important;
+    transition: transform 180ms ease, visibility 180ms;
+}
+
+html.nexus-ff-feed-gallery.nexus-ff-feed-menu-open .offcanvas-sidebar {
+    transform: translateX(0) !important;
+    visibility: visible !important;
+}
+
+html.nexus-ff-feed-gallery .offcanvas-mainbar > .row > .col-lg-8 {
+    flex: 0 0 100%;
+    max-width: 100%;
+}
+
+html.nexus-ff-feed-gallery .offcanvas-mainbar {
+    flex: 0 0 100%;
+    max-width: 100%;
+}
+
+html.nexus-ff-feed-gallery .offcanvas-mainbar > .row > .col-lg-4.js_sticky-sidebar {
+    display: none;
+}
+
+html.nexus-ff-feed-gallery .js_posts_stream {
+    width: 100%;
+}
+
+html.nexus-ff-feed-gallery .js_posts_stream > ul {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: start;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+html.nexus-ff-feed-gallery[data-nexus-ff-feed-columns="5"] .js_posts_stream > ul {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+html.nexus-ff-feed-gallery[data-nexus-ff-feed-columns="6"] .js_posts_stream > ul {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+html.nexus-ff-feed-gallery .js_posts_stream > ul > li {
+    min-width: 0;
+    margin: 0 !important;
+}
+
+html.nexus-ff-feed-gallery .js_posts_stream > ul > li > .post {
+    position: relative !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+/* Skryt nepotrebny vrch nad videom (komunitny cover a duplicitny datum) */
+html.nexus-ff-feed-gallery .js_posts_stream .post .nexus-ff-community-cover,
+html.nexus-ff-feed-gallery .js_posts_stream .post .nexus-ff-date {
+    display: none !important;
+}
+
+/* Skryt nepotrebny spodok pod videom (reakcie, lajky, komentare, statistiky a komunitny panel) */
+html.nexus-ff-feed-gallery .js_posts_stream .post .post-footer,
+html.nexus-ff-feed-gallery .js_posts_stream .post .post-actions,
+html.nexus-ff-feed-gallery .js_posts_stream .post .post-actions-wrapper,
+html.nexus-ff-feed-gallery .js_posts_stream .post .post-stats,
+html.nexus-ff-feed-gallery .js_posts_stream .post .post-comments,
+html.nexus-ff-feed-gallery .js_posts_stream .post .post-reactions,
+html.nexus-ff-feed-gallery .js_posts_stream .post .js_comments,
+html.nexus-ff-feed-gallery .js_posts_stream .post .nexus-ff-community-handle,
+html.nexus-ff-feed-gallery .js_posts_stream .post .nexus-ff-community-stats,
+html.nexus-ff-feed-gallery .js_posts_stream .post .nexus-ff-community-footer {
+    display: none !important;
+}
+
+/* Kompaktny metadata odznak */
+html.nexus-ff-feed-gallery .js_posts_stream .post .nexus-ff-meta {
+    position: absolute !important;
+    left: 6px !important;
+    right: 6px !important;
+    bottom: 6px !important;
+    z-index: 4 !important;
+    text-align: center;
+}
+
+html.nexus-ff-feed-gallery .js_posts_stream > ul > .hbanner,
+html.nexus-ff-feed-gallery .js_posts_stream > ul > .hmbanner,
+html.nexus-ff-feed-gallery .js_posts_stream > ul > .postbanner {
+    display: none !important;
+}
+
+html.nexus-ff-feed-gallery.nexus-ff-feed-video-only .js_posts_stream > ul > .nexus-ff-feed-no-video {
+    display: none !important;
+}
+
+html.nexus-ff-feed-gallery .js_posts_stream .post .overflow-hidden.clearfix,
+html.nexus-ff-feed-gallery .js_posts_stream .post .pg_wrapper {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1;
+    overflow: hidden;
+    position: relative;
+    isolation: isolate;
+}
+
+html.nexus-ff-feed-gallery .js_posts_stream .post :has(> .video-auth-placeholder-thumb) {
+    position: relative !important;
+    display: block;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1;
+    overflow: hidden;
+}
+
+html.nexus-ff-feed-gallery .js_posts_stream .post .overflow-hidden.clearfix > *,
+html.nexus-ff-feed-gallery .js_posts_stream .post .pg_wrapper > * {
+    max-width: 100%;
+}
+
+html.nexus-ff-feed-gallery .js_posts_stream .post .overflow-hidden.clearfix video,
+html.nexus-ff-feed-gallery .js_posts_stream .post .overflow-hidden.clearfix iframe,
+html.nexus-ff-feed-gallery .js_posts_stream .post .pg_wrapper video,
+html.nexus-ff-feed-gallery .js_posts_stream .post .pg_wrapper iframe {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100%;
+    object-fit: contain;
+    background: #000;
+}
+
+html.nexus-ff-feed-gallery .js_posts_stream .post .video-auth-placeholder-thumb {
+    position: absolute !important;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    overflow: hidden;
+}
+
+html.nexus-ff-feed-gallery .js_posts_stream .post:has(.overflow-hidden.clearfix video[src], .overflow-hidden.clearfix video source[src], .pg_wrapper video[src], .pg_wrapper video source[src]) .video-auth-placeholder-thumb {
+    display: none !important;
+}
+
+html.nexus-ff-feed-gallery .js_posts_stream .post .pg_wrapper img {
+    max-width: 100%;
+    object-fit: cover;
+}
+
+.nexus-ff-feed-menu-scrim {
+    position: fixed;
+    inset: 100px 0 0;
+    z-index: 2147482998;
+    background: rgba(0, 0, 0, 0.48);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+}
+
+html.nexus-ff-feed-menu-open .nexus-ff-feed-menu-scrim {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.nexus-ff-feed-controls {
+    position: fixed;
+    inset: 110px 14px auto;
+    z-index: 2147483000;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.nexus-ff-feed-control {
+    flex-shrink: 0;
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid rgba(244, 63, 94, 0.55);
+    border-radius: 999px;
+    background: #17121e;
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    font: 600 13px/1 system-ui, sans-serif;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.nexus-ff-feed-layout {
+    color-scheme: dark;
+}
+
+.nexus-ff-feed-control:hover {
+    background: #2b1b2b;
+    border-color: #f43f5e;
+}
+
+.nexus-ff-feed-control.active {
+    background: linear-gradient(135deg, rgba(244, 63, 94, 0.4), rgba(217, 70, 239, 0.28));
+    border-color: #fb7185;
+}
+
+.nexus-ff-feed-control:focus-visible {
+    outline: 2px solid #fb7185;
+    outline-offset: 3px;
+}
+
+@media (max-width: 1199px) {
+    html.nexus-ff-feed-gallery .js_posts_stream > ul {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+    }
+}
+
+@media (max-width: 767px) {
+    html.nexus-ff-feed-gallery .container.mt20.offcanvas {
+        width: calc(100% - 16px) !important;
+    }
+
+    html.nexus-ff-feed-gallery .js_posts_stream > ul {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    html.nexus-ff-feed-gallery .offcanvas-sidebar {
+        inset-block-start: 96px;
+    }
+
+    .nexus-ff-feed-menu-scrim {
+        inset-block-start: 96px;
+    }
+
+    .nexus-ff-feed-controls {
+        inset-block-start: 104px;
+        inset-inline: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .nexus-ff-feed-control {
+        min-height: 36px;
+        padding-inline: 11px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 479px) {
+    html.nexus-ff-feed-gallery .js_posts_stream > ul {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

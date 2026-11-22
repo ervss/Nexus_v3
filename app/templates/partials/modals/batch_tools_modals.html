@@ -1,0 +1,339 @@
+    <!-- Import CSV Modal (Moved) -->
+    <template x-if="showCSVModal">
+    <div class="modal-wrap nx-lazy-modal" role="dialog" aria-modal="true" aria-label="Import CSV">
+        <div class="modal-card" style="min-width:340px;max-width:98vw;">
+            <div class="modal-header">
+                <h3><span class="material-icons-round">table_view</span>Import CSV</h3><button
+                    @click="showCSVModal = false"><span class="material-icons-round">close</span></button>
+            </div>
+            <div class="modal-content"><input type="file" x-ref="csvInput" accept=".csv" @change="handleCSVSelect"
+                    style="width:100%;margin-bottom:10px;">
+                <div style="font-size:13px;color:#888;">Vyber .csv súbor s videami/galériami na import.
+                </div>
+            </div>
+            <div class="modal-actions" style="display:flex;gap:10px;justify-content:flex-end;"><button class="btn-ghost"
+                    @click="showCSVModal = false">Cancel</button></div>
+        </div>
+    </div>
+</template>
+
+    <!-- Local Import Modal (drag & drop of on-disk videos) -->
+    <template x-if="localImport.open">
+    <div class="modal-wrap nx-lazy-modal"
+        @keydown.escape.window="localImport.open=false" role="dialog" aria-modal="true" aria-label="Lokálny import videí">
+        <div class="modal-card" style="min-width:520px;max-width:92vw;">
+            <div class="modal-header">
+                <h3><span class="material-icons-round">bolt</span>Pridať lokálne videá (okamžite)</h3>
+                <button @click="localImport.open=false"><span class="material-icons-round">close</span></button>
+            </div>
+            <div class="modal-content">
+                <div style="font-size:13px;color:#9aa3b2;margin-bottom:10px;line-height:1.5;">
+                    Prehliadač nedá cestu k pretiahnutým súborom, ale server beží na tomto počítači — pridá ich
+                    <b>okamžite bez nahrávania</b>. Vlož:
+                    <ul style="margin:8px 0 0 18px;padding:0;">
+                        <li>jeden <b>priečinok</b> — napr. <code>C:\Users\Peto\Desktop\PLOCHA\ADR</code> (naskenuje sa
+                            aj s podpriečinkami)</li>
+                        <li>alebo <b>viac súborov</b>, každý na nový riadok (skopíruj cesty zo správcu súborov)</li>
+                    </ul>
+                </div>
+                <textarea x-model="localImport.text" rows="8" spellcheck="false" placeholder="C:\Users\Peto\Desktop\PLOCHA\ADR
+alebo
+C:\...\video1.mp4
+C:\...\video2.mp4"
+                    style="width:100%;margin-bottom:10px;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;white-space:pre;"></textarea>
+                <input type="text" x-model="newBatchName" placeholder="Voliteľný názov batchu" style="width:100%;">
+            </div>
+            <div class="modal-actions" style="display:flex;gap:10px;justify-content:flex-end;">
+                <button class="btn-ghost" @click="localImport.open=false">Zrušiť</button>
+                <button class="btn-primary" @click="runLocalImport()">
+                    <span class="material-icons-round" style="font-size:18px;vertical-align:-4px;">bolt</span>
+                    <span
+                        x-text="localImportLineCount()>1 ? ('Pridať '+localImportLineCount()+' súborov') : 'Pridať okamžite'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
+    <!-- Import URLs Modal (Moved) -->
+    <template x-if="showImportModal">
+    <div class="modal-wrap nx-lazy-modal" role="dialog" aria-modal="true" aria-label="Import URL odkazov">
+        <div class="modal-card" style="min-width:340px;max-width:98vw;">
+            <div class="modal-header">
+                <h3><span class="material-icons-round">playlist_add</span>Import URLs / Playlist</h3>
+                <button @click="showImportModal = false"><span class="material-icons-round">close</span></button>
+            </div>
+            <div class="modal-content"><textarea x-model="importTextContent"
+                    placeholder="Paste playlist URL (e.g. https://www.xvideos.com/playlist/...) or multiple video URLs (one per line)"
+                    rows="6" style="width:100%;margin-bottom:10px;"></textarea><input type="text" x-model="newBatchName"
+                    placeholder="Optional batch name" style="width:100%;margin-bottom:10px;">
+                <div style="margin-bottom:10px;"><label style="font-size:13px;">Parser:</label><select
+                        x-model="selectedParser" style="width:100%;">
+                        <option value="yt-dlp">yt-dlp (default, universal)</option>
+                        <option value="cyberdrop-dl-patched">cyberdrop-dl-patched (CyberDrop only)</option>
+                    </select></div>
+            </div>
+            <div class="modal-actions" style="display:flex;gap:10px;justify-content:flex-end;"><button class="btn-ghost"
+                    @click="showImportModal = false">Cancel</button><button class="btn-primary"
+                    @click="importFromText">Import</button></div>
+        </div>
+    </div>
+</template>
+
+    <!-- Add to Batch Modal (Moved) -->
+    <template x-if="showAddToBatchModal">
+    <div class="modal-wrap nx-lazy-modal" role="dialog" aria-modal="true" aria-label="Pridať do batchu">
+        <div class="modal-card" style="min-width:340px;max-width:98vw;">
+            <div class="modal-header">
+                <h3><span class="material-icons-round">add_circle</span>Add to Batch: <span x-text="filters.batch"
+                        style="color:var(--accent);"></span></h3><button @click="showAddToBatchModal = false"><span
+                        class="material-icons-round">close</span></button>
+            </div>
+            <div class="modal-content"><textarea x-model="addToBatchContent"
+                    placeholder="Paste multiple video URLs (one per line) or playlist URL..." rows="8"
+                    style="width:100%;margin-bottom:10px; font-family: monospace; font-size: 13px;"></textarea>
+                <div style="margin-bottom:10px;"><label style="font-size:13px;">Parser:</label><select
+                        x-model="selectedParser" style="width:100%;">
+                        <option value="yt-dlp">yt-dlp (default, universal)</option>
+                        <option value="cyberdrop-dl-patched">cyberdrop-dl-patched (CyberDrop only)</option>
+                    </select></div>
+            </div>
+            <div class="modal-actions" style="display:flex;gap:10px;justify-content:flex-end;">
+                <button class="btn-ghost" @click="showAddToBatchModal = false">Cancel</button><button
+                    class="btn-primary" @click="importToCurrentBatch" :disabled="!addToBatchContent.trim()">Add to
+                    Batch</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+    <!-- Local Folder Index Modal -->
+    <template x-if="showLocalFolderModal">
+    <div class="modal-wrap nx-lazy-modal" role="dialog" aria-modal="true" aria-label="Indexovať lokálny priečinok">
+        <div class="modal-card" style="min-width:400px;max-width:98vw;">
+            <div class="modal-header">
+                <h3><span class="material-icons-round" style="color: #22c55e;">bolt</span>⚡ Index Local Folder (Fast)
+                </h3>
+                <button @click="showLocalFolderModal = false"><span class="material-icons-round">close</span></button>
+            </div>
+            <div class="modal-content">
+                <div
+                    style="padding: 12px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span class="material-icons-round" style="color: #22c55e; font-size: 20px;">flash_on</span>
+                        <strong style="color: #22c55e;">Ultra-Fast Indexing</strong>
+                    </div>
+                    <p style="font-size: 12px; color: #94a3b8; margin: 0; line-height: 1.5;">
+                        No upload, no copying! Just point to your local folder and videos appear instantly in the
+                        dashboard.
+                        Expected: <strong style="color: #22c55e;">100 videos in ~3 seconds</strong>.
+                    </p>
+                </div>
+
+                <div style="margin-bottom:12px;">
+                    <label
+                        style="font-size:13px; font-weight: 600; color: #e2e8f0; margin-bottom: 6px; display: block;">
+                        <span class="material-icons-round"
+                            style="font-size: 16px; vertical-align: middle;">folder</span>
+                        Folder Path:
+                    </label>
+                    <input type="text" x-model="localFolderPath"
+                        placeholder="C:\Videos\MyCollection  or  /home/user/videos"
+                        style="width:100%; padding: 10px; font-family: monospace; font-size: 13px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
+                        Examples: <code style="color: #22c55e;">C:\Users\YourName\Videos</code> or <code
+                            style="color: #22c55e;">/mnt/media/videos</code>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:12px;">
+                    <label
+                        style="font-size:13px; font-weight: 600; color: #e2e8f0; margin-bottom: 6px; display: block;">
+                        <span class="material-icons-round" style="font-size: 16px; vertical-align: middle;">label</span>
+                        Batch Name (Optional):
+                    </label>
+                    <input type="text" x-model="newBatchName" placeholder="My Local Collection"
+                        style="width:100%; padding: 10px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
+                        Leave empty to auto-generate (e.g., "Local_20240115")
+                    </div>
+                </div>
+
+                <div style="margin-bottom:12px; display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" x-model="localFolderRecursive" id="recursiveCheck"
+                        style="width: 18px; height: 18px; cursor: pointer;">
+                    <label for="recursiveCheck"
+                        style="font-size: 13px; color: #e2e8f0; cursor: pointer; user-select: none;">
+                        <span class="material-icons-round"
+                            style="font-size: 16px; vertical-align: middle; color: #22c55e;">account_tree</span>
+                        Include subfolders (recursive scan)
+                    </label>
+                </div>
+
+                <div
+                    style="padding: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px;">
+                    <div style="font-size: 12px; color: #94a3b8; line-height: 1.6;">
+                        <strong style="color: #3b82f6;">ℹ️ How it works:</strong><br>
+                        • Videos stay on your disk - no upload needed<br>
+                        • Only metadata is indexed (filename, duration, resolution)<br>
+                        • Playback streams directly from local files<br>
+                        • Supported formats: MP4, MKV, AVI, MOV, WEBM, FLV, WMV
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions" style="display:flex;gap:10px;justify-content:flex-end;">
+                <button class="btn-ghost" @click="showLocalFolderModal = false">Cancel</button>
+                <button class="btn-primary" @click="importLocalFolder"
+                    style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); display: flex; align-items: center; gap: 6px;">
+                    <span class="material-icons-round" style="font-size: 18px;">flash_on</span>
+                    Index Folder
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
+    <!-- DUPLICATE RESOLVER MODAL -->
+    <template x-if="duplicateResolverOpen">
+    <div class="duplicate-resolver-modal nx-lazy-modal"  @click.self="closeDuplicateResolver()" role="dialog" aria-modal="true" aria-label="Riešenie duplicít videí">
+        <div class="duplicate-resolver-content">
+            <div class="duplicate-resolver-header">
+                <div class="duplicate-resolver-title">Resolve Duplicate Videos</div>
+                <button @click="closeDuplicateResolver()"
+                    style="background: none; border: none; color: var(--text); cursor: pointer; font-size: 24px;">×</button>
+            </div>
+
+            <template x-if="currentDuplicatePair">
+                <div class="duplicate-comparison">
+                    <!-- Original Video -->
+                    <div class="duplicate-side">
+                        <h3 style="margin-bottom: 16px; color: var(--text);">Original</h3>
+                        <div class="duplicate-preview">
+                            <img :src="proxifyUrl(currentDuplicatePair.original.thumbnail_path)"
+                                :alt="currentDuplicatePair.original.title" />
+                        </div>
+                        <div class="duplicate-info-grid">
+                            <div class="duplicate-info-row">
+                                <span class="duplicate-info-label">Title</span>
+                                <span class="duplicate-info-value" x-text="currentDuplicatePair.original.title"></span>
+                            </div>
+                            <div class="duplicate-info-row">
+                                <span class="duplicate-info-label">Quality</span>
+                                <span class="duplicate-info-value"
+                                    :class="{'better': compareDuplicateField('height') === 'left'}"
+                                    x-text="currentDuplicatePair.original.height + 'p'"></span>
+                            </div>
+                            <div class="duplicate-info-row">
+                                <span class="duplicate-info-label">Duration</span>
+                                <span class="duplicate-info-value"
+                                    x-text="formatTime(currentDuplicatePair.original.duration)"></span>
+                            </div>
+                            <div class="duplicate-info-row">
+                                <span class="duplicate-info-label">Created</span>
+                                <span class="duplicate-info-value"
+                                    x-text="currentDuplicatePair.original.created_at ? new Date(currentDuplicatePair.original.created_at).toLocaleDateString() : 'Unknown'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Duplicate Video -->
+                    <div class="duplicate-side">
+                        <h3 style="margin-bottom: 16px; color: var(--text);">Duplicate</h3>
+                        <div class="duplicate-preview">
+                            <img :src="proxifyUrl(currentDuplicatePair.duplicate.thumbnail_path)"
+                                :alt="currentDuplicatePair.duplicate.title" />
+                        </div>
+                        <div class="duplicate-info-grid">
+                            <div class="duplicate-info-row">
+                                <span class="duplicate-info-label">Title</span>
+                                <span class="duplicate-info-value" x-text="currentDuplicatePair.duplicate.title"></span>
+                            </div>
+                            <div class="duplicate-info-row">
+                                <span class="duplicate-info-label">Quality</span>
+                                <span class="duplicate-info-value"
+                                    :class="{'better': compareDuplicateField('height') === 'right'}"
+                                    x-text="currentDuplicatePair.duplicate.height + 'p'"></span>
+                            </div>
+                            <div class="duplicate-info-row">
+                                <span class="duplicate-info-label">Duration</span>
+                                <span class="duplicate-info-value"
+                                    x-text="formatTime(currentDuplicatePair.duplicate.duration)"></span>
+                            </div>
+                            <div class="duplicate-info-row">
+                                <span class="duplicate-info-label">Created</span>
+                                <span class="duplicate-info-value"
+                                    x-text="currentDuplicatePair.duplicate.created_at ? new Date(currentDuplicatePair.duplicate.created_at).toLocaleDateString() : 'Unknown'"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <div class="duplicate-resolver-actions">
+                <button class="duplicate-action-btn keep-left" @click="keepDuplicate('left')">
+                    Keep Original
+                </button>
+                <button class="duplicate-action-btn keep-both" @click="keepBothDuplicates()">
+                    Keep Both
+                </button>
+                <button class="duplicate-action-btn keep-right" @click="keepDuplicate('right')">
+                    Keep Duplicate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-wrap" x-show="showUrlProbeModal" style="display: none;" x-transition.opacity>
+        <div class="modal-card"
+            style="min-width: min(720px, 92vw); max-width: 92vw; max-height: 80vh; overflow: hidden;">
+            <div class="modal-header">
+                <h3><span class="material-icons-round">travel_explore</span>URL Support Check</h3>
+                <button @click="showUrlProbeModal = false"><span class="material-icons-round">close</span></button>
+            </div>
+            <div class="modal-body" style="padding: 18px 20px 20px;">
+                <div style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">
+                    Result for <span style="color:#e2e8f0;" x-text="probeUrl || '—'"></span>
+                </div>
+                <div x-show="probeLoading"
+                    style="display:flex; align-items:center; gap:10px; color:#38bdf8; font-weight:600;">
+                    <span class="material-icons-round" style="animation: spin 1s linear infinite;">sync</span>
+                    Checking extractor / yt-dlp support...
+                </div>
+                <div x-show="!probeLoading && probeResult" style="display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; flex-wrap:wrap; gap:10px;">
+                        <div
+                            style="padding:8px 12px; border-radius:999px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);">
+                            Supported:
+                            <strong :style="probeResult?.supported ? 'color:#22c55e;' : 'color:#f87171;'"
+                                x-text="probeResult?.supported ? 'YES' : 'NO'"></strong>
+                        </div>
+                        <div
+                            style="padding:8px 12px; border-radius:999px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);">
+                            Method: <strong style="color:#e2e8f0;" x-text="probeResult?.method || '—'"></strong>
+                        </div>
+                        <div
+                            style="padding:8px 12px; border-radius:999px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);">
+                            Extractor: <strong style="color:#e2e8f0;" x-text="probeResult?.extractor || '—'"></strong>
+                        </div>
+                    </div>
+                    <template x-if="probeResult?.title">
+                        <div
+                            style="padding:12px 14px; border-radius:12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);">
+                            <div
+                                style="font-size:12px; text-transform:uppercase; letter-spacing:0.12em; color:#94a3b8; margin-bottom:6px;">
+                                Detected title</div>
+                            <div style="color:#f8fafc; font-weight:600;" x-text="probeResult.title"></div>
+                        </div>
+                    </template>
+                    <template x-if="probeResult?.error">
+                        <div style="padding:12px 14px; border-radius:12px; background:rgba(248,113,113,0.12); border:1px solid rgba(248,113,113,0.3); color:#fecaca;"
+                            x-text="probeResult.error"></div>
+                    </template>
+                    <pre style="margin:0; padding:14px; border-radius:14px; background:#020617; border:1px solid rgba(255,255,255,0.08); color:#cbd5e1; font-size:12px; line-height:1.55; overflow:auto; max-height:40vh;"
+                        x-text="formatProbeResult()"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

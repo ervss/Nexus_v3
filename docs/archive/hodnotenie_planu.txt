@@ -1,0 +1,82 @@
+Moje hodnotenie: dobrý smer, ale plán by som ešte neuvoľnil do produkcie
+Pozrel som si technický návrh aj skutočné súbory v ZIP-e. Myšlienka zjednotiť prehrávanie medzi Quantum Search, Link Testerom a Split-Screenom je správna. Odstránenie množstva výnimiek pre jednotlivé domény môže výrazne zjednodušiť údržbu.
+Hodnotenie návrhu
+7/10
+
+Pripravenosť na implementáciu bez úprav
+4/10
+
+
+Najväčšie pozitívum je, že plán rieši príčinu viacerých problémov naraz, namiesto nekonečného pridávania podmienok typu if (domain === ...).
+
+Objavil som však aj závažný bezpečnostný problém: aktuálna implementácia /embed_proxy môže načítať JavaScript z cudzieho webu pod rovnakým originom ako Nexus. Bez izolácie iframe tak cudzí skript potenciálne získa prístup k rozhraniu a oprávneniam aplikácie. Toto by som opravil pred univerzálnym povoľovaním embedov.
+Čo som konkrétne zistil v kóde
+1. Plán nezodpovedá úplne verzii projektu v ZIP-e
+
+V app/static/search.js sa nachádza _resolvePlayable(), ale nie plánované _resolveQuantumPlayback() ani _isDirectPlaybackUrl(). V hlavnom userscripte zase chýba resolveViaNexusBackend(). Súbor app/static/nexus-universal-splitscreen.js v ZIP-e neexistuje.
+
+Implementačné pokyny preto nemožno aplikovať priamo. Najprv treba zosúladiť plán s aktuálnou verziou projektu.
+
+
+
+2. Proxy potrebuje výrazne lepšie zabezpečenie
+
+V app/url_safety.py už existuje ochrana proti priamym požiadavkám na privátne IP adresy. To je dobré. Chýba však kontrola DNS prekladu a každého presmerovania, takže zostáva riziko SSRF.
+
+Navyše /hls_proxy používa ssl=False a /embed_proxy používa verify=False, čím sa vypína overovanie TLS certifikátov.
+
+Univerzálne proxy tieto riziká zvyšuje, pretože bude spracúvať viac ľubovoľných externých URL.
+
+
+
+3. /hls_proxy ešte nie je úplne univerzálne
+
+V app/main.py, približne na riadkoch 14577–14580, sa pre niektoré typy obsahu vrátane CSS, fontov a obrázkov nastavuje video/MP2T.
+
+To nie je správne pre všeobecnú proxy súborov. Odporúčam zachovávať správny Content-Type upstream odpovede a oddeliť proxy pre mediálne segmenty od proxy pre webové assets.
+
+
+
+4. HubAdapter bridge je dobrý nápad, ale potrebuje mapovanie
+
+V link_tester.py sa pri nenájdenom extraktore momentálne prechádza priamo na _basic_http_probe().
+
+Prepojenie s HubAdaptermi by pomohlo. Lenže hubs.registry.get() očakáva identifikátor zdroja, napríklad anysex, nie doménu z URL. Preto treba doplniť spoľahlivé mapovanie doména → adapter.
+
+
+
+5. Sľub 100 % prehrateľnosti je nerealistický
+
+Lokálne proxy vie vyriešiť veľa problémov s CORS, Referer a Range požiadavkami. Nedokáže však garantovať prehrávanie pri expirovaných podpísaných URL, DRM, CAPTCHA, chýbajúcej autorizácii alebo nekompatibilných embedo ch.
+
+Lepším cieľom je maximálna prehrateľnosť všetkých technicky dostupných zdrojov, s jasným fallbackom, keď prehrávanie nie je možné.
+
+
+
+Ako by som to postavil ja
+Namiesto toho, aby Quantum Search a Split-Screen každý samostatne rozhodovali, čo je MP4, HLS alebo iframe, vytvoril by som jeden spoločný Playback Resolver v backende.
+
+Ten by vracal normalizovaný výsledok, napríklad:
+{
+  "status": "ready",
+  "type": "video",
+  "format": "mp4",
+  "playback_url": "/hls_proxy?...",
+  "requires_proxy": true,
+  "fallback_urls": [],
+  "error": null
+}
+
+
+type by podporoval video, hls, embed a unavailable. QS aj Split-Screen by konzumovali ten istý výsledok. Pre iframe by som používal oddelený origin s prísnou izoláciou a pre URL, ktoré proxy nepotrebujú, by som umožnil aj priame prehrávanie.
+Moje priority pred implementáciou
+1. Bezpečnosť: izolovať /embed_proxy, zabezpečiť SSRF ochranu, presmerovania a TLS certifikáty.
+2. Zjednotenie: vytvoriť spoločný backendový Playback Resolver a doplniť prepojenie na HubAdaptery.
+3. Spoľahlivosť: opraviť MIME typy, Range odpovede, rozpoznávanie streamov bez prípony a testy všetkých typov prehrávania.
+Pri testovaní by som nesledoval iba to, či resolver vrátil URL, ale či sa video skutočne spustilo, prehralo niekoľko sekúnd a umožnilo posun na časovej osi. Dva z testovacích súborov uvedených v pláne navyše v priloženom ZIP-e chýbajú.
+
+Záver: Tento návrh má veľmi dobrý základ a smeruje k správnemu cieľu. Najväčší problém nie je myšlienka univerzálneho prehrávania, ale spôsob, akým sa plánuje implementovať.
+
+Ja by som sa snažil dostať projekt do stavu, kde Quantum Search, Link Tester aj Split-Screen využívajú jediný resolver a jednotný bezpečný prehrávací systém. Tým by sa odstránili celé kategórie problémov, nielen konkrétne chyby na jednotlivých stránkach.
+
+Hodnotenie vychádza zo statickej kontroly priloženého kódu a technického plánu. Nevykonával som živé testy prehrávania ani penetračné testy servera.

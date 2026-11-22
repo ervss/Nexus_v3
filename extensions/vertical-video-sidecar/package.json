@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "scripts": { "build:hls": "node scripts/copy-hls.mjs", "check": "node scripts/self-check.mjs" },
+  "devDependencies": { "hls.js": "^1.6.15" }
+}

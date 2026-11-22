@@ -1,0 +1,899 @@
+html.nexus-ep-docked {
+    --nexus-ep-rail: 320px;
+    --nexus-ep-rail-collapsed: 48px;
+    --nexus-ep-ember: #f97316;
+    --nexus-ep-ink: #e8edf4;
+    --nexus-ep-mute: #8b9bb4;
+    --nexus-ep-rail-bg: #10141c;
+}
+
+#nexus-ep-shell {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: calc(100vh - 72px);
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+    clear: both !important;
+    box-sizing: border-box !important;
+}
+
+#nexus-ep-stage {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    float: none !important;
+    margin: 0 !important;
+    padding: 0 12px 24px !important;
+    box-sizing: border-box !important;
+    container: nexus-ep-stage / inline-size;
+}
+
+#nexus-ep-stage #content,
+#nexus-ep-stage #profile_content,
+#nexus-ep-stage #maincontent,
+#nexus-ep-stage .profilemain,
+#nexus-ep-stage .profile-main,
+#nexus-ep-stage .streameventsday {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    float: none !important;
+}
+
+/* Eporner leaves a floating GIF/video hover clone in the document. After we
+   reparent listing cards the clone keeps the last title and pops up over
+   profile GIFs, banners, and empty space. Kill those overlays on docked pages. */
+html.nexus-ep-docked #float_preview,
+html.nexus-ep-docked #previewdiv,
+html.nexus-ep-docked #mbpreview,
+html.nexus-ep-docked #gifhover,
+html.nexus-ep-docked #imghover,
+html.nexus-ep-docked .mbhover,
+html.nexus-ep-docked .hoverpreview,
+html.nexus-ep-docked [id*="hoverimg" i],
+html.nexus-ep-docked [id*="HoverPreview" i],
+html.nexus-ep-docked [class*="hoverpreview" i],
+html.nexus-ep-docked [class*="gif-popup" i] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+}
+
+.nexus-ep-toolbar {
+    position: sticky !important;
+    top: 0 !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    align-self: flex-start !important;
+    flex: 0 0 var(--nexus-ep-rail, 332px) !important;
+    z-index: 20 !important;
+    width: var(--nexus-ep-rail, 332px) !important;
+    min-width: var(--nexus-ep-rail, 332px) !important;
+    max-width: var(--nexus-ep-rail, 332px) !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding: 18px 16px !important;
+    overflow: auto !important;
+    overscroll-behavior: contain;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    background: var(--nexus-ep-rail-bg) !important;
+    color: var(--nexus-ep-ink);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    box-sizing: border-box !important;
+}
+
+#nexus-ep-shell[data-layout="studio"] .nexus-ep-toolbar {
+    border-left: 1px solid rgba(249, 115, 22, 0.28) !important;
+    border-right: none !important;
+    background:
+        linear-gradient(180deg, rgba(249, 115, 22, 0.08), transparent 120px),
+        var(--nexus-ep-rail-bg) !important;
+}
+
+#nexus-ep-shell[data-layout="spine"] .nexus-ep-toolbar {
+    border-right: 1px solid rgba(45, 212, 191, 0.28) !important;
+    border-left: none !important;
+    background:
+        linear-gradient(180deg, rgba(45, 212, 191, 0.08), transparent 140px),
+        #0d1218 !important;
+}
+
+.nexus-ep-toolbar[data-busy="1"] {
+    opacity: 0.88;
+}
+
+.nexus-ep-title {
+    color: #f8fafc;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+}
+
+.nexus-ep-kicker {
+    margin-bottom: 4px;
+    color: #fb923c;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+}
+
+html[data-nexus-ep-layout="spine"] .nexus-ep-title {
+    color: #5eead4;
+}
+
+.nexus-ep-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.nexus-ep-collapse {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.07);
+    color: #f8fafc;
+    font-size: 17px;
+    font-weight: 900;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.nexus-ep-stats {
+    padding: 10px 11px;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.68);
+    color: #dbe5f1;
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.5;
+}
+
+.nexus-ep-status {
+    min-height: 16px;
+    margin-top: -6px;
+    color: #94a3b8;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.nexus-ep-section {
+    display: grid;
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.nexus-ep-section-title {
+    color: #cbd5e1;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.nexus-ep-field {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.nexus-ep-field input,
+.nexus-ep-field select {
+    width: 100%;
+    min-width: 0;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 9px;
+    outline: none;
+    background: #171d28;
+    color: #f8fafc;
+    font: inherit;
+    font-size: 13px;
+    box-sizing: border-box;
+}
+
+.nexus-ep-field input:focus,
+.nexus-ep-field select:focus {
+    border-color: #fb923c;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.16);
+}
+
+.nexus-ep-field select option { background: #171d28; color: #f8fafc; }
+
+.nexus-ep-label {
+    display: block;
+    margin-bottom: 7px;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.nexus-ep-sort-row,
+.nexus-ep-fetch-row,
+.nexus-ep-selection-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: end;
+    gap: 8px;
+}
+
+.nexus-ep-sort-dir,
+.nexus-ep-fetch-row button,
+.nexus-ep-selection-row button,
+.nexus-ep-reset {
+    min-width: 0;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.055);
+    color: #e2e8f0;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+.nexus-ep-sort-dir:hover,
+.nexus-ep-fetch-row button:hover,
+.nexus-ep-selection-row button:hover,
+.nexus-ep-reset:hover {
+    border-color: rgba(251, 146, 60, 0.58);
+    background: rgba(249, 115, 22, 0.12);
+}
+
+.nexus-ep-reset {
+    justify-self: start;
+    min-height: 32px;
+    padding: 5px 9px;
+    color: #aebaca;
+    font-size: 11px;
+}
+
+.nexus-ep-sort-dir { white-space: nowrap; }
+.nexus-ep-fetch-row button:disabled,
+.nexus-ep-selection-row button:disabled { opacity: 0.45; cursor: default; }
+
+.nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-section,
+.nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-gallery-layout,
+.nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-status,
+.nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-selection-row,
+.nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-actions {
+    display: none !important;
+}
+
+.nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-kicker {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+}
+
+.nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-title {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 12px;
+}
+
+.nexus-ep-page-load {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(64px, 0.45fr) auto auto;
+    align-items: end;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.nexus-ep-page-load label {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.nexus-ep-page-load input,
+.nexus-ep-page-load select {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 7px 8px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    outline: none;
+}
+
+.nexus-ep-page-load button {
+    border: 1px solid rgba(249, 115, 22, 0.34);
+    border-radius: 10px;
+    padding: 8px 9px;
+    background: rgba(249, 115, 22, 0.14);
+    color: #fff7ed;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.nexus-ep-page-load button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.nexus-ep-layouts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.nexus-ep-layouts button {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 9px;
+    padding: 8px 6px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #dbe4f0;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.nexus-ep-layouts button[data-active="1"] {
+    border-color: rgba(249, 115, 22, 0.7);
+    background: rgba(249, 115, 22, 0.22);
+    color: #fff7ed;
+}
+
+html[data-nexus-ep-layout="spine"] .nexus-ep-layouts button[data-active="1"] {
+    border-color: rgba(45, 212, 191, 0.7);
+    background: rgba(45, 212, 191, 0.2);
+    color: #ccfbf1;
+}
+
+.nexus-ep-hunt {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.nexus-ep-hunt label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--nexus-ep-mute, #8b9bb4);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.nexus-ep-hunt input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 8px 9px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 650;
+    outline: none;
+}
+
+.nexus-ep-toolbar[data-collapsed="1"] {
+    flex-basis: var(--nexus-ep-rail-collapsed, 48px) !important;
+    width: var(--nexus-ep-rail-collapsed, 48px) !important;
+    min-width: var(--nexus-ep-rail-collapsed, 48px) !important;
+    max-width: var(--nexus-ep-rail-collapsed, 48px) !important;
+    padding: 10px 6px !important;
+}
+
+.nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-page-load,
+.nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-filter-grid,
+.nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-actions,
+.nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-layouts,
+.nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-hunt,
+.nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-stats {
+    display: none;
+}
+
+.nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-title {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+}
+
+.nexus-ep-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+.nexus-ep-gallery-layout {
+    display: grid;
+    gap: 8px;
+    padding: 10px 0;
+    border-block: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.nexus-ep-column-picks {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+}
+
+.nexus-ep-column-picks button {
+    min-height: 36px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.055);
+    color: #dbe4f0;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.nexus-ep-column-picks button:hover,
+.nexus-ep-column-picks button:focus-visible {
+    border-color: rgba(251, 146, 60, 0.7);
+    outline: none;
+}
+
+.nexus-ep-column-picks button[data-active="1"] {
+    border-color: rgba(249, 115, 22, 0.8);
+    background: rgba(249, 115, 22, 0.24);
+    color: #fff7ed;
+}
+
+#nexus-ep-clean-grid {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(var(--nexus-ep-grid-columns, 5), minmax(0, 1fr)) !important;
+    align-items: start !important;
+    gap: 18px 14px !important;
+    margin: 18px 0 28px !important;
+    padding: 0 !important;
+    clear: both !important;
+}
+
+#nexus-ep-clean-grid[data-full-bleed="1"] {
+    /* Also contain grids created by an older content script in an open tab. */
+    width: 100% !important;
+    margin-left: 0 !important;
+}
+
+html[data-nexus-ep-layout="spine"] #nexus-ep-clean-grid {
+    gap: 28px 18px !important;
+}
+
+html[data-nexus-ep-layout="spine"] #nexus-ep-clean-grid > .nexus-ep-grid-card img {
+    aspect-ratio: 16 / 10 !important;
+}
+
+@container nexus-ep-stage (max-width: 900px) {
+    #nexus-ep-clean-grid[data-columns="5"],
+    #nexus-ep-clean-grid[data-columns="6"] {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+}
+
+@container nexus-ep-stage (max-width: 620px) {
+    #nexus-ep-clean-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 14px 10px !important;
+    }
+}
+
+#nexus-ep-clean-grid > .nexus-ep-grid-card {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+    clear: none !important;
+    position: relative !important;
+    display: block !important;
+    transform: none !important;
+}
+
+#nexus-ep-clean-grid > .nexus-ep-grid-card a,
+#nexus-ep-clean-grid > .nexus-ep-grid-card .mbimg,
+#nexus-ep-clean-grid > .nexus-ep-grid-card .mbcontent {
+    max-width: 100% !important;
+}
+
+#nexus-ep-clean-grid > .nexus-ep-grid-card img {
+    width: 100% !important;
+    max-width: 100% !important;
+    aspect-ratio: 16 / 9 !important;
+    /* Let the thumbnail fill the (now wider) column instead of being capped at
+       ~190px. The 16/9 ratio keeps the height proportional to the column width,
+       so bigger columns = bigger, sharper previews. */
+    height: auto !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+
+.nexus-ep-layout-hidden {
+    display: none !important;
+}
+
+/* Reclaim the full width for the clean grid: once our grid exists on the page,
+   drop Eporner's left profile/responsive sidebar and let the main column span
+   edge-to-edge. Scoped with :has() so it only applies on pages where the grid
+   is actually mounted (listings/playlists), never on video-detail pages. */
+body:has(#nexus-ep-clean-grid) #profile_sidebar,
+body:has(#nexus-ep-clean-grid) #responsive_sidebar,
+body:has(#nexus-ep-clean-grid) .sidebar,
+body:has(#nexus-ep-clean-grid) #sidebar {
+    display: none !important;
+}
+
+body:has(#nexus-ep-clean-grid) #profile_content,
+body:has(#nexus-ep-clean-grid) #content,
+body:has(#nexus-ep-clean-grid) #maincontent,
+body:has(#nexus-ep-clean-grid) .main-content,
+body:has(#nexus-ep-clean-grid) .profilemain,
+body:has(#nexus-ep-clean-grid) .profile-main,
+body:has(#nexus-ep-clean-grid) [class*="profilemain"],
+body:has(#nexus-ep-clean-grid) [class*="profile-main"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    float: none !important;
+}
+
+.nexus-ep-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.nexus-ep-quality-field {
+    grid-column: span 3;
+}
+
+.nexus-ep-quality-picks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.nexus-ep-quality-picks button {
+    min-width: 54px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 7px 9px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #e2e8f0;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.nexus-ep-quality-picks button[data-active="1"] {
+    border-color: rgba(249, 115, 22, 0.72);
+    background: rgba(249, 115, 22, 0.26);
+    color: #fff7ed;
+}
+
+.nexus-ep-quality-empty {
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 0;
+}
+
+.nexus-ep-filter-grid label {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.nexus-ep-filter-grid input,
+.nexus-ep-filter-grid select,
+.nexus-ep-actions select {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 7px 8px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.nexus-ep-filter-grid input::placeholder {
+    color: rgba(226, 232, 240, 0.45);
+}
+
+.nexus-ep-filter-grid select option,
+.nexus-ep-actions select option {
+    background: #1a1a2e;
+    color: #fff;
+}
+
+.nexus-ep-actions button {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.nexus-ep-actions button.primary {
+    min-height: 46px;
+    border: 1px solid rgba(251, 146, 60, 0.6);
+    border-radius: 11px;
+    background: linear-gradient(135deg, #f97316, #c2410c);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    box-shadow: 0 8px 20px rgba(194, 65, 12, 0.22);
+}
+
+.nexus-ep-actions button[data-active="1"] {
+    border-color: rgba(34, 197, 94, 0.5);
+    background: rgba(34, 197, 94, 0.18);
+    color: #dcfce7;
+}
+
+.nexus-ep-actions button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.nexus-ep-check {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 2147483645;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nexus-ep-check input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.nexus-ep-check span {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(7, 12, 20, 0.84);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.nexus-ep-check input:checked + span {
+    background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.nexus-ep-preview {
+    position: relative;
+    cursor: pointer;
+}
+
+.nexus-ep-preview-selected {
+    outline: 2px solid rgba(249, 115, 22, 0.92);
+    outline-offset: 2px;
+    border-radius: 12px;
+}
+
+.nexus-ep-filter-hidden {
+    display: none !important;
+}
+
+.mb.nexus-ep-filter-hidden,
+.post-data.nexus-ep-filter-hidden,
+.p-v-y.nexus-ep-filter-hidden,
+.video.nexus-ep-filter-hidden,
+.video-item.nexus-ep-filter-hidden,
+.video-card.nexus-ep-filter-hidden,
+.thumb-item.nexus-ep-filter-hidden,
+.item.nexus-ep-filter-hidden {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+}
+
+#nexus-ep-clean-grid > .nexus-ep-filter-hidden {
+    display: none !important;
+}
+
+.nexus-ep-meta {
+    position: absolute;
+    inset: 0;
+    z-index: 2147483645;
+    pointer-events: none;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.nexus-ep-chip {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 22px;
+    max-width: calc(100% - 18px);
+    padding: 4px 8px;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    background: rgba(0, 0, 0, 0.88);
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.75), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nexus-ep-date {
+    left: 7px;
+    bottom: 7px;
+    background: rgba(185, 28, 28, 0.95);
+    border-color: rgba(254, 202, 202, 0.78);
+}
+
+.nexus-ep-size {
+    /* Top-CENTER, not top-right — the top-right corner is Eporner's own
+       "Watch later" button and the size badge was covering it. */
+    left: 50%;
+    top: 7px;
+    transform: translateX(-50%);
+    background: rgba(22, 101, 52, 0.96);
+    border-color: rgba(187, 247, 208, 0.72);
+}
+
+.nexus-ep-duration {
+    left: 50%;
+    bottom: 7px;
+    transform: translateX(-50%);
+    background: rgba(2, 6, 23, 0.94);
+    border-color: rgba(191, 219, 254, 0.72);
+}
+
+.nexus-ep-quality {
+    right: 7px;
+    bottom: 7px;
+    background: rgba(234, 88, 12, 0.96);
+    border-color: rgba(254, 215, 170, 0.78);
+}
+
+.nexus-ep-toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 2147483647;
+    max-width: min(420px, calc(100vw - 24px));
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(12, 17, 26, 0.94);
+    border: 1px solid rgba(249, 115, 22, 0.38);
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.4);
+    color: #fff;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.18s ease;
+    pointer-events: none;
+}
+
+.nexus-ep-toast.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.nexus-ep-toast[data-error="1"] {
+    border-color: rgba(239, 68, 68, 0.45);
+}
+
+@media (max-width: 720px) {
+    #nexus-ep-shell {
+        flex-direction: column-reverse !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+
+    .nexus-ep-toolbar,
+    .nexus-ep-toolbar[data-collapsed="1"] {
+        position: relative !important;
+        top: auto !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        flex: 0 0 auto !important;
+        height: min(42vh, 340px) !important;
+        max-height: min(42vh, 340px) !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-top: 1px solid rgba(249, 115, 22, 0.35) !important;
+    }
+
+    .nexus-ep-toolbar[data-collapsed="1"] {
+        height: 48px !important;
+        max-height: 48px !important;
+    }
+
+    .nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-title {
+        writing-mode: horizontal-tb;
+        transform: none;
+    }
+}
+
+/* Keep the workbench predictable even when the host styles labels and sections. */
+#nexus-ep-toolbar .nexus-ep-section { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; }
+#nexus-ep-toolbar .nexus-ep-field { display: flex !important; flex-direction: column !important; width: 100% !important; }
+#nexus-ep-toolbar .nexus-ep-sort-row { display: grid !important; grid-template-columns: minmax(0, 1fr) auto !important; }
+#nexus-ep-toolbar .nexus-ep-sort-row select { min-width: 0 !important; }
+#nexus-ep-toolbar .nexus-ep-reset { width: 100%; }
+#nexus-ep-toolbar .nexus-ep-status:empty { display: none; }
+#nexus-ep-toolbar button:focus-visible, #nexus-ep-toolbar input:focus-visible, #nexus-ep-toolbar select:focus-visible {
+    outline: 2px solid #5eead4 !important; outline-offset: 2px;
+}
+#nexus-ep-toolbar[data-collapsed="1"] .nexus-ep-playlist-basket { display: none !important; }

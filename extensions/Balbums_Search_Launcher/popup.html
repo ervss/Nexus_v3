@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Balbums Search</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main class="launcher">
+    <div class="eyebrow">BALBUMS / ARCHIVE SEARCH</div>
+    <h1>Find albums</h1>
+    <form id="search-form">
+      <label for="keyword">Keywords</label>
+      <input id="keyword" name="keyword" type="search" placeholder="e.g. throat" autocomplete="off" autofocus required>
+      <button type="submit">Search <span aria-hidden="true">&#8599;</span></button>
+    </form>
+    <p class="hint">Results open in a new tab and visible metadata fetch starts automatically.</p>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

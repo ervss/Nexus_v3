@@ -1,0 +1,65 @@
+Forum Hub vyzerá prihlásený, lebo v cookie súbore sú mená session cookies. Posledný úspešný zápis do databázy je z 26. októbra a predvolený pohľad tie staré karty schová. Súbory som nemenil. Refresh som nespúšťal.
+
+## Čo je teraz v dátach
+
+V `nexus_test.db` je 9 vláken, 151 príspevkov a 44 odkazov. Z nich je 43 importovaných a 1 skrytý. Stav `new`, `resolved` aj `dead` je nula. Posledná kontrola vlákna je `2026-10-26 05:52`. Nové odkazy za posledných 14 dní: 0. Uložené tagové kanály: 0. Tag cloud: 0.
+
+Stránka `/forum` posiela filter `status=active`, čiže `new + resolved + dead`. Importované karty do toho nepatria, takže mriežka je prázdna aj keď v databáze 43 odkazov je. Prázdny stav povie len „Klikni na Refresh“.
+
+## Prečo chip hovorí „prihlásené“
+
+`/api/forum/boards` pokladá board za prihlásený, keď v jare existujú mená `*_session` a `*_user`. Neoveruje, či fórum tie cookies prijme, a nepozerá sa na dátum expirácie.
+
+Dnes o 18:38 bol `simpcity.netscape.txt` prepísaný cestou `write_cookies`: všetky riadky mali expiráciu 1. 1. 2100 a jednu doménu. Živý request s tým jarom vrátil **HTTP 403, stránka DDoS-Guard, 902 bajtov, žiadne vlákna**. `ForumClient` z každého 403 spraví `ForumAuthError` s textom „not logged in“, aj keď telo je výzva DDoS-Guardu, nie XenForo login.
+
+`refresh_all` tú chybu chytí a vráti **HTTP 200** s `new_links: 0` a textom v `watchlists[].error`. Chip sa potom znova načíta z mien cookies a ostane zelený. Toast môže chybu spomenúť, mriežka ostane prázdna.
+
+O 18:45 rozšírenie jar prepísalo správnou cestou `write_cookie_rows` (15 cookies, dve domény, skutočná expirácia). S týmto súborom ide SimpCity aj cez `chrome120`, aj cez `chrome146`: **HTTP 200, `data-logged-in="true"`, 20 vláken**. `?unread_only=1`, ktoré Refresh posiela vždy a v UI sa nedá vypnúť, vráti tú istú stránku (20 vláken, 0 unread značiek). Parameter teda zoznam teraz nezúži.
+
+SMG je iný prípad. Jar je stále starý zápis s expiráciou 2100 (4 cookies, mtime 10. 11.). Živá stránka je **login Social Media Girls, `data-logged-in="false"`**. Chip by aj tu vedel ukázať „prihlásené“, lebo mená `xf_session` a `xf_user` v súbore sú.
+
+## Prečo sa nič nové nepridá
+
+Refresh neťahá „nové videá z fóra“ ako feed. Ide na `/watched/threads`, potom na každé vlákno `/latest`, a uloží len odkazy na bunkr, filester, gofile, pixeldrain, turbo, mega, erome a zopár ďalších. Od 26. 10. táto cesta v tejto databáze nedobehla.
+
+Konkrétne diery v tej ceste:
+
+1. **Čiastočný cookie sync rozbije jar.** Keď prídu cookies bez session páru, `sync_cookies` zlučí starú session a zavolá `write_cookies`. Tá vyhodí skutočnú doménu, path aj expiráciu a nastaví rok 2100. DDoS-Guard cookies sú na tom citlivé. Nasledujúci Refresh dostane 403 a UI ďalej tvrdí, že je prihlásené.
+2. **403 sa tvári ako úspech s nulou.** Auth chyba nepríde ako 401. Klient vidí `0 nových liniek` a zelený chip.
+3. **Predvolený filter schová jediný obsah, ktorý v hube je.** Kým nepribudne `new` odkaz, stránka vyzerá ako mŕtva.
+4. **Refresh je jeden dlhý POST.** Medzi requestmi je pauza 1,2 s, zámok je jeden na board, na vlákno sa ide až 4 stránky dozadu, limit je 25 vláken. Pri 20 sledovaných je to desiatky sekúnd bez medzistavu. UI počas toho len točí ikonu.
+5. **Po 15 minútach sa vlákno preskočí**, ak sa čas posledného príspevku v zozname nepohol. Toast to zhrnie ako „preskočené (čerstvé)“, čo vyzerá ako „nič nové“, aj keď sa sieť ani nespýtala.
+6. **Príspevok bez podporovaného hostiteľa neposunie `last_seen_post_id`.** Hub ho nabudúce stiahne znova a opäť uloží nulu. Nepodporované hosty sa nikde neukážu, takže nevidno, že fórum žije a parser ich len zahadzuje.
+7. **TLS profil je natvrdo `chrome120`.** V tomto prostredí je curl_cffi 0.16.3 a ide až po `chrome150`. Po oprave jaru prešiel aj `chrome120`, ale pri DDoS-Guarde je to zbytočne starý odtlačok. Rovnaký fetch v projekte inde používa `chrome124` alebo alias `chrome`.
+
+## Čo zmeniť v stroji, v tomto poradí
+
+**Auth a cookies.** `write_cookies` nesmie prepísať jar, ktorý už má platné session cookies. Čiastočný import nech len doplní mená, ktoré prišli, a nechá domain, path a expiráciu. Chip nech má štyri stavy: `prihlásené` len po poslednom HTML s `data-logged-in="true"`, inak `DDoS-Guard`, `session expirovala`, `cooldown`. Do banneru dať čas posledného úspešného zápisu a poslednú chybu. `ForumAuthError` nech ide von ako 401, nie ako 200 s nulou. 403 s telom DDoS-Guard nech nie je text „not logged in“. Impersonácia nech je `chrome146` alebo alias `chrome`, nie `chrome120`. SMG treba znova nechať zapísať rozšírením cez `cookie_rows`. Kým jar nesie rok 2100, session je mŕtva a súbor to zakrýva.
+
+**Aby Refresh bolo vidieť, že pracuje.** Vrátiť hneď uložený feed a sync pustiť ako job s priebehom: `vlákno 4/20, +3 odkazy, 1 chyba`. Do toastu dať `threads_checked`, `threads_skipped`, `new_links` a prvú chybu, nie len „0 nových liniek“. `unread_only` nech je prepínač, default vypnutý, lebo dnes aj tak vracia celý zoznam a pri skutočne prázdnom unrede by Refresh mlčal. Po dobehnutí prepnúť filter na čerstvé odkazy. Prázdny `active` stav nech povie koľko importovaných leží vedľa a kedy bol posledný sync.
+
+**Rýchlosť.** Jedna session na board už je. Zmysel má ísť len do vláken, ktorých `last_post_at` v zozname je novší ako uložený, a z `/latest` brať jednu stránku, kým sa nenarazí na známy príspevok. Pauzu 1,2 s držať, kým board nedá 429. Pri 429 nechať cooldown, ktorý tam už je. Feed dnes načíta všetky `forum_links` do Pythonu a triedi ich tam. Pri 44 riadkoch je to nič, pri tisícoch to bude celé otvorenie stránky. Filter `board`, `origin`, `status` a stránkovanie patria do SQL. Index `(thread_id, status, posted_at)`.
+
+**Overovanie a prehrávanie.** Fronta po načítaní feedu volá `/links/resolve` na každú neoverenú kartu po troch. To je druhý pomalý a krehký chod vedľa Refreshu. Overiť pri prehratí a prednačítať ďalšie dve. Metadáta (dĺžka, veľkosť, náhľad) držať v `resolved_payload` a stream pýtať znova až keď vyprší. Náhľady cez `/api/tester/thumb` nechať, ale len pre karty vo viewporte.
+
+**Import.** Cesta do fronty je v poriadku a nič sa nesťahuje samo. Na karte netreba druhé tlačidlo Import, keď výber a bočný panel vedia to isté.
+
+## UI
+
+Súčasné rozhranie je dobré na hromadné mazanie mŕtvych odkazov a slabé na pozeranie. `/forum`, `/forum/new` a `/forum/groups` sú tri stránky s tou istou kartou. Horný riadok má režim, dva odkazy, osem selectov bez viditeľných popisov, checkbox, counter a Refresh. Karta má 16:10 náhľad, vetu o stave, tri tlačidlá (Otvoriť, Prehrať, Import) a hover play, ktorý robí to isté čo Prehrať. Stav „overené / čaká / mŕtve“ je na karte, v hlavičke vlákna aj v lište. Prehrávač je modal cez celú stránku, bez ďalšieho a bez Importu. Po 24 kartách je na obrazovke desiatky tlačidiel a žiadne video.
+
+Druhý prechod cez šablóny došiel k tomu istému. Spoločný návrh je jedna stránka, pracovne **Stage Desk**. Staré adresy len presmerujú na `?lens=`.
+
+Horný pás je nízky. Vľavo späť, „Forum · simpcity“ a chip, ktorý ukazuje živý stav, nie mená cookies. V strede tri šošovky: **Nové**, **Vlákna**, **Skupiny**. Vpravo hľadanie, jedno tlačidlo Filtre s počtom, Obnoviť a počet liniek. Druhý riadok sú témy ako chips, nie ďalšia stránka. Skupiny (deepthroat, fake tits, bimbo) sú chips v tom istom rade, nie štyri dlhé taby.
+
+Pod tým je stage, nie modal. Vľavo prehrávač 16:9, vpravo úzky rail: jeden riadok názvu, platforma, dĺžka, kvalita, veľkosť, a až tu Import, Zdroj a Skryť. Pod tým „ďalšie“ ako krátky zoznam. Po `ended` ide ďalšia položka, mŕtve sa preskočia. Na šírke pod 1100 px je stage spodný sheet, mriežka ostane scrollovateľná. Modal ostane len na fullscreen.
+
+Feed pod stage je podľa dní (Dnes, Včera), to si vziať z `/forum/new`. Karta je samotný náhľad 16:9. Na ňom jeden riadok názvu, dĺžka a malá bodka: teal hrateľné, amber ešte neoverené, ružová importované. Žiadny druhý riadok tlačidiel, žiadna veta „Čaká na overenie“, žiadny trvalý workbar. Klik nahrá stage. Shift-klik je druhé okno na porovnanie. Checkbox až po prvom výbere, potom sa vráti hromadná lišta. Mŕtve nie sú karty. Pod dňom je jeden riadok „Mŕtve (n)“, po rozbalení jednoriadkový zoznam.
+
+Šošovka Vlákna nechá zoskupenie, ale hlavička vlákna je jeden riadok: názov, počet, vek, menu `…` pre „označiť prečítané“ a „vybrať mŕtve“. Gradientový panel a tri tlačidlá v hlavičke preč.
+
+Klávesy, keď kurzor nie je v poli: `j`/`k` ďalšie, medzerník play, `i` import, `f` fullscreen, Esc zatvorí porovnanie a výber. Automatické overovanie celej mriežky preč. V hlavičke stačí tichý text „overujem 2“.
+
+Nechať Manrope, `#07131f` a teal `#56dec8`. Ružovú nechať na importovanú bodku a na mazanie. Pulzujúca bodka v logu, dva farebné radial gradienty na pozadí a zdvih karty pri hoveri sú šum. Žiadna nová knižnica a žiadny štvrtý pohľad. HLS a proxy, ktoré už má `showVideo`, ostanú jediná prehrávacia cesta. `/forum/new` dnes HLS na rozdiel od hubu nepúšťa.
+
+Kým sa UI nespraví, najmenšia zmena, ktorá prestane vyzerať ako pokazený hub: chip z posledného živého výsledku, prázdny stav s vetou koľko importovaných vedľa leží a kedy bol posledný sync, a Refresh, ktorý nesmie zelený chip nechať po 403.

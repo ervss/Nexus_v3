@@ -1,0 +1,1236 @@
+/* ==========================================================================
+   NexusPWC — Hybrid Obsidian Glassmorphism Design System
+   Dual-Rail + Command-First Topbar + Active Filters + 16:9 Cards
+   ========================================================================== */
+
+:root {
+    --nx-bg: #07090e;
+    --nx-bg-elevated: #0c101a;
+    --nx-panel: rgba(16, 21, 33, 0.78);
+    --nx-panel-strong: rgba(13, 17, 28, 0.92);
+    --nx-card: rgba(18, 24, 38, 0.74);
+    --nx-card-hover: rgba(24, 32, 50, 0.9);
+    --nx-border: rgba(255, 255, 255, 0.08);
+    --nx-border-strong: rgba(255, 255, 255, 0.15);
+    --nx-violet: #a855f7;
+    --nx-violet-soft: rgba(168, 85, 247, 0.16);
+    --nx-cyan: #22d3ee;
+    --nx-cyan-soft: rgba(34, 211, 238, 0.14);
+    --nx-emerald: #10b981;
+    --nx-emerald-soft: rgba(16, 185, 129, 0.14);
+    --nx-text: #f1f5f9;
+    --nx-text-soft: #cbd5e1;
+    --nx-muted: #94a3b8;
+    --nx-rail-w: 60px;
+    --nx-drawer-w: 240px;
+    --nx-radius: 12px;
+    --nx-radius-sm: 8px;
+}
+
+html:has(body.ui-classic),
+html:has(body.ui-v1) {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+body.ui-classic,
+body.ui-v1 {
+    background: var(--nx-bg) !important;
+    color: var(--nx-text);
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* ── Dual-Rail Shell ────────────────────────────────────────────────────── */
+.nx-shell {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+    background:
+        radial-gradient(900px 500px at 14% -8%, rgba(168, 85, 247, 0.10), transparent 60%),
+        radial-gradient(800px 500px at 88% 0%, rgba(34, 211, 238, 0.07), transparent 60%),
+        var(--nx-bg);
+}
+
+/* ── Left Icon Rail (60px) ──────────────────────────────────────────────── */
+.nx-rail {
+    width: var(--nx-rail-w);
+    flex: 0 0 var(--nx-rail-w);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    background: var(--nx-panel-strong);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-right: 1px solid var(--nx-border);
+    z-index: 45;
+}
+
+.nx-rail-top,
+.nx-rail-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.nx-logo-mark {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+    color: #fff;
+    background: linear-gradient(135deg, #a855f7 0%, #6366f1 55%, #22d3ee 100%);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    cursor: pointer;
+    border: none;
+    margin-bottom: 6px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.nx-logo-mark:hover {
+    transform: translateY(-1px) scale(1.03);
+    box-shadow: 0 0 26px rgba(168, 85, 247, 0.55);
+}
+
+.nx-rail-divider {
+    width: 28px;
+    height: 1px;
+    background: var(--nx-border);
+    margin: 4px 0;
+}
+
+.nx-rail-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--nx-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.nx-rail-btn .material-icons-round {
+    font-size: 20px;
+}
+
+.nx-rail-btn:hover {
+    color: var(--nx-text);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--nx-border);
+}
+
+.nx-rail-btn.active {
+    color: #f5d0fe;
+    background: var(--nx-violet-soft);
+    border-color: rgba(168, 85, 247, 0.42);
+    box-shadow: 0 0 18px rgba(168, 85, 247, 0.28);
+}
+
+.nx-rail-btn.active::before {
+    content: "";
+    position: absolute;
+    left: -10px;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: linear-gradient(180deg, #c084fc, #22d3ee);
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.8);
+}
+
+.nx-rail-btn.is-accent-cyan.active,
+.nx-rail-btn.is-accent-cyan:hover {
+    color: #67e8f9;
+    border-color: rgba(34, 211, 238, 0.35);
+}
+
+/* CSS Tooltip on Rail */
+.nx-rail-btn[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-4px);
+    padding: 5px 10px;
+    border-radius: 7px;
+    background: rgba(9, 12, 20, 0.96);
+    border: 1px solid var(--nx-border-strong);
+    color: #f8fafc;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.14s ease 0s, transform 0.14s ease 0s, visibility 0s linear 0.14s;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+    z-index: 90;
+}
+
+.nx-rail-btn[data-tooltip]:hover::after {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+    transition: opacity 0.16s ease 0.24s, transform 0.16s ease 0.24s, visibility 0s linear 0.24s;
+}
+
+/* ── Context Drawer (240px, collapsible) ────────────────────────────────── */
+.nx-drawer {
+    width: var(--nx-drawer-w);
+    flex: 0 0 var(--nx-drawer-w);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--nx-panel);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-right: 1px solid var(--nx-border);
+    transition: width 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+                flex-basis 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.18s ease;
+    overflow: hidden;
+    z-index: 38;
+}
+
+.nx-shell.is-drawer-collapsed .nx-drawer {
+    width: 0;
+    flex-basis: 0;
+    opacity: 0;
+    border-right-color: transparent;
+    pointer-events: none;
+}
+
+.nx-drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 12px 8px;
+    border-bottom: 1px solid var(--nx-border);
+    gap: 6px;
+}
+
+.nx-drawer-brand {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--nx-text-soft);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.nx-drawer-brand-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--nx-emerald);
+    box-shadow: 0 0 8px var(--nx-emerald);
+}
+
+.nx-drawer-collapse-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid var(--nx-border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--nx-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.nx-drawer-collapse-btn:hover {
+    color: var(--nx-text);
+    border-color: var(--nx-border-strong);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.nx-drawer-collapse-btn .material-icons-round {
+    font-size: 17px;
+}
+
+/* Floating expand button when drawer is collapsed */
+.nx-drawer-expand-fab {
+    position: fixed;
+    left: calc(var(--nx-rail-w) + 8px);
+    top: 14px;
+    z-index: 44;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    border: 1px solid var(--nx-border-strong);
+    background: var(--nx-panel-strong);
+    backdrop-filter: blur(12px);
+    color: var(--nx-text-soft);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+    transition: all 0.15s ease;
+}
+
+.nx-drawer-expand-fab:hover {
+    color: #fff;
+    border-color: rgba(168, 85, 247, 0.5);
+    background: var(--nx-violet-soft);
+}
+
+.nx-drawer-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--nx-border);
+    background: rgba(0, 0, 0, 0.16);
+}
+
+.nx-drawer-tab {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--nx-muted);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 4px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+}
+
+.nx-drawer-tab:hover {
+    color: var(--nx-text);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.nx-drawer-tab.active {
+    color: #f8fafc;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.24), rgba(34, 211, 238, 0.14));
+    border-color: rgba(168, 85, 247, 0.4);
+}
+
+.nx-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+}
+
+.nx-drawer-body::-webkit-scrollbar {
+    width: 5px;
+}
+
+.nx-drawer-body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+}
+
+.nx-drawer-footer {
+    padding: 10px;
+    border-top: 1px solid var(--nx-border);
+    background: rgba(7, 9, 14, 0.55);
+}
+
+.nx-section-title {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nx-muted);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ── Batch Card in Library Tab ──────────────────────────────────────────── */
+.nx-batch-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--nx-border);
+    border-radius: var(--nx-radius);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nx-batch-select-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.nx-select {
+    width: 100%;
+    min-width: 0;
+    background: rgba(7, 9, 14, 0.72);
+    border: 1px solid var(--nx-border-strong);
+    color: var(--nx-text);
+    border-radius: var(--nx-radius-sm);
+    padding: 7px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    outline: none;
+}
+
+.nx-select:focus {
+    border-color: rgba(168, 85, 247, 0.55);
+}
+
+.nx-icon-btn {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: var(--nx-radius-sm);
+    border: 1px solid var(--nx-border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--nx-text-soft);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.nx-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--nx-border-strong);
+    color: #fff;
+}
+
+.nx-icon-btn .material-icons-round {
+    font-size: 16px;
+}
+
+.nx-icon-btn.is-emerald { color: #34d399; border-color: rgba(16, 185, 129, 0.32); }
+.nx-icon-btn.is-cyan { color: #22d3ee; border-color: rgba(34, 211, 238, 0.32); }
+.nx-icon-btn.is-danger { color: #f87171; border-color: rgba(239, 68, 68, 0.32); }
+.nx-icon-btn.is-amber { color: #fbbf24; border-color: rgba(245, 158, 11, 0.32); }
+
+.nx-batch-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 7px 8px;
+    border-radius: var(--nx-radius-sm);
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    font-size: 11px;
+}
+
+.nx-batch-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.nx-batch-meta-item span {
+    color: var(--nx-muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.nx-batch-meta-item strong {
+    color: #ecfdf5;
+    font-weight: 700;
+}
+
+.nx-batch-actions-bar {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.nx-mini-btn {
+    border: 1px solid var(--nx-border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--nx-text-soft);
+    border-radius: 7px;
+    padding: 5px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.nx-mini-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.09);
+    border-color: var(--nx-border-strong);
+}
+
+.nx-mini-btn.is-violet {
+    color: #d8b4fe;
+    border-color: rgba(168, 85, 247, 0.35);
+    background: rgba(168, 85, 247, 0.12);
+}
+
+.nx-mini-btn .material-icons-round {
+    font-size: 14px;
+}
+
+/* ── Source Boards & Playlists List ─────────────────────────────────────── */
+.nx-board-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nx-board-search {
+    width: 100%;
+    background: rgba(7, 9, 14, 0.65);
+    border: 1px solid var(--nx-border);
+    border-radius: var(--nx-radius-sm);
+    color: var(--nx-text);
+    font-size: 11px;
+    padding: 6px 8px;
+    margin-bottom: 6px;
+    outline: none;
+}
+
+.nx-board-search:focus {
+    border-color: rgba(168, 85, 247, 0.5);
+}
+
+.nx-list-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px;
+    align-items: center;
+}
+
+.nx-list-item {
+    width: 100%;
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--nx-text-soft);
+    border-radius: var(--nx-radius-sm);
+    padding: 6px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    text-align: left;
+    min-width: 0;
+    transition: all 0.14s ease;
+}
+
+.nx-list-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
+
+.nx-list-item.active {
+    background: var(--nx-violet-soft);
+    border-color: rgba(168, 85, 247, 0.38);
+    color: #f5d0fe;
+}
+
+.nx-list-item .material-icons-round {
+    font-size: 15px;
+    flex-shrink: 0;
+    color: var(--nx-muted);
+}
+
+.nx-list-item.active .material-icons-round {
+    color: #c084fc;
+}
+
+.nx-list-item-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+}
+
+.nx-count-pill {
+    font-family: 'Manrope', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #c4b5fd;
+    background: rgba(168, 85, 247, 0.16);
+    padding: 1px 7px;
+    border-radius: 999px;
+}
+
+.nx-btn-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.nx-cta-full {
+    width: 100%;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(34, 211, 238, 0.14));
+    color: #f8fafc;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.16s ease;
+}
+
+.nx-cta-full:hover {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.38), rgba(34, 211, 238, 0.22));
+    box-shadow: 0 6px 18px rgba(168, 85, 247, 0.25);
+}
+
+/* ── Sources Grid (2-column) ────────────────────────────────────────────── */
+.nx-sources-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.nx-source-tile {
+    border: 1px solid var(--nx-border);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 9px;
+    padding: 8px;
+    color: var(--nx-text-soft);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+    min-width: 0;
+}
+
+.nx-source-tile span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nx-source-tile:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--nx-border-strong);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.nx-source-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ── Tools Grid ─────────────────────────────────────────────────────────── */
+.nx-tools-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 5px;
+}
+
+.nx-tool-btn {
+    border: 1px solid var(--nx-border);
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 9px;
+    padding: 8px 10px;
+    color: var(--nx-text-soft);
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 9px;
+    cursor: pointer;
+    transition: all 0.14s ease;
+    min-width: 0;
+    width: 100%;
+    text-align: left;
+}
+
+.nx-tool-btn .material-icons-round {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.nx-tool-btn span:last-child {
+    white-space: nowrap;
+}
+
+.nx-tool-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--nx-border-strong);
+    color: #fff;
+}
+
+.nx-quick-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--nx-border);
+    border-radius: var(--nx-radius);
+    padding: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.nx-quick-textarea {
+    width: 100%;
+    background: rgba(7, 9, 14, 0.78);
+    border: 1px solid var(--nx-border);
+    border-radius: var(--nx-radius-sm);
+    color: #fff;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 7px;
+    resize: vertical;
+}
+
+.nx-bt-card {
+    background: linear-gradient(135deg, rgba(14, 116, 144, 0.18), rgba(15, 23, 42, 0.85));
+    border: 1px solid rgba(34, 211, 238, 0.25);
+    border-radius: var(--nx-radius);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    font-size: 11px;
+}
+
+.nx-bt-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.nx-bt-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #67e8f9;
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.nx-bt-pill {
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+
+/* ── Main Stage & Command-First Topbar ──────────────────────────────────── */
+.nx-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.nx-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: rgba(7, 9, 14, 0.82);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--nx-border);
+    padding: 10px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nx-topbar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.nx-search-box {
+    flex: 1 1 280px;
+    min-width: 220px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(16, 21, 33, 0.88);
+    border: 1px solid var(--nx-border-strong);
+    border-radius: 11px;
+    padding: 0 10px;
+    height: 38px;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.nx-search-box:focus-within {
+    border-color: rgba(168, 85, 247, 0.65);
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.16);
+}
+
+.nx-search-box .material-icons-round {
+    font-size: 18px;
+    color: var(--nx-muted);
+}
+
+.nx-search-box input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.nx-kbd {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--nx-muted);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--nx-border);
+    border-radius: 5px;
+    padding: 2px 6px;
+    white-space: nowrap;
+}
+
+.nx-view-toggle {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(16, 21, 33, 0.86);
+    border: 1px solid var(--nx-border);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+}
+
+.nx-view-btn {
+    border: none;
+    background: transparent;
+    color: var(--nx-muted);
+    border-radius: 7px;
+    padding: 5px 9px;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.nx-view-btn .material-icons-round {
+    font-size: 16px;
+}
+
+.nx-view-btn.active {
+    background: var(--nx-violet-soft);
+    color: #f5d0fe;
+}
+
+.nx-filter-pills {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.nx-pill-btn {
+    height: 34px;
+    padding: 0 11px;
+    border-radius: 9px;
+    border: 1px solid var(--nx-border);
+    background: rgba(16, 21, 33, 0.8);
+    color: var(--nx-text-soft);
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+
+.nx-pill-btn .material-icons-round {
+    font-size: 16px;
+}
+
+.nx-pill-btn:hover {
+    border-color: var(--nx-border-strong);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.nx-pill-btn.active {
+    border-color: rgba(34, 211, 238, 0.48);
+    background: var(--nx-cyan-soft);
+    color: #cffafe;
+}
+
+.nx-import-cta {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(168, 85, 247, 0.5);
+    background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(168, 85, 247, 0.32);
+    transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.nx-import-cta:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 22px rgba(168, 85, 247, 0.45);
+}
+
+.nx-import-cta .material-icons-round {
+    font-size: 16px;
+}
+
+/* ── Active Filters Context Strip ───────────────────────────────────────── */
+.nx-active-filters {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 6px 18px;
+    background: rgba(16, 21, 33, 0.55);
+    border-bottom: 1px solid var(--nx-border);
+    font-size: 11px;
+}
+
+.nx-af-label {
+    color: var(--nx-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 10px;
+    margin-right: 2px;
+}
+
+.nx-af-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(168, 85, 247, 0.14);
+    border: 1px solid rgba(168, 85, 247, 0.34);
+    color: #e9d5ff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.14s ease;
+}
+
+.nx-af-chip:hover {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: rgba(239, 68, 68, 0.45);
+    color: #fecaca;
+}
+
+.nx-af-chip .material-icons-round {
+    font-size: 13px;
+}
+
+.nx-af-clear {
+    margin-left: auto;
+    border: none;
+    background: transparent;
+    color: var(--nx-cyan);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.nx-af-clear:hover {
+    text-decoration: underline;
+}
+
+/* ── Modern 16:9 Video Cards (.v-card) — Clean Non-Colliding Badges ─────── */
+.nx-main .v-card {
+    background: var(--nx-card);
+    border: 1px solid var(--nx-border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.nx-main .v-card:hover {
+    transform: translateY(-2px);
+    background: var(--nx-card-hover);
+    border-color: rgba(168, 85, 247, 0.38);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.42);
+}
+
+.nx-main .v-card .thumb-wrapper {
+    aspect-ratio: 16 / 9;
+    position: relative;
+    background: #05070c;
+    overflow: hidden;
+}
+
+.nx-main .v-card .quality-chip {
+    top: 8px;
+    left: 8px;
+    right: auto;
+    bottom: auto;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 2px 6px;
+    backdrop-filter: blur(8px);
+}
+
+.nx-main .v-card .duration-chip {
+    bottom: 8px;
+    right: 8px;
+    top: auto;
+    left: auto;
+    border-radius: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    background: rgba(7, 9, 14, 0.84);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nx-main .v-card .thumbnail-quality-badge,
+.nx-main .v-card .v-verify-badge,
+.nx-main .v-card .v-status-badge {
+    left: 8px !important;
+    right: auto !important;
+    bottom: 8px !important;
+    top: auto !important;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 6px;
+}
+
+.nx-main .v-card .size-chip {
+    bottom: 32px;
+    left: 8px;
+    top: auto;
+    right: auto;
+    font-size: 10px;
+    border-radius: 6px;
+    background: rgba(7, 9, 14, 0.78);
+}
+
+/* ── Gallery Controls Bar & Filter Bar (Contrast + Wrapping) ────────────── */
+.nx-main .gallery-controls-bar,
+.nx-main .filter-bar {
+    display: flex;
+    flex-wrap: wrap !important;
+    max-width: 100%;
+    gap: 8px;
+    box-sizing: border-box;
+    align-items: center;
+}
+
+.nx-main .gallery-controls-bar .gcb-group,
+.nx-main .filter-bar > * {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 100%;
+    align-items: center;
+}
+
+.nx-main .gallery-controls-bar .gcb-btn,
+.nx-main .filter-bar button {
+    color: var(--nx-text-soft);
+    background: rgba(16, 21, 33, 0.85);
+    border: 1px solid var(--nx-border);
+}
+
+.nx-main .gallery-controls-bar .gcb-btn:hover,
+.nx-main .filter-bar button:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--nx-border-strong);
+}
+
+.nx-main .gallery-controls-bar .gcb-btn.active,
+.nx-main .filter-bar button.active {
+    color: #f8fafc !important;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.36), rgba(99, 102, 241, 0.28)) !important;
+    border-color: rgba(168, 85, 247, 0.65) !important;
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.22);
+}
+
+.nx-main .v-card .index-chip {
+    top: 8px;
+    right: 8px;
+    left: auto;
+    bottom: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    opacity: 0.78;
+}
+
+.nx-main .v-card .v-meta {
+    padding: 10px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.nx-main .v-card .v-meta-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.nx-main .v-card .v-source-badge {
+    margin: 0;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #c4b5fd;
+}
+
+.nx-main .v-card .v-title {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--nx-text);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ── Skin Compatibility (Aurora & Vision Glass) ─────────────────────────── */
+body.skin-aurora .nx-shell {
+    background:
+        radial-gradient(900px 520px at 12% 0%, rgba(56, 189, 248, 0.13), transparent 55%),
+        radial-gradient(850px 520px at 90% 10%, rgba(16, 185, 129, 0.11), transparent 55%),
+        #08101c;
+}
+
+body.skin-aurora .nx-rail,
+body.skin-aurora .nx-drawer,
+body.skin-aurora .nx-topbar {
+    background: rgba(11, 20, 34, 0.80);
+    border-color: rgba(148, 163, 184, 0.16);
+}
+
+body.skin-aurora .nx-rail-btn.active {
+    background: rgba(56, 189, 248, 0.18);
+    border-color: rgba(56, 189, 248, 0.45);
+    color: #bae6fd;
+}
+
+body.skin-vision:not(.vision-dark) .nx-shell {
+    background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.25), transparent 50%), #d8e2ef;
+    color: #0f172a;
+}
+
+body.skin-vision:not(.vision-dark) .nx-rail,
+body.skin-vision:not(.vision-dark) .nx-drawer,
+body.skin-vision:not(.vision-dark) .nx-topbar {
+    background: rgba(248, 250, 252, 0.72);
+    border-color: rgba(15, 23, 42, 0.10);
+    color: #0f172a;
+}
+
+body.skin-vision:not(.vision-dark) .nx-search-box,
+body.skin-vision:not(.vision-dark) .nx-pill-btn,
+body.skin-vision:not(.vision-dark) .nx-view-toggle,
+body.skin-vision:not(.vision-dark) .nx-batch-card,
+body.skin-vision:not(.vision-dark) .nx-source-tile,
+body.skin-vision:not(.vision-dark) .nx-tool-btn {
+    background: rgba(255, 255, 255, 0.65);
+    border-color: rgba(15, 23, 42, 0.12);
+    color: #1e293b;
+}
+
+body.skin-vision:not(.vision-dark) .nx-search-box input,
+body.skin-vision:not(.vision-dark) .nx-drawer-brand,
+body.skin-vision:not(.vision-dark) .nx-list-item {
+    color: #0f172a;
+}
+
+body.skin-vision.vision-dark .nx-shell {
+    background: rgba(9, 12, 20, 0.85);
+}
+
+body.skin-vision.vision-dark .nx-rail,
+body.skin-vision.vision-dark .nx-drawer,
+body.skin-vision.vision-dark .nx-topbar {
+    background: rgba(17, 24, 39, 0.68);
+    backdrop-filter: blur(26px) saturate(160%);
+    -webkit-backdrop-filter: blur(26px) saturate(160%);
+}
+
+/* ── Responsive Adjustments ─────────────────────────────────────────────── */
+@media (max-width: 960px) {
+    .nx-drawer {
+        position: fixed;
+        left: var(--nx-rail-w);
+        top: 0;
+        bottom: 0;
+        box-shadow: 18px 0 42px rgba(0, 0, 0, 0.6);
+    }
+    .nx-topbar {
+        padding: 10px 12px;
+    }
+}

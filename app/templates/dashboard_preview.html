@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="sk">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nexus — Dashboard preview</title>
+    <link rel="stylesheet" href="/static/dashboard_preview.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<main class="shell">
+    <aside class="sidebar">
+        <a class="brand" href="/">NEXUS<span>•</span></a>
+        <p class="workspace">PRACOVNÝ PRIESTOR</p>
+        <nav aria-label="Navigácia">
+            <a class="nav-item active" href="#overview"><i>◈</i> Prehľad</a>
+            <a class="nav-item" href="#queue"><i>↳</i> Import queue <b>12</b></a>
+            <a class="nav-item" href="#activity"><i>⌁</i> Aktivita</a>
+            <span class="nav-divider"></span>
+            <a class="nav-item" href="/forum"><i>◎</i> Forum Hub</a>
+            <a class="nav-item" href="#sources"><i>⊞</i> Zdroje</a>
+        </nav>
+        <section class="sync-card">
+            <div class="sync-top"><span class="pulse"></span> SYNC JE AKTÍVNY</div>
+            <p>Posledná kontrola<br><strong>pred 2 minútami</strong></p>
+            <button type="button" id="syncButton">Obnoviť prehľad</button>
+        </section>
+        <p class="preview-note">LEN UKÁŽKA DIZAJNU</p>
+    </aside>
+
+    <section class="content" id="overview">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">FORUM HUB / CONTROL ROOM</p>
+                <h1>Dnes máš <em>12</em> vecí na rozhodnutie.</h1>
+            </div>
+            <div class="top-actions">
+                <button class="icon-button" type="button" aria-label="Notifikácie">◌<span></span></button>
+                <div class="avatar">PE</div>
+            </div>
+        </header>
+
+        <section class="signal-strip" aria-label="Stav importov">
+            <div class="signal-main"><span class="signal-symbol">↯</span><span><strong>6 odkazov čaká na kontrolu</strong><small>Najstarší čaká 38 minút</small></span></div>
+            <a href="#queue">Otvoriť frontu <b>→</b></a>
+        </section>
+
+        <section class="metrics" aria-label="Metriky">
+            <article class="metric-card orange"><p>Nové odkazy</p><strong>12</strong><span>+4 od poslednej kontroly</span><div class="mini-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article>
+            <article class="metric-card"><p>Pripravené na import</p><strong>8</strong><span class="good">● Metadáta sú kompletné</span><div class="progress"><i style="width:72%"></i></div></article>
+            <article class="metric-card"><p>Importované dnes</p><strong>34</strong><span>18.4 GB do knižnice</span><div class="spark">╱╲╱╲╱╲</div></article>
+            <article class="metric-card"><p>Vyžaduje pozornosť</p><strong>3</strong><span class="warn">● Neoverený alebo chybný odkaz</span><div class="alert-dots">● ● ●</div></article>
+        </section>
+
+        <section class="dashboard-grid">
+            <article class="panel queue-panel" id="queue">
+                <div class="panel-heading"><div><p class="eyebrow">NAJBLIŽŠIE ROZHODNUTIA</p><h2>Import queue</h2></div><button type="button" class="plain-button">Zobraziť všetko →</button></div>
+                <div class="queue-list">
+                    <div class="queue-row"><div class="source-badge cyan">SC</div><div class="queue-title"><strong>Summer archive · collection 04</strong><span>Simpcity · 5 odkazov · pred 38 min.</span></div><div class="quality">1080P</div><button type="button" class="review">Skontrolovať</button></div>
+                    <div class="queue-row"><div class="source-badge purple">PH</div><div class="queue-title"><strong>Creator pack — selected files</strong><span>Pornhub Hub · 2 odkazy · pred 52 min.</span></div><div class="quality">4K</div><button type="button" class="review">Skontrolovať</button></div>
+                    <div class="queue-row"><div class="source-badge gold">VK</div><div class="queue-title"><strong>Saved clips from channel</strong><span>VK Discovery · 1 odkaz · pred 1 h</span></div><div class="quality">720P</div><button type="button" class="review">Skontrolovať</button></div>
+                </div>
+            </article>
+
+            <article class="panel sources-panel" id="sources">
+                <div class="panel-heading"><div><p class="eyebrow">PRIPOJENIA</p><h2>Stav zdrojov</h2></div><button type="button" class="plain-button">Spravovať</button></div>
+                <div class="source-list">
+                    <div><span class="source-name"><i class="dot green"></i> Simpcity</span><small>pripojené</small><b>7 nových</b></div>
+                    <div><span class="source-name"><i class="dot green"></i> Pornhub Hub</span><small>pripojené</small><b>4 nové</b></div>
+                    <div><span class="source-name"><i class="dot yellow"></i> VK Discovery</span><small>skontrolovať cookies</small><b>1 nové</b></div>
+                </div>
+            </article>
+
+            <article class="panel activity-panel" id="activity">
+                <div class="panel-heading"><div><p class="eyebrow">SYSTÉMOVÝ ZÁZNAM</p><h2>Posledná aktivita</h2></div><span class="live">● LIVE</span></div>
+                <ol class="timeline">
+                    <li><time>10:42</time><span class="event ok"></span><p><strong>Import dokončený</strong><br>12 položiek bolo pridaných do knižnice.</p></li>
+                    <li><time>10:31</time><span class="event"></span><p><strong>Forum Hub našiel 4 nové odkazy</strong><br>Simpcity / summer archive</p></li>
+                    <li><time>10:19</time><span class="event"></span><p><strong>Metadáta doplnené</strong><br>8 z 8 položiek je pripravených na import.</p></li>
+                </ol>
+            </article>
+
+            <article class="focus-card">
+                <p class="eyebrow">ĎALŠÍ KROK</p>
+                <h2>Vyčisti frontu<br><span>pred ďalším refreshom.</span></h2>
+                <p>Šesť odkazov už má kompletné metadáta. Rozhodni, ktoré chceš importovať.</p>
+                <a href="#queue">Prejsť na kontrolu <b>→</b></a>
+            </article>
+        </section>
+    </section>
+</main>
+<script>
+document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => {
+  document.querySelectorAll('.nav-item').forEach(link => link.classList.remove('active'));
+  item.classList.add('active');
+}));
+document.getElementById('syncButton').addEventListener('click', event => {
+  event.currentTarget.textContent = 'Prehľad obnovený ✓';
+  setTimeout(() => event.currentTarget.textContent = 'Obnoviť prehľad', 1800);
+});
+</script>
+</body>
+</html>

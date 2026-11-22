@@ -1,0 +1,275 @@
+/* ============================================================
+   CLASSIC GLASS — V1 "Archive Console" look for the Classic UI
+   ------------------------------------------------------------
+   Pure presentation override layer, loaded AFTER nexus_refresh.css
+   so its rules win the cascade (same/higher specificity + later).
+   Scoped 100% under body.ui-classic:not(.light-theme) — the light
+   theme and the V1 route are untouched; no markup or logic changes.
+
+   Brings over the V1 signature: a blurred library thumbnail as a
+   fixed ambient environment (same .vg-ambient mechanism as V1's
+   Vision Glass), with the chrome floating above it as translucent
+   dark glass — hairline borders, backdrop blur, ember accents.
+   ============================================================ */
+
+/* ---------- 0 · Tokens ---------- */
+body.ui-classic:not(.light-theme) {
+    --cg-glass:        rgba(19, 21, 31, 0.55);
+    --cg-glass-2:      rgba(26, 29, 42, 0.62);
+    --cg-glass-strong: rgba(21, 23, 34, 0.78);
+    --cg-hairline:     rgba(255, 255, 255, 0.14);
+    --cg-hairline-sft: rgba(255, 255, 255, 0.08);
+    --cg-blur:         26px;
+    --cg-blur-strong:  36px;
+}
+
+/* ---------- 1 · Ambient environment (library-driven) ---------- */
+/* Same contract as V1: main.js feeds the newest visible thumbnail
+   to window.vgApplyAmbient(); the classic inline script loads it
+   into #vgAmbientImg. Heavy blur + dark scrim = the warm glow. */
+body.ui-classic .vg-ambient { display: none; }
+
+body.ui-classic:not(.light-theme) .vg-ambient {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+body.ui-classic:not(.light-theme) .vg-ambient img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* over-scale so the blur never reveals hard edges */
+    transform: scale(1.25);
+    filter: blur(44px) saturate(1.35) brightness(0.78);
+    opacity: 0;
+    transition: opacity 900ms ease;
+    /* barely-there breathing so the environment reads as alive, not a poster */
+    animation: cg-ambient-drift 90s ease-in-out infinite alternate;
+    will-change: transform;
+}
+
+@keyframes cg-ambient-drift {
+    from { transform: scale(1.25) translate3d(-1.5%, -1%, 0); }
+    to   { transform: scale(1.32) translate3d(1.5%, 1%, 0); }
+}
+
+body.ui-classic:not(.light-theme) .vg-ambient img.is-loaded { opacity: 0.85; }
+
+/* readability scrim over the environment */
+body.ui-classic:not(.light-theme) .vg-ambient::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+        rgba(9, 10, 16, 0.20) 0%,
+        rgba(9, 10, 16, 0.34) 55%,
+        rgba(7, 8, 13, 0.48) 100%);
+}
+
+/* the environment carries the scene — retire the decorative orbs */
+body.ui-classic:not(.light-theme) .bg-orb { display: none !important; }
+
+/* fallback environment: before the first thumbnail lands (or with an
+   empty library) the page already glows warm, matching the V1 canvas */
+body.ui-classic:not(.light-theme) {
+    background:
+        radial-gradient(900px 520px at 50% -12%, rgba(255, 145, 77, 0.10), transparent 60%),
+        radial-gradient(1000px 600px at 74% -14%, rgba(184, 202, 255, 0.10), transparent 56%),
+        radial-gradient(620px 520px at -5% 94%, rgba(174, 142, 255, 0.09), transparent 60%),
+        #090a10 !important;
+}
+
+/* content sits above the environment */
+body.ui-classic:not(.light-theme) .app-layout {
+    position: relative;
+    z-index: 1;
+}
+
+/* netflix mode has its own full-bleed hero — no ambient underneath */
+body.ui-classic.netflix-mode .vg-ambient { display: none !important; }
+
+/* ---------- 2 · Navigation rail: floating dark glass ---------- */
+body.ui-classic:not(.light-theme) .sidebar {
+    border: 1px solid transparent !important;
+    background:
+        linear-gradient(180deg, rgba(23, 25, 37, 0.60), rgba(10, 11, 17, 0.72)) padding-box,
+        linear-gradient(180deg, rgba(245, 247, 255, 0.18), rgba(184, 202, 255, 0.08) 40%, rgba(255, 145, 77, 0.13)) border-box !important;
+    -webkit-backdrop-filter: blur(var(--cg-blur)) saturate(1.35);
+    backdrop-filter: blur(var(--cg-blur)) saturate(1.35);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        inset -1px 0 0 rgba(0, 0, 0, 0.35),
+        16px 0 48px rgba(0, 0, 0, 0.30) !important;
+}
+
+/* ---------- 3 · Top bar: sticky frosted strip over the scroll ---------- */
+body.ui-classic:not(.light-theme) .top-bar {
+    background: linear-gradient(180deg, rgba(9, 10, 16, 0.60), rgba(9, 10, 16, 0.28)) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(1.3);
+    backdrop-filter: blur(18px) saturate(1.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* shared command chrome: translucent panes instead of solid alloy */
+body.ui-classic:not(.light-theme) .dashboard-command-deck,
+body.ui-classic:not(.light-theme) .import-monitor-strip,
+body.ui-classic:not(.light-theme) .fast-import-bar.compact,
+body.ui-classic:not(.light-theme) .filter-panel {
+    border: 1px solid transparent !important;
+    background:
+        linear-gradient(180deg, rgba(27, 30, 43, 0.60), rgba(13, 14, 22, 0.72)) padding-box,
+        linear-gradient(135deg, rgba(245, 247, 255, 0.22), rgba(184, 202, 255, 0.13) 40%, rgba(255, 145, 77, 0.12) 73%, rgba(255, 255, 255, 0.08)) border-box !important;
+    -webkit-backdrop-filter: blur(var(--cg-blur)) saturate(1.35);
+    backdrop-filter: blur(var(--cg-blur)) saturate(1.35);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 18px 50px rgba(0, 0, 0, 0.40) !important;
+}
+
+/* sticky controls bar becomes a frosted pane while scrolling the grid */
+body.ui-classic:not(.light-theme) .gallery-controls-bar {
+    border: 1px solid transparent !important;
+    background:
+        linear-gradient(180deg, rgba(24, 27, 39, 0.55), rgba(12, 13, 20, 0.68)) padding-box,
+        linear-gradient(135deg, rgba(245, 247, 255, 0.18), rgba(184, 202, 255, 0.10) 45%, rgba(255, 145, 77, 0.10)) border-box !important;
+    -webkit-backdrop-filter: blur(var(--cg-blur)) saturate(1.35);
+    backdrop-filter: blur(var(--cg-blur)) saturate(1.35);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 14px 34px rgba(0, 0, 0, 0.30) !important;
+}
+
+/* ---------- 4 · Inputs & controls: glass fills ---------- */
+body.ui-classic:not(.light-theme) .search-wrapper {
+    background:
+        linear-gradient(180deg, rgba(17, 19, 29, 0.66), rgba(11, 12, 19, 0.74)) padding-box,
+        linear-gradient(135deg, rgba(245, 247, 255, 0.25), rgba(184, 202, 255, 0.12), rgba(255, 145, 77, 0.11)) border-box !important;
+    -webkit-backdrop-filter: blur(18px) saturate(1.3);
+    backdrop-filter: blur(18px) saturate(1.3);
+}
+
+body.ui-classic:not(.light-theme) .top-actions > button,
+body.ui-classic:not(.light-theme) .top-actions > a.top-action-btn {
+    background: linear-gradient(180deg, rgba(41, 44, 59, 0.55), rgba(18, 19, 29, 0.66)) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    backdrop-filter: blur(14px) saturate(1.3);
+}
+
+body.ui-classic:not(.light-theme) .view-switcher {
+    background: var(--cg-glass) !important;
+    border: 1px solid var(--cg-hairline-sft) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    backdrop-filter: blur(14px) saturate(1.3);
+}
+
+body.ui-classic:not(.light-theme) .gcb-btn {
+    background: linear-gradient(180deg, rgba(49, 53, 69, 0.50), rgba(20, 21, 31, 0.66)) !important;
+}
+
+body.ui-classic:not(.light-theme) .fast-import-urlbar {
+    background:
+        linear-gradient(90deg, rgba(28, 31, 45, 0.66), rgba(20, 18, 29, 0.72)) padding-box,
+        linear-gradient(90deg, rgba(184, 202, 255, 0.22), rgba(174, 142, 255, 0.28), rgba(255, 145, 77, 0.25)) border-box !important;
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    backdrop-filter: blur(16px) saturate(1.3);
+}
+
+body.ui-classic:not(.light-theme) .batch-select,
+body.ui-classic:not(.light-theme) .btn-ghost {
+    background: rgba(24, 26, 38, 0.45) !important;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+/* ---------- 5 · Cards: lit glass slides over the glow ---------- */
+/* Slight translucency only — no per-card backdrop-filter, the grid
+   can hold hundreds of tiles and blur there would tank scrolling. */
+body.ui-classic:not(.light-theme) .v-card {
+    background:
+        linear-gradient(180deg, rgba(27, 29, 39, 0.88) 0%, rgba(13, 14, 21, 0.93) 100%) padding-box,
+        linear-gradient(145deg, rgba(245, 247, 255, 0.21), rgba(184, 202, 255, 0.10) 43%, rgba(255, 145, 77, 0.10) 76%, rgba(0, 0, 0, 0.70)) border-box !important;
+}
+
+/* keep the Prism ignition border on hover, but stay glassy underneath
+   (the base layer's hover snaps back to a fully opaque fill) */
+body.ui-classic:not(.light-theme) .v-card:hover {
+    background:
+        linear-gradient(180deg, rgba(35, 37, 49, 0.92) 0%, rgba(14, 15, 22, 0.96) 100%) padding-box,
+        linear-gradient(135deg, #fff2e4, #ffd09b 21%, #ff914d 51%, #a88bff 100%) border-box !important;
+}
+
+body.ui-classic:not(.light-theme) .v-card.selected {
+    background:
+        linear-gradient(180deg, rgba(31, 29, 44, 0.92), rgba(15, 14, 25, 0.96)) padding-box,
+        linear-gradient(135deg, #f0eaff, #c7b8ff 45%, #8d72e8) border-box !important;
+}
+
+/* the meta strip painted its own opaque gradient over the card glass */
+body.ui-classic:not(.light-theme) .v-meta {
+    background: linear-gradient(180deg, rgba(19, 21, 30, 0.80), rgba(12, 13, 20, 0.90)) !important;
+}
+
+/* ---------- 6 · Overlays: modals, settings, batch bar ---------- */
+body.ui-classic:not(.light-theme) .modal-card,
+body.ui-classic:not(.light-theme) .settings-card {
+    border: 1px solid transparent !important;
+    background:
+        linear-gradient(180deg, rgba(25, 28, 41, 0.80), rgba(12, 13, 21, 0.88)) padding-box,
+        linear-gradient(135deg, rgba(245, 247, 255, 0.22), rgba(184, 202, 255, 0.13) 40%, rgba(255, 145, 77, 0.12) 73%, rgba(255, 255, 255, 0.08)) border-box !important;
+    -webkit-backdrop-filter: blur(var(--cg-blur-strong)) saturate(1.35);
+    backdrop-filter: blur(var(--cg-blur-strong)) saturate(1.35);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 24px 60px rgba(0, 0, 0, 0.45) !important;
+}
+
+body.ui-classic:not(.light-theme) .batch-bar,
+body.ui-classic:not(.light-theme) .nexus-empty-state {
+    border: 1px solid var(--cg-hairline) !important;
+    background: var(--cg-glass-strong) !important;
+    -webkit-backdrop-filter: blur(var(--cg-blur)) saturate(1.35);
+    backdrop-filter: blur(var(--cg-blur)) saturate(1.35);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 18px 50px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* ---------- 6b · Small signature details ---------- */
+/* text selection carries the ember accent */
+body.ui-classic:not(.light-theme) ::selection {
+    background: rgba(255, 145, 77, 0.32);
+    color: #fff5ec;
+}
+
+/* glass scrollbar track — the Prism thumb stays, the rail disappears
+   into the environment instead of drawing a solid gutter */
+body.ui-classic:not(.light-theme) ::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+/* ---------- 7 · Performance & accessibility guards ---------- */
+body.ui-classic.perf-lite .vg-ambient img { display: none; animation: none; }
+
+body.ui-classic.perf-lite .sidebar,
+body.ui-classic.perf-lite .dashboard-command-deck,
+body.ui-classic.perf-lite .import-monitor-strip,
+body.ui-classic.perf-lite .fast-import-bar.compact,
+body.ui-classic.perf-lite .filter-panel,
+body.ui-classic.perf-lite .gallery-controls-bar,
+body.ui-classic.perf-lite .search-wrapper,
+body.ui-classic.perf-lite .top-actions > button,
+body.ui-classic.perf-lite .top-actions > a.top-action-btn,
+body.ui-classic.perf-lite .view-switcher,
+body.ui-classic.perf-lite .fast-import-urlbar,
+body.ui-classic.perf-lite .batch-select,
+body.ui-classic.perf-lite .btn-ghost,
+body.ui-classic.perf-lite .modal-card,
+body.ui-classic.perf-lite .settings-card,
+body.ui-classic.perf-lite .batch-bar {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.ui-classic .vg-ambient img { transition: none; animation: none; }
+}

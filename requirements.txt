@@ -1,0 +1,7 @@
+-r requirements/base.txt
+-r requirements/scraping.txt
+-r requirements/media.txt
+-r requirements/dev.txt
+
+# Cloudflare R2 (Related Search public thumbnail broker for Google Lens API)
+boto3>=1.34

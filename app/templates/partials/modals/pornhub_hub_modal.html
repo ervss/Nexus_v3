@@ -1,0 +1,544 @@
+    <!-- PornHub Hub -->
+    <template x-if="phHub.open">
+    <div class="ph-overlay nx-lazy-modal"
+        @keydown.escape.window="phHub.open=false" role="dialog" aria-modal="true" aria-label="PornHub Hub">
+        <div class="ph-shell" @scroll.passive="phMaybeMore($event)">
+            <!-- top bar -->
+            <div class="ph-top">
+                <div class="ph-brand"><span class="ph-logo">PH</span><span class="ph-brandtxt">Hub</span></div>
+                <div class="ph-searchwrap">
+                    <span class="material-icons-round">search</span>
+                    <input class="ph-search" type="text" x-model="phHub.q" @input="phSearchDebounced()"
+                        placeholder="Hľadaj čokoľvek… (milf, pov, amateur, meno hviezdy)">
+                    <button class="ph-clear" x-show="phHub.q" @click="phHub.q=''; phLoad(false)"><span
+                            class="material-icons-round">close</span></button>
+                </div>
+                <button class="ph-x" @click="phHub.open=false"><span class="material-icons-round">close</span></button>
+            </div>
+
+            <!-- controls -->
+            <div class="ph-controls">
+                <div class="ph-seg" x-show="phHub.view!=='playlist'">
+                    <template x-for="s in ephSortOptions()" :key="s[0]">
+                        <button class="ph-segbtn" :class="{'on': phHub.sort===s[0]}" @click="phSetSort(s[0])">
+                            <span class="material-icons-round" x-text="s[2]"></span><span x-text="s[1]"></span>
+                        </button>
+                    </template>
+                </div>
+                <select class="ph-period" x-show="phHub.view!=='playlist'" x-model="phHub.period"
+                    @change="phLoad(false)">
+                    <option value="">All time</option>
+                    <option value="week">This week</option>
+                    <option value="month">This month</option>
+                    <option value="year">This year</option>
+                </select>
+                <button class="ph-toggle" x-show="phHub.view!=='playlist'" :class="{'on': phHub.hd}"
+                    @click="phToggleHd()">HD</button>
+                <button class="ph-toggle" x-show="phHub.view!=='playlist'"
+                    :class="{'on': phHub.production==='professional'}"
+                    @click="phSetProduction('professional')">Pro</button>
+                <button class="ph-toggle" x-show="phHub.view!=='playlist'"
+                    :class="{'on': phHub.production==='homemade'}"
+                    @click="phSetProduction('homemade')">Homemade</button>
+                <div class="ph-durs" x-show="phHub.view!=='playlist'">
+                    <template x-for="d in [['short','&lt;10m'],['medium','10–20m'],['long','20m+']]" :key="d[0]">
+                        <button class="ph-toggle" :class="{'on': phHub.dur===d[0]}" @click="phSetDur(d[0])"
+                            x-html="d[1]"></button>
+                    </template>
+                </div>
+                <button class="ph-toggle ph-stars-btn"
+                    :class="{'on': phHub.view==='pornstars'||phHub.view==='pornstar'}" @click="phPornstars()"><span
+                        class="material-icons-round">star</span> Pornstars</button>
+                <button class="ph-toggle ph-pls-btn" @click="phOpenPlSearch()" title="Vyhľadať verejné playlisty"><span
+                        class="material-icons-round">playlist_play</span> Playlisty</button>
+                <button class="ph-toggle ph-queue-btn" :class="{'on': phHub.queue.open}" @click="phQueueOpen()"
+                    title="Kandidáty uložené na neskoršiu analýzu a import">
+                    <span class="material-icons-round">playlist_add_check</span> Smart Queue
+                    <b x-show="phHub.queue.items.length" x-text="phHub.queue.items.length"></b>
+                </button>
+            </div>
+
+            <!-- discovery recipes: repeat a useful search without rebuilding filters -->
+            <div class="ph-recipes" x-show="phHub.view!=='playlist'">
+                <span class="ph-recipes-label"><span class="material-icons-round">bolt</span> Recipes</span>
+                <template x-for="recipe in phRecipeList()" :key="recipe.id">
+                    <div class="ph-recipe-wrap">
+                        <button class="ph-recipe" :class="{'on': phHub.recipes.activeId===recipe.id}"
+                            @click="phRecipeApply(recipe)" :title="'Spustiť: ' + recipe.name">
+                            <span class="material-icons-round" x-text="recipe.icon || 'bookmark'"></span><span
+                                x-text="recipe.name"></span>
+                        </button>
+                        <button class="ph-recipe-delete" x-show="!recipe.builtin" @click.stop="phRecipeDelete(recipe)"
+                            :title="'Odstrániť: ' + recipe.name"><span
+                                class="material-icons-round">close</span></button>
+                    </div>
+                </template>
+                <button class="ph-recipe-save" @click="phRecipeOpenSave()" title="Uložiť aktuálne filtre ako recipe">
+                    <span class="material-icons-round">bookmark_add</span> Uložiť aktuálne
+                </button>
+                <div class="ph-recipe-editor" x-show="phHub.recipes.editorOpen" x-transition.opacity>
+                    <input type="text" x-model="phHub.recipes.name" @keydown.enter.prevent="phRecipeSave()"
+                        @keydown.escape="phHub.recipes.editorOpen=false" maxlength="48" placeholder="Názov receptu…">
+                    <button @click="phRecipeSave()">Uložiť</button>
+                    <button class="ph-recipe-cancel" @click="phHub.recipes.editorOpen=false" title="Zrušiť"><span
+                            class="material-icons-round">close</span></button>
+                </div>
+            </div>
+
+            <!-- keyword filter + length sort + size/quality fetch -->
+            <div class="ph-controls ph-controls2" x-show="phHub.view!=='pornstars'">
+                <div class="ph-kw">
+                    <span class="material-icons-round">filter_alt</span>
+                    <input class="ph-kwinput" type="text" x-model.debounce.300ms="phHub.incFilter"
+                        placeholder="Obsahuje (napr. pov, amateur)…">
+                </div>
+                <div class="ph-kw ph-kw-exc">
+                    <span class="material-icons-round">block</span>
+                    <input class="ph-kwinput" type="text" x-model.debounce.300ms="phHub.excFilter"
+                        placeholder="Bez (oddeľ čiarkou)…">
+                </div>
+                <div class="ph-seg ph-lensort">
+                    <button class="ph-segbtn" :class="{'on': phHub.lenSort==='desc'}" @click="phSetLenSort('desc')"
+                        title="Najdlhšie prvé"><span class="material-icons-round">south</span>Dĺžka</button>
+                    <button class="ph-segbtn" :class="{'on': phHub.lenSort==='asc'}" @click="phSetLenSort('asc')"
+                        title="Najkratšie prvé"><span class="material-icons-round">north</span>Dĺžka</button>
+                </div>
+                <div class="ph-seg ph-lensort">
+                    <button class="ph-segbtn" :class="{'on': phHub.sizeSort==='desc'}" @click="phSetSizeSort('desc')"
+                        title="Najväčšie prvé (potrebuje načítané veľkosti)"><span
+                            class="material-icons-round">south</span>Veľkosť</button>
+                    <button class="ph-segbtn" :class="{'on': phHub.sizeSort==='asc'}" @click="phSetSizeSort('asc')"
+                        title="Najmenšie prvé (potrebuje načítané veľkosti)"><span
+                            class="material-icons-round">north</span>Veľkosť</button>
+                </div>
+                <div class="ph-prog" x-show="phHub.enriching">
+                    <div class="ph-progbar">
+                        <div class="ph-progfill"
+                            :style="`width:${phHub.enrichTotal ? Math.round(phHub.enrichDone/phHub.enrichTotal*100) : 0}%`">
+                        </div>
+                    </div>
+                    <span class="ph-progtxt"
+                        x-text="phHub.enrichDone + ' / ' + phHub.enrichTotal + ' · ' + (phHub.enrichTotal ? Math.round(phHub.enrichDone/phHub.enrichTotal*100) : 0) + '%'"></span>
+                </div>
+                <button class="ph-toggle ph-fetch" @click="phEnrich('view')" :disabled="phHub.enriching">
+                    <span class="material-icons-round ph-spin" x-show="phHub.enriching">progressive_activity</span>
+                    <span class="material-icons-round" x-show="!phHub.enriching">straighten</span>
+                    Veľkosti (view)
+                </button>
+                <button class="ph-toggle ph-fetch" x-show="phHub.selected.length" @click="phEnrich('selected')"
+                    :disabled="phHub.enriching">
+                    <span class="material-icons-round">straighten</span> Veľkosti (vybrané)
+                </button>
+            </div>
+
+            <!-- range filters: duration (min), size (MB), min quality -->
+            <div class="ph-controls ph-controls3" x-show="phHub.view!=='pornstars'">
+                <div class="ph-range">
+                    <span class="material-icons-round">schedule</span>
+                    <span class="ph-range-lbl">Dĺžka</span>
+                    <input class="ph-num" type="number" min="0" step="1" x-model.debounce.300ms="phHub.durMin"
+                        placeholder="min">
+                    <span class="ph-range-sep">–</span>
+                    <input class="ph-num" type="number" min="0" step="1" x-model.debounce.300ms="phHub.durMax"
+                        placeholder="max">
+                    <span class="ph-range-unit">min</span>
+                </div>
+                <div class="ph-range">
+                    <span class="material-icons-round">sd_storage</span>
+                    <span class="ph-range-lbl">Veľkosť</span>
+                    <input class="ph-num" type="number" min="0" step="50" x-model.debounce.300ms="phHub.sizeMin"
+                        placeholder="min">
+                    <span class="ph-range-sep">–</span>
+                    <input class="ph-num" type="number" min="0" step="50" x-model.debounce.300ms="phHub.sizeMax"
+                        placeholder="max">
+                    <span class="ph-range-unit">MB</span>
+                </div>
+                <div class="ph-range">
+                    <span class="material-icons-round">high_quality</span>
+                    <span class="ph-range-lbl">Min. kvalita</span>
+                    <select class="ph-num ph-qsel" x-model="phHub.minQuality">
+                        <option value="">Všetky</option>
+                        <option value="720">720p+</option>
+                        <option value="1080">1080p+</option>
+                        <option value="1440">1440p+</option>
+                        <option value="2160">4K</option>
+                    </select>
+                </div>
+                <button class="ph-toggle"
+                    x-show="phHub.durMin||phHub.durMax||phHub.sizeMin||phHub.sizeMax||phHub.minQuality"
+                    @click="phHub.durMin='';phHub.durMax='';phHub.sizeMin='';phHub.sizeMax='';phHub.minQuality='';"
+                    title="Zrušiť range filtre">
+                    <span class="material-icons-round">filter_alt_off</span> Reset
+                </button>
+                <span class="ph-range-count" x-text="phFilteredItems().length + ' / ' + phHub.items.length"></span>
+            </div>
+
+            <!-- category chips -->
+            <div class="ph-cats" x-show="phHub.view==='feed'">
+                <button class="ph-chip" :class="{'on': !phHub.category && !phHub.q}"
+                    @click="phHub.category=''; phHub.q=''; phLoad(false)">All</button>
+                <template x-for="c in phHub.categories" :key="c.slug">
+                    <button class="ph-chip" :class="{'on': phHub.category===c.slug}" @click="phSetCategory(c.slug)"
+                        x-text="c.name"></button>
+                </template>
+            </div>
+            <div class="ph-relbar" x-show="phHub.view==='related'">
+                <button class="ph-back" @click="phBackToFeed()"><span class="material-icons-round">arrow_back</span>
+                    Späť na feed</button>
+                <span>Podobné videá</span>
+            </div>
+            <div class="ph-relbar" x-show="phHub.view==='pornstar'">
+                <button class="ph-back" @click="phBackToFeed()"><span class="material-icons-round">arrow_back</span>
+                    Späť</button>
+                <span><span class="material-icons-round" style="vertical-align:-4px;">star</span> <span
+                        x-text="phHub.psName"></span></span>
+                <button class="ph-back ph-merge" :class="{'on': phHub.identity.merged}" @click="phMergeIdentity()"
+                    title="Zlúčiť videá tejto hviezdy zo všetkých zdrojov">
+                    <span class="material-icons-round">merge_type</span>
+                    <span
+                        x-text="phHub.identity.merged ? ('Zlúčené · '+phHub.identity.sources.length+' zdrojov') : 'Zlúčiť všetky zdroje'"></span>
+                </button>
+            </div>
+            <div class="ph-relbar" x-show="phHub.view==='playlist'">
+                <button class="ph-back" @click="phBackToFeed()"><span class="material-icons-round">arrow_back</span>
+                    Späť na feed</button>
+                <span><span class="material-icons-round" style="vertical-align:-4px;">playlist_play</span> <span
+                        x-text="phHub.plName"></span></span>
+                <span class="ph-relhint"
+                    x-text="phHub.plTotal ? ('Načítané ' + phHub.plLoaded + ' / ' + phHub.plTotal + (phHub.plPartial ? ' · časť sa nepodarila' : '') + ' · filtre, Smart Queue a import fungujú') : 'Načítavam celý playlist…'"></span>
+            </div>
+
+            <!-- pornstars grid -->
+            <div class="ph-stars" x-show="phHub.view==='pornstars'">
+                <template x-for="p in phHub.pornstars" :key="p.slug">
+                    <div class="ph-starcard" @click="phOpenPornstar(p.slug, p.kind, p.name)">
+                        <img class="ph-staravatar" :src="phMedia(p.thumb)" loading="lazy" :alt="p.name">
+                        <div class="ph-starname" x-text="p.name"></div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- grid -->
+            <div class="ph-grid" x-ref="phgrid" x-show="phHub.view!=='pornstars'">
+                <template x-for="item in phFilteredItems()" :key="item.url">
+                    <div class="ph-card" x-data="{h:false}" @mouseenter="h=true; phHoverPrefetch(item)"
+                        @mouseleave="h=false; phHoverCancel()" :class="{'sel': phIsSelected(item)}">
+                        <div class="ph-thumbwrap" @click="phPlay(item)">
+                            <img class="ph-thumb" :src="phMedia(item.thumb)" loading="lazy" :alt="item.title">
+                            <video class="ph-preview" x-show="h && item.preview"
+                                :src="h && item.preview ? phMedia(item.preview) : ''" muted loop autoplay
+                                playsinline></video>
+                            <span class="ph-dur" x-show="item.duration" x-text="item.duration"></span>
+                            <span class="ph-hd" x-show="item.hd">HD</span>
+                            <span class="ph-qual" x-show="item.quality" x-text="item.quality"></span>
+                            <span class="ph-size" x-show="item.size_mb"
+                                x-text="(item.size_mb||0) >= 1024 ? ((item.size_mb/1024).toFixed(1)+' GB') : (Math.round(item.size_mb||0)+' MB')"></span>
+                            <template x-if="item.sources && item.sources.length">
+                                <span class="ph-srcbadge"
+                                    x-text="item.sources.length>1 ? item.sources.length+'×' : item.sources[0]"></span>
+                            </template>
+                            <div class="ph-playbadge" x-show="h"><span class="material-icons-round">play_arrow</span>
+                            </div>
+                            <div class="ph-cardhover" x-show="h">
+                                <a class="ph-act" :href="item.url" target="_blank" rel="noopener noreferrer" @click.stop
+                                    title="Otvoriť zdroj (PornHub)"><span
+                                        class="material-icons-round">open_in_new</span></a>
+                                <button class="ph-act" @click.stop="phQueueAddOne(item)" :disabled="phQueueHas(item)"
+                                    :title="phQueueHas(item)?'Už je v Smart Queue':'Pridať do Smart Queue'">
+                                    <span class="material-icons-round"
+                                        x-text="phQueueHas(item)?'playlist_add_check':'playlist_add'"></span>
+                                </button>
+                                <button class="ph-act" @click.stop="phImportOne(item)" title="Import do knižnice"><span
+                                        class="material-icons-round">download</span></button>
+                                <button class="ph-act" @click.stop="phRelated(item)" title="Podobné"><span
+                                        class="material-icons-round">hub</span></button>
+                                <button class="ph-act" @click.stop="phFindBetter(item)"
+                                    title="Nájsť vo vyššej kvalite inde"><span
+                                        class="material-icons-round">high_quality</span></button>
+                                <button class="ph-act" @click.stop="phToggleSelect(item)"
+                                    :title="phIsSelected(item)?'Odznačiť':'Vybrať'"><span class="material-icons-round"
+                                        x-text="phIsSelected(item)?'check_box':'check_box_outline_blank'"></span></button>
+                            </div>
+                        </div>
+                        <div class="ph-meta" @click="phToggleSelect(item)" @keydown.enter.prevent="phToggleSelect(item)"
+                            role="button" tabindex="0" :aria-pressed="phIsSelected(item)"
+                            :title="phIsSelected(item) ? 'Klikni pre odznačenie karty' : 'Klikni na spodný panel pre označenie karty'">
+                            <div class="ph-title" x-text="item.title"></div>
+                            <div class="ph-sub">
+                                <span class="ph-up" x-show="item.uploader" @click.stop="phUploaderClick(item)"
+                                    x-text="item.uploader"></span>
+                                <span x-show="item.views" x-text="item.views + ' views'"></span>
+                                <span class="ph-date" x-show="item.upload_date"
+                                    x-text="phFmtDate(item.upload_date)"></span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- skeleton / empty / load more -->
+            <div class="ph-state" x-show="phHub.loading"><span
+                    class="material-icons-round ph-spin">progressive_activity</span> Načítavam…</div>
+            <div class="ph-state" x-show="!phHub.loading && phHub.loadError">
+                <span class="material-icons-round">error_outline</span>
+                <span x-text="'Nepodarilo sa načítať: ' + phHub.loadError"></span>
+                <button class="ph-back" @click="phLoad(false)">Skúsiť znova</button>
+            </div>
+            <div class="ph-state"
+                x-show="!phHub.loading && !phHub.loadError && phHub.view==='pornstars' && !phHub.pornstars.length">Nič
+                sa nenašlo — skús iné meno.</div>
+            <div class="ph-state"
+                x-show="!phHub.loading && !phHub.loadError && phHub.view!=='pornstars' && !phHub.items.length">Nič sa
+                nenašlo — skús iný filter.</div>
+            <!-- load more: pornstars grid -->
+            <div class="ph-more"
+                x-show="!phHub.loading && phHub.view==='pornstars' && phHub.psHasMore && phHub.pornstars.length">
+                <button @click="phPornstarsMore()">Načítať viac <span
+                        class="material-icons-round">expand_more</span></button>
+            </div>
+            <!-- load more: video grid -->
+            <div class="ph-more"
+                x-show="!phHub.loading && phHub.view!=='pornstars' && phHub.hasMore && phHub.items.length">
+                <button @click="phLoadMore()">Načítať viac <span
+                        class="material-icons-round">expand_more</span></button>
+            </div>
+        </div>
+
+        <!-- in-hub player -->
+        <div class="ph-playerwrap" x-show="phHub.player.open" style="display:none;" x-transition.opacity
+            @click.self="phClosePlayer()" @keydown.escape.window="phClosePlayer()">
+            <div class="ph-playerbox">
+                <div class="ph-playerhead">
+                    <span class="ph-playertitle" x-text="phHub.player.title"></span>
+                    <div class="ph-playeractions">
+                        <button class="ph-act" @click="phClosePlayer()" title="Zavrieť"><span
+                                class="material-icons-round">close</span></button>
+                    </div>
+                </div>
+                <div class="ph-stage">
+                    <video class="ph-video" x-ref="phvideo" controls autoplay playsinline></video>
+                    <div class="ph-ploading" x-show="phHub.player.loading"><span
+                            class="material-icons-round ph-spin">progressive_activity</span> Extrahujem stream…</div>
+                    <div class="ph-perror" x-show="phHub.player.error" x-text="phHub.player.error"></div>
+                </div>
+
+                <!-- playlists this video is featured in (under the player) -->
+                <div class="ph-plblock" x-show="phHub.player.playlistsLoading || phHub.player.playlists.length">
+                    <div class="ph-plhead">
+                        <span class="material-icons-round">playlist_play</span>
+                        <span>V playlistoch</span>
+                        <span class="ph-plcount" x-show="phHub.player.playlists.length"
+                            x-text="phHub.player.playlists.length"></span>
+                        <span class="ph-plload" x-show="phHub.player.playlistsLoading"><span
+                                class="material-icons-round ph-spin">progressive_activity</span></span>
+                    </div>
+                    <div class="ph-plgrid">
+                        <template x-for="pl in phHub.player.playlists" :key="pl.id">
+                            <div class="ph-plcard" @click="phOpenPlaylist(pl)"
+                                :title="pl.name + ' — ' + pl.count + ' videí'">
+                                <div class="ph-plthumb">
+                                    <img x-show="pl.thumb" :src="phMedia(pl.thumb)" loading="lazy" :alt="pl.name">
+                                    <span class="material-icons-round ph-plph" x-show="!pl.thumb">playlist_play</span>
+                                    <span class="ph-plnum" x-show="pl.count" x-text="pl.count + ' videí'"></span>
+                                </div>
+                                <div class="ph-plname" x-text="pl.name"></div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- #2 better-quality finder -->
+        <div class="ph-playerwrap" x-show="phHub.better.open" style="display:none;" x-transition.opacity
+            @click.self="phCloseBetter()" @keydown.escape.window="phCloseBetter()">
+            <div class="ph-betterbox">
+                <div class="ph-playerhead">
+                    <span class="ph-playertitle"><span class="material-icons-round"
+                            style="vertical-align:-4px;color:#ff9000;">high_quality</span> Vyššia kvalita inde</span>
+                    <button class="ph-act" @click="phCloseBetter()"><span
+                            class="material-icons-round">close</span></button>
+                </div>
+                <div class="ph-bettertitle" x-text="phHub.better.forTitle"></div>
+                <div class="ph-state" x-show="phHub.better.loading"><span
+                        class="material-icons-round ph-spin">progressive_activity</span> Hľadám naprieč zdrojmi…</div>
+                <template x-if="!phHub.better.loading && phHub.better.best">
+                    <div class="ph-betterbest" @click="phPlayAlt(phHub.better.best)">
+                        <img :src="phMedia(phHub.better.best.thumb)" loading="lazy">
+                        <div>
+                            <div class="ph-bb-tag">★ Najlepšia kvalita · <span x-text="phHub.better.best.source"></span>
+                            </div>
+                            <div class="ph-bb-title" x-text="phHub.better.best.title"></div>
+                            <div class="ph-bb-meta"><span x-show="phHub.better.best.height"
+                                    x-text="phHub.better.best.height+'p'"></span></div>
+                        </div>
+                        <button class="ph-bulk-import"><span class="material-icons-round">play_arrow</span>
+                            Prehrať</button>
+                    </div>
+                </template>
+                <div class="ph-betterlist" x-show="!phHub.better.loading">
+                    <template x-for="alt in phHub.better.alts" :key="alt.url">
+                        <div class="ph-betteralt" @click="phPlayAlt(alt)">
+                            <img :src="phMedia(alt.thumb)" loading="lazy">
+                            <div class="ph-ba-info">
+                                <div class="ph-ba-title" x-text="alt.title"></div>
+                                <div class="ph-ba-meta">
+                                    <span class="ph-srcbadge" x-text="alt.source"></span>
+                                    <span x-show="alt.height" x-text="alt.height+'p'"></span>
+                                    <span x-show="alt.distance<=12" class="ph-ba-match">✓ overené</span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <div class="ph-state" x-show="!phHub.better.loading && !phHub.better.alts.length">Inde sa nenašlo —
+                    možno je toto najlepšia kópia.</div>
+            </div>
+        </div>
+
+        <!-- #3 playlist search -->
+        <div class="ph-playerwrap" x-show="phHub.plSearch.open" style="display:none;" x-transition.opacity
+            @click.self="phClosePlSearch()" @keydown.escape.window="phClosePlSearch()">
+            <div class="ph-betterbox">
+                <div class="ph-playerhead">
+                    <span class="ph-playertitle"><span class="material-icons-round"
+                            style="vertical-align:-4px;color:#ff9000;">playlist_play</span> Vyhľadať playlisty</span>
+                    <button class="ph-act" @click="phClosePlSearch()"><span
+                            class="material-icons-round">close</span></button>
+                </div>
+                <div class="ph-plsearchbar">
+                    <span class="material-icons-round">search</span>
+                    <input class="ph-kwinput" type="text" x-model="phHub.plSearch.q"
+                        placeholder="slovo, URL alebo ID playlistu…" @keydown.enter="phSearchPlaylists()">
+                    <button class="ph-toggle ph-fetch" @click="phSearchPlaylists()" :disabled="phHub.plSearch.loading">
+                        <span class="material-icons-round ph-spin"
+                            x-show="phHub.plSearch.loading">progressive_activity</span>
+                        <span class="material-icons-round" x-show="!phHub.plSearch.loading">search</span> Hľadať
+                    </button>
+                </div>
+                <div class="ph-state" x-show="phHub.plSearch.loading"><span
+                        class="material-icons-round ph-spin">progressive_activity</span> Hľadám playlisty…</div>
+                <div class="ph-plgrid ph-plgrid-search" x-show="!phHub.plSearch.loading && phHub.plSearch.items.length">
+                    <template x-for="pl in phHub.plSearch.items" :key="pl.id">
+                        <div class="ph-plcard" @click="phOpenPlaylist(pl)"
+                            :title="pl.name + ' — ' + pl.count + ' videí'">
+                            <div class="ph-plthumb">
+                                <img x-show="pl.thumb" :src="phMedia(pl.thumb)" loading="lazy" :alt="pl.name">
+                                <span class="material-icons-round ph-plph" x-show="!pl.thumb">playlist_play</span>
+                                <span class="ph-plnum" x-show="pl.count" x-text="pl.count + ' videí'"></span>
+                            </div>
+                            <div class="ph-plname" x-text="pl.name"></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- bulk bar -->
+        <div class="ph-bulk" x-show="phHub.selected.length" x-transition>
+            <span x-text="phHub.selected.length + ' vybraných'"></span>
+            <button class="ph-bulk-queue" @click="phQueueAddSelected()"><span
+                    class="material-icons-round">playlist_add</span> Do Smart Queue</button>
+            <button class="ph-bulk-import" @click="phImportSelected()"><span
+                    class="material-icons-round">download</span> Import do knižnice</button>
+            <button class="ph-bulk-clear" @click="phHub.selected=[]">Zrušiť</button>
+        </div>
+
+        <!-- persistent review-first queue: expensive checks happen only here -->
+        <aside class="ph-queue" x-show="phHub.queue.open" style="display:none;" x-transition.opacity>
+            <div class="ph-queue-head">
+                <div>
+                    <span class="ph-queue-kicker">PORN HUB · REVIEW</span>
+                    <h2>Smart Queue <b x-text="phHub.queue.items.length"></b></h2>
+                    <p>Poradie je podľa pripravenosti a kvality, nie podľa času pridania.</p>
+                </div>
+                <button class="ph-act" @click="phQueueClose()" title="Zavrieť queue"><span
+                        class="material-icons-round">close</span></button>
+            </div>
+            <div class="ph-qtriage" x-show="phHub.queue.items.length">
+                <div class="ph-qnext">
+                    <span>NAJBLIŽŠÍ KROK</span>
+                    <strong
+                        x-text="phQueueCount(['new','failed']) ? ('Prever ' + phQueueCount(['new','failed']) + ' neznámych') : (phQueueCount(['ready']) ? ('Importuj ' + phQueueCount(['ready']) + ' pripravených') : 'Queue je vyčistená')"></strong>
+                </div>
+                <div class="ph-qquick">
+                    <button class="ph-q-secondary" @click="phQueueAnalyzeUnknown()"
+                        :disabled="phHub.queue.busy || !phQueueCount(['new','failed'])">
+                        <span class="material-icons-round">straighten</span> Overiť <b
+                            x-text="phQueueCount(['new','failed'])"></b>
+                    </button>
+                    <button class="ph-q-secondary" @click="phQueueSelectRecommended()"
+                        :disabled="phHub.queue.busy || !phQueueRecommendedIds().length">
+                        <span class="material-icons-round">auto_awesome</span> Vybrať top <b
+                            x-text="phQueueRecommendedIds().length"></b>
+                    </button>
+                    <button class="ph-bulk-import" @click="phQueueImportRecommended()"
+                        :disabled="phHub.queue.busy || !phQueueRecommendedIds().length">
+                        <span class="material-icons-round">download</span> Import top
+                    </button>
+                </div>
+                <button class="ph-q-clean" x-show="phQueueCount(['duplicate'])" @click="phQueueRemoveDuplicates()"
+                    :disabled="phHub.queue.busy">
+                    <span class="material-icons-round">delete_sweep</span> Odstrániť duplicity <b
+                        x-text="phQueueCount(['duplicate'])"></b>
+                </button>
+            </div>
+            <div class="ph-queue-actions">
+                <span
+                    x-text="phHub.queue.selected.length ? phHub.queue.selected.length + ' označené' : 'Označ karty na ďalší krok'"></span>
+                <button class="ph-q-secondary" @click="phQueueAnalyzeSelected()"
+                    :disabled="phHub.queue.busy || !phHub.queue.selected.length">
+                    <span class="material-icons-round">straighten</span> Analyzovať
+                </button>
+                <button class="ph-bulk-import" @click="phQueueImportSelected()"
+                    :disabled="phHub.queue.busy || !phHub.queue.selected.length">
+                    <span class="material-icons-round">download</span> Importovať
+                </button>
+            </div>
+            <div class="ph-queue-state" x-show="phHub.queue.loading || phHub.queue.busy">
+                <span class="material-icons-round ph-spin">progressive_activity</span>
+                <span x-text="phHub.queue.loading ? 'Načítavam queue…' : 'Spracúvam vybrané položky…'"></span>
+            </div>
+            <div class="ph-queue-list" x-show="!phHub.queue.loading">
+                <template x-for="item in phQueueSortedItems()" :key="item.id">
+                    <article class="ph-qcard" :class="'is-'+item.status">
+                        <button class="ph-qcheck" @click="phQueueToggle(item)"
+                            :class="{'on': phHub.queue.selected.includes(item.id)}"
+                            :disabled="['duplicate','queued','imported'].includes(item.status)"
+                            :title="phHub.queue.selected.includes(item.id)?'Odznačiť':'Označiť'">
+                            <span class="material-icons-round"
+                                x-text="phHub.queue.selected.includes(item.id)?'check_box':'check_box_outline_blank'"></span>
+                        </button>
+                        <img :src="phMedia(item.thumb)" loading="lazy" :alt="item.title">
+                        <div class="ph-qinfo">
+                            <div class="ph-qtitle" x-text="item.title"></div>
+                            <div class="ph-qmeta">
+                                <span class="ph-qstatus" :class="'is-'+item.status" x-text="phQueueStatus(item)"></span>
+                                <span x-show="item.quality" x-text="item.quality"></span>
+                                <span x-show="item.size_mb" x-text="Math.round(item.size_mb)+' MB'"></span>
+                                <span x-show="item.duration_sec"
+                                    x-text="Math.round(item.duration_sec/60)+' min'"></span>
+                            </div>
+                            <p class="ph-qreason" x-text="phQueueReason(item)"></p>
+                            <p class="ph-qerror" x-show="item.error" x-text="item.error"></p>
+                        </div>
+                        <div class="ph-qpriority" :class="phQueuePriorityTone(item)"
+                            :title="'Priorita: ' + phQueuePriority(item) + ' / 100'">
+                            <span x-text="phQueuePriorityLabel(item)"></span>
+                            <b x-text="phQueuePriority(item)"></b>
+                        </div>
+                        <button class="ph-qremove" @click="phQueueRemove(item)" :disabled="item.status==='queued'"
+                            title="Odstrániť z queue">
+                            <span class="material-icons-round">close</span>
+                        </button>
+                    </article>
+                </template>
+            </div>
+            <div class="ph-queue-empty" x-show="!phHub.queue.loading && !phHub.queue.items.length">
+                <span class="material-icons-round">playlist_add</span>
+                <strong>Zatiaľ je prázdna.</strong>
+                <p>Na karte klikni na ikonku plus a priprav si kandidátov bokom od knižnice.</p>
+            </div>
+        </aside>
+    </div>
+</template>

@@ -1,0 +1,124 @@
+{
+  "manifest_version": 3,
+  "name": "Nexus Video Card Selector Fresh_v3",
+  "version": "1.5.16",
+  "description": "Smart video thumbnail detector: adds selectors, fetches metadata (date, size, quality, duration) and imports to Nexus dashboard on any site.",
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "tabs",
+    "activeTab",
+    "scripting",
+    "clipboardWrite",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "exclude_matches": [
+        "http://localhost/*",
+        "http://localhost:*/*",
+        "http://127.0.0.1/*",
+        "http://127.0.0.1:*/*",
+        "https://localhost/*",
+        "https://localhost:*/*",
+        "https://youtube.com/*",
+        "https://www.youtube.com/*",
+        "https://*.youtube.com/*",
+        "https://m.youtube.com/*",
+        "https://youtu.be/*",
+        "https://eporner.com/*",
+        "https://*.eporner.com/*",
+        "https://bunkr.site/*",
+        "https://*.bunkr.site/*",
+        "https://bunkr.si/*",
+        "https://*.bunkr.si/*",
+        "https://bunkr.cr/*",
+        "https://*.bunkr.cr/*",
+        "https://bunkr.red/*",
+        "https://*.bunkr.red/*",
+        "https://bunkr.media/*",
+        "https://*.bunkr.media/*",
+        "https://bunkr.black/*",
+        "https://*.bunkr.black/*",
+        "https://bunkr.is/*",
+        "https://*.bunkr.is/*",
+        "https://bunkr.la/*",
+        "https://*.bunkr.la/*",
+        "https://bunkr.ws/*",
+        "https://*.bunkr.ws/*",
+        "https://bunkr.fi/*",
+        "https://*.bunkr.fi/*",
+        "https://bunkr.ph/*",
+        "https://*.bunkr.ph/*",
+        "https://bunkr.pk/*",
+        "https://*.bunkr.pk/*",
+        "https://bunkr.ps/*",
+        "https://*.bunkr.ps/*",
+        "https://bunkr.sk/*",
+        "https://*.bunkr.sk/*",
+        "https://bunkr.ac/*",
+        "https://*.bunkr.ac/*",
+        "https://bunkr.ci/*",
+        "https://*.bunkr.ci/*",
+        "https://apidl.bunkr.ru/*",
+        "https://*.apidl.bunkr.ru/*",
+        "https://get.bunkrr.su/*",
+        "https://*.get.bunkrr.su/*",
+        "https://bunkrr.pics/*",
+        "https://*.bunkrr.pics/*",
+        "https://bunkr-albums.io/*",
+        "https://*.bunkr-albums.io/*",
+        "https://balbums.st/*",
+        "https://*.balbums.st/*",
+        "https://balbums.io/*",
+        "https://*.balbums.io/*",
+        "https://findr.to/*",
+        "https://*.findr.to/*",
+        "https://gofile.io/*",
+        "https://*.gofile.io/*"
+      ],
+      "js": ["overview.js", "import-workbench.js", "xhamster-listing.js", "xhamster-layout.js", "xvideos-listing.js", "spankbang-listing.js", "pimpbunny-listing.js", "erome-listing.js", "vendor/hls.min.js", "whoreshub-player.js", "listing-player-sites.js", "whoreshub-listing.js", "scan-hud.js", "content.js"],
+      "css": ["styles.css", "listing-player.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "matches": ["<all_urls>"],
+      "exclude_matches": [
+        "https://gofile.io/*",
+        "https://*.gofile.io/*"
+      ],
+      "js": ["nvs-ui-guard.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    },
+    {
+      "matches": ["https://turbo.cr/embed/*"],
+      "js": ["turbo-preview.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

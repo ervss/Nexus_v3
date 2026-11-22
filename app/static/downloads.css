@@ -1,0 +1,328 @@
+.nx-download-manager,
+.nx-download-launcher,
+.nx-download-dialog {
+    color: #eef2f8;
+    font: 14px/1.45 Manrope, "Segoe UI", sans-serif;
+}
+
+.nx-download-manager {
+    position: fixed;
+    z-index: 9000;
+    inset: auto 20px 20px auto;
+    display: flex;
+    flex-direction: column;
+    width: min(440px, calc(100vw - 32px));
+    max-height: min(76vh, 760px);
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, .35);
+    border-radius: 16px;
+    background: #10131b;
+    box-shadow: 0 20px 70px rgba(0, 0, 0, .62);
+}
+
+.nx-download-manager[hidden],
+.nx-download-launcher[hidden] {
+    display: none;
+}
+
+.nx-download-header,
+.nx-download-header-actions,
+.nx-download-metrics,
+.nx-download-toolbar,
+.nx-download-dialog-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.nx-download-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid #293142;
+}
+
+.nx-download-header h2,
+.nx-download-dialog h2 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.nx-download-header p {
+    margin: 3px 0 0;
+    color: #aab4c5;
+    font-size: 12px;
+}
+
+.nx-download-header-actions button,
+.nx-download-manager button,
+.nx-download-launcher,
+.nx-download-dialog button {
+    min-height: 36px;
+    border: 1px solid #3a465b;
+    border-radius: 8px;
+    padding: 6px 10px;
+    background: #1b2230;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.nx-download-manager button:hover,
+.nx-download-launcher:hover,
+.nx-download-dialog button:hover {
+    border-color: #ff9a54;
+    background: #282536;
+}
+
+.nx-download-manager :focus-visible,
+.nx-download-launcher:focus-visible,
+.nx-download-dialog :focus-visible {
+    outline: 3px solid #ff9a54;
+    outline-offset: 2px;
+}
+
+.nx-download-overview,
+.nx-download-start,
+.nx-download-toolbar {
+    padding: 12px 16px;
+}
+
+.nx-download-metrics {
+    color: #cbd5e1;
+    font-size: 12px;
+}
+
+.nx-download-overview progress,
+.nx-download-item progress {
+    display: block;
+    width: 100%;
+    height: 9px;
+    margin-top: 8px;
+    appearance: none;
+    overflow: clip;
+    border: 0;
+    border-radius: 999px;
+    background: #293142;
+}
+
+.nx-download-overview progress::-webkit-progress-bar,
+.nx-download-item progress::-webkit-progress-bar {
+    background: #293142;
+}
+
+.nx-download-overview progress::-webkit-progress-value,
+.nx-download-item progress::-webkit-progress-value {
+    border-radius: 999px;
+    background: linear-gradient(90deg, #ff6a2c, #ffc078);
+}
+
+.nx-download-overview progress::-moz-progress-bar,
+.nx-download-item progress::-moz-progress-bar {
+    border-radius: 999px;
+    background: linear-gradient(90deg, #ff6a2c, #ffc078);
+}
+
+.nx-download-start {
+    display: grid;
+    gap: 7px;
+    border-top: 1px solid #293142;
+}
+
+.nx-download-start label,
+.nx-download-dialog label {
+    color: #cbd5e1;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.nx-download-start textarea,
+.nx-download-dialog input[type="number"],
+.nx-download-dialog input[type="text"] {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid #465269;
+    border-radius: 8px;
+    padding: 9px 10px;
+    background: #0b0e14;
+    color: #f8fafc;
+    font: inherit;
+}
+
+.nx-download-start textarea {
+    min-height: 64px;
+    resize: vertical;
+}
+
+.nx-download-toolbar {
+    flex-wrap: wrap;
+    border-top: 1px solid #293142;
+}
+
+.nx-download-toolbar button {
+    min-height: 32px;
+    padding: 5px 8px;
+    font-size: 11px;
+}
+
+.nx-download-list {
+    display: grid;
+    gap: 9px;
+    min-height: 60px;
+    margin: 0;
+    padding: 0 12px 12px;
+    overflow: auto;
+    list-style: none;
+}
+
+.nx-download-empty {
+    padding: 20px 8px;
+    color: #aab4c5;
+    text-align: center;
+}
+
+.nx-download-item {
+    min-width: 0;
+    border: 1px solid #293142;
+    border-radius: 10px;
+    padding: 10px;
+    background: #171c27;
+}
+
+.nx-download-item-head,
+.nx-download-item-meta,
+.nx-download-item-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.nx-download-item-name {
+    min-width: 0;
+    overflow: hidden;
+    color: #f1f5f9;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nx-download-item-status {
+    flex: none;
+    color: #ffb078;
+    font-size: 11px;
+    text-transform: capitalize;
+}
+
+.nx-download-item-meta {
+    flex-wrap: wrap;
+    margin-top: 5px;
+    color: #aab4c5;
+    font-size: 11px;
+}
+
+.nx-download-item-actions {
+    justify-content: flex-start;
+    margin-top: 8px;
+}
+
+.nx-download-item-actions button {
+    min-height: 30px;
+    padding: 4px 8px;
+    font-size: 11px;
+}
+
+.nx-download-error {
+    margin: 7px 0 0;
+    color: #ffaaa7;
+    font-size: 11px;
+    overflow-wrap: anywhere;
+}
+
+.nx-download-notice {
+    margin: 0;
+    padding: 10px 14px;
+    border-top: 1px solid #293142;
+    background: #202b25;
+    color: #b7f7cb;
+}
+
+.nx-download-notice[data-kind="error"] {
+    background: #35201f;
+    color: #ffc0ba;
+}
+
+.nx-download-launcher {
+    position: fixed;
+    z-index: 9000;
+    inset: auto 20px 20px auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .5);
+}
+
+.nx-download-launcher span {
+    display: grid;
+    min-width: 22px;
+    min-height: 22px;
+    place-items: center;
+    border-radius: 50%;
+    background: #ff7e38;
+    color: #16120f;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.nx-download-dialog {
+    width: min(420px, calc(100vw - 40px));
+    border: 1px solid #49566b;
+    border-radius: 14px;
+    padding: 20px;
+    background: #10131b;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, .65);
+}
+
+.nx-download-dialog::backdrop {
+    background: rgba(3, 5, 10, .72);
+}
+
+.nx-download-dialog form {
+    display: grid;
+    gap: 10px;
+}
+
+.nx-download-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nx-download-check input {
+    width: 18px;
+    height: 18px;
+    accent-color: #ff8a3d;
+}
+
+.nx-download-dialog-actions {
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+    .nx-download-manager,
+    .nx-download-launcher {
+        inset-inline: 8px;
+        inset-block-end: 8px;
+        width: auto;
+        max-width: none;
+    }
+
+    .nx-download-manager {
+        max-height: 84vh;
+    }
+
+    .nx-download-toolbar {
+        gap: 6px;
+    }
+}

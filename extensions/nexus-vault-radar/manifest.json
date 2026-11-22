@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Nexus Vault Radar",
+  "version": "1.0.0",
+  "description": "Obsidian Glass Companion: porovnáva webové stránky a tvorcov s Nexus Knižnicou a 945k Local Vaultom.",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "http://localhost/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Nexus Vault Radar",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*/*", "http://*/*"],
+      "exclude_matches": ["http://127.0.0.1/*", "http://localhost/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

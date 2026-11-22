@@ -1,0 +1,11 @@
+import { readFile, access, stat } from "node:fs/promises";
+const files = ["manifest.json", "service-worker.js", "content-script.js", "popup.html", "popup.js", "sidepanel.html", "sidepanel.js", "sidepanel.css", "seek.css"];
+for (const file of files) await access(new URL(`../${file}`, import.meta.url));
+const manifest = JSON.parse(await readFile(new URL("../manifest.json", import.meta.url)));
+if (manifest.manifest_version !== 3 || !manifest.permissions.includes("sidePanel")) throw new Error("Manifest V3/sidePanel check failed");
+if (!manifest.permissions.includes("declarativeNetRequestWithHostAccess")) throw new Error("Playback header fallback permission is missing");
+if (!manifest.externally_connectable?.ids?.includes("cdndggofdoabgggdaefikebgjliknljb")) throw new Error("Nexus Video Selector bridge allowlist is missing");
+const panel = await readFile(new URL("../sidepanel.html", import.meta.url), "utf8");
+if (!panel.includes("vendor/hls.min.js")) throw new Error("Local HLS bundle is not wired");
+if ((await stat(new URL("../vendor/hls.min.js", import.meta.url))).size < 100000) throw new Error("Local hls.js is still a placeholder; run npm run build:hls");
+console.log("Self-check passed: Manifest V3, playback fallback, and bundled HLS are ready.");

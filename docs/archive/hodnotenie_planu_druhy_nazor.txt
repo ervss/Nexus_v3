@@ -1,0 +1,124 @@
+Peťo, poviem ti rovno: tento návrh má pre náš Nexus veľký zmysel a určite by som ho chcel implementovať. Ale nie úplne v tejto podobe.
+
+Prešiel som celý technický plán aj relevantné časti zdrojového kódu v priloženom ZIP-e. Našiel som niekoľko dobrých architektonických rozhodnutí, ale aj slabiny, ktoré by mohli spôsobiť ďalšie problémy.
+Hodnotenie myšlienky9/10
+Veľký prínos pre Nexus
+
+
+Pripravenosť plánu6/10
+Vyžaduje prepracovanie
+
+
+
+
+1. Čo sa mi na návrhu páči
+Najlepšia časť je snaha vytvoriť jeden univerzálny systém prehrávania pre:
+- Quantum Search
+- Split-Screen
+- Huby
+- Link Tester
+Teraz máme v Nexuse viacero spôsobov, ako získavať a prehrávať streamy. Každý má vlastné pravidlá a špecifické výnimky.
+
+To znamená, že video môže fungovať v Hube, ale zlyhať v Quantum Search.
+
+Centralizácia resolvera je presne to, čo Nexus potrebuje.
+
+Páčia sa mi tiež tieto rozhodnutia:
+Využitie existujúcich HubAdapterov aj mimo samotných Hubov.
+
+Podpora KVS streamov, ktoré nemajú koncovku .mp4.
+
+Spoločné spracovanie Referer, Cookies a Range pre prehrávače.
+
+Prepojenie so Smart Media Routerom, ktorý už v Nexuse máme.
+
+
+2. Čo som odhalil pri kontrole kódu
+Tu sú štyri najdôležitejšie zistenia.
+Oblasť	Zistenie	Priorita
+Quantum Search	V ZIP-e je staršia implementácia streamResult(), nie funkcie opisované v pláne	Vysoká
+Link Tester	Pre neznáme zdroje používa HTTP probe; Smart Router sa volá len ako špeciálny fallback	Vysoká
+Embed Proxy	Natvrdo používa leakporner.com ako Referer	Vysoká
+Bezpečnosť iframe	Vzdialené HTML môže byť spustené pod lokálnym pôvodom Nexusu bez izolácie	Kritická
+
+Zvlášť posledný bod by som nepodcenil. Aktuálny /embed_proxy vracia HTML cudzej stránky pod adresou Nexusu. Keď takéto iframe nie je izolované, skripty stránky môžu získať prístup k lokálnemu rozhraniu aplikácie.
+
+Pred univerzálnym povolením embedov treba vyriešiť ich izoláciu, napríklad sandboxom bez allow-same-origin alebo oddeleným pôvodom.
+3. Jedna vec z návrhu sa mi vyslovene nepáči
+Plán hovorí, že všetky vzdialené streamy majú automaticky prechádzať cez /hls_proxy.
+
+Ja by som to nerobil bez rozlišovania.
+
+Lokálny server nie je zázračná skratka k CDN. Stále musí prijímať dáta zo vzdialeného servera a odovzdávať ich prehrávaču. Pri ôsmich či dvanástich súčasných videách v Split-Screene to znamená ďalšiu prácu, spojenia a potenciálne úzke hrdlo.
+
+Navrhoval by som adaptívne prehrávanie:
+#chatgpt-mermaid-_r_164_{font-family:-apple-system-body,ui-sans-serif,-apple-system,system-ui,"Segoe UI",Helvetica,"Apple Color Emoji",Arial,sans-serif,"Segoe UI Emoji","Segoe UI Symbol";font-size:16px;fill:rgb(237, 237, 237);}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#chatgpt-mermaid-_r_164_ .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#chatgpt-mermaid-_r_164_ .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#chatgpt-mermaid-_r_164_ .error-icon{fill:rgb(48, 48, 48);}#chatgpt-mermaid-_r_164_ .error-text{fill:rgb(237, 237, 237);stroke:rgb(237, 237, 237);}#chatgpt-mermaid-_r_164_ .edge-thickness-normal{stroke-width:1px;}#chatgpt-mermaid-_r_164_ .edge-thickness-thick{stroke-width:3.5px;}#chatgpt-mermaid-_r_164_ .edge-pattern-solid{stroke-dasharray:0;}#chatgpt-mermaid-_r_164_ .edge-thickness-invisible{stroke-width:0;fill:none;}#chatgpt-mermaid-_r_164_ .edge-pattern-dashed{stroke-dasharray:3;}#chatgpt-mermaid-_r_164_ .edge-pattern-dotted{stroke-dasharray:2;}#chatgpt-mermaid-_r_164_ .marker{fill:rgb(175, 175, 175);stroke:rgb(175, 175, 175);}#chatgpt-mermaid-_r_164_ .marker.cross{stroke:rgb(175, 175, 175);}#chatgpt-mermaid-_r_164_ svg{font-family:-apple-system-body,ui-sans-serif,-apple-system,system-ui,"Segoe UI",Helvetica,"Apple Color Emoji",Arial,sans-serif,"Segoe UI Emoji","Segoe UI Symbol";font-size:16px;}#chatgpt-mermaid-_r_164_ p{margin:0;}#chatgpt-mermaid-_r_164_ .label{font-family:-apple-system-body,ui-sans-serif,-apple-system,system-ui,"Segoe UI",Helvetica,"Apple Color Emoji",Arial,sans-serif,"Segoe UI Emoji","Segoe UI Symbol";color:rgb(237, 237, 237);}#chatgpt-mermaid-_r_164_ .cluster-label text{fill:rgb(237, 237, 237);}#chatgpt-mermaid-_r_164_ .cluster-label span{color:rgb(237, 237, 237);}#chatgpt-mermaid-_r_164_ .cluster-label span p{background-color:transparent;}#chatgpt-mermaid-_r_164_ .label text,#chatgpt-mermaid-_r_164_ span{fill:rgb(237, 237, 237);color:rgb(237, 237, 237);}#chatgpt-mermaid-_r_164_ .node rect,#chatgpt-mermaid-_r_164_ .node circle,#chatgpt-mermaid-_r_164_ .node ellipse,#chatgpt-mermaid-_r_164_ .node polygon,#chatgpt-mermaid-_r_164_ .node path{fill:rgb(52, 24, 11);stroke:rgb(172, 79, 35);stroke-width:1px;}#chatgpt-mermaid-_r_164_ .rough-node .label text,#chatgpt-mermaid-_r_164_ .node .label text,#chatgpt-mermaid-_r_164_ .image-shape .label,#chatgpt-mermaid-_r_164_ .icon-shape .label{text-anchor:middle;}#chatgpt-mermaid-_r_164_ .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#chatgpt-mermaid-_r_164_ .rough-node .label,#chatgpt-mermaid-_r_164_ .node .label,#chatgpt-mermaid-_r_164_ .image-shape .label,#chatgpt-mermaid-_r_164_ .icon-shape .label{text-align:center;}#chatgpt-mermaid-_r_164_ .node.clickable{cursor:pointer;}#chatgpt-mermaid-_r_164_ .root .anchor path{fill:rgb(175, 175, 175)!important;stroke-width:0;stroke:rgb(175, 175, 175);}#chatgpt-mermaid-_r_164_ .arrowheadPath{fill:rgb(175, 175, 175);}#chatgpt-mermaid-_r_164_ .edgePath .path{stroke:rgb(175, 175, 175);stroke-width:1px;}#chatgpt-mermaid-_r_164_ .flowchart-link{stroke:rgb(175, 175, 175);fill:none;}#chatgpt-mermaid-_r_164_ .edgeLabel{background-color:rgb(0, 0, 0);text-align:center;}#chatgpt-mermaid-_r_164_ .edgeLabel p{background-color:rgb(0, 0, 0);}#chatgpt-mermaid-_r_164_ .edgeLabel rect{opacity:0.5;background-color:rgb(0, 0, 0);fill:rgb(0, 0, 0);}#chatgpt-mermaid-_r_164_ .labelBkg{background-color:rgba(0, 0, 0, 0.5);}#chatgpt-mermaid-_r_164_ .cluster rect{fill:rgb(48, 48, 48);stroke:rgba(255, 255, 255, 0.15);stroke-width:1px;}#chatgpt-mermaid-_r_164_ .cluster text{fill:rgb(237, 237, 237);}#chatgpt-mermaid-_r_164_ .cluster span{color:rgb(237, 237, 237);}#chatgpt-mermaid-_r_164_ div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:-apple-system-body,ui-sans-serif,-apple-system,system-ui,"Segoe UI",Helvetica,"Apple Color Emoji",Arial,sans-serif,"Segoe UI Emoji","Segoe UI Symbol";font-size:12px;background:rgb(48, 48, 48);border:1px solid rgba(255, 255, 255, 0.15);border-radius:2px;pointer-events:none;z-index:100;}#chatgpt-mermaid-_r_164_ .flowchartTitleText{text-anchor:middle;font-size:18px;fill:rgb(237, 237, 237);}#chatgpt-mermaid-_r_164_ rect.text{fill:none;stroke-width:0;}#chatgpt-mermaid-_r_164_ .icon-shape,#chatgpt-mermaid-_r_164_ .image-shape{background-color:rgb(0, 0, 0);text-align:center;}#chatgpt-mermaid-_r_164_ .icon-shape p,#chatgpt-mermaid-_r_164_ .image-shape p{background-color:rgb(0, 0, 0);padding:2px;}#chatgpt-mermaid-_r_164_ .icon-shape .label rect,#chatgpt-mermaid-_r_164_ .image-shape .label rect{opacity:0.5;background-color:rgb(0, 0, 0);fill:rgb(0, 0, 0);}#chatgpt-mermaid-_r_164_ .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#chatgpt-mermaid-_r_164_ .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#chatgpt-mermaid-_r_164_ .node .neo-node{stroke:rgb(172, 79, 35);}#chatgpt-mermaid-_r_164_ [data-look="neo"].node rect,#chatgpt-mermaid-_r_164_ [data-look="neo"].cluster rect,#chatgpt-mermaid-_r_164_ [data-look="neo"].node polygon{stroke:url(#chatgpt-mermaid-_r_164_-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#chatgpt-mermaid-_r_164_ [data-look="neo"].swimlane.cluster rect{filter:none;}#chatgpt-mermaid-_r_164_ [data-look="neo"].node path{stroke:url(#chatgpt-mermaid-_r_164_-gradient);stroke-width:1px;}#chatgpt-mermaid-_r_164_ [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#chatgpt-mermaid-_r_164_ [data-look="neo"].node .neo-line path{stroke:rgb(172, 79, 35);filter:none;}#chatgpt-mermaid-_r_164_ [data-look="neo"].node circle{stroke:url(#chatgpt-mermaid-_r_164_-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#chatgpt-mermaid-_r_164_ [data-look="neo"].node circle .state-start{fill:#000000;}#chatgpt-mermaid-_r_164_ [data-look="neo"].icon-shape .icon{fill:url(#chatgpt-mermaid-_r_164_-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#chatgpt-mermaid-_r_164_ [data-look="neo"].icon-shape .icon-neo path{stroke:url(#chatgpt-mermaid-_r_164_-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#chatgpt-mermaid-_r_164_ .node text{font-size:14px;font-weight:600;letter-spacing:normal;fill:rgb(255, 183, 144);}#chatgpt-mermaid-_r_164_ .edgeLabels text{font-size:13px;font-weight:600;letter-spacing:-0.08px;fill:rgb(255, 183, 144);}#chatgpt-mermaid-_r_164_ .node tspan[font-weight="normal"],#chatgpt-mermaid-_r_164_ .edgeLabels tspan[font-weight="normal"]{font-weight:600;}#chatgpt-mermaid-_r_164_ .edgeLabel .label rect{opacity:1;rx:13px;ry:13px;fill:rgb(40, 17, 5);stroke:rgb(92, 56, 31);stroke-width:1px;}#chatgpt-mermaid-_r_164_ .node rect,#chatgpt-mermaid-_r_164_ .node circle,#chatgpt-mermaid-_r_164_ .node ellipse,#chatgpt-mermaid-_r_164_ .node polygon,#chatgpt-mermaid-_r_164_ .node path{fill:rgb(74, 34, 6);stroke:rgba(255, 255, 255, 0.1);stroke-width:1px;}#chatgpt-mermaid-_r_164_ .node rect{rx:16px;ry:16px;}#chatgpt-mermaid-_r_164_ .mermaid-decision .label-container{fill:rgb(40, 17, 5);stroke:rgb(92, 56, 31);stroke-dasharray:2,2;}#chatgpt-mermaid-_r_164_ .edgePaths .flowchart-link{stroke:rgb(175, 175, 175);stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;}#chatgpt-mermaid-_r_164_ .marker{fill:rgb(175, 175, 175);stroke:rgb(175, 175, 175);}#chatgpt-mermaid-_r_164_ :root{--mermaid-font-family:-apple-system-body,ui-sans-serif,-apple-system,system-ui,"Segoe UI",Helvetica,"Apple Color Emoji",Arial,sans-serif,"Segoe UI Emoji","Segoe UI Symbol";}Výsledok vyhľadávaniaUniverzálny resolverTyp výsledkuMP4 / HLS / DASHEmbed prehrávačPotrebná proxy?Priame prehrávanieLokálna proxyIzolovaný iframeNieÁnoZlyhanie
+
+
+
+
+
+Takto bude Nexus vedieť zvoliť najvhodnejší spôsob prehrávania a automaticky skúsiť náhradný.
+
+Treba počítať aj s tým, že proxy nevyrieši každý HTTP 403. Niektoré zdroje vyžadujú platné cookies, krátkodobé tokeny, špecifické hlavičky alebo majú ďalšie ochrany.
+
+Preto považujem tvrdenie o „100 % prehrateľnosti“ za príliš optimistické.
+4. Ako by som návrh upravil
+Odporúčam rozdeliť implementáciu do štyroch fáz.
+
+Fáza 1 — Universal Playback Resolver
+
+Jednotné backendové API, ktoré postupne skúša dedikovaný extraktor, HubAdapter a Smart Router. Výsledok bude obsahovať presný typ prehrávania: MP4, HLS, DASH, embed alebo unsupported.
+
+
+
+
+Fáza 2 — Inteligentná streaming proxy
+
+Rozhodovanie o proxy podľa zdroja a výsledku prehrávania. Podpora Range, správnych MIME typov, cookies, presmerovaní a obnovovania expirovaných odkazov. Zabezpečenie embedov.
+
+
+
+
+Fáza 3 — Zjednotenie Quantum Search a Split-Screenu
+
+Oba prehrávače budú využívať rovnaký backendový kontrakt. Tým odstránime potrebu opakovať doménové pravidlá na dvoch miestach.
+
+
+
+
+Fáza 4 — Testovanie jednotlivých zdrojov
+
+Pre každý podporovaný zdroj otestovať prehratie, posúvanie videa, HLS segmenty, opakované spustenie a súčasné prehrávanie viacerých videí.
+
+
+
+Pridal by som aj diagnostiku, ktorá nám pri neúspešnom prehratí ukáže:
+- či zlyhal extraktor alebo samotná CDN,
+- HTTP kód a dôvod zlyhania,
+- ktorý spôsob prehrávania sa použil,
+- či pomohol alternatívny resolver alebo proxy.
+To bude pri ďalšom rozširovaní Nexusu mimoriadne užitočné.
+5. Stav testovania
+Zo ZIP-u som spustil relevantné existujúce JavaScript testy.
+17/17 úspešných
+Testy Quantum Search a metadát
+
+Jeden ďalší test Split-Screenu sa nepodarilo spustiť, pretože v tomto prostredí chýba prehliadač Playwright Chromium. Neznamená to chybu samotného Nexusu.
+
+Dôležité: ZIP obsahuje pravdepodobne starší stav projektu. Niektoré funkcie a testovacie súbory, ktoré plán spomína, v ňom ešte neexistujú. Pred implementáciou treba plán zosúladiť s aktuálnym commitom.
+
+Môj konečný názor
+Áno, Peťo, tento projekt by som realizoval. A dal by som mu pomerne vysokú prioritu.
+
+Nexus už má množstvo extraktorov, discovery zdrojov a Hubov. Ak nedokážeme ich výsledky spoľahlivo prehrávať v jednom prostredí, prichádzame o veľkú časť hodnoty celej aplikácie.
+
+Jediné, čo by som zásadne zmenil, je filozofia implementácie.
+
+Nechcem, aby sme po mesiaci mali ďalších 30 špeciálnych if podmienok pre jednotlivé stránky.
+
+Chcem, aby sme mali jeden kvalitný prehrávací engine, ku ktorému sa každý nový zdroj pripojí cez štandardizované rozhranie.
+
+To je podľa mňa rozdiel medzi zbierkou fungujúcich skriptov a poriadnou aplikáciou.
+
+Moje odporúčanie: Zachovať základnú myšlienku dokumentu, prepracovať architektúru proxy a bezpečnosť embedov a následne implementovať postupne s automatickými testami. Takto z toho môže vzniknúť jedna z najhodnotnejších funkcií Nexusu.

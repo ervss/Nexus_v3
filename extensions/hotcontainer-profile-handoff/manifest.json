@@ -1,0 +1,58 @@
+{
+  "manifest_version": 3,
+  "name": "HotContainer Profile Handoff",
+  "version": "0.2.6",
+  "description": "One-click transfer of the current supported profile URL to HotContainer's normal Red-card form.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "scripting",
+    "downloads",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "https://www.xvideos.com/*",
+    "https://xvideos.com/*",
+    "https://hotcontainer.co/*",
+    "https://www.hotcontainer.co/*",
+    "https://*.xvideos-cdn.com/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.xvideos.com/*",
+        "https://xvideos.com/*"
+      ],
+      "js": [
+        "premium.js",
+        "xvideos.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://hotcontainer.co/*",
+        "https://www.hotcontainer.co/*"
+      ],
+      "js": [
+        "hotcontainer.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "direct.html"
+      ],
+      "matches": [
+        "https://*.xvideos-cdn.com/*"
+      ]
+    }
+  ]
+}

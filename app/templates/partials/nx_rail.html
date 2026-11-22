@@ -1,0 +1,102 @@
+{# Zdieľaný ľavý navigačný rail pre hlavný Dashboard (/), Local Vault (/vault) a podstránky. #}
+{% set _rail_ctx = nx_rail_context | default('dashboard') %}
+<aside class="nx-rail" aria-label="Hlavná navigácia">
+    <div class="nx-rail-top">
+        {% if _rail_ctx == 'dashboard' %}
+        <button type="button" class="nx-logo-mark" @click="showMainGallery()"
+            title="Nexus Galéria" aria-label="Nexus Galéria">N</button>
+        {% else %}
+        <a href="/" class="nx-logo-mark" title="Nexus Galéria" aria-label="Nexus Galéria"
+            style="text-decoration:none;">N</a>
+        {% endif %}
+        <div class="nx-rail-divider" aria-hidden="true"></div>
+
+        {% if _rail_ctx == 'dashboard' %}
+        <button type="button" class="nx-rail-btn" data-tooltip="Galéria" aria-label="Galéria"
+            @click="showMainGallery()"
+            :class="{'active': !isRedGifsBrowseMode() && !oldGalleryMode && !filters.favoritesOnly && filters.batch === 'All' && !activeSmartPlaylistId && !activeSourceBoardId}"
+            :aria-current="(!isRedGifsBrowseMode() && !oldGalleryMode && !filters.favoritesOnly && filters.batch === 'All' && !activeSmartPlaylistId && !activeSourceBoardId) ? 'page' : null">
+            <span class="material-icons-round" aria-hidden="true">grid_view</span>
+        </button>
+
+        <button type="button" class="nx-rail-btn" data-tooltip="Obľúbené" aria-label="Obľúbené"
+            @click="externalBrowseMode = 'gallery'; filters.favoritesOnly = true; oldGalleryMode = false; activeSourceBoardId = null; loadVideos(true)"
+            :class="{'active': !isRedGifsBrowseMode() && filters.favoritesOnly}"
+            :aria-current="(!isRedGifsBrowseMode() && filters.favoritesOnly) ? 'page' : null">
+            <span class="material-icons-round" aria-hidden="true">favorite</span>
+        </button>
+
+        <button type="button" class="nx-rail-btn is-accent-cyan" data-tooltip="Local Vault (Ctrl+Shift+V)"
+            aria-label="Local Vault" @click="openVault()">
+            <span class="material-icons-round" aria-hidden="true">inventory_2</span>
+        </button>
+
+        <button type="button" class="nx-rail-btn is-accent-violet" data-tooltip="Creator Radar (Ctrl+Shift+R)"
+            aria-label="Creator Radar"
+            onclick="window.NexusCreatorRadar && window.NexusCreatorRadar.open()">
+            <span class="material-icons-round" aria-hidden="true">stars</span>
+        </button>
+        {% else %}
+        <a href="/" class="nx-rail-btn" data-tooltip="Galéria (Ctrl+Shift+V)" aria-label="Galéria"
+            style="text-decoration:none;">
+            <span class="material-icons-round" aria-hidden="true">grid_view</span>
+        </a>
+
+        <a href="/?view=favorites" class="nx-rail-btn" data-tooltip="Obľúbené" aria-label="Obľúbené"
+            style="text-decoration:none;">
+            <span class="material-icons-round" aria-hidden="true">favorite</span>
+        </a>
+
+        <a href="/vault" class="nx-rail-btn is-accent-cyan{% if _rail_ctx == 'vault' %} active{% endif %}"
+            data-tooltip="Local Vault (Ctrl+Shift+V)" aria-label="Local Vault"
+            {% if _rail_ctx == 'vault' %}aria-current="page"{% endif %} style="text-decoration:none;">
+            <span class="material-icons-round" aria-hidden="true">inventory_2</span>
+        </a>
+        {% endif %}
+
+        <a href="/forum" class="nx-rail-btn{% if _rail_ctx == 'forum' %} active{% endif %}"
+            data-tooltip="Forum Hub" aria-label="Forum Hub"
+            {% if _rail_ctx == 'forum' %}aria-current="page"{% endif %} style="text-decoration:none;">
+            <span class="material-icons-round" aria-hidden="true">forum</span>
+        </a>
+
+        <a href="/tester" class="nx-rail-btn{% if _rail_ctx == 'tester' %} active{% endif %}"
+            data-tooltip="Link Tester" aria-label="Link Tester"
+            {% if _rail_ctx == 'tester' %}aria-current="page"{% endif %} style="text-decoration:none;">
+            <span class="material-icons-round" aria-hidden="true">science</span>
+        </a>
+
+        <a href="/stats" class="nx-rail-btn{% if _rail_ctx == 'stats' %} active{% endif %}"
+            data-tooltip="Štatistiky" aria-label="Štatistiky"
+            {% if _rail_ctx == 'stats' %}aria-current="page"{% endif %} style="text-decoration:none;">
+            <span class="material-icons-round" aria-hidden="true">bar_chart</span>
+        </a>
+    </div>
+
+    <div class="nx-rail-bottom">
+        {% if _rail_ctx == 'dashboard' %}
+        <button type="button" class="nx-rail-btn" data-tooltip="Správcovské nástroje"
+            aria-label="Prepnúť správcovské nástroje" @click="toggleAdminTools()"
+            :class="{'active': showAdminTools}" :aria-pressed="showAdminTools.toString()">
+            <span class="material-icons-round" aria-hidden="true"
+                x-text="showAdminTools ? 'admin_panel_settings' : 'tune'"></span>
+        </button>
+
+        <button type="button" class="nx-rail-btn nx-skin-toggle" data-tooltip="Prepnúť štýl"
+            aria-label="Prepnúť štýl rozhrania" onclick="nxToggleSkin()">✦</button>
+
+        <button type="button" class="nx-rail-btn vg-tone-toggle" data-tooltip="Svetlý / tmavý motív"
+            aria-label="Prepnúť svetlý a tmavý motív" onclick="vgToggleTone()">☀</button>
+
+        <button type="button" class="nx-rail-btn" data-tooltip="Nastavenia"
+            aria-label="Otvoriť nastavenia" @click="showSettings = true">
+            <span class="material-icons-round" aria-hidden="true">settings</span>
+        </button>
+        {% else %}
+        <a href="/" class="nx-rail-btn" data-tooltip="Späť do Knižnice" aria-label="Späť do Knižnice"
+            style="text-decoration:none;">
+            <span class="material-icons-round" aria-hidden="true">arrow_back</span>
+        </a>
+        {% endif %}
+    </div>
+</aside>

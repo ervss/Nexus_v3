@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SxyPrn Discovery — Nexus</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/theme.css?v=nx_v2">
+    <link rel="stylesheet" href="/static/app_shell.css?v=nx_v2">
+    <script src="https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
+    <script src="/static/app_shell.js?v=nx_v2" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+    <style>
+        /* ── Unlock scroll (style.css sets body{overflow:hidden} for SPA) ── */
+        html, body {
+            overflow: auto !important;
+            height: auto !important;
+        }
+
+        :root {
+            --sxy-accent: #e91e8c;
+            --sxy-accent2: #9c27b0;
+            --sxy-glow: rgba(233, 30, 140, 0.35);
+        }
+
+        .sxy-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px 24px 100px;
+        }
+
+        /* ── Header ── */
+        .sxy-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .sxy-header h1 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--sxy-accent), var(--sxy-accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+        .sxy-header .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--sxy-accent), var(--sxy-accent2));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        /* ── Controls ── */
+        .sxy-controls {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .ctrl-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .ctrl-group label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: rgba(255,255,255,.45);
+            font-weight: 600;
+        }
+
+        .mode-pills {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .mode-pill {
+            padding: 7px 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: all .18s;
+        }
+        .mode-pill:hover { border-color: var(--sxy-accent); color: white; }
+        .mode-pill.active {
+            background: linear-gradient(135deg, var(--sxy-accent), var(--sxy-accent2));
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 2px 10px var(--sxy-glow);
+        }
+
+        .sxy-input {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(0,0,0,0.3);
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+            min-width: 220px;
+            transition: border-color .15s;
+        }
+        .sxy-input:focus { border-color: var(--sxy-accent); }
+        .sxy-input::placeholder { color: rgba(255,255,255,.3); }
+
+        .sxy-select {
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(0,0,0,0.4);
+            color: white;
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 9px 20px;
+            border-radius: 9px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: all .18s;
+        }
+        .btn-sxy {
+            background: linear-gradient(135deg, var(--sxy-accent), var(--sxy-accent2));
+            color: white;
+        }
+        .btn-sxy:hover { transform: translateY(-1px); box-shadow: 0 4px 14px var(--sxy-glow); }
+        .btn-sxy:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+        .btn-ghost {
+            background: rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.8);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        .btn-ghost:hover { background: rgba(255,255,255,0.12); color: white; }
+
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+        }
+        .btn-success:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(34,197,94,.3); }
+        .btn-success:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+        /* ── Quick Tags ── */
+        .quick-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .qtag {
+            padding: 4px 12px;
+            border-radius: 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(233,30,140,0.12);
+            border: 1px solid rgba(233,30,140,0.25);
+            color: rgba(255,255,255,0.75);
+            cursor: pointer;
+            transition: all .15s;
+        }
+        .qtag:hover {
+            background: rgba(233,30,140,0.25);
+            color: white;
+            border-color: var(--sxy-accent);
+        }
+
+        /* ── Stats bar ── */
+        .stats-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .stats-bar .stat-pill {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,.55);
+        }
+        .stats-bar .stat-pill strong { color: rgba(255,255,255,.9); }
+        .select-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        /* ── Host filter pills ── */
+        .host-filters {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .host-filter {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.73rem;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.55);
+            cursor: pointer;
+            transition: all .15s;
+        }
+        .host-filter:hover { color: white; border-color: rgba(255,255,255,.3); }
+        .host-filter.active {
+            background: rgba(233,30,140,0.18);
+            border-color: var(--sxy-accent);
+            color: var(--sxy-accent);
+        }
+
+        /* ── Gallery Grid (4 cols default ≈ 20% wider than 5-col) ── */
+        .sxy-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        @media (max-width: 1300px) { .sxy-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 900px)  { .sxy-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 560px)  { .sxy-grid { grid-template-columns: 1fr; } }
+
+        /* ── Card ── */
+        .sxy-card {
+            border-radius: 11px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            cursor: pointer;
+            transition: all .2s;
+            position: relative;
+        }
+        .sxy-card:hover {
+            border-color: var(--sxy-accent);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px var(--sxy-glow);
+        }
+        .sxy-card.selected {
+            border-color: var(--sxy-accent);
+            box-shadow: 0 0 0 2px var(--sxy-accent), 0 6px 20px var(--sxy-glow);
+        }
+
+        .card-thumb {
+            position: relative;
+            aspect-ratio: 16/9;
+            overflow: hidden;
+            background: #111;
+        }
+        .card-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .3s, opacity .3s;
+        }
+        .card-thumb video.hover-vid {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity .35s;
+            pointer-events: none;
+        }
+        .sxy-card:hover .card-thumb video.hover-vid { opacity: 1; }
+        .sxy-card:hover .card-thumb img { transform: scale(1.03); }
+
+        .card-duration {
+            position: absolute;
+            bottom: 6px;
+            right: 7px;
+            background: rgba(0,0,0,0.82);
+            color: white;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 5px;
+        }
+        .card-size {
+            position: absolute;
+            bottom: 6px;
+            left: 7px;
+            background: rgba(0,0,0,0.82);
+            color: rgba(255,255,255,0.92);
+            font-size: 0.71rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 5px;
+            letter-spacing: 0.01em;
+        }
+        .card-size.estimated {
+            color: rgba(255,255,255,0.75);
+        }
+
+        .card-select {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 2px solid rgba(255,255,255,0.6);
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .15s;
+        }
+        .card-quality {
+            position: absolute;
+            top: 8px;
+            left: 36px;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            background: rgba(0,0,0,0.78);
+            color: rgba(255,255,255,0.92);
+            border: 1px solid rgba(255,255,255,0.16);
+        }
+        .card-quality.q-4k   { background: rgba(234,179,8,0.88); color: #111; border-color: transparent; }
+        .card-quality.q-1080 { background: rgba(14,165,233,0.86); color: #fff; border-color: transparent; }
+        .card-quality.q-720  { background: rgba(34,197,94,0.82); color: #fff; border-color: transparent; }
+        .card-quality.q-sd   { background: rgba(100,116,139,0.8); color: rgba(255,255,255,0.92); border-color: transparent; }
+        .sxy-card.selected .card-select {
+            background: var(--sxy-accent);
+            border-color: var(--sxy-accent);
+        }
+        .card-select svg { width: 13px; height: 13px; stroke: white; display: none; }
+        .sxy-card.selected .card-select svg { display: block; }
+
+        .card-host-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 2px 7px;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: white;
+            text-transform: lowercase;
+        }
+        .host-vidara   { background: rgba(0,160,90,.85); }
+        .host-lulu     { background: rgba(80,100,220,.85); }
+        .host-bunkr    { background: rgba(200,120,0,.85); }
+        .host-stream   { background: rgba(140,60,200,.85); }
+        .host-dood     { background: rgba(200,60,60,.85); }
+        .host-other    { background: rgba(60,60,60,.75); }
+
+        .card-info {
+            padding: 11px 13px 12px;
+        }
+        .card-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 7px;
+        }
+        .card-title {
+            flex: 1;
+            min-width: 0;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: rgba(255,255,255,.92);
+            line-height: 1.38;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 0;
+        }
+        /* stream resolved dot (moved next to title) */
+        .stream-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+        .stream-dot.resolved { background: #22c55e; box-shadow: 0 0 5px #22c55e; }
+        .stream-dot.resolving { background: #f59e0b; animation: pulseDot .9s infinite alternate; }
+        .stream-dot.unresolved { background: rgba(255,255,255,.3); }
+        @keyframes pulseDot { from { opacity: .45; } to { opacity: 1; } }
+        .card-actions {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 7px;
+        }
+        .btn-play {
+            flex: 1;
+            padding: 5px 0;
+            border-radius: 7px;
+            border: none;
+            background: linear-gradient(135deg, var(--sxy-accent), var(--sxy-accent2));
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all .15s;
+        }
+        .btn-play:hover { opacity: .85; transform: translateY(-1px); }
+        .btn-play:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+        .btn-open {
+            padding: 5px 9px;
+            border-radius: 7px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,.7);
+            font-size: 0.72rem;
+            cursor: pointer;
+            transition: all .15s;
+        }
+        .btn-open:hover { border-color: rgba(255,255,255,.35); color: white; }
+        .card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+        }
+        .card-author {
+            font-size: 0.74rem;
+            color: var(--sxy-accent);
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 130px;
+        }
+        .card-hosts-mini {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .host-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ── Tags row ── */
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            margin-top: 6px;
+        }
+        .card-tag {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 5px;
+            background: rgba(233,30,140,0.13);
+            color: rgba(255,255,255,.6);
+        }
+
+        /* ── Play Modal ── */
+        .play-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.88);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .play-modal {
+            background: #0d0d14;
+            border: 1px solid rgba(233,30,140,0.4);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 900px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px var(--sxy-glow);
+        }
+        .play-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .play-modal-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: rgba(255,255,255,.9);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 750px;
+        }
+        .play-modal-close {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,.5);
+            font-size: 1.4rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 6px;
+            border-radius: 6px;
+            transition: all .15s;
+            flex-shrink: 0;
+        }
+        .play-modal-close:hover { color: white; background: rgba(255,255,255,.1); }
+        .play-modal-player {
+            position: relative;
+            aspect-ratio: 16/9;
+            background: #000;
+        }
+        .play-modal-player video {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .play-modal-player .play-loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,.55);
+            font-size: .85rem;
+            gap: 10px;
+        }
+        .play-modal-footer {
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .play-modal-host {
+            font-size: .75rem;
+            padding: 3px 10px;
+            border-radius: 10px;
+            background: rgba(233,30,140,0.15);
+            border: 1px solid rgba(233,30,140,0.3);
+            color: rgba(255,255,255,.7);
+        }
+        .play-modal-stream-url {
+            font-size: .7rem;
+            color: rgba(255,255,255,.3);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* ── Import panel ── */
+        .import-bar {
+            position: sticky;
+            bottom: 20px;
+            margin-top: 20px;
+            background: rgba(18,12,28,0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(233,30,140,0.4);
+            border-radius: 14px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            box-shadow: 0 8px 30px var(--sxy-glow);
+        }
+        .import-bar .import-count {
+            font-weight: 800;
+            font-size: 1.05rem;
+            background: linear-gradient(90deg, var(--sxy-accent), var(--sxy-accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .import-bar .resolve-toggle {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,.65);
+            cursor: pointer;
+        }
+        .import-bar .resolve-toggle input { cursor: pointer; }
+
+        /* ── Empty / loading states ── */
+        .state-box {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255,255,255,.35);
+        }
+        .state-box .state-icon { font-size: 3rem; margin-bottom: 12px; }
+        .state-box p { font-size: 1rem; }
+
+        .spinner {
+            width: 36px; height: 36px;
+            border: 3px solid rgba(233,30,140,.3);
+            border-top-color: var(--sxy-accent);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            margin: 0 auto 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 14px 22px;
+            border-radius: 11px;
+            background: rgba(18,12,28,0.96);
+            border: 1px solid rgba(233,30,140,0.5);
+            color: white;
+            font-size: .9rem;
+            font-weight: 600;
+            z-index: 9999;
+            box-shadow: 0 6px 24px var(--sxy-glow);
+            transition: opacity .3s;
+        }
+        .toast.hidden { opacity: 0; pointer-events: none; }
+    </style>
+<script src="/static/playback_activity.js?v=20260930_activity_3" defer></script>
+</head>
+<body>
+<div x-data="sxyPrnApp()" x-init="init()">
+
+    <!-- App Shell nav expects this wrapper -->
+    <div class="sxy-container">
+
+        <!-- Header -->
+        <div class="sxy-header">
+            <div class="logo">S</div>
+            <div>
+                <h1>SxyPrn Discovery</h1>
+                <div style="font-size:.78rem;color:rgba(255,255,255,.4);margin-top:2px;">Browse · Search · Import</div>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:8px;">
+                <a href="/" class="btn btn-ghost" style="font-size:.8rem;">← Dashboard</a>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="sxy-controls">
+            <!-- Mode selector -->
+            <div class="ctrl-group">
+                <label>Mode</label>
+                <div class="mode-pills">
+                    <template x-for="m in modes" :key="m.value">
+                        <button class="mode-pill"
+                                :class="{ active: mode === m.value }"
+                                @click="setMode(m.value)"
+                                x-text="m.label"></button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Query input (search/tag/profile) -->
+            <div class="ctrl-group" x-show="mode === 'search'">
+                <label>Search Query</label>
+                <input class="sxy-input" x-model="query" placeholder="e.g. blonde milf..." @keydown.enter="doSearch()" />
+            </div>
+            <div class="ctrl-group" x-show="mode === 'tag'">
+                <label>Tag / Category</label>
+                <input class="sxy-input" x-model="tagInput" placeholder="e.g. BigTits, Milf..." @keydown.enter="doSearch()" />
+            </div>
+            <div class="ctrl-group" x-show="mode === 'profile'">
+                <label>Profile ID</label>
+                <input class="sxy-input" x-model="profileId" placeholder="e.g. 6a0d125a875d2" @keydown.enter="doSearch()" style="min-width:200px;" />
+            </div>
+
+            <!-- Pages -->
+            <div class="ctrl-group">
+                <label>Pages</label>
+                <select class="sxy-select" x-model.number="pages">
+                    <option value="1">1 page (~30)</option>
+                    <option value="2">2 pages (~60)</option>
+                    <option value="3">3 pages (~90)</option>
+                    <option value="5">5 pages (~150)</option>
+                </select>
+            </div>
+
+            <!-- Fetch button -->
+            <div class="ctrl-group" style="justify-content:flex-end;">
+                <label>&nbsp;</label>
+                <button class="btn btn-sxy" @click="doSearch()" :disabled="loading">
+                    <span x-show="!loading">Search</span>
+                    <span x-show="loading">Loading…</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Tags -->
+        <div class="quick-tags">
+            <span style="font-size:.72rem;color:rgba(255,255,255,.35);font-weight:600;align-self:center;">Quick tags:</span>
+            <template x-for="qt in quickTags" :key="qt">
+                <button class="qtag" @click="setQuickTag(qt)" x-text="'#' + qt"></button>
+            </template>
+        </div>
+
+        <!-- Stats + host filter + select actions -->
+        <div class="stats-bar" x-show="results.length > 0">
+            <span class="stat-pill">
+                <strong x-text="filteredResults.length"></strong> posts shown
+                (<strong x-text="results.length"></strong> total)
+            </span>
+            <span class="stat-pill" x-show="Object.keys(selectedIds).length > 0">
+                <strong x-text="Object.keys(selectedIds).length"></strong> selected
+            </span>
+            <span class="stat-pill" x-show="enriching">
+                Loading size/quality <strong x-text="enrichProgress"></strong>…
+            </span>
+
+            <!-- Host filter -->
+            <div class="host-filters">
+                <span style="font-size:.72rem;color:rgba(255,255,255,.3);">Host:</span>
+                <button class="host-filter" :class="{ active: hostFilter === '' }" @click="hostFilter = ''">All</button>
+                <template x-for="h in availableHosts" :key="h">
+                    <button class="host-filter" :class="{ active: hostFilter === h }" @click="hostFilter = h" x-text="h"></button>
+                </template>
+            </div>
+
+            <div class="select-actions">
+                <button class="btn btn-sxy"
+                        style="font-size:.78rem;padding:6px 12px;"
+                        @click="openSplitScreen(Object.keys(selectedIds).length ? 'open' : 'picker')"
+                        title="Otvoriť označené (alebo všetky viditeľné) videá v Split-Screene">
+                    ⊞ <span x-text="Object.keys(selectedIds).length ? `Split-Screen (${Object.keys(selectedIds).length})` : 'Split-Screen'"></span>
+                </button>
+                <button class="btn btn-ghost" style="font-size:.78rem;padding:6px 12px;" @click="selectAll()">Select All</button>
+                <button class="btn btn-ghost" style="font-size:.78rem;padding:6px 12px;" @click="clearSelection()">Clear</button>
+            </div>
+        </div>
+
+        <!-- Gallery Grid -->
+        <div class="sxy-grid">
+            <!-- Loading -->
+            <div class="state-box" x-show="loading">
+                <div class="spinner"></div>
+                <p>Fetching posts…</p>
+            </div>
+
+            <!-- Empty -->
+            <div class="state-box" x-show="!loading && results.length === 0 && searched">
+                <div class="state-icon">🔍</div>
+                <p>No posts found. Try a different query.</p>
+            </div>
+
+            <!-- Welcome -->
+            <div class="state-box" x-show="!loading && !searched">
+                <div class="state-icon">✦</div>
+                <p>Select a mode and click <strong>Search</strong>, or pick a quick tag.</p>
+            </div>
+
+            <!-- Cards -->
+            <template x-for="post in filteredResults" :key="post.post_id">
+                <div class="sxy-card" :class="{ selected: selectedIds[post.post_id] }"
+                     :data-nexus-split-watch="post.post_url"
+                     :data-nexus-split-iframe="_toEmbedUrl(post.stream_url) || ''"
+                     :data-nexus-video-meta="cardSplitMeta(post)"
+                     @click="toggleSelect(post)">
+
+                    <!-- Thumbnail + hover preview -->
+                    <div class="card-thumb">
+                        <img :src="post.thumbnail || '/static/placeholder.jpg'"
+                             loading="lazy"
+                             onerror="this.src='/static/placeholder.jpg'" />
+                        <video x-show="post.vidthumb"
+                               class="hover-vid"
+                               :src="post.vidthumb"
+                               loop muted playsinline preload="none"
+                               @mouseenter.prevent="$el.play()"
+                               @mouseleave.prevent="$el.pause(); $el.currentTime=0"></video>
+
+                        <!-- Bottom-right: Duration badge -->
+                        <div class="card-duration" x-show="post.duration" x-text="post.duration"></div>
+
+                        <!-- Bottom-left: File size badge -->
+                        <div class="card-size"
+                             :class="{ estimated: post.size_estimated }"
+                             x-show="post.size_label"
+                             :title="post.best_host ? ('Najlepší zdroj: ' + post.best_host + (post.quality ? ' · ' + post.quality : '') + (post.verified_sources ? ' · TOP ' + post.verified_sources + '/' + post.total_sources + ' ✓' : '')) : (post.size_estimated ? 'Odhad z bitratu (' + post.bitrate_kbps + ' kb/s)' : 'Veľkosť súboru')"
+                             x-text="(post.size_estimated ? '~' : '') + post.size_label"></div>
+
+                        <!-- Top-left: Selection checkbox + Quality / Resolution badge -->
+                        <div class="card-select">
+                            <svg viewBox="0 0 14 14" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="2,7 6,11 12,3"/>
+                            </svg>
+                        </div>
+                        <div class="card-quality"
+                             :class="qualityBadgeClass(post)"
+                             x-show="post.quality"
+                             x-text="post.quality"></div>
+
+                        <!-- Top-right: Best host badge -->
+                        <div class="card-host-badge" :class="hostBadgeClass(post.best_host || (post.hosts && post.hosts[0]))"
+                             :title="hostTooltip(post)"
+                             x-text="shortHost(post.best_host || (post.hosts && post.hosts[0]) || '') + (post.verified_sources ? ' · TOP ' + post.verified_sources + '/' + post.total_sources : '')"
+                             x-show="post.best_host || (post.hosts && post.hosts.length)"></div>
+                    </div>
+
+                    <!-- Info -->
+                    <div class="card-info">
+                        <div class="card-title-row">
+                            <div class="card-title" x-text="post.title || '(no title)'"></div>
+                            <span class="stream-dot"
+                                  :class="post.stream_url ? 'resolved' : (post._resolving ? 'resolving' : 'unresolved')"
+                                  :title="post.stream_url ? ('Najlepší stream (' + (post.best_host || '') + '): ' + post.stream_url) : (post._resolving ? 'Overujem zdroje a vyberám najvyššiu kvalitu…' : 'Stream sa dorieši pri importe')"></span>
+                        </div>
+                        <!-- Action buttons -->
+                        <div class="card-actions" @click.stop>
+                            <button class="btn-play"
+                                    @click.stop="playPost(post)"
+                                    :disabled="post._playing">
+                                <svg width="10" height="10" viewBox="0 0 10 10" fill="white"><polygon points="2,1 9,5 2,9"/></svg>
+                                <span x-text="post._playing ? 'Loading…' : 'Play'"></span>
+                            </button>
+                            <a class="btn-open" :href="post.post_url" target="_blank" @click.stop title="Open on SxyPrn">↗</a>
+                        </div>
+                        <div class="card-meta">
+                            <div class="card-author" x-text="post.author"></div>
+                            <div class="card-hosts-mini" @click.stop>
+                                <template x-for="s in (post.streams && post.streams.length ? post.streams.slice(0, 4) : (post.hosts || []).slice(0, 4).map(h => ({ host: h })))" :key="s.url || s.host">
+                                    <div class="host-dot"
+                                         :style="'background:' + hostColor(s.host) + (s.host === post.best_host ? ';box-shadow:0 0 0 2px #fff;transform:scale(1.18);' : ';opacity:0.75;') + ';cursor:pointer;'"
+                                         :title="s.host + (s.quality ? ' · ' + s.quality : '') + (s.size_label ? ' · ~' + s.size_label : '') + (s.host === post.best_host ? ' (Aktívny TOP zdroj)' : ' — kliknutím prepnúť')"
+                                         @click.stop="selectPostSource(post, s)"></div>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="card-tags" x-show="(post.hashtags || []).length">
+                            <template x-for="t in (post.hashtags || []).slice(0, 4)" :key="t">
+                                <span class="card-tag" x-text="'#' + t"></span>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Sticky Import Bar -->
+        <div class="import-bar" x-show="Object.keys(selectedIds).length > 0">
+            <span class="import-count" x-text="Object.keys(selectedIds).length + ' selected'"></span>
+
+            <span style="font-size:0.8rem;color:rgba(255,255,255,.55);">
+                Streams &amp; metadata resolve automatically on import
+            </span>
+
+            <div style="margin-left:auto;display:flex;gap:10px;">
+                <button class="btn btn-sxy" @click="openSplitScreen('open')" title="Prehrať označené videá v Split-Screene (max 12)">
+                    ⊞ Split-Screen (<span x-text="Object.keys(selectedIds).length"></span>)
+                </button>
+                <button class="btn btn-success" @click="importSelected()" :disabled="importing">
+                    <span x-show="!importing">Import <span x-text="Object.keys(selectedIds).length"></span> Posts</span>
+                    <span x-show="importing">Importing…</span>
+                </button>
+            </div>
+        </div>
+
+    </div><!-- /.sxy-container -->
+
+    <!-- ── Play Modal ── -->
+    <div class="play-modal-backdrop" x-show="player.open" @click.self="closePlayer()" @keydown.escape.window="closePlayer()" x-transition>
+        <div class="play-modal">
+            <div class="play-modal-header">
+                <div class="play-modal-title" x-text="player.title || 'Playing…'"></div>
+                <button class="play-modal-close" @click="closePlayer()">×</button>
+            </div>
+            <div class="play-modal-player">
+                <!-- Loading state -->
+                <div class="play-loading" x-show="player.loading">
+                    <div class="spinner"></div>
+                    <span>Extracting stream…</span>
+                    <span style="font-size:.75rem;color:rgba(255,255,255,.35)" x-text="player.extractingHost"></span>
+                </div>
+                <!-- Error state -->
+                <div class="play-loading" x-show="!player.loading && player.error">
+                    <span style="font-size:2rem;">⚠</span>
+                    <span style="color:#ef4444;" x-text="player.error"></span>
+                    <a :href="player.sourceUrl" target="_blank" style="color:var(--sxy-accent);font-size:.8rem;">Open on site ↗</a>
+                </div>
+                <!-- iframe embed player (no CORS) -->
+                <iframe x-show="!player.loading && !player.error && player.embedUrl"
+                        :src="player.embedUrl"
+                        allowfullscreen allow="autoplay; encrypted-media"
+                        referrerpolicy="no-referrer"
+                        style="width:100%;height:100%;border:none;display:block;background:#000;"></iframe>
+                <!-- Direct MP4 fallback -->
+                <video x-show="!player.loading && !player.error && player.streamUrl && !player.embedUrl"
+                       x-ref="videoEl"
+                       controls
+                       style="width:100%;height:100%;display:block;background:#000;"
+                       @error="player.error = 'Playback failed — try opening on site'"></video>
+            </div>
+            <div class="play-modal-footer" x-show="!player.loading">
+                <span class="play-modal-host" x-text="player.extractingHost || player.bestHost"></span>
+                <span class="play-modal-stream-url"
+                      x-text="player.embedUrl || player.streamUrl"
+                      :title="player.embedUrl || player.streamUrl"></span>
+                <a x-show="player.sourceUrl" :href="player.sourceUrl" target="_blank"
+                   style="font-size:.75rem;color:var(--sxy-accent);text-decoration:none;font-weight:700;flex-shrink:0;">Open ↗</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" :class="{ hidden: !toast.show }" x-text="toast.msg"></div>
+
+</div><!-- /x-data -->
+
+<script>
+function sxyPrnApp() {
+    return {
+        mode: 'latest',
+        query: '',
+        tagInput: '',
+        profileId: '',
+        pages: 2,
+        loading: false,
+        searched: false,
+        results: [],
+        selectedIds: {},
+        hostFilter: '',
+        enriching: false,
+        enrichProgress: '',
+        _searchGen: 0,
+        importing: false,
+        toast: { show: false, msg: '' },
+        player: {
+            open: false,
+            loading: false,
+            error: '',
+            streamUrl: '',   // direct MP4 (if available)
+            embedUrl: '',    // iframe embed URL (primary)
+            title: '',
+            sourceUrl: '',
+            bestHost: '',
+            extractingHost: '',
+        },
+
+        modes: [
+            { value: 'latest',   label: 'Latest' },
+            { value: 'trending', label: 'Trending' },
+            { value: 'search',   label: 'Search' },
+            { value: 'tag',      label: 'Tag' },
+            { value: 'profile',  label: 'Profile' },
+        ],
+
+        quickTags: [
+            'BigTits','Milf','Latina','Blonde','Teen','Hardcore','Lesbian',
+            'Doggystyle','Anal','Creampie','Amateur','Mature','Handjob',
+        ],
+
+        init() {
+            // Auto-load latest on open
+            this.doSearch();
+        },
+
+        setMode(m) {
+            this._searchGen++;
+            this.enriching = false;
+            this.mode = m;
+            this.results = [];
+            this.searched = false;
+            this.clearSelection();
+            this.hostFilter = '';
+            if (m === 'latest' || m === 'trending') {
+                this.doSearch();
+            }
+        },
+
+        setQuickTag(tag) {
+            this.mode = 'tag';
+            this.tagInput = tag;
+            this.doSearch();
+        },
+
+        async doSearch() {
+            const gen = ++this._searchGen;
+            this.loading = true;
+            this.enriching = false;
+            this.enrichProgress = '';
+            this.searched = false;
+            this.results = [];
+            this.clearSelection();
+            this.hostFilter = '';
+
+            const payload = {
+                mode: this.mode,
+                query: this.query,
+                tag: this.tagInput,
+                profile_id: this.profileId,
+                pages: this.pages,
+                resolve_streams: false,
+            };
+
+            try {
+                const resp = await fetch('/api/v1/import/sxyprn_discovery', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const data = await resp.json();
+                if (gen !== this._searchGen) return;
+                if (data.status === 'success') {
+                    this.results = (data.results || []).map(r => ({ ...r, _resolving: false, _playing: false }));
+                    this.showToast(`Loaded ${this.results.length} posts`);
+                    this.loading = false;
+                    this.searched = true;
+                    this._enrichCards(gen);
+                    return;
+                } else {
+                    this.showToast('Error: ' + data.message, 4000);
+                }
+            } catch (e) {
+                this.showToast('Network error: ' + e, 4000);
+            } finally {
+                this.loading = false;
+                this.searched = true;
+            }
+        },
+
+        get filteredResults() {
+            if (!this.hostFilter) return this.results;
+            return this.results.filter(r =>
+                (r.hosts || []).some(h => h === this.hostFilter) ||
+                (r.best_host || '').includes(this.hostFilter)
+            );
+        },
+
+        get availableHosts() {
+            const s = new Set();
+            for (const r of this.results) {
+                for (const h of (r.hosts || [])) s.add(h);
+            }
+            return [...s].sort();
+        },
+
+        toggleSelect(post) {
+            const id = post.post_id;
+            if (this.selectedIds[id]) {
+                delete this.selectedIds[id];
+            } else {
+                this.selectedIds[id] = true;
+            }
+            this.selectedIds = { ...this.selectedIds };
+        },
+
+        selectAll() {
+            for (const r of this.filteredResults) this.selectedIds[r.post_id] = true;
+            this.selectedIds = { ...this.selectedIds };
+        },
+
+        clearSelection() {
+            this.selectedIds = {};
+        },
+
+        _applyEnrichItem(post, item) {
+            if (!post || !item) return;
+            if (item.quality) post.quality = item.quality;
+            if (item.height) post.height = item.height;
+            if (item.bitrate_kbps) post.bitrate_kbps = item.bitrate_kbps;
+            if (item.file_size_mb > 0) {
+                post.file_size_mb = item.file_size_mb;
+                post.size_label = item.size_label || post.size_label;
+                post.size_estimated = !!item.size_estimated;
+            }
+            if (item.duration && !post.duration) post.duration = item.duration;
+            if (item.duration_sec && !post.duration_sec) post.duration_sec = item.duration_sec;
+            if (item.best) post.stream_url = item.best;
+            if (item.direct_stream_url) post.direct_stream_url = item.direct_stream_url;
+            if (item.streams && item.streams.length) post.streams = item.streams;
+            if (item.ext_urls && item.ext_urls.length) post.ext_urls = item.ext_urls;
+            if (item.hosts && item.hosts.length) post.hosts = item.hosts;
+            if (item.best_host) post.best_host = item.best_host;
+            if (typeof item.verified_sources === 'number') post.verified_sources = item.verified_sources;
+            if (typeof item.total_sources === 'number') post.total_sources = item.total_sources;
+            post.enriched = true;
+        },
+
+        selectPostSource(post, sourceObj) {
+            if (!post || !sourceObj || !sourceObj.host) return;
+            post.best_host = sourceObj.host;
+            if (sourceObj.url) post.stream_url = sourceObj.url;
+            if (sourceObj.stream_url) post.direct_stream_url = sourceObj.stream_url;
+            if (sourceObj.quality) post.quality = sourceObj.quality;
+            if (sourceObj.height) post.height = sourceObj.height;
+            if (sourceObj.file_size_mb > 0) {
+                post.file_size_mb = sourceObj.file_size_mb;
+                post.size_label = sourceObj.size_label || post.size_label;
+            }
+            if (Array.isArray(post.ext_urls) && sourceObj.url) {
+                post.ext_urls = [sourceObj.url, ...post.ext_urls.filter(u => u !== sourceObj.url)];
+            }
+            this.showToast(`Zvolený zdroj: ${sourceObj.host}${sourceObj.quality ? ' (' + sourceObj.quality + ')' : ''}${sourceObj.size_label ? ' · ~' + sourceObj.size_label : ''}`);
+        },
+
+        hostTooltip(post) {
+            if (!post) return '';
+            const streams = post.streams || [];
+            if (!streams.length) return post.best_host || '';
+            return streams.map((s, i) =>
+                `P0${i + 1} ${s.host}: ${s.quality || '?'} · ${s.size_label ? '~' + s.size_label : '?'} (${s.status === 'verified' ? 'overený ✓' : 'záloha'})`
+            ).join('\n');
+        },
+
+        async _enrichBatch(batchPosts) {
+            if (!batchPosts.length) return;
+            for (const p of batchPosts) p._resolving = true;
+            try {
+                const resp = await fetch('/api/v1/import/sxyprn_discovery/enrich', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        posts: batchPosts.map(p => ({ post_id: p.post_id, post_url: p.post_url })),
+                    }),
+                });
+                const data = await resp.json();
+                if (data.status === 'success' && Array.isArray(data.items)) {
+                    const byId = new Map(data.items.map(it => [it.post_id, it]));
+                    for (const p of batchPosts) {
+                        const item = byId.get(p.post_id);
+                        if (item) this._applyEnrichItem(p, item);
+                    }
+                }
+            } catch (e) {
+                console.warn('enrich batch failed', e);
+            } finally {
+                for (const p of batchPosts) p._resolving = false;
+            }
+        },
+
+        async _enrichCards(gen) {
+            const targets = this.results.filter(p => !p.enriched);
+            if (!targets.length) return;
+            this.enriching = true;
+            const batchSize = 8;
+            let done = 0;
+            this.enrichProgress = `0/${targets.length}`;
+
+            for (let i = 0; i < targets.length; i += batchSize) {
+                if (gen !== this._searchGen) return;
+                const batch = targets.slice(i, i + batchSize);
+                await this._enrichBatch(batch);
+                if (gen !== this._searchGen) return;
+                done += batch.length;
+                this.enrichProgress = `${done}/${targets.length}`;
+            }
+            if (gen === this._searchGen) {
+                this.enriching = false;
+            }
+        },
+
+        async importSelected() {
+            const posts = this.results.filter(r => this.selectedIds[r.post_id]);
+            if (!posts.length) return;
+
+            this.importing = true;
+            try {
+                // Ensure any selected cards not yet enriched get probed for best stream & exact metadata automatically
+                const unenriched = posts.filter(p => !p.enriched);
+                for (let i = 0; i < unenriched.length; i += 8) {
+                    await this._enrichBatch(unenriched.slice(i, i + 8));
+                }
+
+                const payload = posts.map(p => ({
+                    post_url: p.post_url,
+                    stream_url: p.direct_stream_url || p.stream_url || '',
+                    ext_urls: Array.isArray(p.ext_urls) ? p.ext_urls : [],
+                    streams: Array.isArray(p.streams) ? p.streams : [],
+                    title: p.title,
+                    thumbnail: p.thumbnail,
+                    duration_sec: p.duration_sec || 0,
+                    height: p.height || 0,
+                    quality: p.quality || '',
+                    file_size_mb: p.file_size_mb || 0,
+                }));
+
+                const resp = await fetch('/api/v1/import/sxyprn_discovery/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ selected: payload, batch_name: null }),
+                });
+                const data = await resp.json();
+                if (data.status === 'success') {
+                    this.showToast(`Imported ${data.count} posts to library!`, 5000);
+                    this.clearSelection();
+                } else {
+                    this.showToast('Import error: ' + data.message, 5000);
+                }
+            } catch (e) {
+                this.showToast('Network error: ' + e, 5000);
+            } finally {
+                this.importing = false;
+            }
+        },
+
+        cardSplitMeta(post) {
+            try {
+                return JSON.stringify({
+                    title: post.title || '',
+                    duration: Number(post.duration_sec || 0) || post.duration || 0,
+                    sizeMb: Number(post.file_size_mb || 0) || 0,
+                    sizeEstimated: Boolean(post.size_estimated),
+                    quality: post.quality || '',
+                    height: Number(post.height || 0) || 0,
+                    mirrorUrl: post.stream_url || '',
+                    embedUrl: this._toEmbedUrl(post.stream_url) || '',
+                    extUrls: Array.isArray(post.ext_urls) ? post.ext_urls : [],
+                });
+            } catch {
+                return '{}';
+            }
+        },
+
+        openSplitScreen(mode = 'open') {
+            const selected = this.results.filter(r => this.selectedIds[r.post_id]);
+            const source = selected.length ? selected : this.filteredResults;
+            if (!source.length) {
+                this.showToast('Najprv vyhľadaj alebo označ aspoň jedno video.', 3500);
+                return;
+            }
+            const payload = source.map(p => ({
+                id: p.post_id,
+                watchUrl: p.post_url,
+                url: p.post_url,
+                title: p.title || 'SxyPrn Video',
+                poster: p.thumbnail || '',
+                duration: Number(p.duration_sec || 0) || 0,
+                sizeBytes: Number(p.file_size_mb || 0) > 0 ? Math.round(Number(p.file_size_mb) * 1024 * 1024) : 0,
+                sizeEstimated: Boolean(p.size_estimated),
+                quality: p.quality || '',
+                mirrorUrl: p.stream_url || '',
+                embedUrl: this._toEmbedUrl(p.stream_url) || '',
+                extUrls: Array.isArray(p.ext_urls) ? p.ext_urls : [],
+            }));
+
+            const ready = document.documentElement.dataset.nexusSplitReady === '1' || Boolean(document.getElementById('nuss-fab'));
+            if (!ready) {
+                this.showToast('Nie je aktívny userscript "Nexus Universal Split-Screen" (Tampermonkey) pre túto stránku.', 5000);
+                return;
+            }
+            const eventName = mode === 'picker' ? 'nexus-sxyprn-split-picker' : 'nexus-sxyprn-split-open';
+            document.dispatchEvent(new CustomEvent(eventName, { detail: JSON.stringify(payload) }));
+        },
+
+        qualityBadgeClass(post) {
+            const h = Number(post?.height || 0);
+            const q = String(post?.quality || '').toUpperCase();
+            if (h >= 2160 || q.includes('4K')) return 'q-4k';
+            if (h >= 1080 || q.includes('1080')) return 'q-1080';
+            if (h >= 720 || q === 'HD') return 'q-720';
+            if (h > 0 || q === 'SD') return 'q-sd';
+            return '';
+        },
+
+        shortHost(host) {
+            if (!host) return '';
+            if (host.includes('vidara')) return 'vidara';
+            if (host.includes('lulu')) return 'lulu';
+            if (host.includes('bunkr')) return 'bunkr';
+            if (host.includes('streamtape')) return 'stape';
+            if (host.includes('dood')) return 'dood';
+            return host.split('.')[0].slice(0, 6);
+        },
+
+        hostBadgeClass(host) {
+            if (!host) return 'host-other';
+            if (host.includes('vidara')) return 'host-vidara';
+            if (host.includes('lulu')) return 'host-lulu';
+            if (host.includes('bunkr')) return 'host-bunkr';
+            if (host.includes('streamtape')) return 'host-stream';
+            if (host.includes('dood')) return 'host-dood';
+            return 'host-other';
+        },
+
+        hostColor(host) {
+            if (!host) return '#555';
+            if (host.includes('vidara')) return '#00a05a';
+            if (host.includes('lulu')) return '#5064dc';
+            if (host.includes('bunkr')) return '#c87800';
+            if (host.includes('streamtape')) return '#8c3cc8';
+            if (host.includes('dood')) return '#c83c3c';
+            return '#666';
+        },
+
+        // Convert a video host page URL to an embeddable iframe src
+        _toEmbedUrl(url) {
+            if (!url) return null;
+            try {
+                const u = new URL(url);
+                const h = u.hostname.replace('www.', '');
+                const parts = u.pathname.split('/').filter(Boolean);
+                const code = parts[parts.length - 1];
+
+                // lulustream / luluvid / luluvdo / luluvids / lplaygo
+                if (h.includes('lulu') || h.includes('luluvid') || h.includes('lplaygo')) {
+                    // normalize to lulustream.com/e/CODE (redirects to active player domain)
+                    const c = parts.find(p => p !== 'e' && p !== 'd' && p.length > 4) || code;
+                    return `https://lulustream.com/e/${c}`;
+                }
+                // vidara.so  format: /v/CODE  or  /e/CODE
+                if (h.includes('vidara')) {
+                    const c = parts.find(p => p !== 'v' && p !== 'e' && p.length > 4) || code;
+                    return `https://vidara.so/e/${c}`;
+                }
+                // streamtape.com/v/CODE/title → streamtape.com/e/CODE
+                if (h.includes('streamtape')) {
+                    const c = parts[1] || code;
+                    return `https://streamtape.com/e/${c}`;
+                }
+                // doodstream / dood.watch
+                if (h.includes('dood')) {
+                    const c = parts[1] || code;
+                    return `https://doodstream.com/e/${c}`;
+                }
+                // voe.sx
+                if (h.includes('voe')) {
+                    return `https://voe.sx/e/${code}`;
+                }
+                // playmogo
+                if (h.includes('playmogo')) {
+                    return url.replace('/v/', '/e/');
+                }
+            } catch {}
+            return null;
+        },
+
+        async playPost(post) {
+            this.player = {
+                open: true,
+                loading: true,
+                error: '',
+                streamUrl: '',
+                embedUrl: '',
+                title: post.title || 'Playing…',
+                sourceUrl: post.post_url,
+                bestHost: post.best_host || '',
+                extractingHost: '',
+            };
+
+            // Ensure post is enriched/probed first so we always play the highest quality / largest source
+            if (!post.enriched) {
+                await this._enrichBatch([post]);
+            }
+
+            let urls = (post.ext_urls || []);
+            if (post.stream_url) {
+                urls = [post.stream_url, ...urls.filter(u => u !== post.stream_url)];
+            }
+
+            // If no URLs in listing, fetch from post page
+            if (!urls.length) {
+                try {
+                    const r = await fetch('/api/v1/import/sxyprn_discovery/resolve_stream', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ post_id: post.post_id }),
+                    });
+                    const d = await r.json();
+                    if (d.streams && d.streams.length) {
+                        urls = d.streams.map(s => s.url);
+                        post.ext_urls = urls;
+                        post.streams = d.streams;
+                    }
+                } catch {}
+            }
+
+            if (!urls.length) {
+                this.player.loading = false;
+                this.player.error = 'No video URLs found for this post';
+                return;
+            }
+
+            // Try to get embed URL from first available host (no server call needed)
+            for (const url of urls) {
+                const embed = this._toEmbedUrl(url);
+                if (embed) {
+                    this.player.embedUrl = embed;
+                    this.player.bestHost = this._hostname(url);
+                    this.player.extractingHost = this._hostname(url);
+                    this.player.loading = false;
+                    post._playing = false;
+                    return;
+                }
+            }
+
+            // Fallback: try extract-stream for direct MP4
+            post._playing = true;
+            for (const url of urls) {
+                this.player.extractingHost = this._hostname(url);
+                try {
+                    const resp = await fetch('/api/v1/tools/extract-stream', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url }),
+                    });
+                    const data = await resp.json();
+                    if (data.status === 'ok' && data.stream_url) {
+                        const su = data.raw_stream_url || data.stream_url;
+                        if (su.includes('.mp4') || su.includes('get_file')) {
+                            this.player.streamUrl = su;
+                            this.player.bestHost = data.extractor || this._hostname(url);
+                            this.player.loading = false;
+                            post._playing = false;
+                            this._attachPlayer(su);
+                            return;
+                        }
+                    }
+                } catch {}
+            }
+
+            this.player.loading = false;
+            this.player.error = 'No playable stream found. Try opening on site.';
+            post._playing = false;
+        },
+
+        _attachPlayer(streamUrl) {
+            this.$nextTick(() => {
+                const v = this.$refs.videoEl;
+                if (!v) return;
+                if (this._hls) { this._hls.destroy(); this._hls = null; }
+
+                // Proxied HLS or raw m3u8
+                const isHls = streamUrl.includes('stream-proxy') || streamUrl.includes('.m3u8');
+                if (isHls && typeof Hls !== 'undefined' && Hls.isSupported()) {
+                    const hls = new Hls({
+                        enableWorker: false,
+                        xhrSetup: (xhr) => { xhr.withCredentials = false; },
+                    });
+                    hls.loadSource(streamUrl);
+                    hls.attachMedia(v);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        v.play().catch(() => {});
+                    });
+                    hls.on(Hls.Events.ERROR, (_e, data) => {
+                        if (data.fatal) {
+                            this.player.error = 'Playback error: ' + (data.details || data.type);
+                        }
+                    });
+                    this._hls = hls;
+                } else {
+                    v.src = streamUrl;
+                    v.play().catch(() => {});
+                }
+            });
+        },
+
+        closePlayer() {
+            this.player.open = false;
+            this.player.embedUrl = '';
+            this.player.streamUrl = '';
+            this.player.error = '';
+            if (this._hls) { this._hls.destroy(); this._hls = null; }
+            const v = this.$refs.videoEl;
+            if (v) { v.pause(); v.src = ''; }
+        },
+
+        _hostname(url) {
+            try { return new URL(url).hostname.replace('www.', ''); } catch { return url; }
+        },
+
+        showToast(msg, ms = 2800) {
+            this.toast.msg = msg;
+            this.toast.show = true;
+            setTimeout(() => { this.toast.show = false; }, ms);
+        },
+    };
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,594 @@
+    <!-- ═══════════════════ DISCOVERY HUB ═══════════════════ -->
+
+    <template x-if="discoveryHubOpen">
+    <div class="dhub-overlay nx-lazy-modal" @click.self="discoveryHubClose()" role="dialog" aria-modal="true" aria-label="Discovery Hub">
+        <div class="dhub-container">
+            <div class="dhub-body" x-ref="discoveryHubBody" @scroll.passive="discoveryHubVirtualSchedule()" @resize.window="discoveryHubVirtualSchedule()" style="min-height:0;padding:0;">
+
+            <!-- Header -->
+            <div class="dhub-header">
+                <div class="dhub-logo">
+                    <span class="material-icons-round">rocket_launch</span>
+                    Discovery <span class="dhub-logo-accent" style="margin-left:5px;">Hub</span>
+                </div>
+                <div class="dhub-search">
+                    <span class="material-icons-round">search</span>
+                    <input type="text" x-model="discoveryHubQuery"
+                        :placeholder="discoveryHubMode === 'files' ? 'Hľadaj videá a súbory...' : 'Hľadaj albumy… alebo vlož bunkr album URL (https://bunkr.site/a/…)'"
+                        @keydown.enter.prevent="discoveryHubSearch()" autocomplete="off">
+                </div>
+                <button class="dhub-header-btn dhub-header-btn-search" @click="discoveryHubSearch()" :disabled="!discoveryHubQuery.trim()">
+                    <span class="material-icons-round" :class="discoveryHubLoading ? 'dhub-spin' : ''"
+                        x-text="discoveryHubLoading ? 'progress_activity' : 'travel_explore'"></span>
+                    <span x-text="discoveryHubLoading ? 'Hľadám...' : 'Hľadať'"></span>
+                </button>
+                <button class="dhub-header-btn dhub-header-btn-import" x-show="discoveryHubResults.length > 0"
+                    @click="discoveryHubImportAll()"
+                    :disabled="dhubImportProgress.active || discoveryHubVisibleResults().filter(r=>!r._imported).length === 0">
+                    <span class="material-icons-round">download</span>
+                    Import všetko (<span x-text="discoveryHubVisibleResults().filter(r=>!r._imported).length"></span>)
+                </button>
+                <button class="dhub-header-btn dhub-header-btn-enrich" x-show="discoveryHubResults.length > 0"
+                    @click="discoveryHubFetchMeta(discoveryHubSelectedCount() > 0 ? 'selected' : 'all')"
+                    :disabled="discoveryHubBatchEnriching"
+                    :title="discoveryHubSelectedCount() > 0 ? 'Načítať chýbajúce metadáta pre vybrané položky' : 'Načítať chýbajúce metadáta pre všetky zobrazené položky'">
+                    <span class="material-icons-round" :class="discoveryHubBatchEnriching ? 'dhub-spin' : ''"
+                        x-text="discoveryHubBatchEnriching ? 'progress_activity' : 'refresh'"></span>
+                    <span x-text="discoveryHubBatchEnriching ? `Načítavam meta (${discoveryHubBatchEnrichDone}/${discoveryHubBatchEnrichTotal})...` : (discoveryHubSelectedCount() > 0 ? `Načítať meta vybraných (${discoveryHubSelectedMissingCount()})` : (discoveryHubAllMissingCount() > 0 ? `Načítať chýbajúce meta (${discoveryHubAllMissingCount()})` : 'Všetky meta načítané'))"></span>
+                </button>
+                <button class="dhub-header-btn dhub-header-btn-history" @click="combinedHistoryToggle()"
+                    :class="combinedHistory.open ? 'active' : ''" title="Uložené vyhľadávania, spoločné albumy a fetchnuté karty">
+                    <span class="material-icons-round">history</span>
+                    História
+                </button>
+                <button class="dhub-header-btn dhub-header-btn-close" @click="discoveryHubClose()">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+
+            <!-- Mode tabs -->
+            <div class="dhub-mode-tabs">
+                <button class="dhub-mode-tab" :class="discoveryHubMode === 'trending' ? 'active' : ''"
+                    @click="discoveryHubSetMode('trending')">
+                    🔥 Trending
+                </button>
+                <button class="dhub-mode-tab" :class="discoveryHubMode === 'latest' ? 'active' : ''"
+                    @click="discoveryHubSetMode('latest')">
+                    🆕 Najnovšie
+                </button>
+                <button class="dhub-mode-tab" :class="discoveryHubMode === 'search' ? 'active' : ''"
+                    @click="discoveryHubSetMode('search')">
+                    🔍 Albumy
+                    <span class="dhub-mode-tab-count" x-show="discoveryHubSummary.albums_total && discoveryHubProvider !== 'findr_api'"
+                        x-text="discoveryHubCount(discoveryHubSummary.albums_total)"></span>
+                </button>
+                <button class="dhub-mode-tab" :class="discoveryHubMode === 'files' ? 'active' : ''"
+                    @click="discoveryHubSetMode('files')">
+                    🎞 Súbory
+                    <span class="dhub-mode-tab-count" x-show="discoveryHubSummary.files_total"
+                        x-text="discoveryHubCount(discoveryHubSummary.files_total)"></span>
+                </button>
+                <div class="dhub-view-switch" role="group" aria-label="Zobrazenie výsledkov">
+                    <button type="button" :class="discoveryHubView === 'cards' ? 'active' : ''" :aria-pressed="discoveryHubView === 'cards'" @click="discoveryHubView = 'cards'; localStorage.setItem('dhubView', 'cards')">Karty</button>
+                    <button type="button" :class="discoveryHubView === 'thumb' ? 'active' : ''" :aria-pressed="discoveryHubView === 'thumb'" @click="discoveryHubView = 'thumb'; localStorage.setItem('dhubView', 'thumb')">Veľké náhľady</button>
+                </div>
+                <div class="dhub-sources-info" x-show="!['latest', 'search'].includes(discoveryHubMode)">
+                    <button class="dhub-src-pill" :class="discoveryHubSources.balbums?'active':''"
+                        @click="discoveryHubSources.balbums=!discoveryHubSources.balbums; localStorage.setItem('dhubSources',JSON.stringify(discoveryHubSources)); discoveryHubSetMode(discoveryHubMode);"
+                        title="balbums.st">
+                        <span class="material-icons-round">album</span>balbums.st
+                    </button>
+                    <button class="dhub-src-pill" :class="discoveryHubSources.bunkrr?'active':''"
+                        @click="discoveryHubSources.bunkrr=!discoveryHubSources.bunkrr; localStorage.setItem('dhubSources',JSON.stringify(discoveryHubSources)); discoveryHubSetMode(discoveryHubMode);"
+                        title="bunkrr.pics">
+                        <span class="material-icons-round">image_search</span>bunkrr.pics
+                    </button>
+                    <button class="dhub-src-pill slow" :class="discoveryHubSources.explorer?'active slow':''"
+                        @click="discoveryHubSources.explorer=!discoveryHubSources.explorer; localStorage.setItem('dhubSources',JSON.stringify(discoveryHubSources)); discoveryHubSetMode(discoveryHubMode);"
+                        title="Bunkr Explorer index — pomalý, veľké množstvo albumov">
+                        <span class="material-icons-round">travel_explore</span>Explorer
+                        <span style="font-size:9px;opacity:.7;" x-show="discoveryHubSources.explorer">⚠ pomalý</span>
+                    </button>
+                </div>
+            </div>
+
+            <div x-show="['latest', 'search'].includes(discoveryHubMode)" style="padding:8px 20px;color:#94a3b8;font-size:12px;">
+                <span x-text="discoveryHubProvider === 'findr_api' ? 'Albumy z náhradného indexu Findr. Obsah albumu otvoríš kliknutím na kartu.' : 'Najnovšie albumy z Balbums; pri výpadku sa použije náhradný index Findr.'"></span>
+            </div>
+
+            <div class="dhub-history" x-show="combinedHistory.open" style="display:none;">
+                <div class="dhub-history-filters">
+                    <label>
+                        Dátum
+                        <input type="date" x-model="combinedHistory.date" @change="combinedHistoryLoad()">
+                    </label>
+                    <label class="dhub-history-keyword">
+                        Keyword
+                        <input type="text" x-model="combinedHistory.q" placeholder="ako sme hľadali"
+                            @input.debounce.300ms="combinedHistoryLoad()">
+                    </label>
+                    <span class="dhub-history-count" x-show="!combinedHistory.loading"
+                        x-text="`${combinedHistory.items.length} záznamov`"></span>
+                    <span class="dhub-history-count" x-show="combinedHistory.loading">Načítavam…</span>
+                </div>
+                <div class="dhub-history-scroll">
+                    <template x-for="row in combinedHistory.items" :key="row.id">
+                        <button type="button" class="dhub-history-row" @click="combinedHistoryOpen(row)">
+                            <span class="dhub-history-when" x-text="combinedHistoryLabel(row).when"></span>
+                            <span class="dhub-history-key" x-text="combinedHistoryLabel(row).keyword"></span>
+                            <span class="dhub-history-meta" x-text="combinedHistoryLabel(row).ready"></span>
+                            <span class="dhub-history-meta" x-show="combinedHistoryLabel(row).albums > 1"
+                                x-text="`${combinedHistoryLabel(row).albums} albumov`"></span>
+                            <span class="dhub-history-open">Otvoriť</span>
+                        </button>
+                    </template>
+                    <div class="dhub-history-empty" x-show="!combinedHistory.loading && !combinedHistory.items.length">
+                        Zatiaľ tu nie je žiadny spoločný album ani hotový fetch.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk import progress bar -->
+            <div x-show="dhubImportProgress.active"
+                style="display:none;padding:10px 18px;background:#0f172a;border-bottom:1px solid rgba(255,255,255,.07);">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span class="material-icons-round dhub-spin"
+                        style="font-size:16px;color:#a78bfa;">progress_activity</span>
+                    <span style="font-size:12px;color:#94a3b8;">Importujem</span>
+                    <span style="font-size:12px;font-weight:700;color:#e2e8f0;"
+                        x-text="dhubImportProgress.done + ' / ' + dhubImportProgress.total"></span>
+                    <div style="flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;">
+                        <div style="height:100%;background:linear-gradient(90deg,#7c3aed,#a78bfa);border-radius:2px;transition:width .3s;"
+                            :style="`width:${dhubImportProgress.total ? Math.round(dhubImportProgress.done/dhubImportProgress.total*100) : 0}%`">
+                        </div>
+                    </div>
+                    <span style="font-size:11px;color:#64748b;"
+                        x-text="dhubImportProgress.total ? Math.round(dhubImportProgress.done/dhubImportProgress.total*100)+'%' : ''"></span>
+                </div>
+            </div>
+
+            <!-- Selection bar -->
+            <div class="dhub-selection-bar" x-show="discoveryHubSelectedCount() > 0">
+                <div class="dhub-selection-count">
+                    <span class="material-icons-round">check_box</span>
+                    <span x-text="discoveryHubSelectedCount() + ' vybraných'"></span>
+                </div>
+                <button class="dhub-sel-btn dhub-sel-btn-import" @click="discoveryHubImportSelected()"
+                    :disabled="dhubImportProgress.active || discoveryHubBatchEnriching">
+                    <span class="material-icons-round">move_to_inbox</span>
+                    Import vybraných
+                </button>
+                <button class="dhub-sel-btn dhub-sel-btn-all" @click="discoveryHubFetchMeta('selected')"
+                    :disabled="discoveryHubBatchEnriching"
+                    title="Načítať meta albumov a súborov — z obsahu každého označeného albumu zistí prvý a posledný upload, náhľad a veľkosť">
+                    <span class="material-icons-round" :class="discoveryHubBatchEnriching ? 'dhub-spin' : ''"
+                        x-text="discoveryHubBatchEnriching ? 'progress_activity' : 'refresh'"></span>
+                    <span x-text="discoveryHubBatchEnriching ? `Načítavam meta (${discoveryHubBatchEnrichDone}/${discoveryHubBatchEnrichTotal})...` : (discoveryHubSelectedMissingCount() > 0 ? `Načítať meta albumov (${discoveryHubSelectedMissingCount()} chýba)` : `Načítať meta albumov (hotovo)`)"></span>
+                </button>
+                <button class="dhub-sel-btn dhub-sel-btn-all" @click="discoveryHubFetchMeta('all')"
+                    :disabled="discoveryHubBatchEnriching"
+                    title="Načítať chýbajúce metadáta pre všetky zobrazené položky">
+                    <span class="material-icons-round">autorenew</span>
+                    <span x-text="`Načítať meta všetkých (${discoveryHubAllMissingCount()} chýba)`"></span>
+                </button>
+                <button class="dhub-sel-btn dhub-sel-btn-import" data-dhub-split-screen
+                    @click="(() => { const items = discoveryHubResults.filter(item => discoveryHubIsSelected(item) &amp;&amp; (item.type === 'video' || (item.type === 'file' &amp;&amp; discoveryHubFileKind(item) === 'video'))).map(item => ({ url: item.url || item.source_url, title: item.title || 'Video', poster: discoveryHubThumb(item), duration: Number(item.duration) || 0, size: Number(item.size_bytes || item.total_size_bytes) || 0, quality: item.quality || (item.height ? `${item.height}p` : ''), resolution: item.width &amp;&amp; item.height ? `${item.width}x${item.height}` : '' })).filter(item => item.url); if (!items.length) { showToast('Označ aspoň jeden video súbor. Albumy najprv otvor v spoločnom albume.', 'info', 'info'); return; } document.dispatchEvent(new CustomEvent('nexus-album-split-picker', { detail: items })); })()"
+                    title="Otvorí označené video súbory v split screene">
+                    <span class="material-icons-round">view_column</span> Split-Screen
+                </button>
+                <label class="dhub-sel-btn dhub-sel-btn-all" title="Plynulý režim vykresľuje karty postupne">
+                    Zobrazenie <select x-model="albumViewer.renderMode" aria-label="Režim spoločného albumu pred otvorením" style="background:#0d1117;color:#c4b5fd;border:1px solid #59467d;border-radius:5px;padding:4px;">
+                        <option value="smooth">Plynulé</option><option value="classic">Klasické</option>
+                    </select>
+                </label>
+                <button class="dhub-sel-btn dhub-sel-btn-import" @click="discoveryHubOpenSelectedAlbums()"
+                    x-show="discoveryHubSelectedCount() > 0" title="Otvorí označené súbory a obsah označených albumov v spoločnom prehľade">
+                    <span class="material-icons-round">photo_library</span>
+                    <span x-text="`Otvoriť spoločný album (${discoveryHubSelectedCount()})`"></span>
+                </button>
+                <button class="dhub-sel-btn dhub-sel-btn-all" @click="discoveryHubLockSelected()" :disabled="[...discoveryHubSelected].every(key => discoveryHubLocked.has(key))" title="Ponechá vybrané výsledky hore aj pri ďalšom hľadaní">
+                    <span class="material-icons-round">push_pin</span> Pripnúť vybrané
+                </button>
+                <button class="dhub-sel-btn dhub-sel-btn-all" x-show="discoveryHubLocked.size > 0" @click="discoveryHubUnlockAll()" title="Odopne všetky výsledky; výber zostane zachovaný">
+                    <span class="material-icons-round">push_pin</span> Odopnúť všetky (<span x-text="discoveryHubLocked.size"></span>)
+                </button>
+                <button class="dhub-sel-btn dhub-sel-btn-all" @click="discoveryHubSelectAll()">
+                    <span class="material-icons-round">select_all</span>
+                    Vybrať všetky
+                </button>
+                <button class="dhub-sel-btn dhub-sel-btn-clear" @click="discoveryHubClearSelection()">
+                    <span class="material-icons-round">close</span>
+                    Zrušiť výber
+                </button>
+            </div>
+
+            <!-- Filter bar -->
+            <div class="dhub-controls"
+                x-show="discoveryHubResults.length > 0 || discoveryHubMode === 'files' || discoveryHubMode === 'search'">
+                <label class="dhub-control">
+                    Zoradiť
+                    <select x-model="discoveryHubFilters.sort" @change="discoveryHubFiltersChanged()">
+                        <option value="relevance" x-text="['latest', 'search'].includes(discoveryHubMode) ? (discoveryHubProvider === 'findr_api' ? (discoveryHubMode === 'search' ? 'Relevancia (Findr)' : 'Najnovšie (Findr)') : 'Najnovšie (Balbums)') : 'Relevancia'">Najnovšie (Balbums)</option>
+                        <option value="latest">Posledný upload</option>
+                        <option value="created">Prvý upload</option>
+                        <option value="largest">Najväčšie</option>
+                        <option value="files">Najviac súborov</option>
+                        <option value="preview">S náhľadom</option>
+                    </select>
+                </label>
+                <label class="dhub-control compact">
+                    Typ
+                    <select x-model="discoveryHubFilters.type" @change="discoveryHubFiltersChanged()">
+                        <option value="all">Všetko</option>
+                        <option value="album">Albumy</option>
+                        <option value="video">Videá</option>
+                        <option value="file">Súbory</option>
+                    </select>
+                </label>
+                <label class="dhub-control compact">
+                    Obsah
+                    <select x-model="discoveryHubFilters.content" @change="discoveryHubFiltersChanged()" title="Vyber pred hľadaním. V kategórii Súbory sa filtruje priamo na zdroji; zmenu potvrď tlačidlom Hľadať.">
+                        <option value="video">Len videá</option>
+                        <option value="image">Len obrázky</option>
+                        <option value="all">Všetko</option>
+                    </select>
+                </label>
+                <label class="dhub-control compact">
+                    Náhľad
+                    <select x-model="discoveryHubFilters.preview" @change="discoveryHubFiltersChanged()">
+                        <option value="all">Všetko</option>
+                        <option value="with">S náhľadom</option>
+                        <option value="missing">Bez náhľadu</option>
+                    </select>
+                </label>
+                <label class="dhub-control compact">
+                    Dátum
+                    <select x-model="discoveryHubFilters.date" @change="discoveryHubFiltersChanged()">
+                        <option value="all">Kedykoľvek</option>
+                        <option value="24h">24 hodín</option>
+                        <option value="7d">7 dní</option>
+                        <option value="30d">30 dní</option>
+                    </select>
+                </label>
+                <label class="dhub-control compact">
+                    Min súborov
+                    <input type="number" min="0" step="1" x-model="discoveryHubFilters.minFiles" @change="discoveryHubFiltersChanged()">
+                </label>
+                <label class="dhub-control compact">
+                    Min MB
+                    <input type="number" min="0" step="50" x-model="discoveryHubFilters.minSizeMb" @change="discoveryHubFiltersChanged()">
+                </label>
+                <label class="dhub-control compact">
+                    Max súborov
+                    <input type="number" min="0" step="1" x-model="discoveryHubFilters.maxFiles" @change="discoveryHubFiltersChanged()">
+                </label>
+                <label class="dhub-control compact">
+                    Max MB
+                    <input type="number" min="0" step="50" x-model="discoveryHubFilters.maxSizeMb" @change="discoveryHubFiltersChanged()">
+                </label>
+                <button class="dhub-filter-reset" @click="discoveryHubResetFilters()">Reset</button>
+                <span class="dhub-filter-count"
+                    x-text="discoveryHubResults.length > 0 ? discoveryHubLoadedLabel() : ''"></span>
+                <div class="dhub-refine">
+                    <label class="dhub-control">
+                        Ponechať výrazy
+                        <input type="search" placeholder="napr. rozhovor, 1080p" aria-describedby="dhub-keyword-help"
+                            x-model="discoveryHubFilters.keyword" @input="$nextTick(() => discoveryHubFiltersChanged())">
+                    </label>
+                    <label class="dhub-control">
+                        Vylúčiť výrazy
+                        <input type="search" placeholder="napr. ukážka, trailer" aria-describedby="dhub-keyword-help"
+                            x-model="discoveryHubFilters.excludeKeyword" @input="$nextTick(() => discoveryHubFiltersChanged())">
+                    </label>
+                    <span id="dhub-keyword-help" class="dhub-refine-help">
+                        Oddeľ čiarkou. V názve súboru alebo albumu musia sedieť všetky výrazy na ponechanie; stačí jeden na vylúčenie.
+                    </span>
+                </div>
+                <div class="dhub-excluded" x-show="discoveryHubFilters.excludedAlbums?.length">
+                    <span class="dhub-excluded-label">Skryté albumy:</span>
+                    <template x-for="album in (discoveryHubFilters.excludedAlbums || [])" :key="album.key">
+                        <button type="button" class="dhub-album-filter" @click="discoveryHubRestoreAlbum(album.key)"
+                            :title="'Zobraziť album: ' + album.label" :aria-label="'Zobraziť album: ' + album.label">
+                            <span class="dhub-album-filter-name" x-text="album.label"></span>
+                            <span class="material-icons-round" aria-hidden="true">close</span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <label style="display:flex;gap:8px;align-items:center;padding:8px 20px;">
+                <input type="checkbox" x-model="discoveryHubLoadAllEnabled">
+                Načítať všetky výsledky po potvrdení hľadania (so zvolenými filtrami)
+            </label>
+            <div x-show="discoveryHubError" role="alert" style="padding:12px 20px;color:#fca5a5;">
+                <span x-text="discoveryHubError"></span>
+                <button @click="discoveryHubSearch(discoveryHubResults.length > 0)">Skúsiť znova</button>
+            </div>
+            <div x-show="discoveryHubWarning" role="status" style="padding:8px 20px;color:#fcd34d;" x-text="discoveryHubWarning"></div>
+            <div x-show="discoveryHubEnriching || discoveryHubLoadingAll || (discoveryHubLoading && discoveryHubResults.length > 0) || discoveryHubEnrichPaused || discoveryHubLoadPaused"
+                role="status"
+                style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:8px 20px;">
+                <span x-show="discoveryHubEnriching || discoveryHubEnrichPaused">
+                    <span x-text="discoveryHubEnriching ? 'Načítavam údaje:' : 'Dopĺňanie údajov pozastavené:'"></span>
+                    <strong x-text="discoveryHubEnrichDone"></strong> / <strong x-text="discoveryHubEnrichTotal"></strong>
+                </span>
+                <span x-show="!discoveryHubEnriching && !discoveryHubEnrichPaused && (discoveryHubLoadingAll || discoveryHubLoading || discoveryHubLoadPaused)">
+                    <span x-text="discoveryHubLoadPaused ? 'Načítavanie výsledkov pozastavené' : 'Načítavam ďalšie výsledky...'"></span>
+                </span>
+                <button type="button" class="dhub-sel-btn dhub-sel-btn-clear"
+                    x-show="discoveryHubEnriching || discoveryHubLoadingAll || discoveryHubLoading"
+                    @click="discoveryHubPauseWork()">
+                    <span class="material-icons-round">pause</span>
+                    Zastaviť
+                </button>
+                <button type="button" class="dhub-sel-btn dhub-sel-btn-import"
+                    x-show="!discoveryHubEnriching && !discoveryHubLoadingAll && !discoveryHubLoading && (discoveryHubEnrichPaused || discoveryHubLoadPaused)"
+                    @click="discoveryHubResumeWork()">
+                    <span class="material-icons-round">play_arrow</span>
+                    Pokračovať
+                </button>
+                <button type="button" class="dhub-sel-btn dhub-sel-btn-all"
+                    x-show="discoveryHubResults.length > 0"
+                    @click="discoveryHubUseCurrentList()"
+                    title="Zastaví ďalšie sťahovanie a zobrazí doteraz načítaný zoznam">
+                    <span class="material-icons-round">view_list</span>
+                    Načítať aktuálny zoznam (<span x-text="discoveryHubVisibleResults().length"></span>)
+                </button>
+            </div>
+            <div x-show="dhubImportProgress.total" role="status" style="padding:8px 20px;">
+                Import: <span x-text="dhubImportProgress.succeeded || 0"></span> hotových,
+                <span x-text="dhubImportProgress.failed || 0"></span> chýb,
+                <span x-text="dhubImportProgress.pending || 0"></span> čaká / spracúva sa.
+            </div>
+            <button x-show="discoveryHubResults.some(i => i._importState === 'failed')" @click="discoveryHubRetryFailed()" :disabled="dhubImportProgress.active">Zopakovať neúspešné importy</button>
+            <!-- Content -->
+            <div class="dhub-results-content" style="padding:20px 24px;">
+
+                <!-- Loading initial -->
+                <div x-show="discoveryHubLoading && discoveryHubResults.length === 0" class="dhub-state">
+                    <span class="material-icons-round dhub-spin"
+                        style="font-size:44px;color:#7c3aed;">progress_activity</span>
+                    <div class="dhub-state-title">Prehľadávam siete...</div>
+                    <div class="dhub-state-sub">Vyber zdroje hore a zadaj hľadaný výraz</div>
+                </div>
+
+                <!-- Empty -->
+                <div x-show="!discoveryHubLoading && !discoveryHubError && discoveryHubResults.length === 0" class="dhub-state">
+                    <span class="material-icons-round">rocket_launch</span>
+                    <div class="dhub-state-title">Discovery Hub je pripravený</div>
+                    <div class="dhub-state-sub">Zadaj hľadaný výraz a potvrď Enterom alebo tlačidlom Hľadať.</div>
+                </div>
+
+                <!-- No filter match -->
+                <div x-show="!discoveryHubLoading && discoveryHubResults.length > 0 && discoveryHubVisibleResults().length === 0"
+                    class="dhub-state">
+                    <span class="material-icons-round">filter_alt_off</span>
+                    <div class="dhub-state-title">Nič nezodpovedá filtrom</div>
+                    <button class="dhub-filter-reset" style="margin-top:4px;" @click="discoveryHubResetFilters()">Reset
+                        filtrov</button>
+                </div>
+
+                <!-- Grid -->
+                <div class="dhub-grid" x-ref="discoveryHubGrid" x-init="discoveryHubVirtualInit($el)"
+                    x-effect="discoveryHubVirtualSync(discoveryHubVisibleResults(), discoveryHubView)"
+                    :class="discoveryHubView === 'thumb' ? 'is-thumb' : ''" x-show="discoveryHubVisibleResults().length > 0">
+                    <div class="dhub-virtual-spacer" x-show="discoveryHubVirtual?.top > 0" :style="`height:${discoveryHubVirtual?.top || 0}px;grid-column:1/-1;`" aria-hidden="true"></div>
+                    <template x-for="(item, idx) in discoveryHubRenderResults()" :key="discoveryHubItemKey(item)">
+                        <div class="dhub-card" :data-dhub-virtual-index="(discoveryHubVirtual?.start || 0) + idx"
+                            :class="discoveryHubIsSelected(item) ? 'is-selected' : ''"
+                            :style="item._imported ? 'opacity:.5;' : ''">
+
+                            <!-- Select checkbox -->
+                            <div class="dhub-card-checkbox" @click.stop="discoveryHubToggleSelect(item)"
+                                :title="discoveryHubIsSelected(item) ? 'Zrušiť výber' : 'Vybrať'">
+                                <span class="material-icons-round">check</span>
+                            </div>
+
+                            <button type="button" x-show="discoveryHubLocked.has(discoveryHubItemKey(item))" @click.stop="discoveryHubUnlock(item)" title="Odopnúť výsledok" aria-label="Odopnúť výsledok" style="position:absolute;z-index:5;right:8px;top:38px;border:1px solid #a78bfa;border-radius:6px;background:#4c1d95;color:white;padding:4px 7px;cursor:pointer;">📌 Pripnuté</button>
+                            <!-- Thumbnail -->
+                            <div class="dhub-card-thumb">
+                                <img :src="discoveryHubThumb(item)" @error.once="$event.target.src='/static/placeholder.jpg'"
+                                    loading="lazy">
+                                <span class="dhub-thumb-badge dhub-thumb-detail dhub-thumb-detail-date" x-show="discoveryHubView === 'thumb' &amp;&amp; discoveryHubDateLabel(item, 'first') !== 'unknown'" x-text="discoveryHubDateLabel(item, 'first')" title="Dátum pridania"></span>
+                                <span class="dhub-thumb-badge dhub-thumb-detail dhub-thumb-detail-size" x-show="discoveryHubView === 'thumb' &amp;&amp; discoveryHubSizeBytes(item) > 0" x-text="formatBytes(discoveryHubSizeBytes(item))" title="Veľkosť"></span>
+                                <span class="dhub-thumb-badge dhub-thumb-detail dhub-thumb-detail-count" x-show="discoveryHubView === 'thumb' &amp;&amp; item.type !== 'video' &amp;&amp; item.type !== 'file' &amp;&amp; Number(item.video_count) > 0" x-text="item.video_count + ' videí'" title="Počet videí v albume"></span>
+                                <!-- type -->
+                                <span class="dhub-thumb-badge dhub-thumb-type"
+                                    :class="item.type === 'video' ? 'is-video' : (item.type === 'file' ? 'is-file' : '')"
+                                    x-text="item.type || 'album'"></span>
+                                <!-- count -->
+                                <span class="dhub-thumb-badge dhub-thumb-count" x-show="item.file_count > 0"
+                                    x-text="item.file_count + ' súb.'"></span>
+                                <!-- duration -->
+                                <span class="dhub-thumb-badge dhub-thumb-dur" x-show="item.duration"
+                                    x-text="formatDuration(item.duration)"></span>
+                                <span class="dhub-thumb-badge dhub-thumb-size"
+                                    x-show="item.type !== 'video' && item.type !== 'file' && discoveryHubSizeGb(item)"
+                                    x-text="discoveryHubSizeGb(item)" title="Celková veľkosť"></span>
+                                <!-- quality -->
+                                <span class="dhub-thumb-badge dhub-thumb-quality-4k"
+                                    x-show="item.quality && (item.quality||'').includes('4K')"
+                                    x-text="item.quality"></span>
+                                <span class="dhub-thumb-badge dhub-thumb-quality"
+                                    x-show="item.quality && !(item.quality||'').includes('4K')"
+                                    x-text="item.quality"></span>
+                                <span class="dhub-thumb-badge dhub-thumb-label" x-show="!item.quality"
+                                    x-text="discoveryHubPreviewLabel(item)"></span>
+                            </div>
+
+                            <!-- Info -->
+                            <div class="dhub-card-body">
+                                <div class="dhub-card-title" x-text="item.title"></div>
+
+                                <div class="dhub-card-subtitle" x-show="item.album_title || item.provider"
+                                    x-text="item.album_title || discoveryHubProviderLabel(item.provider)"></div>
+
+                                <div class="dhub-card-dates">
+                                    <span>
+                                        <span class="material-icons-round">upload</span>
+                                        <b x-text="discoveryHubDateLabel(item, 'first')"></b>
+                                    </span>
+                                    <span>
+                                        <span class="material-icons-round">update</span>
+                                        <b x-text="discoveryHubDateLabel(item, 'last')"></b>
+                                    </span>
+                                </div>
+
+                                <div class="dhub-card-meta">
+                                    <span class="dhub-pill source" x-text="item.source"></span>
+                                    <template x-for="badge in discoveryHubMetaBadges(item)" :key="badge">
+                                        <span class="dhub-pill" x-text="badge"></span>
+                                    </template>
+                                    <span class="dhub-pill good" x-show="item._enriched">enriched</span>
+                                    <span class="dhub-pill warn" x-show="item._enriching">načítavam...</span>
+                                    <button type="button" class="dhub-album-filter" x-show="discoveryHubAlbumKey(item)"
+                                        title="Skryje všetky výsledky z tohto albumu"
+                                        @click.stop="discoveryHubExcludeAlbum(item)">
+                                        <span class="material-icons-round" aria-hidden="true">visibility_off</span>
+                                        Skryť album
+                                    </button>
+                                </div>
+
+                                <div class="dhub-samples" x-show="item.sample_files && item.sample_files.length">
+                                    <template x-for="(sample, sampleIndex) in (item.sample_files || []).slice(0, 6)"
+                                        :key="sample.url || sample.title">
+                                        <img class="dhub-sample" role="button" tabindex="0"
+                                            :aria-label="`Zväčšiť náhľady: ${sample.title || 'náhľad'}`"
+                                            @click.stop="discoveryHubOpenSamples(item, sampleIndex)"
+                                            @keydown.enter.prevent.stop="discoveryHubOpenSamples(item, sampleIndex)"
+                                            @keydown.space.prevent.stop="discoveryHubOpenSamples(item, sampleIndex)"
+                                            :src="sample.thumbnail ? proxifyUrl(sample.thumbnail) : '/static/placeholder.jpg'"
+                                            :title="sample.title || ''" @error="$event.target.style.display='none'"
+                                            loading="lazy">
+                                    </template>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="dhub-card-actions">
+                                    <button class="dhub-btn-import" :class="item._imported ? 'is-done' : ''"
+                                        data-dhub-import-button="1"
+                                        :data-import-url="item?.import_plan?.url || item?.url || item?.source_url || item?.detail_url || ''"
+                                        :data-source-url="item?.source_url || item?.detail_url || item?.url || ''"
+                                        :data-title="item?.title || item?.album_title || 'Discovery Hub item'"
+                                        :data-thumbnail="item?.thumbnail || ''" :data-source="item?.source || 'bunkr'"
+                                        @click.stop.prevent="discoveryHubImport(item)"
+                                        :disabled="item._imported || item._importing || item._importState === 'cancelled'">
+                                        <span class="material-icons-round" :class="item._importing ? 'dhub-spin' : ''"
+                                            x-text="item._imported ? 'check_circle' : (item._importing ? 'progress_activity' : 'move_to_inbox')"></span>
+                                        <span
+                                            x-text="discoveryHubImportLabel(item)" :title="item._importError || ''"></span>
+                                    </button>
+                                    <!-- Play file (only for video/file type) -->
+                                    <button class="dhub-btn-play" x-show="item.type==='video'||item.type==='file'"
+                                        @click.stop="dhubPlayFile(item)" title="Prehrať video">
+                                        <span class="material-icons-round">play_arrow</span>
+                                    </button>
+                                    <!-- Browse album -->
+                                    <button class="dhub-btn-browse" x-show="item.type==='album'||!item.type"
+                                        @click.stop="openAlbumViewer(item)"
+                                        aria-label="Otvoriť obsah albumu"
+                                        title="Otvorí súbory albumu na prehliadanie, prehrávanie a výber. Import spustíš samostatne.">
+                                        <span class="material-icons-round">photo_library</span>
+                                    </button>
+                                    <!-- Manual meta refresh -->
+                                    <button class="dhub-btn-refetch" @click.stop="discoveryHubRefetchItem(item)"
+                                        :disabled="item._enriching"
+                                        :title="item._enriched ? 'Znova načítať meta' : 'Načítať meta'"
+                                        :class="item._enriching ? 'is-loading' : (!item._enriched ? 'is-pending' : '')">
+                                        <span class="material-icons-round" :class="item._enriching ? 'dhub-spin' : ''"
+                                            x-text="item._enriching ? 'progress_activity' : 'refresh'"></span>
+                                    </button>
+                                    <button class="dhub-btn-refetch" @click.stop="stashItemToCollection(item, 'discovery')"
+                                        :title="item._stashed ? 'Odložené v kolekcii' : 'Odložiť na neskôr (bez importu)'">
+                                        <span class="material-icons-round" x-text="item._stashed ? 'bookmark' : 'bookmark_border'"></span>
+                                    </button>
+                                    <button class="dhub-btn-refetch" @click.stop="shareItemLink(item, 'discovery')"
+                                        title="Skopírovať odkaz na zdieľanie">
+                                        <span class="material-icons-round">share</span>
+                                    </button>
+                                    <a :href="item.url" target="_blank" rel="noopener noreferrer" class="dhub-btn-open"
+                                        @click.stop title="Otvorí pôvodnú stránku tohto albumu alebo súboru v novej karte.">
+                                        <span class="material-icons-round">open_in_new</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    <div class="dhub-virtual-spacer" x-show="discoveryHubVirtual?.bottom > 0" :style="`height:${discoveryHubVirtual?.bottom || 0}px;grid-column:1/-1;`" aria-hidden="true"></div>
+                </div>
+
+                <!-- Loading more -->
+                <div x-show="discoveryHubLoading && discoveryHubResults.length > 0"
+                    style="text-align:center;padding:24px;">
+                    <span class="material-icons-round dhub-spin"
+                        style="font-size:26px;color:#7c3aed;">progress_activity</span>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            </div><!-- Scrollable header, filters and results -->
+            <div class="dhub-footer">
+                <span class="dhub-footer-info" x-text="discoveryHubLoadedLabel()"></span>
+                <button class="dhub-btn-loadmore" x-show="discoveryHubHasMore && !discoveryHubLoadingAll && (discoveryHubResults.length > 0 || discoveryHubProvider)" @click="discoveryHubLoadAll()" :disabled="discoveryHubLoading">Načítať všetky výsledky</button>
+                <button class="dhub-btn-loadmore" x-show="discoveryHubLoadingAll" @click="discoveryHubStopLoadAll()">Zastaviť načítavanie všetkých</button>
+                <button class="dhub-btn-loadmore" x-show="discoveryHubHasMore && !discoveryHubError && (discoveryHubResults.length > 0 || discoveryHubProvider)"
+                    @click="discoveryHubLoadMore()" :disabled="discoveryHubLoading || discoveryHubLoadingAll">
+                    <span class="material-icons-round" :class="discoveryHubLoading ? 'dhub-spin' : ''"
+                        x-text="discoveryHubLoading ? 'progress_activity' : 'download'"></span>
+                    <span x-text="discoveryHubLoading ? 'Načítavam...' : 'Načítať ďalších 100'"></span>
+                </button>
+            </div>
+
+        </div>
+
+        <div class="dhub-samples-overlay" x-show="discoveryHubSamplesPopup.open" style="display:none;" @click.self="discoveryHubSamplesPopup.open = false" @keydown.escape.window="if (!dhubPlayer.visible) discoveryHubSamplesPopup.open = false" role="dialog" aria-modal="true" aria-label="Náhľady albumu">
+            <div class="dhub-samples-dialog">
+                <div class="dhub-samples-header">
+                    <h3 x-text="`Náhľady · ${discoveryHubSamplesPopup.item?.title || 'Album'}`"></h3>
+                    <button type="button" @click="openAlbumViewer(discoveryHubSamplesPopup.item); discoveryHubSamplesPopup.open = false">Otvoriť album</button>
+                    <button type="button" aria-label="Zatvoriť náhľady" @click="discoveryHubSamplesPopup.open = false">✕</button>
+                </div>
+                <div class="dhub-samples-grid">
+                    <template x-for="(sample, idx) in (discoveryHubSamplesPopup.item?.sample_files || []).slice(0, 6)" :key="idx">
+                        <div class="dhub-sample-card" :class="idx === discoveryHubSamplesPopup.selected ? 'is-active' : ''">
+                            <img :src="sample.thumbnail || sample.thumb ? proxifyUrl(sample.thumbnail || sample.thumb) : '/static/placeholder.jpg'" @error.once="$el.src='/static/placeholder.jpg'" :alt="sample.title || 'Náhľad'">
+                            <div class="dhub-sample-title" x-text="sample.title || sample.name || `Náhľad ${idx + 1}`"></div>
+                            <div class="dhub-sample-meta" x-text="[sample.duration ? formatDuration(sample.duration) : '', sample.quality || (sample.height ? `${sample.height}p` : ''), sample.size_text || (sample.size_bytes ? formatBytes(sample.size_bytes) : ''), sample.uploaded_at ? discoveryHubFormatDate(sample.uploaded_at) : ''].filter(Boolean).join(' · ')"></div>
+                            <div class="dhub-sample-actions" x-show="discoveryHubSampleUrl(sample)">
+                                <button type="button" x-show="sample.type === 'video' || (!sample.type &amp;&amp; /\.(mp4|mkv|mov|webm|m4v|avi)(?:[?#]|$)/i.test(sample.title || sample.url || ''))" @click="dhubPlayFile(sample)">▶ Prehrať</button>
+                                <a :href="discoveryHubSampleUrl(sample)" target="_blank" rel="noopener noreferrer">Otvoriť zdroj ↗</a>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── DISCOVERY HUB FILE PLAYER ── -->
+        <div class="dhub-player-overlay" x-show="dhubPlayer.visible" style="display:none;" x-transition.opacity
+            @click.self="dhubClosePlayer()" @keydown.escape.window="dhubClosePlayer()">
+            <div class="dhub-player-box">
+                <div class="dhub-player-header">
+                    <span class="material-icons-round" style="color:#a78bfa;font-size:18px;">play_circle</span>
+                    <div class="dhub-player-title" x-text="dhubPlayer.title || 'Video'"></div>
+                    <span x-show="dhubPlayer.isHls"
+                        style="font-size:10px;font-weight:700;background:rgba(6,182,212,.2);color:#22d3ee;border:1px solid rgba(6,182,212,.35);border-radius:4px;padding:2px 6px;">HLS</span>
+                    <span class="dhub-player-size" x-show="dhubPlayer.size" x-text="dhubPlayer.size"></span>
+                    <button class="dhub-player-close" @click="dhubClosePlayer()">
+                        <span class="material-icons-round" style="font-size:16px;">close</span>
+                    </button>
+                </div>
+                <div class="dhub-player-state" x-show="dhubPlayer.loading">
+                    <span class="material-icons-round dhub-spin"
+                        style="font-size:36px;color:#a78bfa;">progress_activity</span>
+                    <span style="font-size:14px;">Načítavam stream...</span>
+                </div>
+                <div class="dhub-player-state" x-show="!dhubPlayer.loading && dhubPlayer.error" style="color:#ef4444;"
+                    x-text="dhubPlayer.error"></div>
+                <video id="dhub-player-video" class="dhub-player-video" controls autoplay
+                    x-show="!dhubPlayer.loading && !dhubPlayer.error && dhubPlayer.url" :src="dhubPlayer.url"></video>
+            </div>
+        </div>
+
+    </div>
+</template>

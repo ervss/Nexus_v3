@@ -1,0 +1,3792 @@
+/* ==========================================================================
+   NexusPWC v3 — Obsidian Vision Glass Design System (Full Component Suite)
+   Unified layered glassmorphism across Dashboard, Cards, Filters, Modals,
+   Discovery Hub, Quantum Search, Related Workspace, Player, Batch Bar & Vault
+   ========================================================================== */
+
+:root {
+    --nx-glass-bg: rgba(11, 15, 27, 0.58);
+    --nx-glass-bg-strong: rgba(10, 14, 24, 0.80);
+    --nx-glass-card: rgba(16, 22, 36, 0.56);
+    --nx-glass-card-hover: rgba(22, 30, 48, 0.78);
+    --nx-glass-edge: rgba(255, 255, 255, 0.14);
+    --nx-glass-border: rgba(255, 255, 255, 0.09);
+    --nx-glass-glow-violet: rgba(168, 85, 247, 0.28);
+    --nx-glass-glow-cyan: rgba(34, 211, 238, 0.24);
+    --nx-glass-blur: blur(26px) saturate(165%);
+}
+
+/* ── Ambient Multi-Orb Depth Backdrop (iba v tmavom režime) ─────────────── */
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-shell {
+    position: relative;
+    background:
+        radial-gradient(980px 560px at 12% -6%, rgba(168, 85, 247, 0.16), transparent 58%),
+        radial-gradient(860px 540px at 88% 2%, rgba(34, 211, 238, 0.12), transparent 56%),
+        radial-gradient(760px 520px at 52% 108%, rgba(99, 102, 241, 0.10), transparent 62%),
+        #06080f !important;
+}
+
+body.skin-vision.vision-dark:not(.light-theme) .vg-ambient {
+    opacity: 0.42;
+    filter: blur(58px) saturate(145%) brightness(0.72);
+}
+
+body.skin-vision.vision-dark:not(.light-theme) .nx-shell {
+    background:
+        radial-gradient(960px 540px at 14% -6%, rgba(168, 85, 247, 0.15), transparent 58%),
+        radial-gradient(820px 520px at 88% 4%, rgba(34, 211, 238, 0.12), transparent 56%),
+        rgba(6, 9, 16, 0.74) !important;
+}
+
+/* ── Frosted Shell Panes (Rail, Drawer, Topbar — tmavý režim) ───────────── */
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-rail,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-drawer,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-topbar {
+    background: var(--nx-glass-bg) !important;
+    backdrop-filter: var(--nx-glass-blur) !important;
+    -webkit-backdrop-filter: var(--nx-glass-blur) !important;
+    border-color: var(--nx-glass-border) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.nx-rail {
+    z-index: var(--z-dropdown, 60) !important;
+}
+
+.nx-rail-btn[data-tooltip]:focus:not(:hover)::after {
+    opacity: 0 !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-topbar {
+    z-index: var(--z-topbar, 45);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 14px 36px rgba(0, 0, 0, 0.34);
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-select {
+    background: rgba(15, 21, 36, 0.86) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    color: #f8fafc !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-select option {
+    background: #0b101b;
+    color: #f8fafc;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-drawer-footer {
+    background: rgba(9, 13, 24, 0.84) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    position: relative;
+    z-index: 4;
+}
+
+/* Search Box + Vault Jump CTA */
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-search-box {
+    background: rgba(10, 14, 26, 0.66) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 8px 24px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(16px);
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-search-box:focus-within {
+    border-color: rgba(34, 211, 238, 0.52) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        0 0 0 3px rgba(34, 211, 238, 0.14),
+        0 10px 28px rgba(0, 0, 0, 0.36) !important;
+}
+
+.nx-vault-jump-btn {
+    height: 36px;
+    padding: 0 13px;
+    border-radius: 10px;
+    border: 1px solid rgba(34, 211, 238, 0.36);
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.16), rgba(99, 102, 241, 0.16));
+    color: #cffafe;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 4px 16px rgba(34, 211, 238, 0.14);
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.nx-vault-jump-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(34, 211, 238, 0.65);
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.26), rgba(168, 85, 247, 0.22));
+    color: #ffffff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 8px 22px rgba(34, 211, 238, 0.26);
+}
+
+.nx-vault-jump-btn .material-icons-round {
+    font-size: 16px;
+    color: #67e8f9;
+}
+
+.nx-ntp-bar.is-idle {
+    opacity: 0.78;
+}
+
+/* ── Filter Bar & Gallery Controls (Clean Frosted Pills, No Harsh White) ── */
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .gallery-controls-bar,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .filter-bar {
+    background: rgba(11, 15, 27, 0.56) !important;
+    backdrop-filter: blur(20px) saturate(145%);
+    -webkit-backdrop-filter: blur(20px) saturate(145%);
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    border-radius: 14px !important;
+    padding: 8px 12px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .gallery-controls-bar .gcb-btn,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .filter-bar button {
+    height: 30px;
+    min-height: 30px;
+    padding: 0 10px !important;
+    border-radius: 8px !important;
+    color: #cbd5e1 !important;
+    background: rgba(255, 255, 255, 0.045) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    font-family: 'Manrope', sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition: all 0.15s ease;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .gallery-controls-bar .gcb-btn:hover,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .filter-bar button:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.09) !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .gallery-controls-bar .gcb-btn.active,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .filter-bar button.active {
+    color: #e0f2fe !important;
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.22), rgba(168, 85, 247, 0.24)) !important;
+    border-color: rgba(34, 211, 238, 0.56) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 0 14px rgba(34, 211, 238, 0.22) !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .gallery-controls-bar .nx-date-input {
+    height: 30px !important;
+    min-width: 132px !important;
+    width: auto !important;
+    padding: 0 8px !important;
+    background: rgba(10, 14, 26, 0.72) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 8px !important;
+    color: #e2e8f0 !important;
+}
+
+/* Multi-filter dropdown popovers */
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .gallery-controls-bar [x-show^="multiFilterUI.open"] {
+    background: rgba(11, 15, 27, 0.88) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 12px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 22px 48px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* ── Glassy Cards (Main Gallery + Local Vault) ──────────────────────────── */
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card,
+.nx-vault-page .card {
+    background: var(--nx-glass-card) !important;
+    backdrop-filter: blur(18px) saturate(145%);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
+    border: 1px solid var(--nx-glass-border) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 12px 30px rgba(0, 0, 0, 0.36) !important;
+    border-radius: 14px !important;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card:hover,
+.nx-vault-page .card:hover {
+    transform: translateY(-3px);
+    background: var(--nx-glass-card-hover) !important;
+    border-color: rgba(34, 211, 238, 0.44) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        0 20px 44px rgba(0, 0, 0, 0.54),
+        0 0 28px rgba(168, 85, 247, 0.18),
+        0 0 18px rgba(34, 211, 238, 0.14) !important;
+}
+
+/* Unify card body alignment & remove orange nexus_refresh CTA */
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .v-meta {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .v-date-display {
+    font-family: 'Manrope', sans-serif !important;
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .v-actions-row {
+    margin-top: auto !important;
+    padding-top: 10px;
+    gap: 6px !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .v-actions-row .btn-stream,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v1-primary-btn,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v1-import-btn,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .btn-import {
+    color: #ffffff !important;
+    border: 1px solid rgba(168, 85, 247, 0.56) !important;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.92), rgba(99, 102, 241, 0.92)) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 6px 18px rgba(168, 85, 247, 0.30) !important;
+    border-radius: 9px !important;
+    font-weight: 700 !important;
+    font-family: 'Manrope', sans-serif !important;
+    transition: transform 0.14s ease, filter 0.14s ease, box-shadow 0.14s ease !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .v-actions-row .btn-stream:hover,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v1-primary-btn:hover {
+    filter: brightness(1.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 8px 24px rgba(168, 85, 247, 0.48) !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .v-actions-row > *:not(.btn-stream) {
+    opacity: 0.78 !important;
+    color: #e2e8f0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.11) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+    border-radius: 9px !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card:hover .v-actions-row > *:not(.btn-stream),
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .v-actions-row > *:not(.btn-stream):hover {
+    opacity: 1 !important;
+    background: rgba(255, 255, 255, 0.11) !important;
+    border-color: rgba(34, 211, 238, 0.42) !important;
+}
+
+/* Clean Frosted Thumbnail Badges & Fix Top-Right Collision */
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .quality-chip,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .duration-chip,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .size-chip,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .preview-source-badge,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .thumbnail-quality-badge {
+    background: rgba(6, 9, 16, 0.72) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.nx-main .v-card .index-chip {
+    top: 8px !important;
+    right: 28px !important;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(6, 9, 16, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nx-main .v-card .card-availability {
+    top: 11px !important;
+    right: 10px !important;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.65);
+}
+
+/* ── Glassy Active Filters, Monitors & Floating Batch Bar ───────────────── */
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-active-filters,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-batch-card,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-quick-box,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-bt-card,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-source-tile,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-tool-btn,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .thumbnail-monitor,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .dashboard-import-monitor {
+    background: rgba(15, 21, 36, 0.60) !important;
+    backdrop-filter: blur(18px) saturate(145%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .batch-bar,
+.nx-vault-page .sel-bar {
+    background: rgba(11, 15, 27, 0.78) !important;
+    backdrop-filter: blur(26px) saturate(165%) !important;
+    -webkit-backdrop-filter: blur(26px) saturate(165%) !important;
+    border: 1px solid rgba(168, 85, 247, 0.42) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        0 22px 54px rgba(0, 0, 0, 0.75),
+        0 0 32px rgba(168, 85, 247, 0.22) !important;
+}
+
+/* ── Generic Modals & Player Overlay ────────────────────────────────────── */
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .modal-wrap:not(.nexus-settings) {
+    background: rgba(4, 6, 13, 0.68) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .modal-wrap:not(.nexus-settings) .modal-card {
+    background: rgba(11, 15, 27, 0.80) !important;
+    backdrop-filter: blur(28px) saturate(165%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(165%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 18px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 30px 80px rgba(0, 0, 0, 0.76) !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .modal-wrap:not(.nexus-settings) .modal-header {
+    background: rgba(10, 14, 24, 0.45) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.09) !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .player-overlay,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .duo-player-overlay {
+    background: rgba(4, 6, 12, 0.80) !important;
+    backdrop-filter: blur(22px) !important;
+    -webkit-backdrop-filter: blur(22px) !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .player-overlay .player-container,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .player-overlay .player-shell {
+    background: rgba(10, 14, 24, 0.84) !important;
+    backdrop-filter: blur(28px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 32px 90px rgba(0, 0, 0, 0.85) !important;
+}
+
+/* ── Discovery Hub (Glass Overhaul, Works Regardless of ui-classic/ui-v1) ─ */
+.dhub-overlay {
+    background: rgba(4, 6, 13, 0.68) !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
+}
+
+.dhub-container {
+    background:
+        radial-gradient(860px 440px at 14% 0%, rgba(168, 85, 247, 0.14), transparent 60%),
+        radial-gradient(780px 420px at 88% 4%, rgba(34, 211, 238, 0.11), transparent 58%),
+        rgba(10, 14, 24, 0.78) !important;
+    backdrop-filter: blur(30px) saturate(165%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(165%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 32px 92px rgba(0, 0, 0, 0.82) !important;
+}
+
+.dhub-header {
+    background: rgba(10, 14, 24, 0.52) !important;
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.09) !important;
+}
+
+.dhub-search {
+    background: rgba(15, 21, 36, 0.72) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.dhub-header-btn-search {
+    background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%) !important;
+    border-color: rgba(168, 85, 247, 0.58) !important;
+    color: #ffffff !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 6px 18px rgba(168, 85, 247, 0.34) !important;
+}
+
+.dhub-mode-tabs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dhub-view-switch {
+    margin-left: auto !important;
+    background: rgba(15, 21, 36, 0.65) !important;
+    border: 1px solid rgba(255, 255, 255, 0.11) !important;
+    border-radius: 9px;
+    padding: 2px;
+}
+
+.dhub-view-switch button.active {
+    background: rgba(34, 211, 238, 0.2) !important;
+    color: #e0f2fe !important;
+}
+
+.dhub-card {
+    background: rgba(16, 22, 36, 0.58) !important;
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 10px 26px rgba(0, 0, 0, 0.36);
+}
+
+.dhub-card:hover {
+    border-color: rgba(34, 211, 238, 0.44) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 16px 36px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dhub-footer {
+    background: rgba(10, 14, 24, 0.58) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.09) !important;
+}
+
+.dhub-footer-info {
+    color: #94a3b8 !important;
+}
+
+/* ── Quantum Search (True Frosted Glass, No Ghosting, Vector Mark) ──────── */
+.quantum-search-overlay {
+    background: rgba(3, 5, 11, 0.68) !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
+}
+
+.quantum-search-container {
+    background:
+        radial-gradient(920px 520px at 14% 0%, rgba(168, 85, 247, 0.16), transparent 60%),
+        radial-gradient(820px 480px at 86% 6%, rgba(34, 211, 238, 0.12), transparent 58%),
+        rgba(8, 12, 22, 0.78) !important;
+    backdrop-filter: blur(32px) saturate(165%) !important;
+    -webkit-backdrop-filter: blur(32px) saturate(165%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 32px 92px rgba(0, 0, 0, 0.82) !important;
+    font-family: 'Manrope', sans-serif !important;
+}
+
+.quantum-search-title {
+    background: linear-gradient(135deg, #f8fafc 0%, #c084fc 55%, #22d3ee 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    font-weight: 800 !important;
+}
+
+.quantum-search-title::before {
+    content: '✦' !important;
+    font-size: 20px !important;
+    background: linear-gradient(135deg, #22d3ee, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.55)) !important;
+}
+
+.quantum-search-input-wrap,
+.quantum-search-input {
+    font-family: 'Manrope', sans-serif !important;
+}
+
+.quantum-results-toolbar {
+    background: rgba(15, 21, 36, 0.56) !important;
+    backdrop-filter: blur(18px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.quantum-toolbar-scrape,
+.quantum-toolbar-field {
+    background: rgba(8, 12, 22, 0.62) !important;
+    border: 1px solid rgba(255, 255, 255, 0.11) !important;
+}
+
+.search-result-card {
+    background: rgba(16, 22, 36, 0.58) !important;
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 10px 26px rgba(0, 0, 0, 0.36);
+}
+
+.search-result-card:hover {
+    border-color: rgba(34, 211, 238, 0.44) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 16px 36px rgba(0, 0, 0, 0.52) !important;
+}
+
+/* ── Related Workspace Modal (Obsidian Glass Unification) ───────────────── */
+.nx-rel-modal-card {
+    background:
+        radial-gradient(circle at top right, rgba(34, 211, 238, 0.12), transparent 48%),
+        radial-gradient(circle at top left, rgba(168, 85, 247, 0.12), transparent 48%),
+        rgba(10, 14, 24, 0.80) !important;
+    backdrop-filter: blur(30px) saturate(165%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(165%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.13) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 32px 90px rgba(0, 0, 0, 0.82) !important;
+}
+
+.nx-rel-header,
+.nx-rel-sidebar {
+    background: rgba(11, 15, 27, 0.54) !important;
+    backdrop-filter: blur(18px);
+    border-color: rgba(255, 255, 255, 0.09) !important;
+}
+
+.nx-rel-card {
+    background: rgba(16, 22, 36, 0.56) !important;
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+
+.nx-rel-card:hover {
+    border-color: rgba(34, 211, 238, 0.44) !important;
+}
+
+.nx-rel-bulk-bar {
+    background: rgba(11, 15, 27, 0.82) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    border-top: 1px solid rgba(168, 85, 247, 0.35) !important;
+}
+
+/* ── Local Vault Page Specific Glass Tokens & Layout ─────────────────────── */
+.nx-vault-page {
+    color: #f1f5f9;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+}
+
+.nx-vault-page .nx-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.nx-vault-page .nx-vault-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    padding: 12px 22px 10px;
+    border-bottom: 1px solid var(--nx-glass-border);
+}
+
+.nx-vault-page .topbar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.nx-vault-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    text-decoration: none;
+    user-select: none;
+}
+
+.nx-vault-brand-title {
+    font-family: 'Syne', 'Manrope', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    background: linear-gradient(135deg, #f8fafc 0%, #67e8f9 55%, #c084fc 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.nx-vault-count-pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: #67e8f9;
+    background: rgba(34, 211, 238, 0.14);
+    border: 1px solid rgba(34, 211, 238, 0.34);
+    padding: 3px 10px;
+    border-radius: 999px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.nx-vault-page .nx-search-box {
+    flex: 1;
+    min-width: 260px;
+    max-width: 680px;
+}
+
+.nx-vault-page .chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.nx-vault-page .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    background: rgba(16, 22, 36, 0.56);
+    color: #cbd5e1;
+    backdrop-filter: blur(12px);
+    cursor: pointer;
+    transition: all 0.16s ease;
+}
+
+.nx-vault-page .chip:hover {
+    border-color: rgba(34, 211, 238, 0.45);
+    background: rgba(34, 211, 238, 0.14);
+    color: #ffffff;
+}
+
+.nx-vault-page .chip.active {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.38), rgba(34, 211, 238, 0.28));
+    border-color: rgba(34, 211, 238, 0.62);
+    color: #ffffff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 4px 16px rgba(34, 211, 238, 0.22);
+}
+
+.nx-vault-page .chip .n {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: rgba(6, 8, 15, 0.55);
+    color: #e2e8f0;
+}
+
+.nx-vault-page .controls-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nx-vault-page .ctrl-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(11, 15, 27, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    border-radius: 9px;
+    padding: 3px 10px;
+    backdrop-filter: blur(12px);
+}
+
+.nx-vault-page .ctrl-group label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #67e8f9;
+    white-space: nowrap;
+}
+
+.nx-vault-page .ctrl-group select,
+.nx-vault-page .ctrl-group input {
+    background: transparent;
+    border: 0;
+    color: #f8fafc;
+    font-size: 12px;
+    font-weight: 600;
+    outline: none;
+    padding: 4px 2px;
+}
+
+.nx-vault-page .ctrl-group select option {
+    background: #0b101b;
+    color: #f8fafc;
+}
+
+.nx-vault-page .wrap {
+    padding: 16px 22px 84px;
+    width: 100%;
+    max-width: 2040px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.nx-vault-page .status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+    font-size: 12.5px;
+    color: #94a3b8;
+}
+
+.nx-vault-page .status-bar strong {
+    color: #f8fafc;
+}
+
+.nx-vault-page .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--card-min, 355px), 1fr));
+    gap: 16px;
+}
+
+.nx-vault-page .card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.nx-vault-page .card.is-selected {
+    outline: 2px solid #22d3ee;
+    outline-offset: 1px;
+    border-color: rgba(34, 211, 238, 0.68) !important;
+    box-shadow: 0 14px 36px rgba(34, 211, 238, 0.22), 0 0 24px rgba(168, 85, 247, 0.22) !important;
+}
+
+.nx-vault-page .thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #05070c;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.nx-vault-page .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.32s ease;
+}
+
+.nx-vault-page .card:hover .thumb img {
+    transform: scale(1.04);
+}
+
+.nx-vault-page .thumb-empty {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 14px;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.16) 0%, rgba(10, 14, 24, 0.94) 100%);
+}
+
+.nx-vault-page .thumb-empty .material-icons-round {
+    font-size: 40px;
+    color: #67e8f9;
+    opacity: 0.78;
+}
+
+.nx-vault-page .play-hover {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.16s ease;
+    pointer-events: none;
+}
+
+.nx-vault-page .card:hover .play-hover {
+    opacity: 1;
+}
+
+.nx-vault-page .play-hover span {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.92), rgba(34, 211, 238, 0.88));
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 0 28px rgba(34, 211, 238, 0.55);
+}
+
+.nx-vault-page .thumb-q {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 3;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: rgba(168, 85, 247, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+}
+
+.nx-vault-page .thumb-dur {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    z-index: 3;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: rgba(6, 9, 16, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+}
+
+.nx-vault-page .body {
+    padding: 10px 12px 7px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.nx-vault-page .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #cbd5e1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nx-vault-page .meta-src {
+    color: #67e8f9;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 800;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nx-vault-page .meta-dot {
+    opacity: 0.45;
+}
+
+.nx-vault-page .meta-lib {
+    margin-left: auto;
+    color: #a7f3d0;
+    background: rgba(16, 185, 129, 0.18);
+    border: 1px solid rgba(16, 185, 129, 0.42);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 9.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.nx-vault-page .title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #f8fafc;
+    line-height: 1.32;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nx-vault-page .sub {
+    font-size: 11px;
+    color: #94a3b8;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nx-vault-page .actions {
+    display: flex;
+    gap: 6px;
+    padding: 2px 12px 11px;
+    margin-top: auto;
+}
+
+.nx-vault-page .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #f1f5f9;
+    padding: 7px 12px;
+    font-weight: 700;
+    font-size: 12px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.nx-vault-page .btn:hover {
+    background: rgba(255, 255, 255, 0.13);
+    border-color: rgba(255, 255, 255, 0.28);
+    transform: translateY(-1px);
+}
+
+.nx-vault-page .btn:active {
+    transform: scale(0.97);
+}
+
+.nx-vault-page .btn:disabled {
+    opacity: 0.48;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.nx-vault-page .btn-primary-glass {
+    background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+    border-color: rgba(168, 85, 247, 0.55);
+    color: #ffffff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 6px 18px rgba(168, 85, 247, 0.34);
+}
+
+.nx-vault-page .btn-primary-glass:hover {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 8px 24px rgba(168, 85, 247, 0.5);
+}
+
+.nx-vault-page .btn-cyan-glass {
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.22), rgba(14, 165, 233, 0.2));
+    border-color: rgba(34, 211, 238, 0.45);
+    color: #cffafe;
+}
+
+.nx-vault-page .btn-cyan-glass:hover {
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.34), rgba(14, 165, 233, 0.3));
+    border-color: rgba(34, 211, 238, 0.72);
+    color: #ffffff;
+}
+
+.nx-vault-page .btn-stash-neutral {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.13);
+    color: #e2e8f0;
+}
+
+.nx-vault-page .btn-stash-neutral:hover {
+    background: rgba(245, 158, 11, 0.16);
+    border-color: rgba(245, 158, 11, 0.48);
+    color: #fde68a;
+}
+
+.nx-vault-page .btn-stash-glass {
+    background: rgba(245, 158, 11, 0.18);
+    border-color: rgba(245, 158, 11, 0.48);
+    color: #fde68a;
+}
+
+.nx-vault-page .btn-stash-glass:hover {
+    background: rgba(245, 158, 11, 0.28);
+    border-color: rgba(245, 158, 11, 0.72);
+    color: #ffffff;
+}
+
+.nx-vault-page .actions .btn {
+    flex: 1;
+    padding: 5px 8px;
+    font-size: 11px;
+    min-height: 28px;
+}
+
+.nx-vault-page .actions .btn.btn-icon-only {
+    flex: 0 0 32px;
+    padding: 5px 0;
+}
+
+.nx-vault-page .actions .btn .material-icons-round {
+    font-size: 14px;
+}
+
+/* Vault Empty State + 3x2 Symmetric Stat Grid */
+.nx-vault-page .empty-state {
+    text-align: center;
+    padding: 56px 24px;
+    color: #94a3b8;
+    background: rgba(14, 19, 32, 0.56);
+    backdrop-filter: blur(22px) saturate(145%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 24px 60px rgba(0, 0, 0, 0.45);
+    border-radius: 18px;
+}
+
+.nx-vault-page .empty-state .material-icons-round {
+    font-size: 52px;
+    color: #67e8f9;
+    margin-bottom: 10px;
+}
+
+.nx-vault-page .empty-state h2 {
+    color: #f8fafc;
+    margin: 0 0 8px;
+    font-size: 21px;
+    font-weight: 800;
+}
+
+.nx-vault-recent {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+.nx-vault-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    max-width: 780px;
+    margin: 24px auto 0;
+    text-align: left;
+}
+
+@media (max-width: 780px) {
+    .nx-vault-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.nx-vault-stat-card {
+    padding: 13px 15px;
+    border-radius: 13px;
+    background: rgba(16, 22, 38, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nx-vault-stat-card strong {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 16px;
+    color: #f8fafc;
+}
+
+.nx-vault-stat-card span {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.nx-vault-stat-card .material-icons-round {
+    font-size: 15px !important;
+    color: #c084fc !important;
+    margin: 0 !important;
+}
+
+/* Vault Player Modal + Selection Bar */
+.nx-vault-page .card-select-wrap {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 5;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: rgba(7, 10, 18, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0.76;
+    transition: opacity 0.15s, background 0.15s, border-color 0.15s, transform 0.15s;
+}
+
+.nx-vault-page .card:hover .card-select-wrap,
+.nx-vault-page .card.is-selected .card-select-wrap {
+    opacity: 1;
+}
+
+.nx-vault-page .card.is-selected .card-select-wrap {
+    background: #22d3ee;
+    border-color: #22d3ee;
+}
+
+.nx-vault-page .card-select-cb {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    accent-color: #22d3ee;
+    cursor: pointer;
+}
+
+.nx-vault-page .sel-bar {
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    transform: translate(-50%, 140%);
+    z-index: 70;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    border-radius: 14px;
+    transition: transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+    max-width: calc(100vw - 28px);
+}
+
+.nx-vault-page .sel-bar.visible {
+    transform: translate(-50%, 0);
+}
+
+.nx-vault-page .sel-count {
+    font-size: 13px;
+    font-weight: 800;
+    color: #ffffff;
+    white-space: nowrap;
+}
+
+.nx-vault-page .sel-hint {
+    font-size: 11px;
+    color: #67e8f9;
+    white-space: nowrap;
+}
+
+.nx-vault-page .modal-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: rgba(4, 6, 12, 0.84);
+    backdrop-filter: blur(14px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.nx-vault-page .modal-bg.open {
+    display: flex;
+}
+
+.nx-vault-page .modal {
+    width: min(1040px, 96vw);
+    background: rgba(12, 16, 28, 0.88);
+    backdrop-filter: blur(28px) saturate(160%);
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 32px 90px rgba(0, 0, 0, 0.88);
+}
+
+.nx-vault-page .modal-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: rgba(16, 22, 38, 0.72);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nx-vault-page .modal-title {
+    font-weight: 800;
+    font-size: 14px;
+    color: #f8fafc;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nx-vault-page .modal video {
+    width: 100%;
+    max-height: 78vh;
+    background: #000;
+    display: block;
+}
+
+/* Vyvážený výkonový režim (predvolený): blur na shelli a modáloch, karty bez bluru pre plynulý scroll */
+body.perf-lite .nx-main .v-card,
+body.perf-balanced .nx-main .v-card,
+body.perf-lite .nx-vault-page .card,
+body.perf-balanced .nx-vault-page .card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   ROUND 3 OBSIDIAN GLASS REFINEMENTS
+   - True modal/overlay frost in balanced mode (perf-lite:not(.perf-none))
+   - Single-row 6-button utility bar under home cards (zero orphan 3rd row)
+   - Unified frosted thumbnail badges across Home & Vault
+   - Compact 2-row filter bar without orphan Dĺžka dropdown
+   - Quantum Search & Discovery Hub control harmony + legible tabular numerals
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* 1. Keep smooth backdrop frost on overlays/modals/bars in balanced mode, never in perf-none */
+body:not(.perf-none) .dhub-overlay,
+body.perf-lite:not(.perf-none) .dhub-overlay {
+    background: rgba(4, 6, 13, 0.80) !important;
+    backdrop-filter: blur(28px) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(135%) !important;
+}
+
+body:not(.perf-none) .quantum-search-overlay,
+body.perf-lite:not(.perf-none) .quantum-search-overlay {
+    background: rgba(3, 5, 11, 0.80) !important;
+    backdrop-filter: blur(28px) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(135%) !important;
+}
+
+body:not(.perf-none):not(.light-theme):not(.skin-vision:not(.vision-dark)) .modal-wrap,
+body.perf-lite:not(.perf-none):not(.light-theme):not(.skin-vision:not(.vision-dark)) .modal-wrap,
+body:not(.perf-none) .player-overlay,
+body.perf-lite:not(.perf-none) .player-overlay,
+body:not(.perf-none) .duo-player-overlay,
+body.perf-lite:not(.perf-none) .duo-player-overlay,
+body:not(.perf-none) .tna-player-overlay,
+body.perf-lite:not(.perf-none) .tna-player-overlay,
+body:not(.perf-none) .dhub-player-overlay,
+body.perf-lite:not(.perf-none) .dhub-player-overlay {
+    background: rgba(4, 6, 13, 0.82) !important;
+    backdrop-filter: blur(26px) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(26px) saturate(135%) !important;
+}
+
+body:not(.perf-none) .dhub-container,
+body.perf-lite:not(.perf-none) .dhub-container,
+body:not(.perf-none) .quantum-search-container,
+body.perf-lite:not(.perf-none) .quantum-search-container,
+body:not(.perf-none):not(.light-theme):not(.skin-vision:not(.vision-dark)) .modal-wrap .modal-card,
+body.perf-lite:not(.perf-none):not(.light-theme):not(.skin-vision:not(.vision-dark)) .modal-wrap .modal-card,
+body:not(.perf-none):not(.light-theme):not(.skin-vision:not(.vision-dark)) .modal-wrap.nexus-settings .settings-card,
+body.perf-lite:not(.perf-none):not(.light-theme):not(.skin-vision:not(.vision-dark)) .modal-wrap.nexus-settings .settings-card,
+body:not(.perf-none) .nx-rel-modal-card,
+body.perf-lite:not(.perf-none) .nx-rel-modal-card,
+body:not(.perf-none) .mhub-dialog,
+body.perf-lite:not(.perf-none) .mhub-dialog,
+body:not(.perf-none) .player-container,
+body.perf-lite:not(.perf-none) .player-container,
+body:not(.perf-none) .tna-player-box,
+body.perf-lite:not(.perf-none) .tna-player-box,
+body:not(.perf-none) .dhub-player-box,
+body.perf-lite:not(.perf-none) .dhub-player-box {
+    background:
+        radial-gradient(880px 440px at 14% 0%, rgba(168, 85, 247, 0.14), transparent 60%),
+        radial-gradient(760px 420px at 88% 10%, rgba(34, 211, 238, 0.09), transparent 58%),
+        linear-gradient(165deg, rgba(13, 17, 32, 0.89), rgba(7, 10, 19, 0.93)) !important;
+    backdrop-filter: blur(34px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(34px) saturate(140%) !important;
+    border-color: rgba(255, 255, 255, 0.13) !important;
+}
+
+body.perf-lite:not(.perf-none) .gallery-controls-bar,
+body.perf-lite:not(.perf-none) .batch-bar,
+body.perf-lite:not(.perf-none) .nx-vault-bar,
+body.perf-lite:not(.perf-none) .nx-top-strip {
+    backdrop-filter: blur(20px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(130%) !important;
+}
+
+/* 2. Video cards: single aligned utility icon row + compact actions */
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-actions-row {
+    gap: 5px !important;
+    margin-top: 8px !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-actions-row .btn-stream,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-actions-row .btn-dl-manual,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-actions-row .v-local-pill {
+    height: 33px !important;
+    border-radius: 9px !important;
+    font-size: 12.5px !important;
+    padding-inline: 10px !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card-utility-actions {
+    flex: 0 0 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    opacity: 1 !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card-utility-actions > button {
+    height: 30px !important;
+    min-width: 0 !important;
+    padding: 0 2px !important;
+    border-radius: 8px !important;
+    font-size: 11.5px !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card-utility-actions > button .material-icons-round {
+    font-size: 15px !important;
+}
+
+/* 3. Unified Obsidian frosted thumbnail badges (Home + Vault) */
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .quality-chip,
+body.ui-v1 .quality-chip,
+body.ui-classic .quality-chip,
+.nx-vault-card .thumb-q {
+    background: rgba(8, 12, 22, 0.78) !important;
+    color: #e2e8f0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.34) !important;
+    font-family: 'Manrope', 'Plus Jakarta Sans', system-ui, sans-serif !important;
+    font-variant-numeric: tabular-nums;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.04em !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .status-badge {
+    background: rgba(8, 12, 22, 0.74) !important;
+    color: #cbd5e1 !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28) !important;
+    font-family: 'Manrope', 'Plus Jakarta Sans', system-ui, sans-serif !important;
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    padding: 2px 6px !important;
+    border-radius: 7px !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .status-badge.status-ready {
+    color: #86efac !important;
+    border-color: rgba(52, 211, 153, 0.28) !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .status-badge.status-error {
+    color: #fca5a5 !important;
+    border-color: rgba(248, 113, 113, 0.34) !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .size-chip,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .duration-chip,
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .v-card .preview-source-badge {
+    font-family: 'Manrope', 'Plus Jakarta Sans', system-ui, sans-serif !important;
+    font-variant-numeric: tabular-nums;
+}
+
+/* 4. Filter bar: keep Row 2 unified without orphan Dĺžka dropdown on Row 3 */
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .gallery-controls-bar {
+    padding: 7px 10px !important;
+    gap: 4px 5px !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .gallery-controls-bar .gcb-btn {
+    padding: 4px 7px !important;
+    font-size: 11px !important;
+    gap: 3px !important;
+    border-radius: 9px !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .gallery-controls-bar .size-btn {
+    padding: 3px 6px !important;
+    font-size: 10.5px !important;
+}
+
+body:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-main .gallery-controls-bar .nx-date-input {
+    width: 106px !important;
+    min-width: 104px !important;
+    max-width: 112px !important;
+    padding: 4px 5px !important;
+    font-size: 11px !important;
+}
+
+/* 5. Discovery Hub disabled Import All state (never loud green at 0) */
+.dhub-header-btn-import:disabled {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: rgba(226, 232, 240, 0.45) !important;
+    box-shadow: none !important;
+    opacity: 0.65 !important;
+    cursor: not-allowed !important;
+}
+
+/* 6. Quantum Search gear button, empty state badge, and single-line toolbar */
+.quantum-search-btn-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    border-radius: 10px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(167, 139, 250, 0.25) !important;
+    color: #cbd5e1 !important;
+    cursor: pointer;
+    transition: all 0.16s ease;
+}
+
+.quantum-search-btn-icon:hover {
+    background: rgba(168, 85, 247, 0.18) !important;
+    border-color: rgba(168, 85, 247, 0.48) !important;
+    color: #ffffff !important;
+}
+
+.quantum-search-btn-icon .material-icons-round {
+    font-size: 18px !important;
+}
+
+.quantum-search-empty-icon {
+    width: 58px !important;
+    height: 58px !important;
+    border-radius: 18px !important;
+    margin: 0 auto 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(168, 85, 247, 0.12) !important;
+    border: 1px solid rgba(168, 85, 247, 0.28) !important;
+    color: #c4b5fd !important;
+}
+
+.quantum-search-empty-icon .material-icons-round {
+    font-size: 28px !important;
+}
+
+.quantum-results-toolbar {
+    gap: 4px 5px !important;
+    padding: 7px 9px !important;
+    border-radius: 12px !important;
+    background: rgba(15, 23, 42, 0.56) !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+}
+
+.quantum-toolbar-scrape {
+    gap: 4px !important;
+}
+
+.quantum-toolbar-scrape #telegramJoinedChatsButton {
+    max-width: 90px !important;
+    padding: 3px 5px !important;
+    font-size: 11px !important;
+}
+
+.quantum-toolbar-channel-label {
+    display: none !important;
+}
+
+.quantum-toolbar-scrape #telegramChannelInput,
+.quantum-toolbar-scrape #quantumToolbarChannel {
+    width: 78px !important;
+    min-width: 64px !important;
+    padding: 3px 6px !important;
+    font-size: 11px !important;
+}
+
+.quantum-toolbar-field {
+    gap: 3px !important;
+    font-size: 11px !important;
+}
+
+.quantum-toolbar-layout-group {
+    font-size: 11px !important;
+    gap: 4px !important;
+}
+
+.quantum-result-layout-button {
+    padding: 3px 5px !important;
+    font-size: 10.5px !important;
+}
+
+.quantum-toolbar-field select,
+.quantum-toolbar-field #telegramLimitSelect,
+.quantum-toolbar-field #searchLimitTotal,
+.quantum-toolbar-field #quantumQuickSort,
+.quantum-toolbar-field #quantumQuickDuration,
+.quantum-toolbar-field #quantumQuickQuality,
+.quantum-toolbar-field #quantumQuickOrientation {
+    font-size: 11.5px !important;
+    padding: 4px 6px !important;
+    background: rgba(15, 23, 42, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    color: #e2e8f0 !important;
+}
+
+#quantumSearchSettingsView select,
+.quantum-ms-btn {
+    background: rgba(15, 23, 42, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 8px !important;
+    color: #e2e8f0 !important;
+}
+
+/* 7. Related Workspace & Video Player Obsidian Glass harmony + crisp 0 numerals */
+.nx-rel-sidebar {
+    background: rgba(10, 14, 26, 0.62) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.nx-rel-sidebar .btn-primary.nx-rel-cta {
+    background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(168, 85, 247, 0.58) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 8px 22px rgba(168, 85, 247, 0.34) !important;
+    border-radius: 12px !important;
+    transition: transform 0.14s ease, filter 0.14s ease, box-shadow 0.14s ease !important;
+}
+
+.nx-rel-sidebar .btn-primary.nx-rel-cta:hover:not(:disabled) {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 12px 26px rgba(168, 85, 247, 0.44) !important;
+}
+
+.nx-rel-header {
+    background: linear-gradient(90deg, rgba(16, 21, 38, 0.78), rgba(10, 14, 26, 0.74)) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.09) !important;
+}
+
+.nx-rel-mode-tabs {
+    background: rgba(7, 10, 20, 0.74) !important;
+    border-color: rgba(255, 255, 255, 0.11) !important;
+}
+
+.gallery-related-item {
+    background: rgba(15, 21, 38, 0.74) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+.player-overlay .player-container,
+body.perf-lite .player-overlay .player-container {
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 32px 90px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+    overflow: hidden;
+}
+
+.player-header {
+    background: linear-gradient(180deg, rgba(7, 10, 19, 0.88), rgba(7, 10, 19, 0.25)) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+}
+
+.mhub-pill,
+.dhub-tab-badge,
+.nx-vault-badge,
+.nx-vault-stat-card strong,
+.nx-vault-stat strong,
+.nx-stat-pill,
+.nx-count-pill,
+.nx-board-row .nx-count-pill,
+.nx-rel-section-head span:not(.material-icons-round),
+.nx-rel-section-count,
+.chip .n {
+    font-family: 'Manrope', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+    font-variant-numeric: tabular-nums;
+}
+
+.material-icons-round {
+    font-family: 'Material Icons Round' !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   CREATOR RADAR & VAULT DOSSIER — OBSIDIAN VISION GLASS
+   ══════════════════════════════════════════════════════════════════════════════ */
+.nx-rail-btn.is-accent-violet:hover,
+.nx-rail-btn.is-accent-violet.active {
+    color: #e9d5ff;
+    border-color: rgba(168, 85, 247, 0.52);
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.24), rgba(99, 102, 241, 0.16));
+}
+
+.cradar-overlay,
+body.perf-lite .cradar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100120;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(4, 6, 13, 0.82) !important;
+    backdrop-filter: blur(28px) saturate(135%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(135%) !important;
+}
+
+.cradar-overlay[hidden] {
+    display: none !important;
+}
+
+.cradar-shell,
+body.perf-lite .cradar-shell {
+    width: min(1320px, 96vw);
+    height: min(860px, 90vh);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background:
+        radial-gradient(900px 460px at 14% 0%, rgba(168, 85, 247, 0.15), transparent 60%),
+        radial-gradient(760px 420px at 88% 12%, rgba(34, 211, 238, 0.10), transparent 58%),
+        linear-gradient(165deg, rgba(13, 17, 32, 0.90), rgba(7, 10, 19, 0.94)) !important;
+    backdrop-filter: blur(34px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(34px) saturate(140%) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 36px 96px rgba(0, 0, 0, 0.72);
+    color: #f1f5f9;
+    font-family: 'Plus Jakarta Sans', 'Manrope', system-ui, sans-serif;
+}
+
+.cradar-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+    background: linear-gradient(90deg, rgba(18, 24, 42, 0.72), rgba(10, 14, 26, 0.68));
+}
+
+.cradar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.cradar-brand-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.28), rgba(34, 211, 238, 0.18));
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    color: #e9d5ff;
+    flex-shrink: 0;
+}
+
+.cradar-brand h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: #f8fafc;
+}
+
+.cradar-accent {
+    background: linear-gradient(90deg, #c4b5fd, #67e8f9);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.cradar-brand p {
+    margin: 2px 0 0;
+    font-size: 11.5px;
+    color: #94a3b8;
+}
+
+.cradar-header-stats {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.cradar-pill {
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    background: rgba(168, 85, 247, 0.16);
+    border: 1px solid rgba(168, 85, 247, 0.34);
+    color: #e9d5ff;
+}
+
+.cradar-pill.is-cyan {
+    background: rgba(34, 211, 238, 0.12);
+    border-color: rgba(34, 211, 238, 0.32);
+    color: #a5f3fc;
+}
+
+.cradar-close {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: #cbd5e1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.cradar-close:hover {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: rgba(248, 113, 113, 0.45);
+    color: #fff;
+}
+
+.cradar-body {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 310px 1fr;
+}
+
+.cradar-sidebar {
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(8, 11, 21, 0.56);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    min-height: 0;
+}
+
+.cradar-add-form {
+    display: flex;
+    gap: 6px;
+}
+
+.cradar-input-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    height: 34px;
+    border-radius: 10px;
+    background: rgba(6, 9, 18, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.cradar-input-wrap.is-compact {
+    height: 31px;
+}
+
+.cradar-input-wrap .material-icons-round {
+    font-size: 16px;
+    color: #94a3b8;
+}
+
+.cradar-input-wrap input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #f8fafc;
+    font-size: 12px;
+}
+
+.cradar-sidebar-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.cradar-filter-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 3px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cradar-seg {
+    border: 1px solid transparent;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 5px 8px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.cradar-seg.active {
+    color: #f8fafc;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(34, 211, 238, 0.14));
+    border-color: rgba(168, 85, 247, 0.42);
+}
+
+.cradar-creator-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-right: 2px;
+}
+
+.cradar-creator-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 9px;
+    border-radius: 11px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.cradar-creator-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(168, 85, 247, 0.32);
+}
+
+.cradar-creator-item.is-active {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(34, 211, 238, 0.10));
+    border-color: rgba(168, 85, 247, 0.5);
+}
+
+.cradar-avatar,
+.cradar-hero-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(168, 85, 247, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e9d5ff;
+    font-weight: 800;
+    font-size: 13px;
+}
+
+.cradar-hero-avatar {
+    width: 62px;
+    height: 62px;
+    border-radius: 14px;
+    font-size: 18px;
+}
+
+.cradar-avatar img,
+.cradar-hero-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.cradar-creator-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.cradar-creator-name {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #f8fafc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cradar-creator-sub {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
+    font-size: 10.5px;
+    color: #94a3b8;
+    font-variant-numeric: tabular-nums;
+}
+
+.cradar-local-dot {
+    color: #6ee7b7;
+    font-weight: 700;
+}
+
+.cradar-star-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.cradar-star-btn.is-followed {
+    color: #facc15;
+}
+
+.cradar-star-btn:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #fde047;
+}
+
+.cradar-main {
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+}
+
+.cradar-empty-state {
+    margin: auto;
+    text-align: center;
+    max-width: 420px;
+}
+
+.cradar-empty-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 12px;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(168, 85, 247, 0.14);
+    border: 1px solid rgba(168, 85, 247, 0.34);
+    color: #c4b5fd;
+}
+
+.cradar-empty-icon .material-icons-round {
+    font-size: 28px;
+}
+
+.cradar-empty-mini {
+    padding: 22px 14px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 12.5px;
+}
+
+.cradar-dossier {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.cradar-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: rgba(15, 22, 40, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.cradar-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.cradar-hero-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.cradar-hero-title-row h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #f8fafc;
+}
+
+.cradar-quality-pill,
+.cradar-follow-pill {
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 800;
+}
+
+.cradar-quality-pill {
+    background: rgba(168, 85, 247, 0.22);
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    color: #e9d5ff;
+}
+
+.cradar-follow-pill {
+    background: rgba(250, 204, 21, 0.16);
+    border: 1px solid rgba(250, 204, 21, 0.35);
+    color: #fef08a;
+}
+
+.cradar-hero-metrics {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.cradar-metric {
+    padding: 5px 10px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.cradar-metric strong {
+    color: #f8fafc;
+    font-size: 13px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.cradar-metric.is-cyan strong {
+    color: #67e8f9;
+}
+
+.cradar-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.cradar-btn-primary,
+.cradar-btn-glass {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 13px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.cradar-btn-primary {
+    border: 1px solid rgba(168, 85, 247, 0.58);
+    background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+    color: #ffffff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 6px 18px rgba(168, 85, 247, 0.32);
+}
+
+.cradar-btn-glass {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.05);
+    color: #e2e8f0;
+}
+
+.cradar-btn-glass.is-followed {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: #fef08a;
+}
+
+.cradar-btn-primary.is-sm,
+.cradar-btn-glass.is-sm {
+    height: 29px;
+    padding: 0 10px;
+    font-size: 11px;
+    border-radius: 8px;
+}
+
+.cradar-btn-primary .material-icons-round,
+.cradar-btn-glass .material-icons-round {
+    font-size: 15px;
+}
+
+.cradar-btn-primary.is-done {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(52, 211, 153, 0.45);
+    color: #a7f3d0;
+    box-shadow: none;
+}
+
+.cradar-tabs-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.cradar-tabs {
+    display: inline-flex;
+    gap: 6px;
+    padding: 4px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.cradar-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 9px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cradar-tab.active {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.24), rgba(34, 211, 238, 0.14));
+    border-color: rgba(168, 85, 247, 0.42);
+    color: #f8fafc;
+}
+
+.cradar-tab .material-icons-round {
+    font-size: 15px;
+}
+
+.cradar-count-badge {
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.cradar-dossier-status {
+    font-size: 11.5px;
+    color: #a5f3fc;
+}
+
+.cradar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+    gap: 12px;
+}
+
+.cradar-card {
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgba(15, 22, 38, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    display: flex;
+    flex-direction: column;
+}
+
+.cradar-card-thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: radial-gradient(circle at 50% 35%, rgba(168, 85, 247, 0.14), rgba(6, 9, 18, 0.96));
+    overflow: hidden;
+}
+
+.cradar-card-thumb img {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.cradar-thumb-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.cradar-thumb-fallback .material-icons-round {
+    font-size: 26px;
+    color: #67e8f9;
+    opacity: 0.78;
+}
+
+.cradar-badge {
+    z-index: 2;
+    position: absolute;
+    padding: 2px 7px;
+    border-radius: 7px;
+    font-size: 10px;
+    font-weight: 800;
+    background: rgba(6, 9, 18, 0.80);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #f8fafc;
+    font-variant-numeric: tabular-nums;
+}
+
+.cradar-badge.is-q {
+    top: 7px;
+    left: 7px;
+}
+
+.cradar-badge.is-dur {
+    bottom: 7px;
+    right: 7px;
+}
+
+.cradar-card-body {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.cradar-card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10.5px;
+    color: #94a3b8;
+}
+
+.cradar-src-tag {
+    color: #67e8f9;
+    font-weight: 700;
+}
+
+.cradar-card-body h4 {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.35;
+    color: #f1f5f9;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.cradar-card-actions {
+    margin-top: auto;
+    display: flex;
+    gap: 6px;
+    padding-top: 4px;
+}
+
+@media (max-width: 860px) {
+    .cradar-body {
+        grid-template-columns: 1fr;
+    }
+    .cradar-sidebar {
+        max-height: 250px;
+        border-right: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+}
+
+
+/* ── Creator Radar Toolbar, Selectors, Split-Screen & Inline Player ────────── */
+.cradar-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(12, 18, 34, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.cradar-toolbar-filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.cradar-filter-search {
+    min-width: 190px;
+    flex: 1 1 200px;
+}
+
+.cradar-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 9px;
+    height: 31px;
+    border-radius: 10px;
+    background: rgba(6, 9, 18, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.cradar-field span {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 10px;
+    color: #67e8f9;
+    white-space: nowrap;
+}
+
+.cradar-field select {
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #f8fafc;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cradar-field select option {
+    background: #0b1020;
+    color: #f8fafc;
+}
+
+.cradar-selection-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.cradar-sel-counter {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #cbd5e1;
+    margin-right: auto;
+    font-variant-numeric: tabular-nums;
+}
+
+.cradar-btn-cyan {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 29px;
+    padding: 0 11px;
+    border-radius: 8px;
+    border: 1px solid rgba(34, 211, 238, 0.45);
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.22), rgba(59, 130, 246, 0.16));
+    color: #cffafe;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cradar-btn-cyan:hover:not(:disabled) {
+    filter: brightness(1.12);
+}
+
+.cradar-btn-cyan:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.cradar-btn-glass.is-icon {
+    padding: 0 8px;
+}
+
+.cradar-btn-glass.is-enhanced {
+    border-color: rgba(34, 211, 238, 0.45);
+    color: #a5f3fc;
+}
+
+.cradar-btn-glass.is-busy .material-icons-round {
+    animation: cradarSpin 1s linear infinite;
+}
+
+@keyframes cradarSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.cradar-select-wrap {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    z-index: 3;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    background: rgba(6, 9, 18, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.cradar-select-cb {
+    width: 14px;
+    height: 14px;
+    accent-color: #22d3ee;
+    cursor: pointer;
+}
+
+.cradar-card.is-selected {
+    border-color: rgba(34, 211, 238, 0.72) !important;
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.35), 0 12px 28px rgba(0, 0, 0, 0.45) !important;
+}
+
+.cradar-player-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(3, 5, 11, 0.84);
+    backdrop-filter: blur(24px);
+}
+
+.cradar-player-overlay[hidden] {
+    display: none !important;
+}
+
+.cradar-player-box {
+    width: min(1040px, 94vw);
+    max-height: 86vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: linear-gradient(165deg, rgba(14, 18, 34, 0.94), rgba(7, 10, 19, 0.98));
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.75);
+}
+
+.cradar-player-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.cradar-player-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #f8fafc;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cradar-player-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.cradar-player-status {
+    padding: 8px 16px;
+    font-size: 12px;
+    color: #e9d5ff;
+    background: rgba(168, 85, 247, 0.16);
+    border-bottom: 1px solid rgba(168, 85, 247, 0.30);
+}
+
+.cradar-player-error {
+    padding: 10px 16px;
+    font-size: 12.5px;
+    color: #fecaca;
+    background: rgba(239, 68, 68, 0.16);
+    border-bottom: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.cradar-player-box video {
+    width: 100%;
+    max-height: 70vh;
+    background: #000;
+    display: block;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   FÁZA 1 & 2 — SÉMANTICKÉ FILTER MENU, 2-LIŠTOVÝ HEADER, FROSTED LIGHT & PERF-NONE
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Čisté sémantické dropdown menu pre multi-filtre (.nx-filter-menu) ────── */
+.nx-filter-dropdown {
+    position: relative;
+}
+
+.nx-filter-trigger {
+    height: 28px;
+    min-width: 112px;
+}
+
+.nx-filter-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: var(--z-dropdown, 60);
+    width: 250px;
+    max-height: 330px;
+    overflow: hidden;
+    padding: 9px;
+    border-radius: 12px;
+    border: 1px solid var(--nx-menu-border);
+    background: var(--nx-menu-bg);
+    color: var(--nx-menu-text);
+    box-shadow: var(--nx-menu-shadow);
+    backdrop-filter: blur(22px) saturate(155%);
+    -webkit-backdrop-filter: blur(22px) saturate(155%);
+}
+
+.nx-filter-menu--wide {
+    width: 280px;
+}
+
+.nx-filter-menu--narrow {
+    width: 225px;
+}
+
+.nx-filter-menu--right {
+    left: auto;
+    right: 0;
+}
+
+.nx-filter-menu__actions {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.nx-filter-menu__actions .gcb-btn {
+    height: 24px !important;
+    min-height: 24px !important;
+    padding: 0 9px !important;
+    font-size: 11px !important;
+}
+
+.nx-filter-menu__search {
+    width: 100%;
+    height: 29px;
+    margin-bottom: 8px;
+    padding: 0 9px;
+    border-radius: 7px;
+    border: 1px solid var(--nx-menu-border);
+    background: var(--nx-menu-input-bg);
+    color: var(--nx-menu-text);
+    font-size: 12px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.nx-filter-menu__search:focus {
+    border-color: var(--nx-accent, #a855f7);
+}
+
+.nx-filter-menu__list {
+    max-height: 228px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nx-filter-menu__option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--nx-menu-text);
+    cursor: pointer;
+    transition: background 0.12s ease;
+}
+
+.nx-filter-menu__option:hover {
+    background: var(--nx-menu-hover);
+}
+
+/* ── 2-lištový Header: Nástroje pohľadu & Activity Pill ───────────────────── */
+.nx-topbar-dropdown {
+    position: relative;
+}
+
+.nx-view-tools-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: var(--z-dropdown, 60);
+    width: 256px;
+    padding: 8px;
+    border-radius: 13px;
+    border: 1px solid var(--nx-menu-border);
+    background: var(--nx-menu-bg);
+    color: var(--nx-menu-text);
+    box-shadow: var(--nx-menu-shadow);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.nx-view-tools-section {
+    padding: 5px 8px 3px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nx-menu-muted);
+}
+
+.nx-view-tools-divider {
+    height: 1px;
+    margin: 4px 2px;
+    background: var(--nx-menu-border);
+    opacity: 0.6;
+}
+
+.nx-view-tools-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 9px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--nx-menu-text);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.nx-view-tools-item:hover {
+    background: var(--nx-menu-hover);
+}
+
+.nx-view-tools-item.is-active {
+    background: rgba(168, 85, 247, 0.18);
+    border-color: rgba(168, 85, 247, 0.36);
+}
+
+.nx-view-tools-item .material-icons-round {
+    font-size: 16px;
+    color: var(--nx-menu-muted);
+}
+
+.nx-view-tools-item.is-active .material-icons-round {
+    color: #c084fc;
+}
+
+.nx-view-tools-badge {
+    margin-left: auto;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    background: rgba(34, 211, 238, 0.18);
+    color: #67e8f9;
+}
+
+.nx-activity-pill {
+    height: 36px;
+    padding: 0 11px;
+    border-radius: 10px;
+    border: 1px solid rgba(34, 211, 238, 0.36);
+    background: rgba(34, 211, 238, 0.12);
+    color: #cffafe;
+    font-size: 11.5px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.nx-activity-pill .material-icons-round {
+    font-size: 16px;
+    color: #22d3ee;
+}
+
+.nx-activity-popover {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: var(--z-dropdown, 60);
+    width: min(360px, 90vw);
+    padding: 10px;
+    border-radius: 13px;
+    border: 1px solid var(--nx-menu-border);
+    background: var(--nx-menu-bg);
+    color: var(--nx-menu-text);
+    box-shadow: var(--nx-menu-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* ── 3-stupňový prepínač výkonu skla v Nastaveniach ───────────────────────── */
+.nx-perf-segmented {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.nx-perf-option {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--settings-border, var(--nx-border));
+    background: var(--settings-input, rgba(255, 255, 255, 0.04));
+    color: var(--settings-text, var(--nx-text));
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.nx-perf-option:hover {
+    border-color: var(--settings-accent, #a855f7);
+}
+
+.nx-perf-option.is-active {
+    border-color: var(--settings-accent, #a855f7);
+    background: var(--settings-accent-soft, rgba(168, 85, 247, 0.18));
+    box-shadow: 0 0 0 1px var(--settings-accent, #a855f7);
+}
+
+.nx-perf-option strong {
+    font-size: 12px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.nx-perf-option small {
+    font-size: 11px;
+    color: var(--settings-muted, var(--nx-text-dim));
+    line-height: 1.3;
+}
+
+/* ── Zjednotená Command Palette (Ctrl+Shift+P) ────────────────────────────── */
+.modal-wrap.command-palette-wrap {
+    z-index: var(--z-command, 140) !important;
+}
+
+.command-palette-card .result-item.is-selected,
+.command-palette-card .result-item:hover {
+    background: rgba(168, 85, 247, 0.18);
+    border-radius: 9px;
+}
+
+.command-palette-card .command-result {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.command-palette-card .command-result-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    flex: 1;
+}
+
+.command-palette-card .command-result-desc {
+    font-size: 11px;
+    color: var(--nx-text-dim, #94a3b8);
+}
+
+.command-palette-card .command-result-kbd {
+    font-family: var(--nx-font-mono);
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    border: 1px solid var(--nx-border-strong, rgba(255, 255, 255, 0.16));
+    color: var(--nx-text-dim, #94a3b8);
+    white-space: nowrap;
+}
+
+/* ── Jednotný z-index pre toasty, neorezaný rail a kompaktný responzívny topbar ── */
+.toast-container {
+    z-index: var(--z-toast, 160) !important;
+}
+
+.nx-rail-top {
+    overflow: visible;
+    gap: 5px;
+}
+
+.nx-rail-bottom {
+    overflow: visible;
+    gap: 5px;
+}
+
+@media (max-height: 780px) {
+    .nx-rail {
+        padding: 8px 0;
+    }
+
+    .nx-rail-top,
+    .nx-rail-bottom {
+        gap: 3px;
+    }
+
+    .nx-rail-btn {
+        width: 34px;
+        height: 34px;
+    }
+
+    .nx-rail-btn .material-icons-round {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 1360px) {
+    .nx-topbar {
+        padding: 8px 12px;
+    }
+
+    .nx-topbar-row {
+        gap: 6px;
+    }
+
+    .nx-search-box {
+        flex: 1 1 180px;
+        min-width: 150px;
+    }
+
+    .nx-pill-btn,
+    .nx-vault-jump-btn,
+    .nx-import-cta,
+    .nx-activity-pill {
+        padding: 0 8px;
+        font-size: 11.5px;
+    }
+
+    .nx-view-btn {
+        padding: 4px 7px;
+        font-size: 11.5px;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   FROSTED LIGHT REŽIM (body.light-theme a body.skin-vision:not(.vision-dark))
+   ══════════════════════════════════════════════════════════════════════════════ */
+body.light-theme,
+body.skin-vision:not(.vision-dark) {
+    background: #eef2f8 !important;
+    color: #0f172a !important;
+}
+
+body.light-theme .nx-shell,
+body.skin-vision:not(.vision-dark) .nx-shell {
+    background:
+        radial-gradient(920px 520px at 12% -6%, rgba(168, 85, 247, 0.14), transparent 60%),
+        radial-gradient(840px 500px at 88% 2%, rgba(14, 165, 233, 0.13), transparent 58%),
+        #eef2f8 !important;
+    color: #0f172a !important;
+}
+
+body.light-theme .nx-rail,
+body.light-theme .nx-drawer,
+body.light-theme .nx-topbar,
+body.skin-vision:not(.vision-dark) .nx-rail,
+body.skin-vision:not(.vision-dark) .nx-drawer,
+body.skin-vision:not(.vision-dark) .nx-topbar {
+    background: rgba(255, 255, 255, 0.78) !important;
+    border-color: rgba(15, 23, 42, 0.11) !important;
+    color: #0f172a !important;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+}
+
+body.light-theme .nx-drawer-footer,
+body.skin-vision:not(.vision-dark) .nx-drawer-footer {
+    background: rgba(248, 250, 252, 0.92) !important;
+    border-top-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+body.light-theme .nx-search-box,
+body.skin-vision:not(.vision-dark) .nx-search-box {
+    background: rgba(255, 255, 255, 0.92) !important;
+    border: 1px solid rgba(15, 23, 42, 0.16) !important;
+    color: #0f172a !important;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+body.light-theme .nx-search-box input,
+body.light-theme .nx-drawer-brand,
+body.light-theme .nx-list-item,
+body.light-theme .nx-tool-btn,
+body.light-theme .nx-source-tile,
+body.light-theme .v-card .v-title,
+body.skin-vision:not(.vision-dark) .nx-search-box input,
+body.skin-vision:not(.vision-dark) .nx-drawer-brand,
+body.skin-vision:not(.vision-dark) .nx-list-item,
+body.skin-vision:not(.vision-dark) .nx-tool-btn,
+body.skin-vision:not(.vision-dark) .nx-source-tile,
+body.skin-vision:not(.vision-dark) .v-card .v-title {
+    color: #0f172a !important;
+}
+
+body.light-theme .nx-select,
+body.light-theme .nx-board-search,
+body.light-theme .nx-quick-textarea,
+body.skin-vision:not(.vision-dark) .nx-select,
+body.skin-vision:not(.vision-dark) .nx-board-search,
+body.skin-vision:not(.vision-dark) .nx-quick-textarea {
+    background: #ffffff !important;
+    border-color: rgba(15, 23, 42, 0.18) !important;
+    color: #0f172a !important;
+}
+
+body.light-theme .nx-main .gallery-controls-bar,
+body.light-theme .nx-active-filters,
+body.light-theme .nx-ntp-bar,
+body.skin-vision:not(.vision-dark) .nx-main .gallery-controls-bar,
+body.skin-vision:not(.vision-dark) .nx-active-filters,
+body.skin-vision:not(.vision-dark) .nx-ntp-bar {
+    background: rgba(255, 255, 255, 0.82) !important;
+    border: 1px solid rgba(15, 23, 42, 0.11) !important;
+    color: #0f172a !important;
+}
+
+body.light-theme .nx-main .gallery-controls-bar .gcb-btn,
+body.light-theme .nx-pill-btn,
+body.light-theme .nx-mini-btn,
+body.light-theme .nx-view-btn,
+body.skin-vision:not(.vision-dark) .nx-main .gallery-controls-bar .gcb-btn,
+body.skin-vision:not(.vision-dark) .nx-pill-btn,
+body.skin-vision:not(.vision-dark) .nx-mini-btn,
+body.skin-vision:not(.vision-dark) .nx-view-btn {
+    background: rgba(15, 23, 42, 0.05) !important;
+    border: 1px solid rgba(15, 23, 42, 0.13) !important;
+    color: #1e293b !important;
+}
+
+body.light-theme .nx-main .gallery-controls-bar .gcb-btn.active,
+body.light-theme .nx-pill-btn.active,
+body.light-theme .nx-view-btn.active,
+body.skin-vision:not(.vision-dark) .nx-main .gallery-controls-bar .gcb-btn.active,
+body.skin-vision:not(.vision-dark) .nx-pill-btn.active,
+body.skin-vision:not(.vision-dark) .nx-view-btn.active {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(14, 165, 233, 0.18)) !important;
+    border-color: rgba(124, 58, 237, 0.45) !important;
+    color: #3b0764 !important;
+}
+
+body.light-theme .nx-vault-jump-btn,
+body.skin-vision:not(.vision-dark) .nx-vault-jump-btn {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.16), rgba(99, 102, 241, 0.16)) !important;
+    border-color: rgba(14, 165, 233, 0.45) !important;
+    color: #0c4a6e !important;
+}
+
+body.light-theme .nx-vault-jump-btn .material-icons-round,
+body.skin-vision:not(.vision-dark) .nx-vault-jump-btn .material-icons-round {
+    color: #0284c7 !important;
+}
+
+body.light-theme .nx-main .v-card,
+body.skin-vision:not(.vision-dark) .nx-main .v-card {
+    background: rgba(255, 255, 255, 0.88) !important;
+    border: 1px solid rgba(15, 23, 42, 0.11) !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08) !important;
+    color: #0f172a !important;
+}
+
+body.light-theme .nx-main .v-card .v-date-display,
+body.light-theme .nx-ntp-bar strong,
+body.light-theme .nx-ntp-bar span,
+body.skin-vision:not(.vision-dark) .nx-main .v-card .v-date-display,
+body.skin-vision:not(.vision-dark) .nx-ntp-bar strong,
+body.skin-vision:not(.vision-dark) .nx-ntp-bar span {
+    color: #334155 !important;
+}
+
+body.light-theme .nx-rail-btn,
+body.skin-vision:not(.vision-dark) .nx-rail-btn {
+    color: #475569;
+}
+
+body.light-theme .nx-rail-btn:hover,
+body.skin-vision:not(.vision-dark) .nx-rail-btn:hover {
+    color: #0f172a;
+    background: rgba(15, 23, 42, 0.07);
+}
+
+body.light-theme .nx-rail-btn.active,
+body.skin-vision:not(.vision-dark) .nx-rail-btn.active {
+    color: #6d28d9;
+    background: rgba(139, 92, 246, 0.14);
+}
+
+body.light-theme .nx-activity-pill,
+body.skin-vision:not(.vision-dark) .nx-activity-pill {
+    background: rgba(14, 165, 233, 0.14);
+    border-color: rgba(14, 165, 233, 0.42);
+    color: #0c4a6e;
+}
+
+body.light-theme .nx-activity-pill .material-icons-round,
+body.skin-vision:not(.vision-dark) .nx-activity-pill .material-icons-round {
+    color: #0284c7;
+}
+
+body.light-theme .modal-wrap,
+body.skin-vision:not(.vision-dark) .modal-wrap {
+    background: rgba(15, 23, 42, 0.36) !important;
+    backdrop-filter: blur(18px) saturate(130%);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
+}
+
+body.light-theme .modal-wrap .modal-card,
+body.light-theme .modal-wrap.nexus-settings .settings-card,
+body.light-theme .command-palette-card,
+body.skin-vision:not(.vision-dark) .modal-wrap .modal-card,
+body.skin-vision:not(.vision-dark) .modal-wrap.nexus-settings .settings-card,
+body.skin-vision:not(.vision-dark) .command-palette-card {
+    background: rgba(255, 255, 255, 0.94) !important;
+    border: 1px solid rgba(15, 23, 42, 0.14) !important;
+    color: #0f172a !important;
+    box-shadow: 0 24px 64px rgba(15, 23, 42, 0.22) !important;
+}
+
+body.light-theme .modal-wrap .modal-header,
+body.skin-vision:not(.vision-dark) .modal-wrap .modal-header {
+    background: rgba(241, 245, 249, 0.9) !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.1) !important;
+    color: #0f172a !important;
+}
+
+body.light-theme .command-palette-card .command-palette-input,
+body.skin-vision:not(.vision-dark) .command-palette-card .command-palette-input {
+    border-bottom: 1px solid rgba(15, 23, 42, 0.12);
+    background: rgba(248, 250, 252, 0.9);
+}
+
+body.light-theme .command-palette-card .command-palette-input input,
+body.light-theme .command-palette-card .result-item,
+body.skin-vision:not(.vision-dark) .command-palette-card .command-palette-input input,
+body.skin-vision:not(.vision-dark) .command-palette-card .result-item {
+    color: #0f172a !important;
+}
+
+body.light-theme .command-palette-card .command-result-desc,
+body.light-theme .command-palette-card .command-result-kbd,
+body.skin-vision:not(.vision-dark) .command-palette-card .command-result-desc,
+body.skin-vision:not(.vision-dark) .command-palette-card .command-result-kbd {
+    color: #475569 !important;
+    border-color: rgba(15, 23, 42, 0.16);
+}
+
+body.light-theme .batch-bar,
+body.skin-vision:not(.vision-dark) .batch-bar {
+    background: rgba(255, 255, 255, 0.94) !important;
+    border-color: rgba(124, 58, 237, 0.35) !important;
+    color: #0f172a !important;
+    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.18) !important;
+}
+
+body.light-theme .nexus-settings,
+body.skin-vision:not(.vision-dark) .nexus-settings {
+    --settings-bg: #f8fafc;
+    --settings-card: #ffffff;
+    --settings-input: #f1f5f9;
+    --settings-text: #0f172a;
+    --settings-muted: #475569;
+    --settings-border: rgba(15, 23, 42, 0.14);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   FÁZA 3: ČISTÁ .v-card (MAX 3 SIGNÁLY + ⋯ MENU), PLAYER-DRAWER, NEXUSTOAST & LAZY MODÁLY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* 1. Čistá video karta (.v-card) */
+.v-card.menu-open {
+    z-index: 35 !important;
+    overflow: visible !important;
+}
+
+.v-card .thumb-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Združený horný ľavý klaster (1. signál v pokoji: dostupnosť + kvalita + prípadný nehotový stav) */
+.v-card .v-card-signal-tl {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 6;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: rgba(6, 8, 15, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    pointer-events: none;
+}
+
+.v-card .v-card-signal-tl .card-availability {
+    position: static !important;
+    inset: auto !important;
+    width: 7px;
+    height: 7px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.v-card .v-card-signal-tl .quality-chip {
+    position: static !important;
+    inset: auto !important;
+    padding: 0 3px !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-family: var(--nx-font-mono, 'IBM Plex Mono', monospace);
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+}
+
+.v-card .v-card-signal-tl .status-badge {
+    position: static !important;
+    inset: auto !important;
+    padding: 1px 5px !important;
+    font-size: 9.5px !important;
+    border-radius: 999px;
+}
+
+/* Trvanie v IBM Plex Mono vpravo dole (2. signál v pokoji) */
+.v-card .duration-chip {
+    position: absolute !important;
+    right: 8px !important;
+    bottom: 8px !important;
+    left: auto !important;
+    top: auto !important;
+    z-index: 6;
+    font-family: var(--nx-font-mono, 'IBM Plex Mono', monospace) !important;
+    font-variant-numeric: tabular-nums;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em;
+    padding: 2px 6px !important;
+    border-radius: 6px !important;
+    background: rgba(6, 8, 15, 0.78) !important;
+    color: #f8fafc !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Technické odznaky (#ID, veľkosť, slabý náhľad) len pri jemnom hoveri */
+.v-card .v-card-hover-meta {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: calc(100% - 76px);
+    opacity: 0;
+    transform: translateY(3px);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+    pointer-events: none;
+}
+
+.v-card:hover .v-card-hover-meta,
+.v-card:focus-within .v-card-hover-meta {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.v-card .v-card-hover-meta .index-chip,
+.v-card .v-card-hover-meta .size-chip,
+.v-card .v-card-hover-meta .thumbnail-quality-badge {
+    position: static !important;
+    inset: auto !important;
+    margin: 0 !important;
+    padding: 2px 6px !important;
+    border-radius: 5px !important;
+    font-family: var(--nx-font-mono, 'IBM Plex Mono', monospace) !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    background: rgba(6, 8, 15, 0.8) !important;
+    color: #cbd5e1 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    white-space: nowrap;
+}
+
+/* Mirror picker: jemne utlmený v pokoji, plne viditeľný pri hoveri alebo otvorení */
+.v-card .mirror-source-picker {
+    opacity: 0.72;
+    transition: opacity 0.16s ease;
+}
+
+.v-card:hover .mirror-source-picker,
+.v-card:focus-within .mirror-source-picker,
+.v-card.menu-open .mirror-source-picker {
+    opacity: 1;
+}
+
+/* Meta hlavička karty */
+.v-card .v-meta-tech {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--nx-font-mono, 'IBM Plex Mono', monospace);
+    font-size: 10.5px;
+    color: var(--nx-text-muted, #94a3b8);
+    font-variant-numeric: tabular-nums;
+}
+
+.v-card .v-meta-size {
+    color: var(--nx-text-dim, #cbd5e1);
+    font-weight: 600;
+}
+
+/* Zjednodušený akčný riadok: 2 primárne akcie + kompaktné ⋯ menu */
+.v-card .v-actions-row {
+    display: flex !important;
+    align-items: center;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+    position: relative;
+}
+
+.v-card .v-actions-row .btn-stream,
+.v-card .v-actions-row .btn-dl-manual,
+.v-card .v-actions-row .v-local-pill {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 8px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.v-card .v-actions-row .btn-stream .material-icons-round,
+.v-card .v-actions-row .btn-dl-manual .material-icons-round,
+.v-card .v-actions-row .v-local-pill .material-icons-round {
+    font-size: 15px;
+}
+
+.v-card .v-card-more-wrap {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.v-card .v-card-more-btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--nx-surface-2, rgba(255, 255, 255, 0.06));
+    border: 1px solid var(--nx-border, rgba(255, 255, 255, 0.12));
+    color: var(--nx-text-dim, #cbd5e1);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.v-card .v-card-more-btn:hover,
+.v-card .v-card-more-btn.active {
+    background: rgba(var(--nx-accent-rgb, 168, 85, 247), 0.18);
+    border-color: rgba(var(--nx-accent-rgb, 168, 85, 247), 0.5);
+    color: var(--nx-text, #f8fafc);
+}
+
+.v-card .v-card-more-menu {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 6px);
+    min-width: 196px;
+    padding: 6px;
+    border-radius: 12px;
+    background: rgba(11, 16, 30, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    z-index: var(--z-dropdown, 60);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.v-card .v-card-more-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 9px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #e2e8f0;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.14s ease, color 0.14s ease;
+}
+
+.v-card .v-card-more-item:hover:not(:disabled) {
+    background: rgba(var(--nx-accent-rgb, 168, 85, 247), 0.18);
+    color: #ffffff;
+}
+
+.v-card .v-card-more-item:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+.v-card .v-card-more-item .material-icons-round {
+    font-size: 16px;
+    color: var(--nx-text-muted, #94a3b8);
+}
+
+.v-card .v-card-more-item.is-refresh .material-icons-round { color: #818cf8; }
+.v-card .v-card-more-item.is-rethumb .material-icons-round { color: #c084fc; }
+.v-card .v-card-more-item.is-related .material-icons-round { color: #22d3ee; }
+.v-card .v-card-more-item.is-ntp .material-icons-round { color: #4ade80; }
+
+.v-card .v-card-rethumb-status {
+    margin-top: 6px;
+    font-size: 11.5px;
+    line-height: 1.35;
+    color: var(--nx-warning, #fbbf24);
+    white-space: normal;
+}
+
+/* 2. Prehrávač — rozbaľovací player-drawer (vzor Nexus_Deck) */
+.p-drawer-dropdown {
+    position: relative;
+}
+
+.p-drawer-toggle-btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+    padding: 0 10px !important;
+    width: auto !important;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.p-drawer-toggle-label {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.player-drawer {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 312px;
+    max-width: min(92vw, 340px);
+    padding: 12px;
+    border-radius: 14px;
+    background: rgba(10, 15, 28, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 22px 54px rgba(0, 0, 0, 0.62);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: calc(var(--z-player, 120) + 5);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.player-drawer-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.player-drawer-title {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    padding: 0 2px;
+}
+
+.player-drawer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.player-drawer-btn {
+    width: 100% !important;
+    height: auto !important;
+    padding: 8px 9px !important;
+    border-radius: 9px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #e2e8f0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: flex-start !important;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.player-drawer-btn:hover,
+.player-drawer-btn.active {
+    background: rgba(var(--nx-accent-rgb, 168, 85, 247), 0.22) !important;
+    border-color: rgba(var(--nx-accent-rgb, 168, 85, 247), 0.55) !important;
+    color: #ffffff !important;
+}
+
+.player-drawer-btn .material-icons-round {
+    font-size: 16px;
+}
+
+.player-drawer-btn kbd {
+    margin-left: auto;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: var(--nx-font-mono, 'IBM Plex Mono', monospace);
+    font-size: 9.5px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #cbd5e1;
+}
+
+.p-icon-vlc { color: #fb923c; }
+.p-icon-tv { color: #38bdf8; }
+.p-actions-tv-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 3. Jednotný globálny NexusToast (--z-toast: 160) */
+.nx-toast-host,
+#nexus-toast-host {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    left: auto;
+    bottom: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: visible;
+    z-index: var(--z-toast, 160) !important;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: min(400px, calc(100vw - 28px));
+    pointer-events: none;
+}
+
+.nx-toast-host[popover] {
+    inset: 16px 16px auto auto;
+    width: auto;
+    height: auto;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+}
+
+.nx-toast {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    margin: 0;
+    border-radius: 12px;
+    background: rgba(13, 18, 32, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-left: 3px solid var(--nx-accent, #a855f7);
+    color: #f1f5f9;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    opacity: 0;
+    transform: translateX(18px) scale(0.98);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    animation: none;
+}
+
+.nx-toast.is-visible {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+}
+
+.nx-toast.is-leaving {
+    opacity: 0;
+    transform: translateX(18px) scale(0.96);
+}
+
+.nx-toast.success { border-left-color: #22c55e; }
+.nx-toast.success .nx-toast-icon { color: #4ade80; }
+.nx-toast.error { border-left-color: #ef4444; }
+.nx-toast.error .nx-toast-icon { color: #f87171; }
+.nx-toast.warning { border-left-color: #f59e0b; }
+.nx-toast.warning .nx-toast-icon { color: #fbbf24; }
+.nx-toast.info { border-left-color: var(--nx-accent, #a855f7); }
+.nx-toast.info .nx-toast-icon { color: var(--nx-accent-2, #38bdf8); }
+
+.nx-toast-icon {
+    font-size: 19px;
+    flex-shrink: 0;
+}
+
+.nx-toast-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    word-break: break-word;
+}
+
+.nx-toast-close {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #94a3b8;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.14s ease, color 0.14s ease;
+}
+
+.nx-toast-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.nx-toast-close .material-icons-round {
+    font-size: 16px;
+}
+
+/* 4. Lazy modály (.nx-lazy-modal) + Frosted Light kontrast */
+@keyframes nxModalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.nx-lazy-modal {
+    animation: nxModalFadeIn 0.14s ease-out;
+}
+
+body.light-theme .v-card .v-card-more-btn,
+body.skin-vision:not(.vision-dark) .v-card .v-card-more-btn {
+    background: rgba(15, 23, 42, 0.05);
+    border-color: rgba(15, 23, 42, 0.14);
+    color: #334155;
+}
+
+body.light-theme .v-card .v-card-more-menu,
+body.skin-vision:not(.vision-dark) .v-card .v-card-more-menu {
+    background: rgba(255, 255, 255, 0.96);
+    border-color: rgba(15, 23, 42, 0.14);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+}
+
+body.light-theme .v-card .v-card-more-item,
+body.skin-vision:not(.vision-dark) .v-card .v-card-more-item {
+    color: #0f172a;
+}
+
+body.light-theme .v-card .v-card-more-item:hover:not(:disabled),
+body.skin-vision:not(.vision-dark) .v-card .v-card-more-item:hover:not(:disabled) {
+    background: rgba(124, 58, 237, 0.1);
+    color: #0f172a;
+}
+
+body.light-theme .v-card .v-meta-size,
+body.skin-vision:not(.vision-dark) .v-card .v-meta-size {
+    color: #334155;
+}
+
+body.light-theme .nx-toast,
+body.skin-vision:not(.vision-dark) .nx-toast {
+    background: rgba(255, 255, 255, 0.96);
+    border-color: rgba(15, 23, 42, 0.14);
+    color: #0f172a;
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.16);
+}
+
+body.light-theme .nx-toast-close,
+body.skin-vision:not(.vision-dark) .nx-toast-close {
+    color: #475569;
+}
+
+body.light-theme .nx-toast-close:hover,
+body.skin-vision:not(.vision-dark) .nx-toast-close:hover {
+    background: rgba(15, 23, 42, 0.08);
+    color: #0f172a;
+}
+
+body.light-theme .nx-lazy-modal .modal-card,
+body.light-theme .duplicate-resolver-content,
+body.skin-vision:not(.vision-dark) .nx-lazy-modal .modal-card,
+body.skin-vision:not(.vision-dark) .duplicate-resolver-content {
+    background: rgba(255, 255, 255, 0.96) !important;
+    color: #0f172a !important;
+    border-color: rgba(15, 23, 42, 0.14) !important;
+}
+
+body.light-theme .nx-lazy-modal .modal-header h3,
+body.light-theme .nx-lazy-modal .modal-content label,
+body.light-theme .duplicate-resolver-title,
+body.skin-vision:not(.vision-dark) .nx-lazy-modal .modal-header h3,
+body.skin-vision:not(.vision-dark) .nx-lazy-modal .modal-content label,
+body.skin-vision:not(.vision-dark) .duplicate-resolver-title {
+    color: #0f172a !important;
+}
+
+body.light-theme .nx-lazy-modal .modal-content input,
+body.light-theme .nx-lazy-modal .modal-content select,
+body.light-theme .nx-lazy-modal .modal-content textarea,
+body.skin-vision:not(.vision-dark) .nx-lazy-modal .modal-content input,
+body.skin-vision:not(.vision-dark) .nx-lazy-modal .modal-content select,
+body.skin-vision:not(.vision-dark) .nx-lazy-modal .modal-content textarea {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-color: rgba(15, 23, 42, 0.18) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   REŽIM BEZ BLURU (body.perf-none) — SKUTOČNE 0× backdrop-filter
+   Vyššia špecificita (:root:not(#_)) prebije všetky triedne !important pravidlá
+   naprieč všetkými CSS súbormi vrátane obsidian_glass, dashboard a style.css.
+   ══════════════════════════════════════════════════════════════════════════════ */
+:root:not(#_) body.perf-none *,
+:root:not(#_) body.perf-none *::before,
+:root:not(#_) body.perf-none *::after,
+body.perf-none *,
+body.perf-none *::before,
+body.perf-none *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.perf-none .vg-ambient,
+body.perf-none .bg-orb {
+    display: none !important;
+}
+
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-rail,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-drawer,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-topbar,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .gallery-controls-bar,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-filter-menu,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-view-tools-menu,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-activity-popover,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .batch-bar,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .modal-wrap .modal-card,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .command-palette-card,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .dhub-container,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .quantum-search-container,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-rel-modal-card,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .mhub-dialog,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .cradar-shell,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .player-container,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .v-card-more-menu,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .player-drawer,
+body.perf-none:not(.light-theme):not(.skin-vision:not(.vision-dark)) .nx-toast {
+    background: #0d1220 !important;
+}
+
+body.perf-none.light-theme .nx-rail,
+body.perf-none.light-theme .nx-drawer,
+body.perf-none.light-theme .nx-topbar,
+body.perf-none.light-theme .gallery-controls-bar,
+body.perf-none.light-theme .nx-filter-menu,
+body.perf-none.light-theme .nx-view-tools-menu,
+body.perf-none.light-theme .nx-activity-popover,
+body.perf-none.light-theme .batch-bar,
+body.perf-none.light-theme .modal-wrap .modal-card,
+body.perf-none.light-theme .command-palette-card,
+body.perf-none.light-theme .v-card-more-menu,
+body.perf-none.light-theme .nx-toast,
+body.perf-none.skin-vision:not(.vision-dark) .nx-rail,
+body.perf-none.skin-vision:not(.vision-dark) .nx-drawer,
+body.perf-none.skin-vision:not(.vision-dark) .nx-topbar,
+body.perf-none.skin-vision:not(.vision-dark) .gallery-controls-bar,
+body.perf-none.skin-vision:not(.vision-dark) .nx-filter-menu,
+body.perf-none.skin-vision:not(.vision-dark) .nx-view-tools-menu,
+body.perf-none.skin-vision:not(.vision-dark) .nx-activity-popover,
+body.perf-none.skin-vision:not(.vision-dark) .batch-bar,
+body.perf-none.skin-vision:not(.vision-dark) .modal-wrap .modal-card,
+body.perf-none.skin-vision:not(.vision-dark) .command-palette-card,
+body.perf-none.skin-vision:not(.vision-dark) .v-card-more-menu,
+body.perf-none.skin-vision:not(.vision-dark) .nx-toast {
+    background: #ffffff !important;
+}

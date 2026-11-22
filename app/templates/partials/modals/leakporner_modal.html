@@ -1,0 +1,176 @@
+    <!-- LeakPorner Smart Discovery Modal -->
+    <template x-if="showLeakPornerDiscoveryModal">
+    <div class="modal-wrap nx-lazy-modal" role="dialog" aria-modal="true" aria-label="LeakPorner Smart Discovery">
+        <div class="modal-card" style="min-width:90vw;max-width:95vw;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
+                <h3><span class="material-icons-round">leak_add</span>🔍 Smart LeakPorner Discovery</h3>
+                <button @click="showLeakPornerDiscoveryModal = false"><span
+                        class="material-icons-round">close</span></button>
+            </div>
+            <div class="modal-body" style="padding:20px;">
+                <!-- Discovery Form -->
+                <div style="background:#1e293b;padding:20px;border-radius:8px;margin-bottom:20px;">
+                    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:15px;margin-bottom:15px;">
+                        <div>
+                            <label style="display:block;margin-bottom:5px;color:#cbd5e1;">Keyword (optional)</label>
+                            <input type="text" x-model="leakpornerDiscovery.keyword"
+                                placeholder="e.g., 'leaked', 'onlyfans', 'homemade'"
+                                style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;"
+                                @keydown.enter="searchLeakPornerDiscovery()">
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:5px;color:#cbd5e1;">Sort By</label>
+                            <select x-model="leakpornerDiscovery.sort"
+                                style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;">
+                                <option value="latest">Latest</option>
+                                <option value="longest">Longest</option>
+                                <option value="random">Random</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:5px;color:#cbd5e1;">Min Duration</label>
+                            <select x-model.number="leakpornerDiscovery.minDuration"
+                                style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;">
+                                <option value="0">Any</option>
+                                <option value="60">1 min</option>
+                                <option value="180">3 min</option>
+                                <option value="300">5 min</option>
+                                <option value="600">10 min</option>
+                                <option value="900">15 min</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:5px;color:#cbd5e1;">Pages to Scan</label>
+                            <input type="number" x-model.number="leakpornerDiscovery.pages" min="1" max="10"
+                                style="width:100%;padding:10px;border-radius:6px;border:1px solid #475569;background:#0f172a;color:#fff;">
+                        </div>
+                    </div>
+                    <div style="text-align:center;">
+                        <button @click="searchLeakPornerDiscovery()" :disabled="leakpornerDiscovery.loading"
+                            style="padding:12px 30px;background:#f59e0b;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;"
+                            :style="leakpornerDiscovery.loading ? 'opacity:0.6;cursor:not-allowed;' : ''"
+                            @mouseover="$event.target.style.background='#d97706'"
+                            @mouseout="$event.target.style.background='#f59e0b'">
+                            <span class="material-icons-round" x-show="!leakpornerDiscovery.loading">search</span>
+                            <span class="material-icons-round" x-show="leakpornerDiscovery.loading"
+                                style="animation:spin 1s linear infinite;">sync</span>
+                            <span x-text="leakpornerDiscovery.loading ? 'Scraping...' : 'Search'"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Header -->
+                <div x-show="leakpornerDiscovery.results.length > 0" style="margin-top:20px;">
+                    <div
+                        style="display:flex;justify-content:space-between;align-items:center;padding:15px;background:#1e293b;border-radius:8px;margin-bottom:15px;">
+                        <div style="color:#cbd5e1;">
+                            <strong style="color:#f59e0b;font-size:18px;">
+                                Found <span x-text="getLeakPornerMatchingResults().length"></span>/<span
+                                    x-text="leakpornerDiscovery.total"></span> videos
+                            </strong>
+                            <br>
+                            <span style="font-size:13px;">
+                                Keyword: <span x-text="leakpornerDiscovery.keyword || 'Latest'"
+                                    style="color:#f59e0b;font-weight:600;"></span> | Sort: <span
+                                    x-text="leakpornerDiscovery.sort" style="color:#22c55e;"></span>
+                            </span>
+                            <br>
+                            <span style="font-size:13px;color:#94a3b8;">
+                                Showing <span x-text="getLeakPornerFilteredResults().length"></span> visible results
+                                <span x-show="!leakpornerDiscovery.showAllResults">with the current filters</span>
+                                <span x-show="leakpornerDiscovery.showAllResults">from the full result set</span>
+                            </span>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+                            <label
+                                style="display:flex;align-items:center;gap:8px;color:#cbd5e1;font-size:12px;cursor:pointer;">
+                                <input type="checkbox" x-model="leakpornerDiscovery.showAllResults"
+                                    style="width:16px;height:16px;">
+                                Show all results
+                            </label>
+                            <button @click="selectAllLeakPorner()"
+                                style="padding:8px 16px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);border-radius:6px;color:#f59e0b;font-size:12px;cursor:pointer;font-weight:600;">
+                                Select All Matching
+                            </button>
+                            <button @click="importSelectedLeakPorner()"
+                                :disabled="leakpornerDiscovery.selected.length === 0"
+                                :style="leakpornerDiscovery.selected.length === 0 ? 'opacity:0.5;cursor:not-allowed;' : ''"
+                                style="padding:10px 20px;background:#f59e0b;color:#000;border:none;border-radius:6px;font-weight:700;cursor:pointer;">
+                                Import Selected (<span x-text="leakpornerDiscovery.selected.length"></span>)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Results Grid -->
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:15px;">
+                        <template x-for="video in getLeakPornerFilteredResults()" :key="video.url">
+                            <div @click="leakpornerDiscovery.selected.includes(video.url) ? leakpornerDiscovery.selected = leakpornerDiscovery.selected.filter(u => u !== video.url) : leakpornerDiscovery.selected.push(video.url)"
+                                :class="leakpornerDiscovery.selected.includes(video.url) ? 'leakporner-card-selected' : ''"
+                                style="position:relative;border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid rgba(255,255,255,0.1);transition:all 0.2s;"
+                                class="leakporner-discovery-card"
+                                @mouseover="$event.currentTarget.style.borderColor='#f59e0b'"
+                                @mouseout="$event.currentTarget.style.borderColor=leakpornerDiscovery.selected.includes(video.url) ? '#f59e0b' : 'rgba(255,255,255,0.1)'">
+                                <img :src="video.thumbnail ? proxifyUrl(video.thumbnail) : 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22%3E%3Crect fill=%22%231e293b%22 width=%22320%22 height=%22180%22/%3E%3C/svg%3E'"
+                                    @error="$event.target.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22%3E%3Crect fill=%22%231e293b%22 width=%22320%22 height=%22180%22/%3E%3C/svg%3E'; $event.target.onerror=null;"
+                                    :alt="video.title" loading="lazy"
+                                    style="width:100%;height:180px;object-fit:cover;background:#1e293b;">
+                                <!-- Checkbox -->
+                                <div style="position:absolute;top:8px;left:8px;display:flex;gap:5px;">
+                                    <div :style="leakpornerDiscovery.selected.includes(video.url) ? 'background:#f59e0b;border-color:#f59e0b;' : 'background:rgba(0,0,0,0.6);border-color:rgba(255,255,255,0.3);'"
+                                        style="width:24px;height:24px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">
+                                        <span class="material-icons-round"
+                                            x-show="leakpornerDiscovery.selected.includes(video.url)"
+                                            style="font-size:16px;color:#000;">check</span>
+                                    </div>
+                                </div>
+                                <!-- Source badge -->
+                                <div style="position:absolute;top:8px;right:8px;display:flex;gap:5px;">
+                                    <span
+                                        style="background:#f59e0b;color:#000;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:700;">LP</span>
+                                </div>
+                                <!-- Duration -->
+                                <div style="position:absolute;bottom:48px;left:8px;">
+                                    <div x-show="video.duration > 0"
+                                        style="background:rgba(0,0,0,0.8);color:#fff;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:600;display:inline-block;"
+                                        x-text="Math.floor(video.duration / 60) + ':' + String(video.duration % 60).padStart(2, '0')">
+                                    </div>
+                                </div>
+                                <div style="padding:10px 12px;background:#0f172a;">
+                                    <p style="margin:0;font-size:12px;font-weight:600;color:#fff;line-height:1.3;"
+                                        x-text="video.title && video.title.length > 60 ? video.title.substring(0, 60) + '...' : (video.title || 'LeakPorner Video')">
+                                    </p>
+                                    <div
+                                        style="display:flex;align-items:center;gap:4px;margin-top:4px;color:#94a3b8;font-size:10px;">
+                                        <span x-show="video.duration > 0"
+                                            style="display:flex;align-items:center;gap:3px;">
+                                            <span class="material-icons-round" style="font-size:12px;">schedule</span>
+                                            <span x-text="formatDuration(video.duration)"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div x-show="!leakpornerDiscovery.loading && leakpornerDiscovery.results.length === 0 && leakpornerDiscovery.total === 0 && !leakpornerDiscovery.loading"
+                    style="text-align:center;padding:60px 20px;color:#94a3b8;">
+                    <span class="material-icons-round"
+                        style="font-size:64px;opacity:0.3;margin-bottom:15px;color:#f59e0b;">leak_add</span>
+                    <p style="font-size:16px;margin:0;">Click <strong>Search</strong> to browse LeakPorner listings.<br>
+                        <small style="font-size:12px;opacity:0.7;">Scrapes latest leaked content from leakporner.com —
+                            no keyword required.</small>
+                    </p>
+                </div>
+                <div x-show="!leakpornerDiscovery.loading && leakpornerDiscovery.results.length > 0 && getLeakPornerFilteredResults().length === 0"
+                    style="text-align:center;padding:60px 20px;color:#94a3b8;">
+                    <span class="material-icons-round"
+                        style="font-size:64px;opacity:0.3;margin-bottom:15px;color:#f59e0b;">search_off</span>
+                    <p style="font-size:16px;margin:0;">No videos match the current filters. Try lowering the duration
+                        limit or clearing the keyword.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

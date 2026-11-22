@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Filester Discovery",
+  "version": "13.1.0",
+  "minimum_chrome_version": "120",
+  "description": "Control panel for local Filester OSINT discovery backend",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Filester Discovery"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage", "contextMenus", "alarms", "tabs", "tabGroups", "unlimitedStorage"],
+  "host_permissions": ["http://127.0.0.1:8765/*", "http://localhost:8765/*"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; img-src 'self' https://filester.me https://*.filester.me"
+  },
+  "options_page": "dashboard.html",
+  "commands": {}
+}

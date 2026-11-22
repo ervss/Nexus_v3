@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Simpcity Search",
+  "version": "1.0.0",
+  "description": "Search Simpcity for selected text or a phrase you enter.",
+  "permissions": ["contextMenus"],
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "action": {
+    "default_title": "Search Simpcity",
+    "default_popup": "popup.html"
+  }
+}

@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS VAULT — Lokálny trezor</title>
+<script src="/static/color_palettes.js?v=20261122_ui1"></script>
+<link rel="stylesheet" href="/static/tokens.css?v=20261122_ui1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<link rel="stylesheet" href="/static/dashboard_hybrid.css?v=20261122_ui1">
+<link rel="stylesheet" href="/static/obsidian_glass.css?v=20261122_ui1">
+<link rel="stylesheet" href="/static/color_palettes.css?v=20261122_ui1">
+<script src="/static/hls.min.js" defer></script>
+<script src="/static/dashboard_hybrid.js?v=20261122_ui1" defer></script>
+</head>
+<body class="nx-vault-page ui-classic skin-vision vision-dark">
+<script>
+  (function () {
+    try {
+      var stored = localStorage.getItem('dashboardPerformanceMode');
+      var mode = stored === 'full' ? 'full' : (stored === 'none' ? 'none' : 'balanced');
+      document.body.classList.toggle('perf-lite', mode !== 'full');
+      document.body.classList.toggle('perf-balanced', mode === 'balanced');
+      document.body.classList.toggle('perf-full', mode === 'full');
+      document.body.classList.toggle('perf-none', mode === 'none');
+    } catch (e) { }
+  })();
+</script>
+
+<div class="nx-shell">
+  <!-- Zdieľaný ľavý navigačný rail -->
+  {% set nx_rail_context = 'vault' %}
+  {% include "partials/nx_rail.html" %}
+
+  <!-- Main Stage -->
+  <main class="nx-main">
+    <header class="nx-topbar nx-vault-topbar">
+      <div class="topbar-row">
+        <a class="nx-vault-brand" href="/vault">
+          <span class="nx-vault-brand-title">LOCAL VAULT</span>
+          <span class="nx-vault-count-pill" id="totalRecordsLabel">načítavam…</span>
+        </a>
+
+        <div class="nx-search-box">
+          <span class="material-icons-round">search</span>
+          <input id="queryInput" type="search" placeholder="Zadaj meno modelky, názov videa alebo kľúčové slovo… (Enter)" autocomplete="off">
+          <kbd class="nx-kbd">Ctrl+K</kbd>
+          <button id="searchBtn" class="btn btn-primary-glass" type="button" style="height:30px;padding:0 14px;">Hľadať</button>
+        </div>
+
+        <button id="topSplitBtn" class="btn btn-cyan-glass" type="button" title="Prehrať označené (alebo viditeľné) videá v Split-Screene">
+          <span class="material-icons-round">view_column</span> Split-Screen
+        </button>
+        <a class="btn" href="/"><span class="material-icons-round">home</span> Knižnica</a>
+      </div>
+
+      <div class="chips" id="bucketChips"></div>
+
+      <div class="controls-bar">
+        <div class="ctrl-group">
+          <label for="sortSelect">Zoradiť</label>
+          <select id="sortSelect">
+            <option value="relevance">Relevancia</option>
+            <option value="quality_desc">Najvyššia kvalita (4K → SD)</option>
+            <option value="duration_desc">Najdlhšie video</option>
+            <option value="size_desc">Najväčší súbor (MB)</option>
+            <option value="newest">Najnovšie</option>
+            <option value="title_asc">Názov (A–Z)</option>
+          </select>
+        </div>
+
+        <div class="ctrl-group">
+          <label for="minHeightSelect">MIN kvalita</label>
+          <select id="minHeightSelect">
+            <option value="0">Všetky kvality</option>
+            <option value="480">480p+</option>
+            <option value="720">720p+ HD</option>
+            <option value="1080">1080p+ Full HD</option>
+            <option value="1440">1440p+ (2K)</option>
+            <option value="2160">4K (2160p+)</option>
+          </select>
+        </div>
+
+        <div class="ctrl-group">
+          <label for="minDurationSelect">MIN dĺžka</label>
+          <select id="minDurationSelect">
+            <option value="0">Akákoľvek</option>
+            <option value="60">1+ min</option>
+            <option value="180">3+ min</option>
+            <option value="300">5+ min</option>
+            <option value="600">10+ min</option>
+            <option value="1200">20+ min</option>
+            <option value="1800">30+ min</option>
+            <option value="3600">60+ min</option>
+          </select>
+        </div>
+
+        <div class="ctrl-group">
+          <label for="minSizeSelect">MIN veľkosť</label>
+          <select id="minSizeSelect">
+            <option value="0">Akákoľvek</option>
+            <option value="10">10+ MB</option>
+            <option value="25">25+ MB</option>
+            <option value="50">50+ MB</option>
+            <option value="100">100+ MB</option>
+            <option value="250">250+ MB</option>
+            <option value="500">500+ MB</option>
+            <option value="1024">1+ GB</option>
+            <option value="2048">2+ GB</option>
+          </select>
+        </div>
+
+        <div class="ctrl-group">
+          <label for="stateSelect">Stav</label>
+          <select id="stateSelect">
+            <option value="all">Všetko</option>
+            <option value="playable">Dá sa prehrať</option>
+            <option value="importable">Nové (na import)</option>
+            <option value="library">Už v knižnici</option>
+            <option value="thumb">Iba s náhľadom</option>
+          </select>
+        </div>
+
+        <div class="ctrl-group">
+          <label for="limitSelect">Limit</label>
+          <select id="limitSelect">
+            <option value="50">50 / trezor</option>
+            <option value="100" selected>100 / trezor</option>
+            <option value="250">250 / trezor</option>
+            <option value="500">500 / trezor</option>
+          </select>
+        </div>
+
+        <div class="ctrl-group">
+          <label for="cardSizeSelect">Náhľady</label>
+          <select id="cardSizeSelect">
+            <option value="285">Kompaktné</option>
+            <option value="355" selected>Veľké</option>
+            <option value="440">Extra veľké</option>
+          </select>
+        </div>
+
+        <div class="ctrl-group">
+          <label for="inlineFilterInput">Filter</label>
+          <input id="inlineFilterInput" type="search" placeholder="zdroj, kanál, tag, URL…" autocomplete="off">
+        </div>
+
+        <button id="resetFiltersBtn" class="btn btn-stash-glass" type="button" style="display:none">
+          <span class="material-icons-round">restart_alt</span> Reset filtrov
+        </button>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <div class="status-bar" id="statusBar">
+        <span>Okamžité lokálne FTS5 vyhľadávanie naprieč všetkými trezormi bez sieťového čakania · <kbd class="nx-kbd">Ctrl+Shift+V</kbd> späť do Knižnice</span>
+      </div>
+      <div id="resultsContainer">
+        <div class="empty-state" id="vaultEmptyState">
+          <span class="material-icons-round">local_movies</span>
+          <h2>Prehľadaj svoj lokálny trezor</h2>
+          <p>Zadaj meno alebo kľúčové slovo hore. Následne vieš výsledky okamžite filtrovať, prehrávať, odkladať do Stashu alebo hromadne importovať.</p>
+          <div class="nx-vault-recent" id="recentQueriesRow"></div>
+          <div class="nx-vault-stats-grid" id="vaultStatsGrid"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="sel-bar" id="selectionBar" aria-live="polite">
+  <span class="sel-count" id="selectionCountLabel">0 označených</span>
+  <span class="sel-hint">Ctrl + klik na kartu</span>
+  <button id="selectAllVisibleBtn" class="btn" type="button"><span class="material-icons-round">select_all</span> Všetky viditeľné</button>
+  <button id="selSplitOpenBtn" class="btn btn-primary-glass" type="button"><span class="material-icons-round">view_column</span> Split-Screen</button>
+  <button id="selSplitPickerBtn" class="btn btn-cyan-glass" type="button"><span class="material-icons-round">grid_view</span> Split Picker</button>
+  <button id="selBulkStashBtn" class="btn btn-stash-glass" type="button"><span class="material-icons-round">bookmark_add</span> Odložiť (<span id="selStashCount">0</span>)</button>
+  <button id="selBulkImportBtn" class="btn btn-cyan-glass" type="button"><span class="material-icons-round">download</span> Importovať (<span id="selImportCount">0</span>)</button>
+  <button id="clearSelectionBtn" class="btn" type="button"><span class="material-icons-round">close</span> Zrušiť</button>
+</div>
+
+<div class="modal-bg" id="playerModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="playerTitle">Prehrávač</div>
+      <button class="btn" type="button" id="playerRefreshBtn" style="display:none"><span class="material-icons-round">refresh</span> Obnoviť stream</button>
+      <a class="btn" id="playerSourceLink" href="#" target="_blank" rel="noopener noreferrer" style="display:none"><span class="material-icons-round">open_in_new</span> Zdroj</a>
+      <button class="btn btn-primary-glass" type="button" id="closePlayerBtn"><span class="material-icons-round">close</span> Zavrieť</button>
+    </div>
+    <div id="playerStatus" style="display:none;padding:9px 16px;background:rgba(168,85,247,.16);color:#e9d5ff;font-size:12.5px;border-bottom:1px solid rgba(168,85,247,.32)"></div>
+    <div id="playerError" style="display:none;padding:12px 16px;background:rgba(239,68,68,.16);color:#fecaca;font-size:13px;border-bottom:1px solid rgba(239,68,68,.35)"></div>
+    <video id="playerVideo" controls autoplay playsinline></video>
+  </div>
+</div>
+
+<script>
+(() => {
+  const queryInput = document.getElementById('queryInput');
+  const sortSelect = document.getElementById('sortSelect');
+  const minHeightSelect = document.getElementById('minHeightSelect');
+  const minDurationSelect = document.getElementById('minDurationSelect');
+  const minSizeSelect = document.getElementById('minSizeSelect');
+  const stateSelect = document.getElementById('stateSelect');
+  const limitSelect = document.getElementById('limitSelect');
+  const cardSizeSelect = document.getElementById('cardSizeSelect');
+  const inlineFilterInput = document.getElementById('inlineFilterInput');
+  const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+  const searchBtn = document.getElementById('searchBtn');
+  const chipsEl = document.getElementById('bucketChips');
+  const statusBar = document.getElementById('statusBar');
+  const resultsEl = document.getElementById('resultsContainer');
+  const totalLabel = document.getElementById('totalRecordsLabel');
+  const topSplitBtn = document.getElementById('topSplitBtn');
+  const selectionBar = document.getElementById('selectionBar');
+  const selectionCountLabel = document.getElementById('selectionCountLabel');
+  const selectAllVisibleBtn = document.getElementById('selectAllVisibleBtn');
+  const selSplitOpenBtn = document.getElementById('selSplitOpenBtn');
+  const selSplitPickerBtn = document.getElementById('selSplitPickerBtn');
+  const selBulkStashBtn = document.getElementById('selBulkStashBtn');
+  const selStashCount = document.getElementById('selStashCount');
+  const selBulkImportBtn = document.getElementById('selBulkImportBtn');
+  const selImportCount = document.getElementById('selImportCount');
+  const clearSelectionBtn = document.getElementById('clearSelectionBtn');
+  const playerModal = document.getElementById('playerModal');
+  const playerVideo = document.getElementById('playerVideo');
+  const playerTitle = document.getElementById('playerTitle');
+  const playerStatus = document.getElementById('playerStatus');
+  const playerError = document.getElementById('playerError');
+  const playerSourceLink = document.getElementById('playerSourceLink');
+  const playerRefreshBtn = document.getElementById('playerRefreshBtn');
+
+  let activeHls = null;
+  let currentPlayerItem = null;
+  let currentPlayerRetryDone = false;
+  let playerToken = 0;
+
+  const RECENT_KEY = 'nx_vault_recent_queries';
+  const STASH_TITLE = 'Odložené na neskôr';
+
+  let statsBuckets = [];
+  let activeBucket = 'all';
+  let lastSearchData = null;
+  let visibleItems = [];
+  const selectedIds = new Set();
+  const stashedIds = new Set();
+  let lastSelectedIdx = -1;
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmtDur = (sec) => {
+    const s = Number(sec || 0);
+    if (!s) return '';
+    const m = Math.floor(s / 60), r = s % 60;
+    const h = Math.floor(m / 60);
+    return h ? `${h}:${String(m % 60).padStart(2,'0')}:${String(r).padStart(2,'0')}` : `${m}:${String(r).padStart(2,'0')}`;
+  };
+
+  function getRecentQueries() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+      return Array.isArray(parsed) ? parsed.filter(Boolean).slice(0, 10) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function rememberQuery(q) {
+    const clean = String(q || '').trim();
+    if (!clean) return;
+    const next = [clean, ...getRecentQueries().filter(item => item.toLowerCase() !== clean.toLowerCase())].slice(0, 10);
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(next)); } catch {}
+  }
+
+  function renderEmptyOverview() {
+    const recentRow = document.getElementById('recentQueriesRow');
+    const statsGrid = document.getElementById('vaultStatsGrid');
+    if (recentRow) {
+      const recent = getRecentQueries();
+      if (recent.length) {
+        recentRow.innerHTML = recent.map(q =>
+          `<button type="button" class="chip" data-recent-q="${esc(q)}"><span class="material-icons-round">history</span> ${esc(q)}</button>`
+        ).join('');
+        recentRow.querySelectorAll('[data-recent-q]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            queryInput.value = btn.dataset.recentQ || '';
+            runSearch();
+          });
+        });
+      } else {
+        recentRow.innerHTML = '';
+      }
+    }
+    if (statsGrid && statsBuckets.length) {
+      statsGrid.innerHTML = statsBuckets.map(b => `
+        <div class="nx-vault-stat-card">
+          <span><span class="material-icons-round">${esc(b.icon || 'folder')}</span>${esc(b.label)}</span>
+          <strong>${Number(b.count || 0).toLocaleString('en-US').replace(/,/g, ' ')}</strong>
+        </div>
+      `).join('');
+    }
+  }
+
+  function getPlayUrl(item) {
+    if (item.bucket === 'library' && item.video_id && !String(item.playable_url || '').startsWith('/')) {
+      return `/stream_proxy/${item.video_id}.mp4`;
+    }
+    return item.playable_url || '';
+  }
+
+  function hasActiveControls() {
+    return (
+      activeBucket !== 'all' ||
+      sortSelect.value !== 'relevance' ||
+      Number(minHeightSelect.value || 0) > 0 ||
+      Number(minDurationSelect.value || 0) > 0 ||
+      Number(minSizeSelect.value || 0) > 0 ||
+      stateSelect.value !== 'all' ||
+      inlineFilterInput.value.trim() !== ''
+    );
+  }
+
+  function applyClientFiltersAndSort(items, includeBucket = true) {
+    const minH = Number(minHeightSelect.value || 0);
+    const minDur = Number(minDurationSelect.value || 0);
+    const minSz = Number(minSizeSelect.value || 0);
+    const state = stateSelect.value;
+    const sub = inlineFilterInput.value.trim().toLowerCase();
+    const sortBy = sortSelect.value;
+
+    const filtered = items.filter((item, idx) => {
+      item._origIndex = item._origIndex ?? idx;
+      if (includeBucket && activeBucket !== 'all' && item.bucket !== activeBucket) return false;
+      if (minH > 0 && Number(item.height || 0) < minH) return false;
+      if (minDur > 0 && Number(item.duration_sec || 0) < minDur) return false;
+      if (minSz > 0 && Number(item.size_mb || 0) < minSz) return false;
+
+      const playUrl = getPlayUrl(item);
+      if (state === 'playable' && !playUrl) return false;
+      if (state === 'importable' && !item.can_import) return false;
+      if (state === 'library' && item.status !== 'library') return false;
+      if (state === 'thumb' && !item.thumbnail) return false;
+
+      if (sub) {
+        const hay = `${item.title || ''} ${item.subtitle || ''} ${item.source_label || ''} ${item.url || ''} ${item.source_url || ''}`.toLowerCase();
+        if (!hay.includes(sub)) return false;
+      }
+      return true;
+    });
+
+    const sorted = [...filtered];
+    if (sortBy === 'quality_desc') {
+      sorted.sort((a, b) => (Number(b.height || 0) - Number(a.height || 0)) || (Number(b.size_mb || 0) - Number(a.size_mb || 0)) || (a._origIndex - b._origIndex));
+    } else if (sortBy === 'duration_desc') {
+      sorted.sort((a, b) => (Number(b.duration_sec || 0) - Number(a.duration_sec || 0)) || (Number(b.height || 0) - Number(a.height || 0)));
+    } else if (sortBy === 'size_desc') {
+      sorted.sort((a, b) => (Number(b.size_mb || 0) - Number(a.size_mb || 0)) || (Number(b.height || 0) - Number(a.height || 0)));
+    } else if (sortBy === 'newest') {
+      sorted.sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')) || (a._origIndex - b._origIndex));
+    } else if (sortBy === 'title_asc') {
+      sorted.sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'sk', {sensitivity:'base'}));
+    } else {
+      sorted.sort((a, b) => a._origIndex - b._origIndex);
+    }
+    return sorted;
+  }
+
+  function renderChips() {
+    const allItems = lastSearchData?.items || null;
+    let filteredByBucket = null;
+    let totalFiltered = 0;
+
+    if (allItems) {
+      const noBucketItems = applyClientFiltersAndSort(allItems, false);
+      filteredByBucket = {};
+      for (const b of statsBuckets) filteredByBucket[b.id] = 0;
+      for (const it of noBucketItems) {
+        filteredByBucket[it.bucket] = (filteredByBucket[it.bucket] || 0) + 1;
+      }
+      totalFiltered = noBucketItems.length;
+    }
+
+    const totalStored = statsBuckets.reduce((a, b) => a + (b.count || 0), 0);
+
+    let html = `<button type="button" class="chip ${activeBucket === 'all' ? 'active' : ''}" data-bucket="all">
+      <span class="material-icons-round">apps</span> Všetko
+      <span class="n">${(filteredByBucket ? totalFiltered : totalStored).toLocaleString('en-US').replace(/,/g, ' ')}</span>
+    </button>`;
+
+    for (const b of statsBuckets) {
+      const cnt = filteredByBucket ? (filteredByBucket[b.id] ?? 0) : b.count;
+      html += `<button type="button" class="chip ${activeBucket === b.id ? 'active' : ''}" data-bucket="${esc(b.id)}">
+        <span class="material-icons-round">${esc(b.icon)}</span> ${esc(b.label)}
+        <span class="n">${Number(cnt || 0).toLocaleString('en-US').replace(/,/g, ' ')}</span>
+      </button>`;
+    }
+    chipsEl.innerHTML = html;
+    chipsEl.querySelectorAll('.chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeBucket = btn.dataset.bucket || 'all';
+        renderChips();
+        renderResults();
+      });
+    });
+
+    resetFiltersBtn.style.display = hasActiveControls() ? 'inline-flex' : 'none';
+  }
+
+  function destroyActiveHls() {
+    if (activeHls) {
+      try { activeHls.destroy(); } catch {}
+      activeHls = null;
+    }
+  }
+
+  function setPlayerStatus(msg = '') {
+    if (!playerStatus) return;
+    if (msg) {
+      playerStatus.textContent = msg;
+      playerStatus.style.display = 'block';
+    } else {
+      playerStatus.textContent = '';
+      playerStatus.style.display = 'none';
+    }
+  }
+
+  function isHlsTarget(playbackUrl, itemMeta) {
+    const u = String(playbackUrl || '').toLowerCase();
+    return Boolean(itemMeta?.is_hls) || u.includes('.m3u8') || u.startsWith('/hls_proxy');
+  }
+
+  function buildLibraryPlaybackUrl(streamUrl, sourceUrl, videoId, isHlsHint = false, proxySession = '', playbackReferer = '', preferVideoProxy = false) {
+    const clean = String(streamUrl || '').trim();
+    const isHls = Boolean(isHlsHint) || /\.m3u8(?:[?#]|$)/i.test(clean);
+    const ref = encodeURIComponent(playbackReferer || sourceUrl || '');
+    const sess = proxySession ? `&session=${encodeURIComponent(proxySession)}` : '';
+    if (clean.startsWith('/api/') || clean.startsWith('/hls_proxy')) return clean;
+    if (clean.startsWith('/') && !clean.startsWith('//')) return clean;
+    if (isHls && /^https?:\/\//i.test(clean)) {
+      return `/hls_proxy?url=${encodeURIComponent(clean)}&referer=${ref}${sess}`;
+    }
+    if (proxySession && /^https?:\/\//i.test(clean)) {
+      return `/hls_proxy?url=${encodeURIComponent(clean)}&referer=${ref}${sess}`;
+    }
+    if (preferVideoProxy && /^https?:\/\//i.test(clean)) {
+      return `/api/v1/video_proxy?url=${encodeURIComponent(clean)}&referer=${ref}`;
+    }
+    if (videoId) return `/stream_proxy/${Number(videoId)}.mp4`;
+    return clean;
+  }
+
+  function attachPlaybackSource(playbackUrl, itemMeta, runToken) {
+    if (runToken !== playerToken) return;
+    destroyActiveHls();
+    const wantHls = isHlsTarget(playbackUrl, itemMeta);
+
+    if (wantHls && window.Hls && window.Hls.isSupported()) {
+      const hls = new window.Hls({ enableWorker: true, lowLatencyMode: false });
+      activeHls = hls;
+      hls.loadSource(playbackUrl);
+      hls.attachMedia(playerVideo);
+      hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
+        if (runToken !== playerToken) return;
+        setPlayerStatus('');
+        playerVideo.play().catch(() => {});
+      });
+      hls.on(window.Hls.Events.ERROR, (_ev, data) => {
+        if (runToken !== playerToken || !data || !data.fatal) return;
+        destroyActiveHls();
+        handlePlaybackFailure();
+      });
+      return;
+    }
+
+    if (wantHls && playerVideo.canPlayType && playerVideo.canPlayType('application/vnd.apple.mpegurl')) {
+      playerVideo.src = playbackUrl;
+      playerVideo.play().catch(() => {});
+      return;
+    }
+
+    playerVideo.src = playbackUrl;
+    playerVideo.play().catch(() => {});
+  }
+
+  async function resolveFreshLibraryStream(itemMeta, force = false) {
+    const videoId = Number(itemMeta?.video_id || 0);
+    if (!videoId) return null;
+    const rawCombo = `${itemMeta?.source_url || ''} ${itemMeta?.url || ''}`.toLowerCase();
+    const isXhamster = rawCombo.includes('xhamster.com') || rawCombo.includes('xhcdn.com');
+
+    if (isXhamster) {
+      setPlayerStatus('Obnovujem čerstvý xHamster stream (JIT)...');
+      const res = await fetch(`/api/v1/stream/xhamster/${videoId}`, { cache: 'no-store' });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.stream_url) {
+        return {
+          streamUrl: data.stream_url,
+          isHls: Boolean(data.is_hls) || /\.m3u8(?:[?#]|$)/i.test(data.stream_url),
+          proxySession: '',
+        };
+      }
+    }
+
+    setPlayerStatus('Obnovujem stream zo zdrojovej stránky...');
+    const res = await fetch(`/api/v1/stream/resolve/${videoId}${force ? '?force=1' : ''}`, { cache: 'no-store' });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.supported && data.stream_url) {
+      return {
+        streamUrl: data.stream_url,
+        isHls: Boolean(data.is_hls) || /\.m3u8(?:[?#]|$)/i.test(data.stream_url),
+        proxySession: data.proxy_session || '',
+        playbackReferer: data.playback_referer || '',
+      };
+    }
+    return null;
+  }
+
+  async function handlePlaybackFailure() {
+    const runToken = playerToken;
+    const item = currentPlayerItem;
+    if (item && item.video_id && !currentPlayerRetryDone) {
+      currentPlayerRetryDone = true;
+      try {
+        const fresh = await resolveFreshLibraryStream(item, true);
+        if (runToken !== playerToken) return;
+        if (fresh && fresh.streamUrl) {
+          item.url = fresh.streamUrl;
+          item.is_hls = fresh.isHls;
+          const nextPlayUrl = buildLibraryPlaybackUrl(
+            fresh.streamUrl,
+            item.source_url || '',
+            item.video_id,
+            fresh.isHls,
+            fresh.proxySession,
+            fresh.playbackReferer,
+            true
+          );
+          item.playable_url = nextPlayUrl;
+          setPlayerStatus('Načítavam obnovený stream...');
+          attachPlaybackSource(nextPlayUrl, item, runToken);
+          return;
+        }
+      } catch {}
+    }
+    setPlayerStatus('');
+    playerError.textContent = 'Video sa nepodarilo načítať v prehliadači (môže vyžadovať Telegram session alebo je stream nedostupný). Skús tlačidlo Zdroj.';
+    playerError.style.display = 'block';
+  }
+
+  async function openPlayer(url, title, sourceUrl = '', itemMeta = null) {
+    const runToken = ++playerToken;
+    destroyActiveHls();
+    currentPlayerItem = itemMeta || { source_url: sourceUrl, url };
+    currentPlayerRetryDone = false;
+
+    playerTitle.textContent = title || 'Prehrávač';
+    playerError.style.display = 'none';
+    playerError.textContent = '';
+    setPlayerStatus('');
+
+    if (sourceUrl && sourceUrl.startsWith('http')) {
+      playerSourceLink.href = sourceUrl;
+      playerSourceLink.style.display = 'inline-flex';
+    } else {
+      playerSourceLink.style.display = 'none';
+    }
+    if (playerRefreshBtn) {
+      playerRefreshBtn.style.display = currentPlayerItem.video_id ? 'inline-flex' : 'none';
+    }
+
+    playerModal.classList.add('open');
+
+    const combo = `${sourceUrl || ''} ${currentPlayerItem.url || ''}`.toLowerCase();
+    const needsProactiveXhamster = Boolean(
+      currentPlayerItem.video_id && (combo.includes('xhamster.com') || (combo.includes('xhcdn.com') && combo.includes('.m3u8')))
+    );
+    if (needsProactiveXhamster) {
+      currentPlayerRetryDone = true;
+      try {
+        const fresh = await resolveFreshLibraryStream(currentPlayerItem, false);
+        if (runToken !== playerToken) return;
+        if (fresh && fresh.streamUrl) {
+          currentPlayerItem.url = fresh.streamUrl;
+          currentPlayerItem.is_hls = fresh.isHls;
+          const freshPlayUrl = buildLibraryPlaybackUrl(
+            fresh.streamUrl,
+            sourceUrl || currentPlayerItem.source_url || '',
+            currentPlayerItem.video_id,
+            fresh.isHls,
+            fresh.proxySession
+          );
+          currentPlayerItem.playable_url = freshPlayUrl;
+          attachPlaybackSource(freshPlayUrl, currentPlayerItem, runToken);
+          return;
+        }
+      } catch {}
+    }
+
+    attachPlaybackSource(url, currentPlayerItem, runToken);
+  }
+
+  if (playerRefreshBtn) {
+    playerRefreshBtn.addEventListener('click', async () => {
+      if (!currentPlayerItem || !currentPlayerItem.video_id) return;
+      playerError.style.display = 'none';
+      currentPlayerRetryDone = false;
+      const runToken = ++playerToken;
+      try {
+        const fresh = await resolveFreshLibraryStream(currentPlayerItem, true);
+        if (runToken !== playerToken) return;
+        if (fresh && fresh.streamUrl) {
+          currentPlayerItem.url = fresh.streamUrl;
+          currentPlayerItem.is_hls = fresh.isHls;
+          const nextPlayUrl = buildLibraryPlaybackUrl(
+            fresh.streamUrl,
+            currentPlayerItem.source_url || '',
+            currentPlayerItem.video_id,
+            fresh.isHls,
+            fresh.proxySession
+          );
+          attachPlaybackSource(nextPlayUrl, currentPlayerItem, runToken);
+          return;
+        }
+      } catch {}
+      handlePlaybackFailure();
+    });
+  }
+
+  playerVideo.addEventListener('playing', () => setPlayerStatus(''));
+  playerVideo.addEventListener('error', () => {
+    if (!playerModal.classList.contains('open')) return;
+    handlePlaybackFailure();
+  });
+
+  document.getElementById('closePlayerBtn').addEventListener('click', () => {
+    playerToken += 1;
+    destroyActiveHls();
+    currentPlayerItem = null;
+    setPlayerStatus('');
+    playerVideo.pause();
+    playerVideo.removeAttribute('src');
+    playerVideo.load();
+    playerModal.classList.remove('open');
+  });
+  playerModal.addEventListener('click', (e) => {
+    if (e.target === playerModal) document.getElementById('closePlayerBtn').click();
+  });
+
+  function toStashPayload(item) {
+    const tg = item.telegram_meta || {};
+    const url = item.url || item.source_url || getPlayUrl(item) || '';
+    const canonicalKey = (tg.chat_id != null && tg.message_id != null)
+      ? `tg:${tg.chat_id}:${tg.message_id}`
+      : (item.video_id ? `lib:${item.video_id}` : (url || String(item.id || '')));
+    return {
+      canonical_key: canonicalKey,
+      url: url || canonicalKey,
+      source_url: item.source_url || url || '',
+      chat_id: tg.chat_id ?? null,
+      message_id: tg.message_id ?? null,
+      title: item.title || 'Vault video',
+      type: 'video',
+      duration: Number(item.duration_sec || 0),
+      height: Number(item.height || 0),
+      quality: item.quality || (item.height ? `${item.height}p` : ''),
+      size: item.size_mb ? `${item.size_mb} MB` : '',
+      thumbnail: item.thumbnail || '',
+      source: item.source_label || item.bucket || 'vault',
+      surface: 'vault',
+      in_library: item.status === 'library',
+      save_status: item.status === 'library' ? 'imported' : 'stashed',
+    };
+  }
+
+  async function stashItems(items, btn = null) {
+    const payloadItems = items.map(toStashPayload).filter(entry => entry.canonical_key);
+    if (!payloadItems.length) return;
+    const prevHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Ukladám…';
+    }
+    try {
+      const res = await fetch('/api/v1/discovery-hub/combined-history/collections/stash', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          title: STASH_TITLE,
+          keyword: 'stash',
+          items: payloadItems,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Odloženie zlyhalo');
+      items.forEach(it => stashedIds.add(it.id));
+      if (btn) {
+        btn.classList.remove('btn-stash-neutral');
+        btn.classList.add('btn-stash-glass', 'is-stashed');
+        btn.innerHTML = `<span class="material-icons-round">bookmark_added</span> Odložené`;
+      }
+      statusBar.innerHTML = `<span>Odložené do kolekcie <strong>"${esc(STASH_TITLE)}"</strong> (${Number(data.total_count || payloadItems.length)} položiek).</span>`;
+    } catch (err) {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = prevHtml;
+      }
+      alert(err.message || 'Chyba pri odkladaní do Stashu');
+    }
+  }
+
+  async function importItem(item, btn) {
+    btn.disabled = true;
+    btn.textContent = 'Importujem…';
+    try {
+      const res = await fetch('/api/vault/import', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({items: [item], batch_name: `Vault - ${lastSearchData?.query || 'Search'}`}),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Import zlyhal');
+      item.can_import = false;
+      item.status = item.bucket === 'telegram' ? 'library' : 'queued';
+      btn.textContent = item.bucket === 'telegram' ? 'V knižnici' : 'V fronte';
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Importovať';
+      alert(err.message || 'Chyba pri importe');
+    }
+  }
+
+  function toSplitPayload(items) {
+    const out = [];
+    for (const item of items) {
+      const playUrl = getPlayUrl(item);
+      const absStream = playUrl ? new URL(playUrl, window.location.origin).href : '';
+      const rawWatch = item.source_url || item.url || '';
+      let absWatch = '';
+      if (rawWatch && /^https?:\/\//i.test(rawWatch)) {
+        absWatch = rawWatch;
+      } else if (absStream) {
+        absWatch = `${absStream}#watch`;
+      }
+      if (absStream && absWatch === absStream) {
+        absWatch = `${absStream}#watch`;
+      }
+      if (!absWatch && !absStream) continue;
+      let absPoster = '';
+      if (item.thumbnail) {
+        try { absPoster = new URL(item.thumbnail, window.location.origin).href; } catch {}
+      }
+      out.push({
+        id: item.id,
+        url: absWatch || absStream,
+        watchUrl: absWatch || absStream,
+        streamUrl: absStream,
+        title: item.title || 'Vault video',
+        poster: absPoster,
+        duration: Number(item.duration_sec || 0),
+        sizeBytes: item.size_mb ? Math.round(Number(item.size_mb) * 1048576) : 0,
+        quality: item.quality || '',
+        provider: item.source_label || item.bucket || 'vault',
+      });
+    }
+    return out;
+  }
+
+  function launchSplitScreen(items, mode = 'open') {
+    const payload = toSplitPayload(items);
+    if (!payload.length) {
+      alert('Žiadna z vybraných položiek nemá platnú URL na prehratie v Split-Screene.');
+      return;
+    }
+    const ready = document.documentElement.dataset.nexusSplitReady === '1' || Boolean(document.getElementById('nuss-fab'));
+    const eventName = mode === 'picker' ? 'nexus-findr-split-picker' : 'nexus-findr-split-open';
+    document.dispatchEvent(new CustomEvent(eventName, { detail: JSON.stringify(payload) }));
+    if (!ready) {
+      alert('Split-Screen event bol odoslaný, ale v prehliadači nie je detegovaný aktívny userscript "Nexus Universal Split-Screen" (Tampermonkey). Skontroluj, či je zapnutý pre localhost.');
+    }
+  }
+
+  function getSelectedItems() {
+    const all = lastSearchData?.items || [];
+    return all.filter(it => selectedIds.has(it.id));
+  }
+
+  function updateSelectionUI() {
+    const count = selectedIds.size;
+    selectionCountLabel.textContent = count === 1 ? '1 označená' : (count >= 2 && count <= 4 ? `${count} označené` : `${count} označených`);
+    const selectedItems = getSelectedItems();
+    const importableCount = selectedItems.filter(it => it.can_import).length;
+    selImportCount.textContent = String(importableCount);
+    selStashCount.textContent = String(count);
+    selBulkImportBtn.disabled = importableCount === 0;
+    selBulkStashBtn.disabled = count === 0;
+    selSplitOpenBtn.disabled = count === 0;
+    selSplitPickerBtn.disabled = count === 0;
+    selectionBar.classList.toggle('visible', count > 0);
+    if (topSplitBtn) {
+      topSplitBtn.innerHTML = count > 0
+        ? `<span class="material-icons-round">view_column</span> Split-Screen (${count})`
+        : `<span class="material-icons-round">view_column</span> Split-Screen`;
+    }
+    resultsEl.querySelectorAll('.card').forEach(card => {
+      const id = card.dataset.vaultId;
+      const on = selectedIds.has(id);
+      card.classList.toggle('is-selected', on);
+      card.classList.toggle('nuss-page-selected', on);
+      const cb = card.querySelector('.card-select-cb');
+      if (cb) cb.checked = on;
+    });
+  }
+
+  function toggleItemSelection(id, idx, shiftKey = false) {
+    if (shiftKey && lastSelectedIdx >= 0 && idx >= 0 && visibleItems.length) {
+      const start = Math.min(lastSelectedIdx, idx);
+      const end = Math.max(lastSelectedIdx, idx);
+      for (let i = start; i <= end; i++) {
+        if (visibleItems[i]) selectedIds.add(visibleItems[i].id);
+      }
+    } else if (selectedIds.has(id)) {
+      selectedIds.delete(id);
+    } else {
+      selectedIds.add(id);
+    }
+    if (idx >= 0) lastSelectedIdx = idx;
+    updateSelectionUI();
+  }
+
+  function renderResults() {
+    resetFiltersBtn.style.display = hasActiveControls() ? 'inline-flex' : 'none';
+    if (!lastSearchData) return;
+
+    const allItems = lastSearchData.items || [];
+    const visible = applyClientFiltersAndSort(allItems, true);
+    visibleItems = visible;
+
+    const errCount = Object.keys(lastSearchData.errors || {}).length;
+    statusBar.innerHTML = `<span>Dotaz <strong>"${esc(lastSearchData.query)}"</strong> · zobrazené <strong>${visible.length}</strong> z ${allItems.length} nájdených · čas <strong>${lastSearchData.elapsed_ms} ms</strong> · tip: <strong>Ctrl + klik</strong> označí kartu${errCount ? ` · <span style="color:#fca5a5">${errCount} trezor(y) s chybou</span>` : ''}</span>`;
+
+    if (!visible.length) {
+      resultsEl.innerHTML = `<div class="empty-state">
+        <span class="material-icons-round">search_off</span>
+        <h2>Žiadne výsledky pre zvolené filtre</h2>
+        <p>Skús uvoľniť niektorý z filtrov (kvalita, dĺžka, stav, textový filter) alebo prepni na iný trezor.</p>
+      </div>`;
+      updateSelectionUI();
+      return;
+    }
+
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+
+    visible.forEach((item, idx) => {
+      const card = document.createElement('article');
+      const isSelected = selectedIds.has(item.id);
+      card.className = `card${isSelected ? ' is-selected nuss-page-selected' : ''}`;
+      card.dataset.vaultId = item.id;
+
+      const playUrl = getPlayUrl(item);
+      const absStream = playUrl ? new URL(playUrl, window.location.origin).href : '';
+      const rawWatch = item.source_url || item.url || '';
+      const absWatch = (rawWatch && /^https?:\/\//i.test(rawWatch)) ? rawWatch : (absStream ? `${absStream}#watch` : '');
+      if (absStream) {
+        card.dataset.nexusSplitStream = absStream;
+        card.dataset.nexusSplitFormat = /\.m3u8(?:\?|$)|\/hls_proxy/i.test(absStream) ? 'hls' : 'mp4';
+      }
+      if (absWatch) {
+        card.dataset.nexusSplitWatch = absWatch;
+      }
+
+      const dur = fmtDur(item.duration_sec);
+      const qBadge = item.quality ? `<span class="thumb-q">${esc(item.quality)}</span>` : '';
+      const durBadge = dur ? `<span class="thumb-dur">${esc(dur)}</span>` : '';
+      const sizeStr = item.size_mb ? `<span class="meta-dot">·</span><span>${esc(item.size_mb)} MB</span>` : '';
+      const libBadge = item.status === 'library' ? `<span class="meta-lib">V knižnici</span>` : '';
+
+      const bucketIcon = (statsBuckets.find(b => b.id === item.bucket) || {}).icon || 'movie';
+      const thumbFallbackHtml = `<div class="thumb-empty"><span class="material-icons-round">${esc(bucketIcon)}</span><span>${esc(item.source_label)}</span></div>`;
+      const thumbHtml = item.thumbnail
+        ? `<img src="${esc(item.thumbnail)}" loading="lazy" alt="">`
+        : thumbFallbackHtml;
+
+      const hoverPlayHtml = playUrl
+        ? `<div class="play-hover"><span class="material-icons-round">play_arrow</span></div>`
+        : '';
+
+      card.innerHTML = `
+        <div class="thumb">
+          <label class="card-select-wrap" title="Označiť kartu (alebo Ctrl + klik kdekoľvek na kartu)">
+            <input type="checkbox" class="card-select-cb" ${isSelected ? 'checked' : ''} aria-label="Označiť kartu">
+          </label>
+          ${thumbHtml}
+          ${hoverPlayHtml}
+          ${qBadge}
+          ${durBadge}
+        </div>
+        <div class="body">
+          <div class="meta-row">
+            <span class="meta-src" title="${esc(item.source_label)}">${esc(item.source_label)}</span>
+            ${sizeStr}
+            ${libBadge}
+          </div>
+          <div class="title" title="${esc(item.title)}">${esc(item.title)}</div>
+          <div class="sub" title="${esc(item.subtitle || item.source_url || item.url)}">${esc(item.subtitle || item.source_url || item.url)}</div>
+        </div>
+        <div class="actions"></div>
+      `;
+
+      card.addEventListener('click', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.button === 0) {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleItemSelection(item.id, idx, e.shiftKey);
+        }
+      }, true);
+
+      const selectWrap = card.querySelector('.card-select-wrap');
+      const selectCb = card.querySelector('.card-select-cb');
+      selectWrap.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+      selectCb.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleItemSelection(item.id, idx, e.shiftKey);
+      });
+
+      const actions = card.querySelector('.actions');
+      if (playUrl) {
+        const playBtn = document.createElement('button');
+        playBtn.type = 'button';
+        playBtn.className = 'btn btn-primary-glass';
+        playBtn.innerHTML = `<span class="material-icons-round">play_arrow</span> Prehrať`;
+        playBtn.addEventListener('click', () => openPlayer(playUrl, item.title, item.source_url || item.url, item));
+        actions.appendChild(playBtn);
+        card.querySelector('.thumb').addEventListener('click', () => openPlayer(playUrl, item.title, item.source_url || item.url, item));
+      }
+
+      if (item.can_import) {
+        const impBtn = document.createElement('button');
+        impBtn.type = 'button';
+        impBtn.className = 'btn btn-cyan-glass';
+        impBtn.innerHTML = `<span class="material-icons-round">download</span> Importovať`;
+        impBtn.addEventListener('click', () => importItem(item, impBtn));
+        actions.appendChild(impBtn);
+      }
+
+      const thumbImg = card.querySelector('.thumb img');
+      if (thumbImg) {
+        thumbImg.addEventListener('error', () => {
+          const wrap = thumbImg.parentElement;
+          thumbImg.remove();
+          if (wrap && !wrap.querySelector('.thumb-empty')) {
+            wrap.insertAdjacentHTML('afterbegin', thumbFallbackHtml);
+          }
+        }, { once: true });
+      }
+
+      const stashBtn = document.createElement('button');
+      stashBtn.type = 'button';
+      const isStashed = stashedIds.has(item.id);
+      stashBtn.className = `btn btn-icon-only ${isStashed ? 'btn-stash-glass is-stashed' : 'btn-stash-neutral'}`;
+      stashBtn.title = `Odložiť do "${STASH_TITLE}"`;
+      stashBtn.disabled = isStashed;
+      stashBtn.innerHTML = `<span class="material-icons-round">${isStashed ? 'bookmark_added' : 'bookmark_add'}</span>`;
+      stashBtn.addEventListener('click', () => stashItems([item], stashBtn));
+      actions.appendChild(stashBtn);
+
+      if (absWatch || absStream) {
+        const splitBtn = document.createElement('button');
+        splitBtn.type = 'button';
+        splitBtn.className = 'btn btn-icon-only';
+        splitBtn.title = 'Prehrať v Split-Screene (alebo označené karty)';
+        splitBtn.innerHTML = `<span class="material-icons-round">view_column</span>`;
+        splitBtn.addEventListener('click', () => {
+          const picked = selectedIds.size > 0 && selectedIds.has(item.id) ? getSelectedItems() : [item];
+          launchSplitScreen(picked, 'open');
+        });
+        actions.appendChild(splitBtn);
+      }
+
+      const openHref = item.source_url || item.url;
+      if (openHref && openHref.startsWith('http')) {
+        const link = document.createElement('a');
+        link.className = 'btn btn-icon-only';
+        link.href = openHref;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.title = 'Otvoriť pôvodný zdroj';
+        link.innerHTML = `<span class="material-icons-round">open_in_new</span>`;
+        actions.appendChild(link);
+      }
+
+      grid.appendChild(card);
+    });
+    resultsEl.innerHTML = '';
+    resultsEl.appendChild(grid);
+    updateSelectionUI();
+  }
+
+  async function runSearch() {
+    const q = queryInput.value.trim();
+    if (!q) return;
+    rememberQuery(q);
+    searchBtn.disabled = true;
+    statusBar.innerHTML = '<span>Prehľadávam lokálne trezory…</span>';
+    try {
+      const url = new URL('/api/vault/search', window.location.origin);
+      url.searchParams.set('q', q);
+      url.searchParams.set('min_height', minHeightSelect.value || '0');
+      url.searchParams.set('min_duration', minDurationSelect.value || '0');
+      url.searchParams.set('min_size_mb', minSizeSelect.value || '0');
+      url.searchParams.set('sort', sortSelect.value || 'relevance');
+      url.searchParams.set('limit', limitSelect.value || '100');
+      const res = await fetch(url.toString());
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Vyhľadávanie zlyhalo');
+      if (Array.isArray(data.items)) {
+        data.items.forEach((it, i) => { it._origIndex = i; });
+      }
+      if (lastSearchData && lastSearchData.query !== q) {
+        selectedIds.clear();
+        lastSelectedIdx = -1;
+      }
+      lastSearchData = data;
+      const nextUrl = new URL(window.location.href);
+      nextUrl.searchParams.set('q', q);
+      window.history.replaceState({}, '', nextUrl.toString());
+      renderChips();
+      renderResults();
+    } catch (err) {
+      statusBar.innerHTML = `<span style="color:#fca5a5">Chyba: ${esc(err.message)}</span>`;
+    } finally {
+      searchBtn.disabled = false;
+    }
+  }
+
+  async function loadStats() {
+    try {
+      const res = await fetch('/api/vault/stats');
+      const data = await res.json();
+      statsBuckets = data.buckets || [];
+      totalLabel.textContent = `${Number(data.total_records || 0).toLocaleString('en-US').replace(/,/g, ' ')} záznamov`;
+      renderChips();
+      renderEmptyOverview();
+    } catch {
+      totalLabel.textContent = 'offline';
+      renderEmptyOverview();
+    }
+  }
+
+  searchBtn.addEventListener('click', runSearch);
+  queryInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
+
+  topSplitBtn.addEventListener('click', () => {
+    if (selectedIds.size > 0) {
+      launchSplitScreen(getSelectedItems(), 'open');
+    } else if (visibleItems.length > 0) {
+      launchSplitScreen(visibleItems, 'picker');
+    } else {
+      alert('Najprv vyhľadaj alebo označ nejaké videá.');
+    }
+  });
+  selectAllVisibleBtn.addEventListener('click', () => {
+    visibleItems.forEach(it => selectedIds.add(it.id));
+    updateSelectionUI();
+  });
+  clearSelectionBtn.addEventListener('click', () => {
+    selectedIds.clear();
+    lastSelectedIdx = -1;
+    updateSelectionUI();
+  });
+  selSplitOpenBtn.addEventListener('click', () => launchSplitScreen(getSelectedItems(), 'open'));
+  selSplitPickerBtn.addEventListener('click', () => launchSplitScreen(getSelectedItems(), 'picker'));
+  selBulkStashBtn.addEventListener('click', () => stashItems(getSelectedItems(), selBulkStashBtn));
+  selBulkImportBtn.addEventListener('click', async () => {
+    const toImport = getSelectedItems().filter(it => it.can_import);
+    if (!toImport.length) return;
+    selBulkImportBtn.disabled = true;
+    try {
+      const res = await fetch('/api/vault/import', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({items: toImport, batch_name: `Vault - ${lastSearchData?.query || 'Search'}`}),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Hromadný import zlyhal');
+      for (const it of toImport) {
+        it.can_import = false;
+        it.status = it.bucket === 'telegram' ? 'library' : 'queued';
+      }
+      renderChips();
+      renderResults();
+    } catch (err) {
+      alert(err.message || 'Chyba pri hromadnom importe');
+    } finally {
+      updateSelectionUI();
+    }
+  });
+
+  sortSelect.addEventListener('change', () => { renderChips(); renderResults(); });
+  minDurationSelect.addEventListener('change', () => { renderChips(); renderResults(); });
+  minSizeSelect.addEventListener('change', () => { renderChips(); renderResults(); });
+  stateSelect.addEventListener('change', () => { renderChips(); renderResults(); });
+  inlineFilterInput.addEventListener('input', () => { renderChips(); renderResults(); });
+  minHeightSelect.addEventListener('change', () => {
+    if (lastSearchData) { renderChips(); renderResults(); }
+    if (queryInput.value.trim()) runSearch();
+  });
+  limitSelect.addEventListener('change', () => { if (queryInput.value.trim()) runSearch(); });
+  cardSizeSelect.addEventListener('change', () => {
+    const px = Number(cardSizeSelect.value || 355);
+    document.documentElement.style.setProperty('--card-min', `${px}px`);
+    try { localStorage.setItem('vault_card_min', String(px)); } catch {}
+  });
+  try {
+    const savedCardMin = Number(localStorage.getItem('vault_card_min') || 0);
+    if ([285, 355, 440].includes(savedCardMin)) {
+      cardSizeSelect.value = String(savedCardMin);
+      document.documentElement.style.setProperty('--card-min', `${savedCardMin}px`);
+    }
+  } catch {}
+
+  resetFiltersBtn.addEventListener('click', () => {
+    activeBucket = 'all';
+    sortSelect.value = 'relevance';
+    const prevMinH = minHeightSelect.value;
+    minHeightSelect.value = '0';
+    minDurationSelect.value = '0';
+    minSizeSelect.value = '0';
+    stateSelect.value = 'all';
+    inlineFilterInput.value = '';
+    if (prevMinH !== '0' && queryInput.value.trim()) {
+      runSearch();
+    } else {
+      renderChips();
+      renderResults();
+    }
+  });
+
+  loadStats().then(() => {
+    const initQ = new URLSearchParams(window.location.search).get('q');
+    if (initQ) {
+      queryInput.value = initQ;
+      runSearch();
+    }
+  });
+})();
+</script>
+</body>
+</html>

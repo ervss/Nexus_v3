@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Nexus Annotation Board</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-2: #0b1730;
+      --panel: rgba(10, 18, 34, 0.86);
+      --panel-strong: rgba(13, 22, 43, 0.96);
+      --line: rgba(255, 255, 255, 0.12);
+      --line-strong: rgba(255, 255, 255, 0.22);
+      --text: rgba(255, 255, 255, 0.94);
+      --muted: rgba(255, 255, 255, 0.64);
+      --primary: #71e1ff;
+      --secondary: #a78bfa;
+      --accent: #ffcf5c;
+      --danger: #ff6b6b;
+      --success: #57d68d;
+      --shadow: 0 22px 50px rgba(0, 0, 0, 0.32);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; }
+    body {
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(113, 225, 255, 0.14), transparent 28%),
+        radial-gradient(circle at top right, rgba(167, 139, 250, 0.14), transparent 24%),
+        linear-gradient(135deg, #050a13 0%, #091527 52%, #0d1630 100%);
+      overflow: hidden;
+    }
+
+    .shell {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1.4fr) minmax(0, 2.2fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 16px;
+      background: linear-gradient(180deg, rgba(9, 15, 28, 0.92), rgba(8, 14, 25, 0.78));
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.03rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #fff, var(--primary) 36%, var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand .meta {
+      font-size: 0.78rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status {
+      justify-self: center;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 0.82rem;
+      color: var(--muted);
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    button, select, input {
+      font: inherit;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, rgba(113, 225, 255, 0.22), rgba(167, 139, 250, 0.18));
+      border-color: rgba(113, 225, 255, 0.45);
+    }
+
+    .btn.danger {
+      background: rgba(255, 107, 107, 0.12);
+      border-color: rgba(255, 107, 107, 0.36);
+      color: #ffd9d9;
+    }
+
+    .btn.active {
+      border-color: rgba(113, 225, 255, 0.75);
+      background: linear-gradient(135deg, rgba(113, 225, 255, 0.24), rgba(167, 139, 250, 0.22));
+    }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+    }
+
+    .stage {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+      padding: 16px;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      width: 100%;
+      margin: 0 auto;
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .shot {
+      display: block;
+      width: 100%;
+      height: auto;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    #drawingCanvas,
+    #notesLayer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #drawingCanvas {
+      pointer-events: auto;
+      cursor: crosshair;
+    }
+
+    #notesLayer {
+      pointer-events: none;
+    }
+
+    .sidebar {
+      min-width: 0;
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(9, 16, 31, 0.86), rgba(8, 13, 25, 0.92));
+      backdrop-filter: blur(18px);
+      padding: 14px;
+      overflow: auto;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+      margin-bottom: 12px;
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 0.86rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .swatches {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 2px solid rgba(255, 255, 255, 0.24);
+      cursor: pointer;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+    }
+
+    .swatch.active {
+      border-color: white;
+      transform: scale(1.08);
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .control-row input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+    }
+
+    .note-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .note-item {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 10px;
+      color: var(--text);
+      min-height: 96px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .note-handle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      cursor: grab;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 0.77rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      user-select: none;
+    }
+
+    .note-body {
+      min-height: 58px;
+      outline: none;
+      white-space: pre-wrap;
+      line-height: 1.35;
+      color: rgba(255, 255, 255, 0.92);
+      font-size: 0.9rem;
+    }
+
+    .note-item[contenteditable="true"] {
+      outline: none;
+    }
+
+    .note-pin {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(255, 207, 92, 0.16);
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      pointer-events: none;
+    }
+
+    .note-panel {
+      position: absolute;
+      min-width: 190px;
+      max-width: 260px;
+      background: linear-gradient(180deg, rgba(255, 247, 202, 0.96), rgba(255, 235, 150, 0.95));
+      color: #1d1b11;
+      border-radius: 14px;
+      box-shadow: 0 18px 34px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      padding: 10px 10px 9px;
+      pointer-events: auto;
+    }
+
+    .note-panel .note-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      cursor: grab;
+      user-select: none;
+      margin-bottom: 8px;
+    }
+
+    .note-panel .note-text {
+      min-height: 60px;
+      white-space: pre-wrap;
+      outline: none;
+      cursor: text;
+      font-size: 0.92rem;
+      line-height: 1.36;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .mini {
+      font-size: 0.76rem;
+      color: var(--muted);
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .summary {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .summary strong {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    @media (max-width: 1200px) {
+      .workspace { grid-template-columns: 1fr; }
+      .sidebar { border-left: 0; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+      .topbar { grid-template-columns: 1fr; justify-items: stretch; }
+      .status { justify-self: stretch; }
+      .actions { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Nexus Debug Annotator</h1>
+        <div class="meta" id="sourceMeta">Pripájam aktuálnu stránku...</div>
+      </div>
+      <div class="status" id="saveStatus">Čakám na screenshot…</div>
+      <div class="actions">
+        <button class="btn" id="toolMove">Move</button>
+        <button class="btn active" id="toolPen">Pen</button>
+        <button class="btn" id="toolHighlight">Highlight</button>
+        <button class="btn" id="toolNote">Note</button>
+        <button class="btn" id="btnUndo">Undo</button>
+        <button class="btn danger" id="btnClear">Clear</button>
+        <button class="btn" id="btnCapture">Re-capture</button>
+        <button class="btn primary" id="btnDownloadPng">Download PNG</button>
+        <button class="btn primary" id="btnDownloadJson">Download JSON</button>
+        <button class="btn primary" id="btnCopyJson">Copy JSON</button>
+        <button class="btn" id="btnCopySummary">Copy summary</button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <main class="stage">
+        <div class="canvas-wrap" id="canvasWrap">
+          <img id="shot" class="shot" alt="Screenshot preview">
+          <canvas id="drawingCanvas"></canvas>
+          <div id="notesLayer"></div>
+        </div>
+      </main>
+
+      <aside class="sidebar">
+        <div class="card">
+          <h2>Tool settings</h2>
+          <div class="tools">
+            <button class="btn" id="btnAddNote">Add note</button>
+            <button class="btn" id="btnEraseLast">Erase last</button>
+          </div>
+          <div class="swatches" id="swatches"></div>
+          <div class="control-row">
+            <span>Size</span>
+            <input id="sizeRange" type="range" min="2" max="30" value="6">
+            <span id="sizeLabel">6</span>
+          </div>
+          <div class="mini" style="margin-top:10px;">
+            Klikni <strong>Note</strong> a potom do screenshotu, aby si vložil sticky poznámku.
+            Pen je klasická kresba, Highlight je jemný marker.
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Source</h2>
+          <div class="summary">
+            <div class="mini" id="sourceUrl">URL: -</div>
+            <div class="mini" id="sourceTitle">Title: -</div>
+            <div class="mini" id="sourceWindow">Window: -</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Notes</h2>
+          <div class="note-list" id="noteList"></div>
+        </div>
+
+        <div class="card">
+          <h2>Export</h2>
+          <div class="hint">
+            JSON je najlepší, keď mi chceš poslať presné zmeny. PNG je najlepší, keď chceš poslať vizuálne anotácie.
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script src="annotation.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="sk">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="style.css"><title>Nexus Extreme Searcher</title></head>
+<body>
+  <header><strong>NEXUS <span>EXTREME SEARCHER</span></strong><button id="settings" title="Nastavenia">⚙</button></header>
+  <form id="search-form"><input id="query" type="search" placeholder="Zadaj kľúčové slová…" autocomplete="off" maxlength="180" required><button type="submit">Search</button></form>
+  <div id="status" role="status">Pripravené na vyhľadávanie.</div>
+  <nav id="tabs" aria-label="Kategórie">
+    <button data-tab="torrents">Torrents <b>0</b></button><button data-tab="tubes">Tubes <b>0</b></button><button data-tab="files">File Hosts <b>0</b></button><button data-tab="forums">Forums/Leaks <b>0</b></button><button data-tab="reddit">Reddit <b>0</b></button><button data-tab="metadata">Metadata <b>0</b></button>
+  </nav>
+  <main id="results"></main>
+  <footer><label><input id="select-all" type="checkbox"> Vybrať zobrazené</label><button id="add-selected" disabled>Add selected to Nexus</button></footer>
+  <script type="module" src="popup.js"></script>
+</body></html>

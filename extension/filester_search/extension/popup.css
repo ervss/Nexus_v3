@@ -1,0 +1,26 @@
+
+body { font: 12px/1.4 system-ui,sans-serif; margin: 0; padding: 10px; width: 340px; background: #111; color: #eee; }
+.hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.badge { font-size:10px; padding:2px 6px; border-radius:8px; }
+.badge.on { background:#0a4; color:#fff; }
+.badge.off { background:#444; color:#ccc; }
+label { display:block; margin:8px 0 4px; color:#aaa; font-size:11px; }
+.chips { display:flex; flex-wrap:wrap; gap:4px; min-height:24px; }
+.chip { background:#223; border:1px solid #345; border-radius:12px; padding:2px 8px; }
+.chip button { border:0; background:transparent; color:#f88; cursor:pointer; }
+.row { display:flex; gap:6px; margin:6px 0; }
+.row input { flex:1; }
+input, select { background:#1a1a1a; border:1px solid #333; color:#eee; border-radius:4px; padding:6px; }
+button { background:#234; color:#eee; border:1px solid #456; border-radius:4px; padding:6px 10px; cursor:pointer; }
+button.primary { background:#174; border-color:#2a6; }
+button.danger { background:#411; border-color:#633; }
+button:disabled { opacity:0.5; }
+.checks label { display:inline-flex; align-items:center; gap:4px; margin-right:8px; color:#ccc; }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.live { background:#1a1a1a; border:1px solid #333; border-radius:6px; padding:8px; margin:8px 0; font-size:11px; }
+.results { max-height:160px; overflow:auto; }
+.card { background:#1a1a1a; border:1px solid #333; border-radius:6px; padding:6px; margin:4px 0; }
+.card a { color:#6af; }
+.foot { margin-top:8px; font-size:10px; color:#777; }
+.foot a { color:#6af; }
+code { color:#9c9; }

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Torrenty — Nexus</title>
+  <link rel="stylesheet" href="/static/torrents.css?v=2">
+</head>
+<body>
+  <header class="top">
+    <a class="back" href="/">Nexus</a>
+    <div>
+      <h1>Torrenty</h1>
+      <p>Jackett alebo Prowlarr → qBittorrent → prehrávanie počas sťahovania</p>
+    </div>
+    <p id="health" class="health"><i></i><span>Kontrolujem služby</span></p>
+  </header>
+
+  <main class="shell">
+    <section class="deck">
+      <h2>Nájdi, stiahni, pusti hneď.</h2>
+      <p class="lede">Výsledky idú zo všetkých nakonfigurovaných indexerov. Náhľad je poster tej istej release; keď chýba, hľadá sa podľa infohashu. qBittorrent sťahuje video od začiatku a prehrávač štartuje, keď sú na disku prvé sekundy.</p>
+      <form id="search-form">
+        <label class="grow">
+          Hľadaný názov
+          <input id="q" name="q" type="search" autocomplete="off" required maxlength="200" placeholder="názov scény">
+        </label>
+        <button id="search-btn" type="submit">Hľadať</button>
+      </form>
+      <div class="filters">
+        <label>Text
+          <input id="filter-text" type="search" placeholder="v názve">
+        </label>
+        <label>Min. seeders
+          <input id="filter-seeds" type="number" min="0" step="1" value="0">
+        </label>
+        <label>Indexer
+          <select id="filter-indexer"><option value="">Všetky</option></select>
+        </label>
+        <label>Zoradiť
+          <select id="sort">
+            <option value="seeders">Najviac seedov</option>
+            <option value="size">Najväčšie</option>
+            <option value="date">Najnovšie</option>
+            <option value="title">Názov</option>
+          </select>
+        </label>
+      </div>
+      <p id="status" class="status" role="status"></p>
+      <details class="why">
+        <summary>Prečo takto</summary>
+        <p>Prowlarr je lepší správca indexerov, ak je v .env nastavený — Jackett ostáva záloha. Poster z indexera patrí presne tej release a ostáva na serveri, lebo jeho adresa obsahuje API kľúč. Bez posteru ide whatslink podľa infohashu, potom obrázok zo stránky releasu. Vyhľadávanie obrázkov podľa názvu mieša iné scény, preto ho nepoužívam. Súbor prehráva jeden klient, qBittorrent, so sequential download a prioritou prvého a posledného kusu. MP4 ide priamo, MKV cez ffmpeg remux.</p>
+      </details>
+    </section>
+
+    <section id="player-dock" class="player" hidden>
+      <header>
+        <h2 id="player-title">Prehrávanie</h2>
+        <p id="player-stat" class="status"></p>
+      </header>
+      <video id="player" controls playsinline preload="none" width="1280" height="720"></video>
+      <div class="meter" aria-hidden="true"><span id="player-bar"></span></div>
+    </section>
+
+    <section id="grid" class="grid" aria-live="polite"></section>
+  </main>
+  <script src="/static/torrents.js?v=4"></script>
+</body>
+</html>

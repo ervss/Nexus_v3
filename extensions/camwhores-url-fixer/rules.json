@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1001,
+    "priority": 100,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "regexSubstitution": "https://www.xvideos.com\\1"
+      }
+    },
+    "condition": {
+      "regexFilter": "^https?://(?:www\\.)?xvideos\\.red(.*)$",
+      "resourceTypes": ["main_frame"]
+    }
+  }
+]

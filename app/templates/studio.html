@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus Studio — Momenty</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0908; --bg-2:#131110; --panel:#16130f; --panel-2:#1e1a15;
+  --line:rgba(255,196,124,.14); --line-hot:rgba(255,168,76,.42);
+  --text:#f6efe6; --muted:#9d9184;
+  --ember:#ff9f43; --ember-2:#ffd07a; --heat:#ff3f6c; --cool:#4dd6c1;
+  --ok:#5fd88f; --bad:#ff6b6b;
+  --shadow:0 30px 70px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:'Manrope',sans-serif;color:var(--text);
+  background:
+    radial-gradient(1200px 500px at 10% -10%, rgba(255,159,67,.10), transparent 60%),
+    radial-gradient(900px 400px at 95% 0%, rgba(255,63,108,.08), transparent 55%),
+    linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%);
+  background-attachment:fixed;}
+body.reeling{overflow:hidden}
+.material-icons-round{font-size:18px;line-height:1;vertical-align:-4px}
+button,input,select,textarea{font-family:inherit}
+.tc{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+::-webkit-scrollbar{height:9px;width:9px}
+::-webkit-scrollbar-thumb{background:rgba(255,159,67,.28);border-radius:9px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---- chrome ---- */
+.top{position:sticky;top:0;z-index:40;padding:12px 20px;backdrop-filter:blur(16px);
+  background:linear-gradient(180deg,rgba(10,9,8,.97),rgba(10,9,8,.8));border-bottom:1px solid var(--line)}
+.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;letter-spacing:.4px}
+.brand .reel-dot{width:11px;height:11px;border-radius:3px;background:var(--ember);
+  box-shadow:0 0 16px var(--ember);animation:blink 2s infinite}
+@keyframes blink{50%{opacity:.35}}
+.brand small{color:var(--muted);font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase}
+.spacer{flex:1}
+
+.tabs{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.tab{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:11px;border:1px solid var(--line);
+  background:rgba(255,255,255,.03);color:var(--muted);font-weight:800;font-size:13px;cursor:pointer;transition:.16s}
+.tab:hover{color:var(--text);border-color:var(--line-hot)}
+.tab.on{color:#1a1006;background:linear-gradient(135deg,var(--ember),var(--ember-2));border-color:transparent;
+  box-shadow:0 8px 22px rgba(255,159,67,.28)}
+.tab .n{font-size:11px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(0,0,0,.18)}
+.tab:not(.on) .n{background:rgba(255,255,255,.07)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);border-radius:11px;
+  background:rgba(255,255,255,.045);color:var(--text);padding:9px 14px;font-weight:700;font-size:13px;
+  cursor:pointer;transition:.16s;white-space:nowrap}
+.btn:hover:not(:disabled){border-color:var(--line-hot);transform:translateY(-1px)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.p{background:linear-gradient(135deg,var(--ember),var(--ember-2));border:0;color:#1a1006;
+  box-shadow:0 8px 20px rgba(255,159,67,.26)}
+.btn.h{background:linear-gradient(135deg,var(--heat),#b8265a);border:0;color:#fff}
+.btn.g{background:transparent}
+.btn.sm{padding:6px 10px;font-size:12px;border-radius:9px}
+.btn.ico{padding:8px 9px}
+.spin{animation:spin 1s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+input[type=text],input[type=search],input[type=number],select,textarea{
+  background:rgba(255,255,255,.045);border:1px solid var(--line);color:var(--text);
+  border-radius:11px;padding:9px 12px;font-size:13px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--line-hot)}
+select option{background:#1e1a15}
+label.fld{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:800;
+  letter-spacing:.9px;text-transform:uppercase;color:var(--muted)}
+
+.wrap{padding:20px 20px 120px;max-width:2000px;margin:0 auto}
+.view{display:none}.view.on{display:block}
+.muted{color:var(--muted)}
+.hint{font-size:12px;color:var(--muted);line-height:1.6}
+.empty{text-align:center;padding:80px 20px;color:var(--muted)}
+.empty .material-icons-round{font-size:58px;opacity:.25;display:block;margin-bottom:12px}
+.empty h2{color:var(--text);margin:0 0 8px;font-size:20px}
+
+/* ---- stats ---- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:18px}
+.stat{padding:13px 15px;border-radius:14px;border:1px solid var(--line);background:var(--panel)}
+.stat b{display:block;font-size:24px;font-weight:800;line-height:1.15}
+.stat span{font-size:11px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted)}
+
+/* ---- chips ---- */
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}
+.chip{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.035);
+  color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;transition:.14s}
+.chip:hover{color:var(--text);border-color:var(--line-hot)}
+.chip.on{color:#1a1006;background:linear-gradient(135deg,var(--ember),var(--ember-2));border-color:transparent}
+
+/* ---- moment wall ---- */
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.mcard{position:relative;border-radius:16px;overflow:hidden;background:var(--panel);
+  border:1px solid var(--line);display:flex;flex-direction:column;transition:.18s}
+.mcard:hover{border-color:var(--line-hot);transform:translateY(-3px);box-shadow:var(--shadow)}
+.mcard.h1{box-shadow:inset 0 0 0 1px rgba(255,159,67,.3)}
+.mcard.h2{box-shadow:inset 0 0 0 1px rgba(255,120,90,.45)}
+.mcard.h3{box-shadow:inset 0 0 0 1px rgba(255,63,108,.6),0 0 24px rgba(255,63,108,.16)}
+.mstage{position:relative;aspect-ratio:16/9;background:#000;cursor:pointer;overflow:hidden}
+.mstage img{width:100%;height:100%;object-fit:cover;display:block}
+.mstage .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#3a3128}
+.mstage .ph .material-icons-round{font-size:42px}
+.mstage .glass{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.42) 0%,transparent 34%,transparent 55%,rgba(0,0,0,.72) 100%);pointer-events:none}
+.tcbadge{position:absolute;top:9px;left:9px;font-size:10.5px;font-weight:700;padding:4px 8px;border-radius:6px;
+  background:rgba(8,6,4,.82);border:1px solid var(--line);backdrop-filter:blur(6px)}
+.lenbadge{position:absolute;bottom:9px;right:9px;font-size:10.5px;font-weight:800;padding:4px 8px;border-radius:6px;
+  color:#1a1006;background:linear-gradient(135deg,var(--ember),var(--ember-2))}
+.clipbadge{position:absolute;top:9px;right:9px;font-size:10px;font-weight:800;padding:4px 7px;border-radius:6px;
+  background:rgba(95,216,143,.16);border:1px solid rgba(95,216,143,.45);color:#a7f0c4}
+.heatdots{position:absolute;bottom:9px;left:9px;display:flex;gap:3px}
+.heatdots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.22)}
+.heatdots i.on{background:var(--heat);box-shadow:0 0 8px var(--heat)}
+.mbody{padding:11px 13px;display:flex;flex-direction:column;gap:7px;flex:1}
+.mtitle{font-size:13px;font-weight:700;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.mparent{font-size:11px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:5px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mtags{display:flex;gap:4px;flex-wrap:wrap}
+.mtag{font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;color:#ffd9a8;
+  background:rgba(255,159,67,.10);border:1px solid rgba(255,159,67,.22);cursor:pointer}
+.mtag:hover{background:rgba(255,159,67,.22)}
+.mact{display:flex;gap:5px;padding:0 13px 12px;margin-top:auto}
+.mact .btn{flex:1;padding:7px 4px;font-size:12px;border-radius:9px;min-width:0}
+.mact .btn.ico{flex:0 0 auto;padding:7px 9px}
+.fav{color:var(--heat)}
+/* Proposal cards look unfinished on purpose — dashed edge, and the keyboard
+   focus ring makes it obvious which one A/D will act on. */
+.mcard.prop{border-style:dashed;opacity:.94}
+.mcard.prop.focus{border-style:solid;border-color:var(--ember);opacity:1;
+  box-shadow:0 0 0 2px rgba(255,159,67,.35),var(--shadow)}
+
+/* ---- cutter ---- */
+.cut{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px;align-items:start}
+@media(max-width:1150px){.cut{grid-template-columns:1fr}}
+.pane{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:15px}
+.pane h3{margin:0 0 12px;font-size:13px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+/* Capped, not aspect-locked: a portrait clip in a 16/9 box pushed the filmstrip
+   and the in/out bar off-screen, and those are the controls being used. */
+.player{width:100%;height:min(52vh,520px);background:#000;border-radius:13px;display:block;
+  border:1px solid var(--line);object-fit:contain}
+
+.strip{position:relative;margin-top:14px;border:1px solid var(--line);border-radius:12px;
+  background:#0d0b09;overflow:hidden;user-select:none}
+.strip-frames{display:flex;height:74px;overflow-x:auto;overflow-y:hidden;cursor:crosshair}
+/* flex-grow so a short strip fills the width instead of leaving dead black to
+   the right; min-width keeps a 72-frame strip readable and scrollable. */
+.strip-frames img{height:74px;width:auto;flex:1 1 auto;min-width:38px;object-fit:cover;display:block;
+  opacity:.82;transition:opacity .12s;border-right:1px solid rgba(0,0,0,.5)}
+.strip-frames img:hover{opacity:1}
+.strip-frames img.insel{opacity:1;filter:saturate(1.25) brightness(1.12)}
+.strip-load{height:74px;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--muted);font-size:12.5px;font-weight:700}
+.scenebar{position:relative;height:14px;background:#0d0b09;border-top:1px solid var(--line)}
+.scenebar i{position:absolute;top:0;bottom:0;width:2px;background:var(--cool);opacity:.75}
+.scenebar i:hover{width:3px;opacity:1}
+
+.range{position:relative;height:46px;margin-top:12px;border-radius:11px;border:1px solid var(--line);
+  background:linear-gradient(180deg,#100d0a,#0b0908);overflow:hidden;cursor:pointer;user-select:none}
+.range .sel{position:absolute;top:0;bottom:0;background:linear-gradient(180deg,rgba(255,159,67,.34),rgba(255,159,67,.14));
+  border-left:2px solid var(--ember);border-right:2px solid var(--ember)}
+.range .cur{position:absolute;top:0;bottom:0;width:2px;background:#fff;box-shadow:0 0 8px rgba(255,255,255,.7)}
+.range .hnd{position:absolute;top:0;bottom:0;width:14px;margin-left:-7px;cursor:ew-resize;z-index:3}
+.range .hnd::after{content:'';position:absolute;left:5px;top:9px;bottom:9px;width:4px;border-radius:3px;
+  background:var(--ember);box-shadow:0 0 10px rgba(255,159,67,.8)}
+.range .ticks{position:absolute;inset:0;pointer-events:none;display:flex;justify-content:space-between;
+  padding:0 6px;align-items:flex-end;font-size:9.5px;color:#6d6154}
+
+.io{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}
+.io .box{border:1px solid var(--line);border-radius:11px;padding:8px 10px;background:rgba(255,255,255,.025)}
+.io .box span{display:block;font-size:9.5px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted)}
+.io .box b{font-size:17px;font-weight:800}
+.io .box.out b{color:var(--ember)}
+
+.vlist{max-height:520px;overflow:auto;display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.vrow{display:flex;gap:10px;align-items:center;padding:7px;border-radius:11px;border:1px solid transparent;
+  cursor:pointer;transition:.14s}
+.vrow:hover{background:rgba(255,255,255,.04);border-color:var(--line)}
+.vrow.on{background:rgba(255,159,67,.12);border-color:var(--line-hot)}
+.vrow img{width:74px;height:44px;object-fit:cover;border-radius:7px;background:#000;flex:0 0 auto}
+.vrow .vi{min-width:0;flex:1}
+.vrow .vt{font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vrow .vm{font-size:10.5px;color:var(--muted);font-weight:600;display:flex;gap:7px;margin-top:2px}
+.vrow .vm .cnt{color:var(--ember)}
+.warn{margin-top:10px;padding:9px 12px;border-radius:10px;font-size:12px;font-weight:700;
+  background:rgba(255,107,107,.10);border:1px solid rgba(255,107,107,.32);color:#ffc4c4}
+
+/* ---- rails (novinky) ---- */
+.rail{margin-bottom:26px}
+.rail h3{display:flex;align-items:center;gap:9px;margin:0 0 4px;font-size:15px;font-weight:800}
+.rail p{margin:0 0 12px;font-size:12px;color:var(--muted)}
+.rail-scroll{display:flex;gap:13px;overflow-x:auto;padding-bottom:8px}
+.rcard{flex:0 0 232px;border-radius:14px;overflow:hidden;background:var(--panel);border:1px solid var(--line);
+  cursor:pointer;transition:.16s}
+.rcard:hover{border-color:var(--line-hot);transform:translateY(-3px)}
+.rcard .rt{position:relative;aspect-ratio:16/9;background:#000}
+.rcard .rt img{width:100%;height:100%;object-fit:cover}
+.rcard .rb{padding:9px 11px}
+.rcard .rb div{font-size:12px;font-weight:700;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden}
+.rcard .rb small{color:var(--muted);font-size:10.5px;font-weight:700}
+
+/* ---- reel ---- */
+.reel{position:fixed;inset:0;z-index:200;background:#000;display:none;flex-direction:column}
+.reel.on{display:flex}
+.reel video{flex:1;width:100%;height:100%;object-fit:contain;background:#000}
+.reel-hud{position:absolute;left:0;right:0;bottom:0;padding:20px 22px 18px;
+  background:linear-gradient(0deg,rgba(0,0,0,.92),transparent);display:flex;flex-direction:column;gap:11px;
+  transition:opacity .3s}
+.reel.idle .reel-hud{opacity:0}
+.reel-bar{height:4px;border-radius:4px;background:rgba(255,255,255,.16);overflow:hidden}
+.reel-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ember),var(--heat));width:0}
+.reel-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.reel-meta h4{margin:0;font-size:16px;font-weight:800;flex:1;min-width:200px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reel-top{position:absolute;top:0;left:0;right:0;padding:16px 20px;display:flex;align-items:center;gap:12px;
+  background:linear-gradient(180deg,rgba(0,0,0,.85),transparent);transition:opacity .3s}
+.reel.idle .reel-top{opacity:0}
+.reel-count{font-size:12px;font-weight:800;letter-spacing:1.2px;color:var(--ember)}
+.reel-keys{font-size:11px;color:#8b8177;font-weight:700;letter-spacing:.4px}
+.reel-keys kbd{background:rgba(255,255,255,.1);border-radius:4px;padding:1px 6px;margin:0 2px;font-family:'JetBrains Mono',monospace}
+.reel-dots{display:flex;gap:4px;flex-wrap:wrap;max-height:26px;overflow:hidden}
+.reel-dots i{width:16px;height:3px;border-radius:3px;background:rgba(255,255,255,.2);cursor:pointer}
+.reel-dots i.done{background:rgba(255,159,67,.5)}
+.reel-dots i.now{background:var(--ember);box-shadow:0 0 8px var(--ember)}
+
+/* ---- modal ---- */
+.modal{position:fixed;inset:0;z-index:150;display:none;align-items:center;justify-content:center;padding:22px;
+  background:rgba(4,3,2,.88);backdrop-filter:blur(7px)}
+.modal.on{display:flex}
+.sheet{width:min(560px,100%);border-radius:18px;background:var(--panel-2);border:1px solid var(--line-hot);
+  box-shadow:var(--shadow);overflow:hidden}
+.sheet-h{display:flex;align-items:center;gap:10px;padding:14px 17px;border-bottom:1px solid var(--line)}
+.sheet-h h3{margin:0;font-size:15px;font-weight:800;flex:1}
+.sheet-b{padding:17px;display:flex;flex-direction:column;gap:13px;max-height:70vh;overflow:auto}
+.sheet-f{padding:13px 17px;border-top:1px solid var(--line);display:flex;gap:9px;justify-content:flex-end}
+.heatpick{display:flex;gap:7px}
+.heatpick button{flex:1;padding:9px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);
+  color:var(--muted);font-weight:800;font-size:12px;cursor:pointer}
+.heatpick button.on{background:linear-gradient(135deg,var(--heat),#b8265a);color:#fff;border-color:transparent}
+
+/* ---- toast ---- */
+.toasts{position:fixed;right:20px;bottom:20px;z-index:300;display:flex;flex-direction:column;gap:9px}
+.toasts div{padding:12px 16px;border-radius:12px;font-size:13px;font-weight:700;background:#1e1a15;
+  border:1px solid var(--line-hot);box-shadow:var(--shadow);animation:sl .28s}
+.toasts .ok{border-color:rgba(95,216,143,.5);color:#b6f0cd}
+.toasts .bad{border-color:rgba(255,107,107,.5);color:#ffc4c4}
+@keyframes sl{from{transform:translateX(24px);opacity:0}}
+</style>
+<script src="/static/playback_activity.js?v=20260930_activity_3" defer></script>
+</head>
+<body>
+
+<div class="top">
+  <div class="row">
+    <a class="btn g ico" href="/" title="Späť na dashboard"><span class="material-icons-round">arrow_back</span></a>
+    <div class="brand"><span class="reel-dot"></span>NEXUS STUDIO <small id="tagline">momenty, nie videá</small></div>
+    <div class="spacer"></div>
+    <input type="search" id="q" placeholder="Hľadať v momentoch…" style="min-width:210px">
+    <select id="sort" title="Zoradenie momentov">
+      <option value="recent">Najnovšie</option>
+      <option value="hottest">Najhorúcejšie</option>
+      <option value="most_played">Najhranejšie</option>
+      <option value="longest">Najdlhšie</option>
+      <option value="shortest">Najkratšie</option>
+      <option value="oldest">Najstaršie</option>
+    </select>
+    <button class="btn" id="dailyBtn" title="Zamiešaný výber podľa tvojho vkusu, každý deň iný">
+      <span class="material-icons-round">today</span> Denný reel</button>
+    <button class="btn h" id="reelBtn"><span class="material-icons-round">play_circle</span> Spustiť reel</button>
+  </div>
+  <div class="tabs">
+    <button class="tab on" data-view="wall"><span class="material-icons-round">grid_view</span> Stena <span class="n" id="nWall">0</span></button>
+    <button class="tab" data-view="cut"><span class="material-icons-round">content_cut</span> Strihač</button>
+    <button class="tab" data-view="prop"><span class="material-icons-round">inbox</span> Návrhy <span class="n" id="nProp">0</span></button>
+    <button class="tab" data-view="new"><span class="material-icons-round">auto_awesome</span> Novinky</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ============ STENA ============ -->
+  <section class="view on" id="v-wall">
+    <div class="stats" id="stats"></div>
+    <div class="chips" id="chips"></div>
+    <div id="wall"></div>
+    <div style="text-align:center;margin-top:22px">
+      <button class="btn" id="moreBtn" style="display:none">Načítať ďalšie</button>
+    </div>
+  </section>
+
+  <!-- ============ STRIHAČ ============ -->
+  <section class="view" id="v-cut">
+    <div class="cut">
+      <div>
+        <div class="pane">
+          <h3 id="cutTitle">Vyber video vpravo</h3>
+          <video class="player" id="cv" controls playsinline preload="metadata"></video>
+          <div id="cutWarn"></div>
+
+          <div class="strip">
+            <div class="strip-frames" id="strip">
+              <div class="strip-load">Filmový pás sa vytvorí po výbere videa</div>
+            </div>
+            <div class="scenebar" id="scenebar"></div>
+          </div>
+
+          <div class="range" id="range">
+            <div class="sel" id="rsel"></div>
+            <div class="cur" id="rcur"></div>
+            <div class="hnd" id="hIn"></div>
+            <div class="hnd" id="hOut"></div>
+            <div class="ticks" id="rticks"></div>
+          </div>
+
+          <div class="io">
+            <div class="box"><span>Začiatok (I)</span><b class="tc" id="ioIn">0:00</b></div>
+            <div class="box out"><span>Koniec (O)</span><b class="tc" id="ioOut">0:00</b></div>
+            <div class="box"><span>Dĺžka</span><b class="tc" id="ioLen">0:00</b></div>
+          </div>
+
+          <div class="row" style="margin-top:12px">
+            <button class="btn" id="loopBtn"><span class="material-icons-round">repeat</span> Slučka</button>
+            <button class="btn" id="nudgeIn"><span class="material-icons-round">login</span> I = teraz</button>
+            <button class="btn" id="nudgeOut"><span class="material-icons-round">logout</span> O = teraz</button>
+            <div class="spacer"></div>
+            <button class="btn" id="sceneBtn"><span class="material-icons-round">movie_filter</span> Nájsť scény</button>
+            <button class="btn" id="rebuildBtn" title="Prekresliť filmový pás"><span class="material-icons-round">refresh</span></button>
+            <button class="btn p" id="saveBtn"><span class="material-icons-round">bookmark_add</span> Uložiť moment (S)</button>
+          </div>
+          <div class="hint" style="margin-top:10px">
+            Klik na pás = začiatok · Shift+klik = koniec · Ťahaj po páse = výber rozsahu ·
+            <b>I</b>/<b>O</b> podľa prehrávača · <b>S</b> uloží · <b>medzerník</b> play/pause · <b>←/→</b> ±1 s (so Shiftom ±5 s)
+          </div>
+        </div>
+
+        <div class="pane" style="margin-top:16px">
+          <h3>Momenty z tohto videa <span id="cutCount" class="muted"></span></h3>
+          <div id="cutMoments"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="pane">
+          <h3>Knižnica</h3>
+          <div class="row">
+            <input type="search" id="vq" placeholder="Hľadať video…" style="flex:1;min-width:0">
+            <select id="vsort" title="Zoradenie knižnice" style="flex:0 0 auto">
+              <option value="recent">Nové</option>
+              <option value="longest">Dlhé</option>
+              <option value="biggest">Veľké</option>
+              <option value="title">A–Z</option>
+            </select>
+          </div>
+          <div class="vlist" id="vlist"></div>
+          <button class="btn sm" id="vmore" style="width:100%;margin-top:9px;display:none">Ďalšie videá</button>
+        </div>
+
+        <div class="pane" style="margin-top:16px">
+          <h3>Zo zdroja (bez importu)</h3>
+          <div class="hint" style="margin-bottom:9px">
+            Vlož odkaz na video z ktoréhokoľvek hub zdroja. Nič sa nesťahuje —
+            strihá sa priamo zo streamu a uloží sa len tvoj výsek.
+          </div>
+          <div class="row">
+            <select id="hubSrc" title="Zdroj" style="flex:0 0 auto;max-width:150px"></select>
+            <input type="text" id="hubUrl" placeholder="https://…/video/…" style="flex:1;min-width:0">
+          </div>
+          <button class="btn p sm" id="hubLoad" style="width:100%;margin-top:9px">
+            <span class="material-icons-round">link</span> Otvoriť v strihači</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ NÁVRHY ============ -->
+  <section class="view" id="v-prop">
+    <div class="pane" style="margin-bottom:16px">
+      <div class="row">
+        <div style="flex:1;min-width:220px">
+          <h3 style="margin:0 0 5px">Automatické návrhy</h3>
+          <div class="hint" id="propStatus">Načítavam…</div>
+        </div>
+        <button class="btn" id="scanBtn"><span class="material-icons-round">bolt</span> Prehľadať teraz</button>
+        <button class="btn g" id="rejectAllBtn"><span class="material-icons-round">clear_all</span> Zamietnuť všetko</button>
+      </div>
+      <div class="hint" style="margin-top:10px">
+        Každú noc o 03:20 prejdem nenakrájané dlhé videá, nájdem strihy a nechám tu návrhy.
+        Nič sa nepridá samo — <b>A</b> prijme, <b>D</b> zamietne, <b>medzerník</b> prehrá.
+      </div>
+    </div>
+    <div id="proposals"></div>
+    <div style="text-align:center;margin-top:20px">
+      <button class="btn" id="propMore" style="display:none">Ďalšie návrhy</button>
+    </div>
+  </section>
+
+  <!-- ============ NOVINKY ============ -->
+  <section class="view" id="v-new">
+    <div id="news"></div>
+  </section>
+</div>
+
+<!-- ============ REEL ============ -->
+<div class="reel" id="reel">
+  <div class="reel-top">
+    <span class="reel-count" id="reelCount"></span>
+    <div class="spacer"></div>
+    <span class="reel-keys">
+      <kbd>␣</kbd>pauza <kbd>→</kbd>ďalší <kbd>←</kbd>späť <kbd>F</kbd>obľúbené <kbd>H</kbd>heat <kbd>Esc</kbd>koniec</span>
+    <button class="btn g ico" id="reelClose"><span class="material-icons-round">close</span></button>
+  </div>
+  <video id="rv" playsinline></video>
+  <div class="reel-hud">
+    <div class="reel-dots" id="reelDots"></div>
+    <div class="reel-bar"><i id="reelProg"></i></div>
+    <div class="reel-meta">
+      <h4 id="reelTitle"></h4>
+      <button class="btn g ico" id="reelPrev"><span class="material-icons-round">skip_previous</span></button>
+      <button class="btn g ico" id="reelPlay"><span class="material-icons-round">pause</span></button>
+      <button class="btn g ico" id="reelNext"><span class="material-icons-round">skip_next</span></button>
+      <button class="btn g ico" id="reelFav"><span class="material-icons-round">favorite_border</span></button>
+      <button class="btn g ico" id="reelHeat"><span class="material-icons-round">local_fire_department</span></button>
+      <button class="btn g ico" id="reelDel"><span class="material-icons-round">delete_outline</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EDIT SHEET ============ -->
+<div class="modal" id="sheet">
+  <div class="sheet">
+    <div class="sheet-h">
+      <span class="material-icons-round" style="color:var(--ember)">bookmark</span>
+      <h3 id="sheetTitle">Uložiť moment</h3>
+      <button class="btn g ico" id="sheetX"><span class="material-icons-round">close</span></button>
+    </div>
+    <div class="sheet-b">
+      <label class="fld">Názov<input type="text" id="fTitle" placeholder="Napr. „najlepších 20 sekúnd“"></label>
+      <label class="fld">Značky (oddelené čiarkou)<input type="text" id="fTags" placeholder="pov, blondínka, finish"></label>
+      <label class="fld">Zbierka<input type="text" id="fColl" list="collList" placeholder="napr. Top 2026"></label>
+      <datalist id="collList"></datalist>
+      <label class="fld">Heat
+        <div class="heatpick" id="fHeat">
+          <button data-h="0">—</button><button data-h="1">🔥</button>
+          <button data-h="2">🔥🔥</button><button data-h="3">🔥🔥🔥</button>
+        </div>
+      </label>
+      <div class="hint" id="sheetSpan"></div>
+    </div>
+    <div class="sheet-f">
+      <button class="btn g" id="sheetCancel">Zrušiť</button>
+      <button class="btn p" id="sheetSave">Uložiť</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const API = '/api/v1';
+/* Plenty of older library rows point at thumbnails that were cleaned up long
+   ago; a broken-image icon in every rail reads as "Studio is broken". Inline
+   SVG rather than /static/placeholder.jpg — that file decodes to zero width in
+   Chromium, so it fails exactly like the thumbnail it was standing in for. */
+const FALLBACK_THUMB = "data:image/svg+xml;charset=utf8," + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180">' +
+  '<rect width="320" height="180" fill="#141110"/>' +
+  '<path d="M130 66h60v48h-60z" fill="none" stroke="#3a3128" stroke-width="4"/>' +
+  '<circle cx="160" cy="90" r="9" fill="#3a3128"/></svg>');
+const imgTag = (src, extra) =>
+  '<img loading="lazy" src="' + esc(src || FALLBACK_THUMB) + '"' + (extra || '') +
+  ' onerror="this.onerror=null;this.src=\'' + FALLBACK_THUMB + '\'">';
+
+async function api(url, opts) {
+  const r = await fetch(url, opts);
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.detail || ('HTTP ' + r.status));
+  return body;
+}
+const jpost = (url, data, method) => api(url, {
+  method: method || 'POST', headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify(data || {})
+});
+function toast(msg, kind) {
+  const el = document.createElement('div');
+  el.className = kind || 'ok'; el.textContent = msg;
+  $('#toasts').appendChild(el); setTimeout(() => el.remove(), 4000);
+}
+/* Some legacy library rows hold a timestamp in `duration`; rendering those
+   verbatim printed badges like "1368087:51:43". Anything past 12 h is not a
+   duration, so say so rather than dress up garbage as a number. */
+function tc(s) {
+  s = Math.max(0, Math.round(s || 0));
+  if (s > 12 * 3600) return '—:—';
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
+  return h ? h + ':' + String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0')
+           : m + ':' + String(x).padStart(2, '0');
+}
+
+const S = {
+  view: 'wall',
+  filters: { q: '', collection: '', tag: '', favorites_only: false, min_heat: 0, sort: 'recent' },
+  moments: [], total: 0, offset: 0,
+  overview: null,
+  cut: null,          // loaded video for the cutter (library card OR hub video)
+  inSec: 0, outSec: 0,
+  videos: [], vOffset: 0, vTotal: 0,
+  reel: { items: [], i: 0, on: false },
+  sheet: { mode: 'create', moment: null },
+  prop: { items: [], offset: 0, total: 0, i: 0 },
+};
+
+/* ======================= NAV ======================= */
+$$('.tab').forEach(t => t.onclick = () => {
+  S.view = t.dataset.view;
+  $$('.tab').forEach(x => x.classList.toggle('on', x === t));
+  $$('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + S.view));
+  if (S.view === 'cut' && !S.videos.length) loadVideos(true);
+  if (S.view === 'new') loadNews();
+  if (S.view === 'prop') loadProposals(true);
+});
+
+/* ======================= WALL ======================= */
+function filterParams(extra) {
+  const p = new URLSearchParams();
+  const f = S.filters;
+  if (f.q) p.set('q', f.q);
+  if (f.collection) p.set('collection', f.collection);
+  if (f.tag) p.set('tag', f.tag);
+  if (f.favorites_only) p.set('favorites_only', 'true');
+  if (f.min_heat) p.set('min_heat', f.min_heat);
+  p.set('sort', f.sort);
+  for (const k in (extra || {})) p.set(k, extra[k]);
+  return p;
+}
+
+async function loadOverview() {
+  try {
+    S.overview = await api(API + '/studio/overview');
+    renderStats(); renderChips();
+  } catch (e) { /* header is decoration; the wall still works */ }
+}
+
+function renderStats() {
+  const o = S.overview; if (!o) return;
+  const cells = [
+    ['Momentov', o.total, 'bookmark'],
+    ['Minút zostrihaných', o.total_minutes, 'schedule'],
+    ['Obľúbených', o.favorites, 'favorite'],
+    ['Vyexportovaných', o.exported, 'movie'],
+    ['Videí nakrájaných', o.sliced_videos + ' / ' + o.library_videos, 'content_cut'],
+  ];
+  $('#stats').innerHTML = cells.map(c =>
+    '<div class="stat"><b>' + esc(c[1]) + '</b><span>' + esc(c[0]) + '</span></div>').join('');
+  $('#tagline').textContent = o.total ? o.total + ' momentov · ' + o.total_minutes + ' min' : 'momenty, nie videá';
+}
+
+function renderChips() {
+  const o = S.overview; if (!o) return;
+  const f = S.filters;
+  let html = '<button class="chip ' + (!f.collection && !f.tag && !f.favorites_only && !f.min_heat ? 'on' : '') +
+    '" data-clear="1">Všetko</button>';
+  html += '<button class="chip ' + (f.favorites_only ? 'on' : '') + '" data-fav="1">♥ Obľúbené</button>';
+  html += '<button class="chip ' + (f.min_heat === 3 ? 'on' : '') + '" data-heat="3">🔥🔥🔥 Len top</button>';
+  for (const c of o.collections)
+    html += '<button class="chip ' + (f.collection === c.name ? 'on' : '') + '" data-coll="' + esc(c.name) +
+      '">📁 ' + esc(c.name) + ' · ' + c.count + '</button>';
+  for (const t of o.tags.slice(0, 18))
+    html += '<button class="chip ' + (f.tag === t.name ? 'on' : '') + '" data-tag="' + esc(t.name) +
+      '">' + esc(t.name) + ' · ' + t.count + '</button>';
+  $('#chips').innerHTML = html;
+  $('#collList').innerHTML = o.collections.map(c => '<option value="' + esc(c.name) + '">').join('');
+
+  $$('#chips .chip').forEach(ch => ch.onclick = () => {
+    const f = S.filters, d = ch.dataset;
+    if (d.clear) { f.collection = ''; f.tag = ''; f.favorites_only = false; f.min_heat = 0; }
+    else if (d.fav) f.favorites_only = !f.favorites_only;
+    else if (d.heat) f.min_heat = f.min_heat === 3 ? 0 : 3;
+    else if (d.coll) f.collection = f.collection === d.coll ? '' : d.coll;
+    else if (d.tag) f.tag = f.tag === d.tag ? '' : d.tag;
+    renderChips(); loadWall(true);
+  });
+}
+
+async function loadWall(reset) {
+  if (reset) { S.offset = 0; S.moments = []; }
+  const p = filterParams({ limit: 60, offset: S.offset });
+  try {
+    const d = await api(API + '/studio/moments?' + p);
+    S.moments = S.moments.concat(d.items);
+    S.total = d.total; S.offset += d.items.length;
+    $('#nWall').textContent = d.total;
+    renderWall(d.has_more);
+  } catch (e) { toast(e.message, 'bad'); }
+}
+
+function renderWall(hasMore) {
+  const wall = $('#wall');
+  if (!S.moments.length) {
+    wall.innerHTML = '<div class="empty"><span class="material-icons-round">content_cut</span>' +
+      '<h2>Zatiaľ žiadne momenty</h2><p>Otvor <b>Strihač</b>, vyber video z knižnice a označ prvý kúsok, ' +
+      'ktorý stojí za to.<br>Potom sa sem vráť a spusti <b>reel</b>.</p></div>';
+    $('#moreBtn').style.display = 'none';
+    return;
+  }
+  wall.innerHTML = '<div class="wall">' + S.moments.map(cardHtml).join('') + '</div>';
+  $('#moreBtn').style.display = hasMore ? '' : 'none';
+  bindHover();
+}
+
+function cardHtml(m) {
+  const heat = [0, 1, 2].map(i => '<i class="' + (i < m.heat ? 'on' : '') + '"></i>').join('');
+  const thumb = m.thumb ? imgTag(m.thumb)
+    : '<div class="ph"><span class="material-icons-round">movie</span></div>';
+  return '<article class="mcard h' + m.heat + '" data-id="' + m.id + '">' +
+    '<div class="mstage" data-play="' + m.id + '">' + thumb +
+      '<div class="glass"></div>' +
+      '<span class="tcbadge">' + tc(m.start_sec) + '</span>' +
+      (m.clip_status === 'ready' ? '<span class="clipbadge">MP4</span>' :
+       m.clip_status === 'rendering' ? '<span class="clipbadge">renderujem…</span>' : '') +
+      '<div class="heatdots">' + heat + '</div>' +
+      '<span class="lenbadge">' + tc(m.length_sec) + '</span>' +
+    '</div>' +
+    '<div class="mbody">' +
+      '<div class="mtitle">' + esc(m.title || 'Bez názvu') + '</div>' +
+      (m.tags.length ? '<div class="mtags">' + m.tags.map(t =>
+        '<span class="mtag" data-tag="' + esc(t) + '">' + esc(t) + '</span>').join('') + '</div>' : '') +
+      '<div class="mparent"><span class="material-icons-round" style="font-size:12px">subdirectory_arrow_right</span>' +
+        esc(m.parent_title || '—') + (m.play_count ? ' · ' + m.play_count + '× hrané' : '') + '</div>' +
+    '</div>' +
+    '<div class="mact">' +
+      '<button class="btn ico" data-fav="' + m.id + '" title="Obľúbené">' +
+        '<span class="material-icons-round' + (m.is_favorite ? ' fav' : '') + '">' +
+        (m.is_favorite ? 'favorite' : 'favorite_border') + '</span></button>' +
+      '<button class="btn ico" data-edit="' + m.id + '" title="Upraviť"><span class="material-icons-round">edit</span></button>' +
+      '<button class="btn ico" data-cut="' + m.id + '" title="Otvoriť v strihači"><span class="material-icons-round">content_cut</span></button>' +
+      '<button class="btn" data-reel="' + m.id + '"><span class="material-icons-round">play_arrow</span> Reel</button>' +
+      '<button class="btn ico" data-exp="' + m.id + '" title="Export mp4"><span class="material-icons-round">download</span></button>' +
+      '<button class="btn ico" data-del="' + m.id + '" title="Zmazať"><span class="material-icons-round">delete_outline</span></button>' +
+    '</div></article>';
+}
+
+/* One shared <video> follows the pointer around the wall: a hundred cards each
+   holding their own element would stall the tab, and only one can be watched. */
+const hoverVid = document.createElement('video');
+hoverVid.muted = true; hoverVid.playsInline = true; hoverVid.loop = false;
+hoverVid.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000';
+let hoverTimer = null, hoverM = null;
+
+function stopHover() {
+  clearTimeout(hoverTimer);
+  hoverVid.pause();
+  if (hoverVid.parentElement) hoverVid.parentElement.removeChild(hoverVid);
+  hoverVid.removeAttribute('src'); hoverVid.load();
+  hoverM = null;
+}
+
+function startHover(stage, m) {
+  if (!m.play_url) return;
+  hoverM = m;
+  hoverVid.src = m.play_url;
+  const begin = m.seek ? m.start_sec : 0;
+  const stop = m.seek ? m.end_sec : 1e9;
+  hoverVid.currentTime = begin;
+  hoverVid.ontimeupdate = () => {
+    if (hoverM !== m) return;
+    if (hoverVid.currentTime >= stop - 0.05) hoverVid.currentTime = begin;
+  };
+  hoverVid.onloadedmetadata = () => { try { hoverVid.currentTime = begin; } catch (e) {} };
+  stage.appendChild(hoverVid);
+  hoverVid.play().catch(() => {});
+}
+
+function bindHover() {
+  $$('#wall .mstage').forEach(stage => {
+    const card = stage.closest('.mcard');
+    const m = S.moments.find(x => x.id === +card.dataset.id);
+    stage.onmouseenter = () => {
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => startHover(stage, m), 320); // don't fire on a pass-through
+    };
+    stage.onmouseleave = stopHover;
+  });
+}
+
+$('#wall').addEventListener('click', async e => {
+  const btn = e.target.closest('[data-fav],[data-edit],[data-del],[data-reel],[data-exp],[data-cut],[data-tag],[data-play]');
+  if (!btn) return;
+  const d = btn.dataset;
+  const id = +(d.fav || d.edit || d.del || d.reel || d.exp || d.cut || d.play || 0);
+  const m = S.moments.find(x => x.id === id);
+  if (d.tag) { S.filters.tag = d.tag; renderChips(); loadWall(true); return; }
+  if (!m) return;
+  if (d.play || d.reel) { stopHover(); openReel(S.moments, S.moments.indexOf(m)); return; }
+  if (d.cut) {
+    stopHover();
+    openCutter(m.source ? { source: m.source, url: m.parent_source } : m.video_id, m);
+    return;
+  }
+  if (d.fav) {
+    try {
+      const up = await jpost(API + '/studio/moments/' + id, { is_favorite: !m.is_favorite }, 'PATCH');
+      Object.assign(m, up); renderWall(S.offset < S.total); loadOverview();
+    } catch (err) { toast(err.message, 'bad'); }
+    return;
+  }
+  if (d.edit) { openSheet('edit', m); return; }
+  if (d.exp) {
+    try {
+      await jpost(API + '/studio/moments/' + id + '/export', { precise: false });
+      m.clip_status = 'rendering'; renderWall(S.offset < S.total);
+      toast('Renderujem mp4 na pozadí…');
+      pollExport(id);
+    } catch (err) { toast(err.message, 'bad'); }
+    return;
+  }
+  if (d.del) {
+    if (!confirm('Zmazať tento moment?')) return;
+    try {
+      await api(API + '/studio/moments/' + id, { method: 'DELETE' });
+      S.moments = S.moments.filter(x => x.id !== id); S.total--;
+      renderWall(S.offset < S.total); loadOverview(); toast('Zmazané');
+    } catch (err) { toast(err.message, 'bad'); }
+  }
+});
+
+/* Rendering happens in a background task, so the row is the only progress
+   signal. Poll that one row — not the whole wall — and give up after ~5 min so
+   a wedged ffmpeg can't leave a timer running for the rest of the session. */
+async function pollExport(id, tries) {
+  tries = tries || 0;
+  if (tries > 120) return;
+  setTimeout(async () => {
+    let m;
+    try { m = await api(API + '/studio/moments/' + id); } catch (e) { return; }
+    const local = S.moments.find(x => x.id === id) || (S.cut && (S.cut.moments || []).find(x => x.id === id));
+    if (local) Object.assign(local, m);
+    if (m.clip_status === 'ready') {
+      renderWall(S.offset < S.total); renderCutMoments(); loadOverview();
+      toast('Klip hotový (' + m.clip_size_mb + ' MB) — nájdeš ho aj ako súbor');
+      return;
+    }
+    if (m.clip_status === 'error') {
+      renderWall(S.offset < S.total);
+      toast('Export zlyhal: ' + (m.clip_error || 'neznáma chyba'), 'bad');
+      return;
+    }
+    pollExport(id, tries + 1);
+  }, 2500);
+}
+
+$('#moreBtn').onclick = () => loadWall(false);
+let qTimer;
+$('#q').oninput = e => {
+  clearTimeout(qTimer);
+  qTimer = setTimeout(() => { S.filters.q = e.target.value.trim(); loadWall(true); }, 250);
+};
+$('#sort').onchange = e => { S.filters.sort = e.target.value; loadWall(true); };
+
+/* ======================= EDIT SHEET ======================= */
+function openSheet(mode, moment) {
+  S.sheet = { mode, moment };
+  $('#sheetTitle').textContent = mode === 'edit' ? 'Upraviť moment' : 'Uložiť moment';
+  const m = moment || {};
+  $('#fTitle').value = m.title || (S.cut ? S.cut.title : '');
+  $('#fTags').value = (m.tags || []).join(', ');
+  $('#fColl').value = m.collection || '';
+  setHeat(m.heat || 0);
+  const a = mode === 'edit' ? m.start_sec : S.inSec;
+  const b = mode === 'edit' ? m.end_sec : S.outSec;
+  $('#sheetSpan').innerHTML = 'Rozsah <b class="tc">' + tc(a) + ' → ' + tc(b) + '</b> · dĺžka <b class="tc">' + tc(b - a) + '</b>';
+  $('#sheet').classList.add('on');
+  setTimeout(() => $('#fTitle').focus(), 60);
+}
+function closeSheet() { $('#sheet').classList.remove('on'); }
+let heatVal = 0;
+function setHeat(h) {
+  heatVal = h;
+  $$('#fHeat button').forEach(b => b.classList.toggle('on', +b.dataset.h === h));
+}
+$$('#fHeat button').forEach(b => b.onclick = () => setHeat(+b.dataset.h));
+$('#sheetX').onclick = closeSheet;
+$('#sheetCancel').onclick = closeSheet;
+$('#sheet').onclick = e => { if (e.target.id === 'sheet') closeSheet(); };
+
+$('#sheetSave').onclick = async () => {
+  const payload = {
+    title: $('#fTitle').value.trim(),
+    tags: $('#fTags').value.trim(),
+    collection: $('#fColl').value.trim(),
+    heat: heatVal,
+  };
+  try {
+    if (S.sheet.mode === 'edit') {
+      const up = await jpost(API + '/studio/moments/' + S.sheet.moment.id, payload, 'PATCH');
+      const local = S.moments.find(x => x.id === up.id);
+      if (local) Object.assign(local, up);
+      renderWall(S.offset < S.total);
+      if (S.cut && S.cut.id === up.video_id) refreshCutMoments();
+    } else {
+      // A hub cut has no library row to hang off — it carries its source and
+      // watch URL instead, and the server re-resolves the stream when played.
+      if (S.cut.source) { payload.source = S.cut.source; payload.source_url = S.cut.url; }
+      else payload.video_id = S.cut.id;
+      payload.start_sec = S.inSec;
+      payload.end_sec = S.outSec;
+      const created = await jpost(API + '/studio/moments', payload);
+      toast('Moment uložený · ' + tc(created.length_sec));
+      refreshCutMoments();
+    }
+    closeSheet(); loadOverview();
+    if (S.view === 'wall') loadWall(true);
+  } catch (e) { toast(e.message, 'bad'); }
+};
+
+/* ======================= CUTTER ======================= */
+async function loadVideos(reset) {
+  if (reset) { S.vOffset = 0; S.videos = []; }
+  const p = new URLSearchParams({ limit: 40, offset: S.vOffset, sort: $('#vsort').value });
+  const q = $('#vq').value.trim(); if (q) p.set('q', q);
+  try {
+    const d = await api(API + '/studio/videos?' + p);
+    S.videos = S.videos.concat(d.items); S.vOffset += d.items.length; S.vTotal = d.total;
+    renderVideos(d.has_more);
+  } catch (e) { toast(e.message, 'bad'); }
+}
+
+function renderVideos(hasMore) {
+  $('#vlist').innerHTML = S.videos.map(v =>
+    '<div class="vrow' + (S.cut && S.cut.id === v.id ? ' on' : '') + '" data-v="' + v.id + '">' +
+      imgTag(v.thumb) +
+      '<div class="vi"><div class="vt">' + esc(v.title) + '</div><div class="vm">' +
+        '<span>' + tc(v.duration) + '</span>' +
+        (v.quality ? '<span>' + esc(v.quality) + '</span>' : '') +
+        (v.moments ? '<span class="cnt">' + v.moments + ' momentov</span>' : '') +
+        (v.local ? '' : '<span title="vzdialený zdroj — strih je pomalší">☁</span>') +
+      '</div></div></div>').join('');
+  $('#vmore').style.display = hasMore ? '' : 'none';
+  $$('#vlist .vrow').forEach(r => r.onclick = () => openCutter(+r.dataset.v));
+}
+$('#vmore').onclick = () => loadVideos(false);
+$('#vsort').onchange = () => loadVideos(true);
+let vqTimer;
+$('#vq').oninput = () => { clearTimeout(vqTimer); vqTimer = setTimeout(() => loadVideos(true), 250); };
+
+function showCutTab() {
+  $$('.tab').forEach(t => t.classList.toggle('on', t.dataset.view === 'cut'));
+  $$('.view').forEach(v => v.classList.toggle('on', v.id === 'v-cut'));
+  S.view = 'cut';
+}
+
+/* One cutter, two kinds of parent. `openCutter(id)` for a library card,
+   `openCutter({source, url})` for a hub video that was never imported — the
+   server hands back the same shape either way, so everything below is shared. */
+async function openCutter(target, focusMoment, seekTo) {
+  showCutTab();
+  if (!S.videos.length) loadVideos(true);
+  const hub = target && typeof target === 'object';
+
+  $('#cutTitle').textContent = 'Načítavam…';
+  $('#strip').innerHTML = '<div class="strip-load"><span class="material-icons-round spin">autorenew</span> Krájam filmový pás…</div>';
+  $('#scenebar').innerHTML = '';
+  try {
+    S.cut = hub
+      ? await api(API + '/studio/hub-video?source=' + encodeURIComponent(target.source) +
+                  '&url=' + encodeURIComponent(target.url))
+      : await api(API + '/studio/video/' + target);
+  } catch (e) { toast(e.message, 'bad'); return; }
+
+  $('#cutTitle').textContent = S.cut.title || (hub ? target.source : 'Video #' + target);
+  $('#cutWarn').innerHTML = S.cut.problem
+    ? '<div class="warn">' + esc(S.cut.problem) + ' Strih ani náhľad nebudú fungovať.</div>'
+    : (S.cut.local ? '' : '<div class="hint" style="margin-top:9px">☁ Vzdialený zdroj — pás aj export sú pomalšie a detekcia scén je vypnutá.</div>');
+
+  const v = $('#cv');
+  v.src = S.cut.play_url || '';
+  v.load();
+  $('#sceneBtn').disabled = !S.cut.can_detect_scenes;
+
+  const dur = S.cut.duration || 0;
+  const anchor = focusMoment ? focusMoment.start_sec : (seekTo || 0);
+  if (focusMoment) { S.inSec = focusMoment.start_sec; S.outSec = focusMoment.end_sec; }
+  else { S.inSec = anchor; S.outSec = Math.min(anchor + 20, dur || anchor + 20); }
+  drawRange(); renderCutMoments();
+  if (anchor) v.addEventListener('loadedmetadata', () => { v.currentTime = anchor; }, { once: true });
+  renderVideos($('#vmore').style.display !== 'none');
+  streamStrip(false);
+}
+
+/* ---- filmstrip ---- */
+let stripFrames = [];
+function cutParams() {
+  return S.cut.source
+    ? { source: S.cut.source, url: S.cut.url }
+    : { video_id: S.cut.id };
+}
+async function streamStrip(rebuild) {
+  stripFrames = [];
+  const box = $('#strip');
+  box.innerHTML = '<div class="strip-load"><span class="material-icons-round spin">autorenew</span> Krájam filmový pás…</div>';
+  const p = new URLSearchParams(cutParams());
+  if (rebuild) p.set('rebuild', 'true');
+  let painted = false;
+  try {
+    const resp = await fetch(API + '/studio/storyboard/stream?' + p);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const reader = resp.body.getReader(); const dec = new TextDecoder(); let buf = '';
+    for (;;) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      buf += dec.decode(chunk.value, { stream: true });
+      const lines = buf.split('\n'); buf = lines.pop() || '';
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        let ev; try { ev = JSON.parse(line); } catch (e) { continue; }
+        if (ev.type === 'error') { box.innerHTML = '<div class="strip-load">' + esc(ev.error) + '</div>'; return; }
+        if (ev.type === 'frame') {
+          if (!painted) { box.innerHTML = ''; painted = true; }
+          stripFrames.push(ev.frame);
+          // Frames land out of order (parallel ffmpeg); insert each in time order
+          // so the strip reads left-to-right the whole time it is filling.
+          stripFrames.sort((a, b) => a.t - b.t);
+          const img = document.createElement('img');
+          img.loading = 'lazy'; img.src = ev.frame.url; img.dataset.t = ev.frame.t;
+          img.title = tc(ev.frame.t);
+          const after = [...box.children].find(c => +c.dataset.t > ev.frame.t);
+          box.insertBefore(img, after || null);
+        }
+      }
+    }
+    if (!painted) box.innerHTML = '<div class="strip-load">Z tohto videa sa nepodarilo vytiahnuť obrázky.</div>';
+    else markStrip();
+  } catch (e) {
+    box.innerHTML = '<div class="strip-load">Pás sa nepodaril: ' + esc(e.message) + '</div>';
+  }
+}
+$('#rebuildBtn').onclick = () => { if (S.cut) streamStrip(true); };
+
+function markStrip() {
+  $$('#strip img').forEach(img => {
+    const t = +img.dataset.t;
+    img.classList.toggle('insel', t >= S.inSec && t <= S.outSec);
+  });
+}
+
+/* Click = IN, shift-click = OUT, drag = whole range. One handler covers all
+   three so the strip behaves like a timeline instead of a row of buttons. */
+(function bindStrip() {
+  const box = $('#strip');
+  let dragFrom = null;
+  const timeAt = e => {
+    const img = e.target.closest('img');
+    return img ? +img.dataset.t : null;
+  };
+  box.addEventListener('mousedown', e => {
+    const t = timeAt(e); if (t === null) return;
+    e.preventDefault();
+    if (e.shiftKey) { setOut(t); return; }
+    dragFrom = t;
+  });
+  box.addEventListener('mousemove', e => {
+    if (dragFrom === null) return;
+    const t = timeAt(e); if (t === null) return;
+    setSpan(Math.min(dragFrom, t), Math.max(dragFrom, t) + 2);
+  });
+  window.addEventListener('mouseup', e => {
+    if (dragFrom === null) return;
+    const t = timeAt(e);
+    if (t === null || Math.abs(t - dragFrom) < 0.01) setIn(dragFrom);
+    dragFrom = null;
+  });
+})();
+
+/* ---- range bar ---- */
+function dur() { return (S.cut && S.cut.duration) || 0; }
+function clampSpan() {
+  const d = dur() || 1e9;
+  S.inSec = Math.max(0, Math.min(S.inSec, d - 1));
+  S.outSec = Math.max(S.inSec + 1.5, Math.min(S.outSec, d));
+}
+function setIn(t) { S.inSec = t; if (S.outSec <= t + 1.5) S.outSec = Math.min(t + 20, dur() || t + 20); drawRange(); seekTo(t); }
+function setOut(t) { S.outSec = t; if (S.inSec >= t - 1.5) S.inSec = Math.max(0, t - 20); drawRange(); }
+function setSpan(a, b) { S.inSec = a; S.outSec = b; drawRange(); }
+function seekTo(t) { const v = $('#cv'); if (v.src) { try { v.currentTime = t; } catch (e) {} } }
+
+function drawRange() {
+  clampSpan();
+  const d = dur() || 1;
+  const a = (S.inSec / d) * 100, b = (S.outSec / d) * 100;
+  $('#rsel').style.left = a + '%';
+  $('#rsel').style.width = Math.max(0.4, b - a) + '%';
+  $('#hIn').style.left = a + '%';
+  $('#hOut').style.left = b + '%';
+  $('#ioIn').textContent = tc(S.inSec);
+  $('#ioOut').textContent = tc(S.outSec);
+  $('#ioLen').textContent = tc(S.outSec - S.inSec);
+  const ticks = [0, .25, .5, .75, 1].map(f => '<span>' + tc(d * f) + '</span>').join('');
+  $('#rticks').innerHTML = ticks;
+  markStrip();
+}
+
+(function bindRange() {
+  const bar = $('#range');
+  let dragging = null;
+  const tAt = e => {
+    const r = bar.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (dur() || 1);
+  };
+  $('#hIn').addEventListener('mousedown', e => { e.stopPropagation(); dragging = 'in'; });
+  $('#hOut').addEventListener('mousedown', e => { e.stopPropagation(); dragging = 'out'; });
+  bar.addEventListener('mousedown', e => { if (!dragging) seekTo(tAt(e)); });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const t = tAt(e);
+    if (dragging === 'in') S.inSec = Math.min(t, S.outSec - 1.5);
+    else S.outSec = Math.max(t, S.inSec + 1.5);
+    drawRange();
+  });
+  window.addEventListener('mouseup', () => { dragging = null; });
+})();
+
+$('#cv').addEventListener('timeupdate', () => {
+  const d = dur() || 1;
+  $('#rcur').style.left = (($('#cv').currentTime / d) * 100) + '%';
+  if (loopOn && $('#cv').currentTime >= S.outSec) $('#cv').currentTime = S.inSec;
+});
+
+let loopOn = false;
+$('#loopBtn').onclick = () => {
+  loopOn = !loopOn;
+  $('#loopBtn').classList.toggle('p', loopOn);
+  if (loopOn) { seekTo(S.inSec); $('#cv').play().catch(() => {}); }
+};
+$('#nudgeIn').onclick = () => setIn(+$('#cv').currentTime.toFixed(2));
+$('#nudgeOut').onclick = () => setOut(+$('#cv').currentTime.toFixed(2));
+$('#saveBtn').onclick = () => { if (!S.cut) return toast('Najprv vyber video', 'bad'); openSheet('create', null); };
+
+$('#sceneBtn').onclick = async () => {
+  if (!S.cut) return;
+  const btn = $('#sceneBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="material-icons-round spin">autorenew</span> Hľadám…';
+  try {
+    const d = await api(API + '/studio/scenes?video_id=' + S.cut.id);
+    if (!d.scenes.length) { toast(d.reason || 'Žiadne výrazné strihy sa nenašli', 'bad'); return; }
+    const total = dur() || d.duration || 1;
+    $('#scenebar').innerHTML = d.scenes.map(t =>
+      '<i style="left:' + ((t / total) * 100) + '%" title="' + tc(t) + '" data-t="' + t + '"></i>').join('');
+    $$('#scenebar i').forEach(i => i.onclick = () => setIn(+i.dataset.t));
+    S.scenes = d.scenes;
+    toast(d.scenes.length + ' scén nájdených — klikni na značku alebo urob z nich momenty');
+    if (confirm('Nájdených ' + d.scenes.length + ' scén.\nVytvoriť z každej 20-sekundový moment?'))
+      await bulkFromScenes(d.scenes);
+  } catch (e) { toast(e.message, 'bad'); }
+  finally { btn.disabled = false; btn.innerHTML = '<span class="material-icons-round">movie_filter</span> Nájsť scény'; }
+};
+
+async function bulkFromScenes(scenes) {
+  try {
+    const d = await jpost(API + '/studio/moments/bulk', {
+      video_id: S.cut.id, starts: scenes, length: 20, collection: 'Auto-scény'
+    });
+    toast('Vytvorených ' + d.created + ' momentov');
+    refreshCutMoments(); loadOverview();
+  } catch (e) { toast(e.message, 'bad'); }
+}
+
+async function refreshCutMoments() {
+  if (!S.cut) return;
+  try {
+    // A hub video has no id to filter on, so its moments come back by source and
+    // are narrowed to this watch URL here.
+    const p = S.cut.source
+      ? new URLSearchParams({ source: S.cut.source, limit: 200, sort: 'oldest' })
+      : new URLSearchParams({ video_id: S.cut.id, limit: 200, sort: 'oldest' });
+    const d = await api(API + '/studio/moments?' + p);
+    if (S.cut.source) d.items = d.items.filter(m => m.parent_source === S.cut.url);
+    S.cut.moments = d.items.sort((a, b) => a.start_sec - b.start_sec);
+    renderCutMoments();
+  } catch (e) {}
+}
+
+function renderCutMoments() {
+  const list = (S.cut && S.cut.moments) || [];
+  $('#cutCount').textContent = list.length ? '· ' + list.length : '';
+  if (!list.length) {
+    $('#cutMoments').innerHTML = '<div class="hint">Ešte nič. Označ rozsah a stlač <b>S</b>.</div>';
+    return;
+  }
+  $('#cutMoments').innerHTML = '<div class="wall">' + list.map(cardHtml).join('') + '</div>';
+  $$('#cutMoments .mstage').forEach(st => st.onclick = () => {
+    const m = list.find(x => x.id === +st.closest('.mcard').dataset.id);
+    setSpan(m.start_sec, m.end_sec); seekTo(m.start_sec); $('#cv').play().catch(() => {});
+  });
+  $('#cutMoments').onclick = async e => {
+    const btn = e.target.closest('[data-del],[data-edit],[data-exp],[data-reel],[data-fav]');
+    if (!btn) return;
+    const d = btn.dataset;
+    const id = +(d.del || d.edit || d.exp || d.reel || d.fav);
+    const m = list.find(x => x.id === id); if (!m) return;
+    if (d.reel) return openReel(list, list.indexOf(m));
+    if (d.edit) return openSheet('edit', m);
+    if (d.fav) {
+      const up = await jpost(API + '/studio/moments/' + id, { is_favorite: !m.is_favorite }, 'PATCH');
+      Object.assign(m, up); renderCutMoments(); return;
+    }
+    if (d.exp) {
+      await jpost(API + '/studio/moments/' + id + '/export', { precise: false });
+      toast('Renderujem mp4…'); return;
+    }
+    if (d.del && confirm('Zmazať moment?')) {
+      await api(API + '/studio/moments/' + id, { method: 'DELETE' });
+      refreshCutMoments(); loadOverview();
+    }
+  };
+}
+
+/* ======================= ZO ZDROJA (hub) ======================= */
+async function loadHubSources() {
+  try {
+    const d = await api(API + '/hub/sources');
+    const rows = (d.sources || d || []).slice().sort((a, b) => a.label.localeCompare(b.label));
+    $('#hubSrc').innerHTML = rows.map(s =>
+      '<option value="' + esc(s.source) + '">' + esc(s.label) + '</option>').join('');
+  } catch (e) {
+    $('#hubSrc').innerHTML = '<option value="">— zdroje sa nenačítali —</option>';
+  }
+}
+
+/* Guess the source from the URL host so pasting a link usually needs no dropdown
+   fiddling; the select stays as the override for hosts that don't match. */
+function guessSource(url) {
+  const opts = [...$('#hubSrc').options].map(o => o.value).filter(Boolean);
+  let host = '';
+  try { host = new URL(url).hostname.replace(/^www\./, '').toLowerCase(); } catch (e) { return ''; }
+  const stem = host.split('.')[0];
+  return opts.find(o => stem.includes(o) || o.includes(stem)) || '';
+}
+
+$('#hubUrl').addEventListener('input', e => {
+  const guess = guessSource(e.target.value.trim());
+  if (guess) $('#hubSrc').value = guess;
+});
+$('#hubLoad').onclick = () => {
+  const url = $('#hubUrl').value.trim();
+  const source = $('#hubSrc').value;
+  if (!url || !source) return toast('Vyber zdroj a vlož odkaz na video', 'bad');
+  openCutter({ source, url });
+};
+
+/* ======================= NÁVRHY ======================= */
+async function loadProposals(reset) {
+  if (reset) { S.prop = { items: [], offset: 0, total: 0, i: 0 }; }
+  const p = new URLSearchParams({ limit: 60, offset: S.prop.offset });
+  try {
+    const d = await api(API + '/studio/proposals?' + p);
+    S.prop.items = S.prop.items.concat(d.items);
+    S.prop.offset += d.items.length;
+    S.prop.total = d.total;
+    $('#nProp').textContent = d.total;
+    renderPropStatus(d.status);
+    renderProposals(d.has_more);
+  } catch (e) { toast(e.message, 'bad'); }
+}
+
+function renderPropStatus(st) {
+  if (!st) return;
+  const when = st.last_scan ? new Date(st.last_scan).toLocaleString('sk-SK') : 'zatiaľ nikdy';
+  $('#propStatus').innerHTML =
+    '<b>' + st.proposed + '</b> čaká na rozhodnutie · prijatých <b>' + st.kept_auto +
+    '</b> · zamietnutých <b>' + st.rejected + '</b><br>' +
+    'prehľadaných videí ' + st.scanned_videos + ' z ' + st.eligible_videos +
+    ' · posledný beh: ' + esc(when);
+}
+
+function renderProposals(hasMore) {
+  const box = $('#proposals');
+  if (!S.prop.items.length) {
+    box.innerHTML = '<div class="empty"><span class="material-icons-round">inbox</span>' +
+      '<h2>Žiadne návrhy</h2><p>Buď je všetko rozhodnuté, alebo ešte nebežalo nočné hľadanie.<br>' +
+      'Klikni na <b>Prehľadať teraz</b> a pozri sa, čo nájde.</p></div>';
+    $('#propMore').style.display = 'none';
+    return;
+  }
+  box.innerHTML = '<div class="wall">' + S.prop.items.map((m, i) => propCard(m, i)).join('') + '</div>';
+  $('#propMore').style.display = hasMore ? '' : 'none';
+  markPropFocus();
+}
+
+function propCard(m, i) {
+  const thumb = m.thumb ? imgTag(m.thumb)
+    : '<div class="ph"><span class="material-icons-round">movie</span></div>';
+  return '<article class="mcard prop" data-id="' + m.id + '" data-i="' + i + '">' +
+    '<div class="mstage" data-pplay="' + m.id + '">' + thumb +
+      '<div class="glass"></div>' +
+      '<span class="tcbadge">' + tc(m.start_sec) + '</span>' +
+      '<span class="lenbadge">' + tc(m.length_sec) + '</span>' +
+    '</div>' +
+    '<div class="mbody">' +
+      '<div class="mtitle">' + esc(m.parent_title || m.title || 'Bez názvu') + '</div>' +
+      '<div class="mparent"><span class="material-icons-round" style="font-size:12px">schedule</span>' +
+        tc(m.start_sec) + ' → ' + tc(m.end_sec) + '</div>' +
+    '</div>' +
+    '<div class="mact">' +
+      '<button class="btn p" data-keep="' + m.id + '"><span class="material-icons-round">check</span> Nechať</button>' +
+      '<button class="btn" data-drop="' + m.id + '"><span class="material-icons-round">close</span> Nie</button>' +
+      '<button class="btn ico" data-pcut="' + m.id + '" title="Doladiť v strihači">' +
+        '<span class="material-icons-round">content_cut</span></button>' +
+    '</div></article>';
+}
+
+function markPropFocus() {
+  $$('#proposals .mcard').forEach(c => c.classList.toggle('focus', +c.dataset.i === S.prop.i));
+  const el = $('#proposals .mcard.focus');
+  if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+async function verdict(ids, keep) {
+  try {
+    const d = await jpost(API + '/studio/proposals/verdict',
+      keep ? { keep: ids } : { reject: ids });
+    S.prop.items = S.prop.items.filter(m => !ids.includes(m.id));
+    S.prop.total = d.remaining;
+    $('#nProp').textContent = d.remaining;
+    if (S.prop.i >= S.prop.items.length) S.prop.i = Math.max(0, S.prop.items.length - 1);
+    renderProposals(false);
+    loadOverview();
+    if (keep) toast(ids.length + ' prijatých — nájdeš ich na stene');
+  } catch (e) { toast(e.message, 'bad'); }
+}
+
+$('#proposals').addEventListener('click', e => {
+  const btn = e.target.closest('[data-keep],[data-drop],[data-pcut],[data-pplay]');
+  if (!btn) return;
+  const d = btn.dataset;
+  const id = +(d.keep || d.drop || d.pcut || d.pplay);
+  const m = S.prop.items.find(x => x.id === id);
+  if (!m) return;
+  S.prop.i = S.prop.items.indexOf(m); markPropFocus();
+  if (d.keep) return verdict([id], true);
+  if (d.drop) return verdict([id], false);
+  if (d.pcut) return openCutter(m.video_id, m);
+  if (d.pplay) return openReel(S.prop.items, S.prop.i);
+});
+
+$('#propMore').onclick = () => loadProposals(false);
+$('#rejectAllBtn').onclick = async () => {
+  if (!confirm('Zamietnuť všetky návrhy? Znovu sa už neponúknu.')) return;
+  await jpost(API + '/studio/proposals/reject-all', {});
+  loadProposals(true); loadOverview();
+};
+$('#scanBtn').onclick = async () => {
+  const btn = $('#scanBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-icons-round spin">autorenew</span> Hľadám scény…';
+  try {
+    const d = await jpost(API + '/studio/autoscan/run', { videos: 2, max_proposals: 6 });
+    toast(d.proposals
+      ? d.proposals + ' návrhov z ' + d.scanned + ' videí'
+      : 'Prehľadané ' + d.scanned + ' videí, nič použiteľné');
+    loadProposals(true);
+  } catch (e) { toast(e.message, 'bad'); }
+  finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-icons-round">bolt</span> Prehľadať teraz';
+  }
+};
+
+/* ======================= NOVINKY ======================= */
+async function loadNews() {
+  $('#news').innerHTML = '<div class="empty"><span class="material-icons-round spin">autorenew</span>Načítavam…</div>';
+  try {
+    const d = await api(API + '/studio/whats-new');
+    let html = '<div id="tasteRail"></div>';
+    html += rail('Nové v knižnici', 'Prišlo za posledné dva týždne — a ešte to nikto nerozobral.',
+                 'fiber_new', d.fresh.map(vcard).join('')) ;
+    html += rail('Nenakrájané dlhé videá', 'Najdlhšie kúsky bez jediného momentu. Presne tie, ktoré už nikdy neotvoríš celé.',
+                 'content_cut', d.unsliced.map(vcard).join(''));
+    html += rail('Uložené a nikdy nepozreté', 'Momenty, ktoré si si odložil a odvtedy nespustil.',
+                 'history', d.revisit.map(mcardMini).join(''));
+    $('#news').innerHTML = html;
+    $$('#news [data-openv]').forEach(el => el.onclick = () => openCutter(+el.dataset.openv));
+    $$('#news [data-openm]').forEach(el => el.onclick = () => {
+      const m = d.revisit.find(x => x.id === +el.dataset.openm);
+      if (m) openReel(d.revisit, d.revisit.indexOf(m));
+    });
+    loadTasteRail();   // slow (live hub fan-out) — never block the rest of the page on it
+  } catch (e) { $('#news').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; }
+}
+
+/* The taste rail is the only part of Studio that reaches outside the library.
+   It searches the hub sources with the terms your heat ratings produced, so what
+   lands here is new material picked by the same signal that orders the reel. */
+async function loadTasteRail() {
+  const box = $('#tasteRail');
+  if (!box) return;
+  box.innerHTML = rail('Podľa tvojho vkusu', 'Hľadám naprieč zdrojmi…', 'psychology',
+    '<div class="rcard" style="display:flex;align-items:center;justify-content:center;height:150px">' +
+    '<span class="material-icons-round spin">autorenew</span></div>');
+  try {
+    const d = await api(API + '/studio/taste-picks');
+    if (!d.items.length) {
+      box.innerHTML = rail('Podľa tvojho vkusu',
+        d.reason || 'Zatiaľ nič — skús ohodnotiť viac momentov 🔥.', 'psychology', '') ||
+        '<div class="rail"><h3><span class="material-icons-round" style="color:var(--ember)">psychology</span>' +
+        'Podľa tvojho vkusu</h3><p>' + esc(d.reason || 'Zatiaľ nič.') + '</p></div>';
+      return;
+    }
+    const sub = 'Nové zo zdrojov na „' + d.query + '“' +
+      (d.confident ? '' : ' — zatiaľ len tipujem, ohodnoť viac momentov 🔥');
+    box.innerHTML = rail('Podľa tvojho vkusu', sub, 'psychology',
+      d.items.map(tasteCard).join(''));
+    $$('#tasteRail [data-hub]').forEach(el => el.onclick = () => {
+      const [source, ...rest] = el.dataset.hub.split('|');
+      openCutter({ source, url: rest.join('|') });
+    });
+  } catch (e) {
+    box.innerHTML = '<div class="rail"><h3><span class="material-icons-round" style="color:var(--ember)">psychology</span>' +
+      'Podľa tvojho vkusu</h3><p>' + esc(e.message) + '</p></div>';
+  }
+}
+
+function tasteCard(t) {
+  const thumb = t.thumb
+    ? '/api/v1/hub/' + encodeURIComponent(t.source) + '/media?url=' + encodeURIComponent(t.thumb)
+    : '';
+  return '<div class="rcard" data-hub="' + esc(t.source + '|' + t.url) + '" title="Otvoriť v strihači">' +
+    '<div class="rt">' + imgTag(thumb) +
+    (t.duration ? '<span class="lenbadge">' + esc(t.duration) + '</span>' : '') +
+    '<span class="tcbadge">' + esc(t.source) + '</span></div>' +
+    '<div class="rb"><div>' + esc(t.title || '') + '</div><small>' +
+    esc(t.quality || '') + (t.views ? ' · ' + esc(t.views) : '') + '</small></div></div>';
+}
+function rail(title, sub, icon, inner) {
+  if (!inner) return '';
+  return '<div class="rail"><h3><span class="material-icons-round" style="color:var(--ember)">' + icon + '</span>' +
+    esc(title) + '</h3><p>' + esc(sub) + '</p><div class="rail-scroll">' + inner + '</div></div>';
+}
+function vcard(v) {
+  return '<div class="rcard" data-openv="' + v.id + '"><div class="rt">' +
+    imgTag(v.thumb) +
+    '<span class="lenbadge">' + tc(v.duration) + '</span></div>' +
+    '<div class="rb"><div>' + esc(v.title) + '</div><small>' + esc(v.quality || '') +
+    (v.size_mb ? ' · ' + v.size_mb + ' MB' : '') + '</small></div></div>';
+}
+function mcardMini(m) {
+  return '<div class="rcard" data-openm="' + m.id + '"><div class="rt">' +
+    (m.thumb ? imgTag(m.thumb) : '<div class="ph"></div>') +
+    '<span class="lenbadge">' + tc(m.length_sec) + '</span></div>' +
+    '<div class="rb"><div>' + esc(m.title || 'Bez názvu') + '</div><small>' + esc(m.parent_title || '') + '</small></div></div>';
+}
+
+/* ======================= REEL ======================= */
+const rv = $('#rv');
+let reelIdleTimer = null;
+
+async function startReelFromFilters() {
+  try {
+    const d = await api(API + '/studio/reel?' + filterParams({ shuffle: 'true', limit: 80 }));
+    if (!d.items.length) return toast('Žiadne momenty na prehratie — najprv nejaké ulož v Strihači', 'bad');
+    openReel(d.items, 0);
+  } catch (e) { toast(e.message, 'bad'); }
+}
+
+function openReel(items, index) {
+  S.reel = { items: items.slice(), i: index || 0, on: true };
+  $('#reel').classList.add('on');
+  document.body.classList.add('reeling');
+  renderReelDots();
+  playReel();
+}
+function closeReel() {
+  S.reel.on = false;
+  rv.pause(); rv.removeAttribute('src'); rv.load();
+  $('#reel').classList.remove('on');
+  document.body.classList.remove('reeling');
+  if (S.view === 'wall') loadWall(true);
+}
+
+function renderReelDots() {
+  const { items, i } = S.reel;
+  $('#reelDots').innerHTML = items.slice(0, 60).map((m, k) =>
+    '<i class="' + (k < i ? 'done' : k === i ? 'now' : '') + '" data-k="' + k + '"></i>').join('');
+  $$('#reelDots i').forEach(d => d.onclick = () => { S.reel.i = +d.dataset.k; playReel(); });
+}
+
+function playReel() {
+  const m = S.reel.items[S.reel.i];
+  if (!m) return closeReel();
+  $('#reelCount').textContent = 'MOMENT ' + (S.reel.i + 1) + ' / ' + S.reel.items.length;
+  $('#reelTitle').textContent = (m.title || 'Bez názvu') + ' — ' + (m.parent_title || '');
+  $('#reelFav').querySelector('span').textContent = m.is_favorite ? 'favorite' : 'favorite_border';
+  $('#reelFav').querySelector('span').className = 'material-icons-round' + (m.is_favorite ? ' fav' : '');
+  renderReelDots();
+
+  if (!m.play_url) { nextReel(); return; }
+  if (rv.dataset.src !== m.play_url) { rv.src = m.play_url; rv.dataset.src = m.play_url; }
+  const begin = m.seek ? m.start_sec : 0;
+  const apply = () => { try { rv.currentTime = begin; } catch (e) {} rv.play().catch(() => {}); };
+  if (rv.readyState >= 1) apply(); else rv.addEventListener('loadedmetadata', apply, { once: true });
+  jpost(API + '/studio/moments/' + m.id + '/played', {}).catch(() => {});
+}
+
+rv.addEventListener('timeupdate', () => {
+  const m = S.reel.items[S.reel.i]; if (!m || !S.reel.on) return;
+  const begin = m.seek ? m.start_sec : 0;
+  const stop = m.seek ? m.end_sec : (rv.duration || 1e9);
+  const pct = Math.max(0, Math.min(1, (rv.currentTime - begin) / Math.max(0.1, stop - begin)));
+  $('#reelProg').style.width = (pct * 100) + '%';
+  if (rv.currentTime >= stop - 0.05) nextReel();
+});
+rv.addEventListener('ended', () => nextReel());
+
+function nextReel() {
+  if (S.reel.i >= S.reel.items.length - 1) {
+    toast('Koniec reelu — ' + S.reel.items.length + ' momentov');
+    return closeReel();
+  }
+  S.reel.i++; playReel();
+}
+function prevReel() { if (S.reel.i > 0) { S.reel.i--; playReel(); } }
+
+async function startDailyReel() {
+  try {
+    const d = await api(API + '/studio/daily?limit=40');
+    if (!d.items.length) return toast('Na denný reel ešte nemám z čoho vyberať', 'bad');
+    toast(d.confident
+      ? 'Dnešný výber podľa: ' + d.terms.slice(0, 3).join(', ')
+      : 'Dnešný výber — ohodnoť momenty 🔥, aby to sedelo lepšie');
+    openReel(d.items, 0);
+  } catch (e) { toast(e.message, 'bad'); }
+}
+
+$('#dailyBtn').onclick = startDailyReel;
+$('#reelBtn').onclick = startReelFromFilters;
+$('#reelClose').onclick = closeReel;
+$('#reelNext').onclick = nextReel;
+$('#reelPrev').onclick = prevReel;
+$('#reelPlay').onclick = () => {
+  if (rv.paused) rv.play(); else rv.pause();
+  $('#reelPlay').querySelector('span').textContent = rv.paused ? 'play_arrow' : 'pause';
+};
+$('#reelFav').onclick = async () => {
+  const m = S.reel.items[S.reel.i]; if (!m) return;
+  const up = await jpost(API + '/studio/moments/' + m.id, { is_favorite: !m.is_favorite }, 'PATCH');
+  Object.assign(m, up); playReelMetaOnly(up);
+};
+$('#reelHeat').onclick = async () => {
+  const m = S.reel.items[S.reel.i]; if (!m) return;
+  const up = await jpost(API + '/studio/moments/' + m.id, { heat: ((m.heat || 0) + 1) % 4 }, 'PATCH');
+  Object.assign(m, up); toast('Heat: ' + (up.heat ? '🔥'.repeat(up.heat) : 'žiadny'));
+};
+$('#reelDel').onclick = async () => {
+  const m = S.reel.items[S.reel.i]; if (!m) return;
+  await api(API + '/studio/moments/' + m.id, { method: 'DELETE' });
+  S.reel.items.splice(S.reel.i, 1);
+  if (!S.reel.items.length) return closeReel();
+  if (S.reel.i >= S.reel.items.length) S.reel.i = S.reel.items.length - 1;
+  toast('Zmazané'); playReel();
+};
+function playReelMetaOnly(m) {
+  $('#reelFav').querySelector('span').textContent = m.is_favorite ? 'favorite' : 'favorite_border';
+  $('#reelFav').querySelector('span').className = 'material-icons-round' + (m.is_favorite ? ' fav' : '');
+}
+
+/* HUD fades while you actually watch, and comes back on any pointer move. */
+$('#reel').addEventListener('mousemove', () => {
+  $('#reel').classList.remove('idle');
+  clearTimeout(reelIdleTimer);
+  reelIdleTimer = setTimeout(() => $('#reel').classList.add('idle'), 2600);
+});
+
+/* ======================= KEYS ======================= */
+document.addEventListener('keydown', e => {
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+  if (S.reel.on) {
+    if (e.key === 'Escape') { e.preventDefault(); closeReel(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); nextReel(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); prevReel(); }
+    else if (e.key === ' ') { e.preventDefault(); $('#reelPlay').click(); }
+    else if (e.key.toLowerCase() === 'f') { e.preventDefault(); $('#reelFav').click(); }
+    else if (e.key.toLowerCase() === 'h') { e.preventDefault(); $('#reelHeat').click(); }
+    return;
+  }
+  if ($('#sheet').classList.contains('on')) {
+    if (e.key === 'Escape') closeSheet();
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) $('#sheetSave').click();
+    return;
+  }
+  if (typing) return;
+  // Proposal review is a keyboard job: A keeps, D drops, space previews, and
+  // the arrows walk the queue without ever touching the mouse.
+  if (S.view === 'prop' && S.prop.items.length) {
+    const m = S.prop.items[S.prop.i];
+    const k = e.key.toLowerCase();
+    if (k === 'a' && m) { e.preventDefault(); verdict([m.id], true); return; }
+    if (k === 'd' && m) { e.preventDefault(); verdict([m.id], false); return; }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      S.prop.i = Math.min(S.prop.i + 1, S.prop.items.length - 1); markPropFocus(); return;
+    }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault(); S.prop.i = Math.max(0, S.prop.i - 1); markPropFocus(); return;
+    }
+    if (e.key === ' ' && m) { e.preventDefault(); openReel(S.prop.items, S.prop.i); return; }
+  }
+  if (S.view !== 'cut' || !S.cut) return;
+  const v = $('#cv');
+  const k = e.key.toLowerCase();
+  if (k === 'i') { e.preventDefault(); setIn(+v.currentTime.toFixed(2)); }
+  else if (k === 'o') { e.preventDefault(); setOut(+v.currentTime.toFixed(2)); }
+  else if (k === 's') { e.preventDefault(); $('#saveBtn').click(); }
+  else if (k === 'l') { e.preventDefault(); $('#loopBtn').click(); }
+  else if (e.key === ' ') { e.preventDefault(); v.paused ? v.play() : v.pause(); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); v.currentTime += e.shiftKey ? 5 : 1; }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); v.currentTime -= e.shiftKey ? 5 : 1; }
+});
+
+/* ======================= BOOT ======================= */
+/* Deep link from the Fusion Hub player: #cut=1&src=…&url=…&t=…
+   The hub button hands over the exact position you were watching, so the cutter
+   opens with a 20-second selection already sitting on that spot. */
+function bootFromHash() {
+  const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+  if (!params.get('cut')) return false;
+  const source = params.get('src') || '', url = params.get('url') || '';
+  if (!source || !url) return false;
+  const at = Math.max(0, parseFloat(params.get('t') || '0') || 0);
+  history.replaceState(null, '', location.pathname);   // don't re-open on reload
+  openCutter({ source, url }, null, at);
+  return true;
+}
+
+loadOverview();
+loadHubSources();
+loadWall(true);
+// Proposal count is a badge on a tab you may never open — fetch it once at boot.
+api(API + '/studio/autoscan/status')
+  .then(st => { $('#nProp').textContent = st.proposed || 0; })
+  .catch(() => {});
+bootFromHash();
+</script>
+</body>
+</html>

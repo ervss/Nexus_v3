@@ -1,0 +1,2060 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <title>Nexus v3 — Testovací zoznam podporovaných webov (138)</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: #0b0b0f; color: #ececf1; margin: 0; padding: 24px; }
+    .wrap { max-width: 1240px; margin: 0 auto; }
+    header { position: sticky; top: 0; background: #14141c; border: 1px solid #2a2a38; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; z-index: 10; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; box-shadow: 0 10px 28px rgba(0,0,0,.45); }
+    .head-left { display: flex; flex-direction: column; gap: 4px; }
+    .head-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    h1 { font-size: 19px; margin: 0; color: #fff; }
+    .meta { font-size: 13px; color: #9ca3af; }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    input[type="search"] { background: #0b0b0f; border: 1px solid #38384a; color: #fff; padding: 8px 12px; border-radius: 8px; width: 260px; font-size: 13px; }
+    .fbtn { background: #1c1c28; color: #d1d5db; border: 1px solid #303044; border-radius: 8px; padding: 7px 11px; font-size: 12px; cursor: pointer; text-decoration: none; }
+    .fbtn:hover { border-color: #ef4444; color: #fff; }
+    .fbtn.active { background: #7f1d1d; border-color: #ef4444; color: #fff; }
+    section { margin-bottom: 28px; }
+    h2 { font-size: 17px; border-bottom: 1px solid #272736; padding-bottom: 6px; color: #f87171; }
+    .cnt { color: #9ca3af; font-weight: 400; font-size: 14px; }
+    .row { background: #14141c; border: 1px solid #242433; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; transition: border-color .15s; }
+    .row:hover { border-color: #ef4444; }
+    .row.done { opacity: .52; border-color: #16a34a; }
+    .title-line { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 8px; }
+    .chk { font-size: 12px; color: #a1a1aa; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; background: #1c1c28; padding: 2px 8px; border-radius: 6px; }
+    .support { font-size: 13px; color: #a1a1aa; }
+    .links { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .btn { display: inline-block; text-decoration: none; font-size: 13px; padding: 5px 10px; border-radius: 6px; font-weight: 500; }
+    .btn.web { background: #1e293b; color: #38bdf8; border: 1px solid #334155; }
+    .btn.web:hover { background: #0f172a; }
+    .btn.sample { background: #3b0d14; color: #fda4af; border: 1px solid #7f1d1d; }
+    .btn.sample:hover { background: #4c0519; }
+    .btn.tester { background: #172554; color: #93c5fd; border: 1px solid #1d4ed8; }
+    .btn.tester:hover { background: #1e3a8a; }
+    .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .badge { font-size: 11px; padding: 2px 7px; border-radius: 5px; background: #1f2937; color: #d1d5db; }
+    .badge.db { background: #064e3b; color: #6ee7b7; }
+    .badge.us { background: #312e81; color: #c7d2fe; }
+    .badge.ext { background: #4a1d96; color: #e9d5ff; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="head-left">
+        <div class="head-top">
+          <a class="fbtn" href="/">← Dashboard</a>
+          <a class="fbtn" href="/tester">Link Tester</a>
+          <h1>Nexus v3 — Podporované weby &amp; testovacie odkazy (<span id="progressCount">0</span> / 138)</h1>
+        </div>
+        <div class="meta">Kliknutím na modrý/červený link otvoríš priamo v Chrome na testovanie rozšírení, userscriptov a extraktorov.</div>
+      </div>
+      <div class="controls">
+        <input type="search" id="q" placeholder="Filtrovať web, doménu, rozšírenie…" oninput="applyFilters()">
+        <button type="button" class="fbtn active" data-mode="all" onclick="setMode('all', this)">Všetky</button>
+        <button type="button" class="fbtn" data-mode="sample" onclick="setMode('sample', this)">Len s príkladom z DB</button>
+        <button type="button" class="fbtn" data-mode="todo" onclick="setMode('todo', this)">Len neotestované</button>
+        <button type="button" class="fbtn" onclick="resetDone()">Reset</button>
+      </div>
+    </header>
+    <section data-section><h2>Tube &amp; Video Portály <span class="cnt">(47)</span></h2>
+        <div class="row" data-key="eporner.com" data-has-sample="1" data-search="eporner https://www.eporner.com/ extraktor, quantum search, hub, nexus gallery, extreme searcher v2  nexus extreme searcher v2 nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('eporner.com', this.checked)"> Otestované</label>
+              <strong>Eporner</strong>
+              <span class="support">Extraktor, Quantum Search, Hub, Nexus Gallery, Extreme Searcher v2</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.eporner.com/" target="_blank" rel="noopener">https://www.eporner.com/ ↗</a>
+              <a class="btn sample" href="https://www.eporner.com/video-SP36Pb0WIiC/tetonaza-latina-slim/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.eporner.com%2Fvideo-SP36Pb0WIiC%2Ftetonaza-latina-slim%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 149</span><span class="badge ext">Nexus Extreme Searcher v2</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="pornhub.com" data-has-sample="1" data-search="pornhub https://www.pornhub.com/ extraktor, quantum search, hub, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('pornhub.com', this.checked)"> Otestované</label>
+              <strong>Pornhub</strong>
+              <span class="support">Extraktor, Quantum Search, Hub, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.pornhub.com/" target="_blank" rel="noopener">https://www.pornhub.com/ ↗</a>
+              <a class="btn sample" href="https://www.pornhub.com/view_video.php?viewkey=65e1abffb5294" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.pornhub.com%2Fview_video.php%3Fviewkey%3D65e1abffb5294" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 131</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="xvideos.com" data-has-sample="1" data-search="xvideos https://www.xvideos.com/ extraktor, quantum search, hub, nexus gallery, hotcontainer handoff  hotcontainer profile handoff nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('xvideos.com', this.checked)"> Otestované</label>
+              <strong>XVideos</strong>
+              <span class="support">Extraktor, Quantum Search, Hub, Nexus Gallery, HotContainer Handoff</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.xvideos.com/" target="_blank" rel="noopener">https://www.xvideos.com/ ↗</a>
+              <a class="btn sample" href="https://xvideos.com/video.oupieelccbc/tattooed_wifey_makes_cabbage_soup_and_creampie_for_huge_cock_hipster" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fxvideos.com%2Fvideo.oupieelccbc%2Ftattooed_wifey_makes_cabbage_soup_and_creampie_for_huge_cock_hipster" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 49</span><span class="badge ext">HotContainer Profile Handoff</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="xnxx.com" data-has-sample="1" data-search="xnxx https://www.xnxx.com/ extraktor (extended)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('xnxx.com', this.checked)"> Otestované</label>
+              <strong>XNXX</strong>
+              <span class="support">Extraktor (Extended)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.xnxx.com/" target="_blank" rel="noopener">https://www.xnxx.com/ ↗</a>
+              <a class="btn sample" href="https://www.xnxx.com/video-t68p0b/orgasms_-_incredibly_passionate_sex_between_lovers" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.xnxx.com%2Fvideo-t68p0b%2Forgasms_-_incredibly_passionate_sex_between_lovers" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="xhamster.com" data-has-sample="1" data-search="xhamster https://xhamster.com/ extraktor, quantum search, hub, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('xhamster.com', this.checked)"> Otestované</label>
+              <strong>xHamster</strong>
+              <span class="support">Extraktor, Quantum Search, Hub, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://xhamster.com/" target="_blank" rel="noopener">https://xhamster.com/ ↗</a>
+              <a class="btn sample" href="https://xhamster.com/videos/cum-car-journey-i-let-my-friend-sara-diamante-find-me-with-a-hard-cock-xhCScrZ" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fxhamster.com%2Fvideos%2Fcum-car-journey-i-let-my-friend-sara-diamante-find-me-with-a-hard-cock-xhCScrZ" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 210</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="spankbang.com" data-has-sample="1" data-search="spankbang https://spankbang.com/ extraktor, quantum search, hub, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('spankbang.com', this.checked)"> Otestované</label>
+              <strong>SpankBang</strong>
+              <span class="support">Extraktor, Quantum Search, Hub, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://spankbang.com/" target="_blank" rel="noopener">https://spankbang.com/ ↗</a>
+              <a class="btn sample" href="https://spankbang.com/68n6q/video/pawg+snowbunny+bbc" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fspankbang.com%2F68n6q%2Fvideo%2Fpawg%2Bsnowbunny%2Bbbc" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 2</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="redtube.com" data-has-sample="1" data-search="redtube https://www.redtube.com/ extraktor, hub, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('redtube.com', this.checked)"> Otestované</label>
+              <strong>RedTube</strong>
+              <span class="support">Extraktor, Hub, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.redtube.com/" target="_blank" rel="noopener">https://www.redtube.com/ ↗</a>
+              <a class="btn sample" href="https://www.redtube.com/190809821" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.redtube.com%2F190809821" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="porntrex.com" data-has-sample="1" data-search="porntrex https://www.porntrex.com/ extraktor, quantum search, hub, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('porntrex.com', this.checked)"> Otestované</label>
+              <strong>PornTrex</strong>
+              <span class="support">Extraktor, Quantum Search, Hub, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.porntrex.com/" target="_blank" rel="noopener">https://www.porntrex.com/ ↗</a>
+              <a class="btn sample" href="https://www.porntrex.com/video/3298877/kira-noir-housewhores-of-dicky-valley-part-2" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.porntrex.com%2Fvideo%2F3298877%2Fkira-noir-housewhores-of-dicky-valley-part-2" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 136</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="whoreshub.com" data-has-sample="1" data-search="whoreshub https://www.whoreshub.com/ extraktor, quantum search, hub, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('whoreshub.com', this.checked)"> Otestované</label>
+              <strong>WhoresHub</strong>
+              <span class="support">Extraktor, Quantum Search, Hub, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.whoreshub.com/" target="_blank" rel="noopener">https://www.whoreshub.com/ ↗</a>
+              <a class="btn sample" href="https://www.whoreshub.com/videos/395378/kristina-young-pov-blowjob/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.whoreshub.com%2Fvideos%2F395378%2Fkristina-young-pov-blowjob%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 26</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="hqporner.com" data-has-sample="1" data-search="hqporner https://hqporner.com/ extraktor, quantum search, hub  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('hqporner.com', this.checked)"> Otestované</label>
+              <strong>HQPorner</strong>
+              <span class="support">Extraktor, Quantum Search, Hub</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://hqporner.com/" target="_blank" rel="noopener">https://hqporner.com/ ↗</a>
+              <a class="btn sample" href="https://hqporner.com/hdporn/124842-she_likes_rock_and_stepping_on_cock.html" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fhqporner.com%2Fhdporn%2F124842-she_likes_rock_and_stepping_on_cock.html" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 33</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="pornone.com" data-has-sample="1" data-search="pornone https://pornone.com/ extraktor, quantum search, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('pornone.com', this.checked)"> Otestované</label>
+              <strong>PornOne</strong>
+              <span class="support">Extraktor, Quantum Search, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://pornone.com/" target="_blank" rel="noopener">https://pornone.com/ ↗</a>
+              <a class="btn sample" href="https://pornone.com/nasty/audrey-holiday-asslicking-schoolgirl-gets-educated-on-deepthroating-bbc/280195659/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fpornone.com%2Fnasty%2Faudrey-holiday-asslicking-schoolgirl-gets-educated-on-deepthroating-bbc%2F280195659%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 79</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="tnaflix.com" data-has-sample="1" data-search="tnaflix https://www.tnaflix.com/ extraktor, hub, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('tnaflix.com', this.checked)"> Otestované</label>
+              <strong>Tnaflix</strong>
+              <span class="support">Extraktor, Hub, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.tnaflix.com/" target="_blank" rel="noopener">https://www.tnaflix.com/ ↗</a>
+              <a class="btn sample" href="https://www.tnaflix.com/blowjob-videos/Italia-Kash-Toochi-Kash-Porschi-%2C-Alfiecinematic-...-Natalia-Salloum/video12135534" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.tnaflix.com%2Fblowjob-videos%2FItalia-Kash-Toochi-Kash-Porschi-%252C-Alfiecinematic-...-Natalia-Salloum%2Fvideo12135534" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 2</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="drtuber.com" data-has-sample="1" data-search="drtuber https://www.drtuber.com/ hub, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('drtuber.com', this.checked)"> Otestované</label>
+              <strong>DrTuber</strong>
+              <span class="support">Hub, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.drtuber.com/" target="_blank" rel="noopener">https://www.drtuber.com/ ↗</a>
+              <a class="btn sample" href="https://www.drtuber.com/video/9811929/bimbo-latina-loerna-keeps-squirting-fucked-hardcore-by-bbc" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.drtuber.com%2Fvideo%2F9811929%2Fbimbo-latina-loerna-keeps-squirting-fucked-hardcore-by-bbc" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 64</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="beeg.com" data-has-sample="1" data-search="beeg https://beeg.com/ extraktor, quantum search, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('beeg.com', this.checked)"> Otestované</label>
+              <strong>Beeg</strong>
+              <span class="support">Extraktor, Quantum Search, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://beeg.com/" target="_blank" rel="noopener">https://beeg.com/ ↗</a>
+              <a class="btn sample" href="https://beeg.com/-0159013075222048" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fbeeg.com%2F-0159013075222048" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 5</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="ixxx.com" data-has-sample="0" data-search="ixxx https://www.ixxx.com/ extraktor, quantum search, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('ixxx.com', this.checked)"> Otestované</label>
+              <strong>iXXX</strong>
+              <span class="support">Extraktor, Quantum Search, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.ixxx.com/" target="_blank" rel="noopener">https://www.ixxx.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="noodlemagazine.com" data-has-sample="1" data-search="noodlemagazine https://noodlemagazine.com/ extraktor, quantum search, hub, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('noodlemagazine.com', this.checked)"> Otestované</label>
+              <strong>NoodleMagazine</strong>
+              <span class="support">Extraktor, Quantum Search, Hub, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://noodlemagazine.com/" target="_blank" rel="noopener">https://noodlemagazine.com/ ↗</a>
+              <a class="btn sample" href="https://noodlemagazine.com/watch/-174367205_456242726" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fnoodlemagazine.com%2Fwatch%2F-174367205_456242726" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 60</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="sxyprn.com" data-has-sample="1" data-search="sxyprn https://sxyprn.com/ extraktor, hub, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('sxyprn.com', this.checked)"> Otestované</label>
+              <strong>SxyPrn</strong>
+              <span class="support">Extraktor, Hub, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://sxyprn.com/" target="_blank" rel="noopener">https://sxyprn.com/ ↗</a>
+              <a class="btn sample" href="https://sxyprn.com/post/677f6a259a886.html" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fsxyprn.com%2Fpost%2F677f6a259a886.html" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 246</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="thisvid.com" data-has-sample="0" data-search="thisvid https://thisvid.com/ extraktor, hub, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('thisvid.com', this.checked)"> Otestované</label>
+              <strong>ThisVid</strong>
+              <span class="support">Extraktor, Hub, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://thisvid.com/" target="_blank" rel="noopener">https://thisvid.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="camwhores.tv" data-has-sample="1" data-search="camwhores https://www.camwhores.tv/ extraktor, quantum search, hub, nexus gallery, camwhores url fixer  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('camwhores.tv', this.checked)"> Otestované</label>
+              <strong>Camwhores</strong>
+              <span class="support">Extraktor, Quantum Search, Hub, Nexus Gallery, CamWhores URL Fixer</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.camwhores.tv/" target="_blank" rel="noopener">https://www.camwhores.tv/ ↗</a>
+              <a class="btn sample" href="https://www.camwhores.tv/videos/14432601/sexy-hexy96-a-ka-lola-bonita-sextape/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.camwhores.tv%2Fvideos%2F14432601%2Fsexy-hexy96-a-ka-lola-bonita-sextape%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 195</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="camwhoresbay.com" data-has-sample="1" data-search="camwhoresbay https://www.camwhoresbay.com/ extraktor, hub  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('camwhoresbay.com', this.checked)"> Otestované</label>
+              <strong>CamwhoresBay</strong>
+              <span class="support">Extraktor, Hub</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.camwhoresbay.com/" target="_blank" rel="noopener">https://www.camwhoresbay.com/ ↗</a>
+              <a class="btn sample" href="https://www.camwhoresbay.com/videos/1051374/marina-w-friend-being-absolute-sluts-3-may-2025/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.camwhoresbay.com%2Fvideos%2F1051374%2Fmarina-w-friend-being-absolute-sluts-3-may-2025%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 182</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="faphouse.com" data-has-sample="1" data-search="faphouse https://faphouse.com/ extraktor, hub, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('faphouse.com', this.checked)"> Otestované</label>
+              <strong>Faphouse</strong>
+              <span class="support">Extraktor, Hub, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://faphouse.com/" target="_blank" rel="noopener">https://faphouse.com/ ↗</a>
+              <a class="btn sample" href="https://faphouse.com/videos/UQgeca" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Ffaphouse.com%2Fvideos%2FUQgeca" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 27</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="1porn.tv" data-has-sample="1" data-search="1porn https://www.1porn.tv/ extraktor, quantum search, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('1porn.tv', this.checked)"> Otestované</label>
+              <strong>1Porn</strong>
+              <span class="support">Extraktor, Quantum Search, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.1porn.tv/" target="_blank" rel="noopener">https://www.1porn.tv/ ↗</a>
+              <a class="btn sample" href="https://www.1porn.tv/videos/vanessa-skye-big-tits-blowjob-and-squirt-fun/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.1porn.tv%2Fvideos%2Fvanessa-skye-big-tits-blowjob-and-squirt-fun%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 8</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="fpo.xxx" data-has-sample="1" data-search="fpo.xxx https://www.fpo.xxx/ extraktor, quantum search, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('fpo.xxx', this.checked)"> Otestované</label>
+              <strong>FPO.xxx</strong>
+              <span class="support">Extraktor, Quantum Search, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.fpo.xxx/" target="_blank" rel="noopener">https://www.fpo.xxx/ ↗</a>
+              <a class="btn sample" href="https://www.fpo.xxx/video/1352964/paris-milan-of-2/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.fpo.xxx%2Fvideo%2F1352964%2Fparis-milan-of-2%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 57</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="pornhat.com" data-has-sample="1" data-search="pornhat https://www.pornhat.com/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('pornhat.com', this.checked)"> Otestované</label>
+              <strong>PornHat</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.pornhat.com/" target="_blank" rel="noopener">https://www.pornhat.com/ ↗</a>
+              <a class="btn sample" href="https://www.pornhat.com/video/blonde-brandi-bae-bounces-her-big-ass-on-pressure-s-big-black-cock-in-interracial-action/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.pornhat.com%2Fvideo%2Fblonde-brandi-bae-bounces-her-big-ass-on-pressure-s-big-black-cock-in-interracial-action%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="pimpbunny.com" data-has-sample="1" data-search="pimpbunny https://pimpbunny.com/ extraktor, quantum search, hub  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('pimpbunny.com', this.checked)"> Otestované</label>
+              <strong>PimpBunny</strong>
+              <span class="support">Extraktor, Quantum Search, Hub</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://pimpbunny.com/" target="_blank" rel="noopener">https://pimpbunny.com/ ↗</a>
+              <a class="btn sample" href="https://pimpbunny.com/videos/the-beautiful-busty-blonde-amber-prada-recreates-the-scene-in-the-style-of-dicaprio/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fpimpbunny.com%2Fvideos%2Fthe-beautiful-busty-blonde-amber-prada-recreates-the-scene-in-the-style-of-dicaprio%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 144</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="pornhoarder.tv" data-has-sample="1" data-search="pornhoarder https://pornhoarder.tv/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('pornhoarder.tv', this.checked)"> Otestované</label>
+              <strong>PornHoarder</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://pornhoarder.tv/" target="_blank" rel="noopener">https://pornhoarder.tv/ ↗</a>
+              <a class="btn sample" href="https://pornhoarder.tv/pornvideo/tattooed-princessjas4ux-rims-fucks-a-bwc/amlYU29SeWFmK05iUGJFd0JCOGhmNmxlNUZFemxUZk51SnZObFZ0YlBJST0=" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fpornhoarder.tv%2Fpornvideo%2Ftattooed-princessjas4ux-rims-fucks-a-bwc%2FamlYU29SeWFmK05iUGJFd0JCOGhmNmxlNUZFemxUZk51SnZObFZ0YlBJST0%3D" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 6</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="8kporner.com" data-has-sample="0" data-search="8kporner https://8kporner.com/ extraktor  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('8kporner.com', this.checked)"> Otestované</label>
+              <strong>8KPorner</strong>
+              <span class="support">Extraktor</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://8kporner.com/" target="_blank" rel="noopener">https://8kporner.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="4kporno.xxx" data-has-sample="0" data-search="4kporno https://www.4kporno.xxx/ hub  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('4kporno.xxx', this.checked)"> Otestované</label>
+              <strong>4KPorno</strong>
+              <span class="support">Hub</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.4kporno.xxx/" target="_blank" rel="noopener">https://www.4kporno.xxx/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="analdin.com" data-has-sample="0" data-search="analdin https://www.analdin.com/ hub  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('analdin.com', this.checked)"> Otestované</label>
+              <strong>Analdin</strong>
+              <span class="support">Hub</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.analdin.com/" target="_blank" rel="noopener">https://www.analdin.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="anysex.com" data-has-sample="0" data-search="anysex https://anysex.com/ hub  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('anysex.com', this.checked)"> Otestované</label>
+              <strong>AnySex</strong>
+              <span class="support">Hub</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://anysex.com/" target="_blank" rel="noopener">https://anysex.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="bigporn.com" data-has-sample="0" data-search="bigporn https://www.bigporn.com/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('bigporn.com', this.checked)"> Otestované</label>
+              <strong>BigPorn</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.bigporn.com/" target="_blank" rel="noopener">https://www.bigporn.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="freeuseporn.com" data-has-sample="0" data-search="freeuseporn https://www.freeuseporn.com/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('freeuseporn.com', this.checked)"> Otestované</label>
+              <strong>Freeuseporn</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.freeuseporn.com/" target="_blank" rel="noopener">https://www.freeuseporn.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="freepornfun.com" data-has-sample="0" data-search="freepornfun https://freepornfun.com/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('freepornfun.com', this.checked)"> Otestované</label>
+              <strong>FreePornFun</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://freepornfun.com/" target="_blank" rel="noopener">https://freepornfun.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="baddiehub.com" data-has-sample="1" data-search="baddiehub https://baddiehub.com/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('baddiehub.com', this.checked)"> Otestované</label>
+              <strong>BaddieHub</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://baddiehub.com/" target="_blank" rel="noopener">https://baddiehub.com/ ↗</a>
+              <a class="btn sample" href="https://baddiehub.com/danii-banks-10/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fbaddiehub.com%2Fdanii-banks-10%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 49</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="xxbrits.com" data-has-sample="1" data-search="xxbrits https://www.xxbrits.com/ extraktor, hub  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('xxbrits.com', this.checked)"> Otestované</label>
+              <strong>XXBrits</strong>
+              <span class="support">Extraktor, Hub</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.xxbrits.com/" target="_blank" rel="noopener">https://www.xxbrits.com/ ↗</a>
+              <a class="btn sample" href="https://www.xxbrits.com/videos/32775/irish-slut-alaska-clarke-fucked-after-club-in-playboy-bunny-outfit-leaked-7a2c7dc/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.xxbrits.com%2Fvideos%2F32775%2Firish-slut-alaska-clarke-fucked-after-club-in-playboy-bunny-outfit-leaked-7a2c7dc%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 3</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="xfree.com" data-has-sample="1" data-search="xfree https://www.xfree.com/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('xfree.com', this.checked)"> Otestované</label>
+              <strong>XFree</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.xfree.com/" target="_blank" rel="noopener">https://www.xfree.com/ ↗</a>
+              <a class="btn sample" href="https://www.xfree.com/video?id=203398&amp;title=this-e-girls-deepthroat-blowjob-fucking-in-outdoor-cowgirl-style-is-as-unmissable-as-her-nipple-pier&amp;stag=FakeTits" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.xfree.com%2Fvideo%3Fid%3D203398%26title%3Dthis-e-girls-deepthroat-blowjob-fucking-in-outdoor-cowgirl-style-is-as-unmissable-as-her-nipple-pier%26stag%3DFakeTits" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 10</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="xgroovy.com" data-has-sample="1" data-search="xgroovy https://xgroovy.com/ extraktor  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('xgroovy.com', this.checked)"> Otestované</label>
+              <strong>XGroovy</strong>
+              <span class="support">Extraktor</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://xgroovy.com/" target="_blank" rel="noopener">https://xgroovy.com/ ↗</a>
+              <a class="btn sample" href="https://xgroovy.com/gifs/667784/sloppy-blowjob-for-lucky-guy/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fxgroovy.com%2Fgifs%2F667784%2Fsloppy-blowjob-for-lucky-guy%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 2</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="pornhd4k.net" data-has-sample="0" data-search="pornhd4k https://pornhd4k.net/ extraktor  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('pornhd4k.net', this.checked)"> Otestované</label>
+              <strong>PornHD4K</strong>
+              <span class="support">Extraktor</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://pornhd4k.net/" target="_blank" rel="noopener">https://pornhd4k.net/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="fnxtube.com" data-has-sample="0" data-search="fnxtube https://fnxtube.com/ extraktor, catalog  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('fnxtube.com', this.checked)"> Otestované</label>
+              <strong>FNXTube</strong>
+              <span class="support">Extraktor, Catalog</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://fnxtube.com/" target="_blank" rel="noopener">https://fnxtube.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="porneec.com" data-has-sample="1" data-search="porneec https://porneec.com/ extraktor  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('porneec.com', this.checked)"> Otestované</label>
+              <strong>Porneec</strong>
+              <span class="support">Extraktor</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://porneec.com/" target="_blank" rel="noopener">https://porneec.com/ ↗</a>
+              <a class="btn sample" href="https://porneec.com/video/12345/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fporneec.com%2Fvideo%2F12345%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="pornonahobka.icu" data-has-sample="0" data-search="pornonahobka https://pornonahobka.icu/ extraktor  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('pornonahobka.icu', this.checked)"> Otestované</label>
+              <strong>Pornonahobka</strong>
+              <span class="support">Extraktor</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://pornonahobka.icu/" target="_blank" rel="noopener">https://pornonahobka.icu/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="fullporner.com" data-has-sample="0" data-search="fullporner https://fullporner.com/ nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('fullporner.com', this.checked)"> Otestované</label>
+              <strong>FullPorner</strong>
+              <span class="support">Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://fullporner.com/" target="_blank" rel="noopener">https://fullporner.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="xxxdbx.com" data-has-sample="0" data-search="xxxdbx https://xxxdbx.com/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('xxxdbx.com', this.checked)"> Otestované</label>
+              <strong>XXXDBX</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://xxxdbx.com/" target="_blank" rel="noopener">https://xxxdbx.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="69tubed.com" data-has-sample="0" data-search="69tubed https://www.69tubed.com/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('69tubed.com', this.checked)"> Otestované</label>
+              <strong>69Tubed</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.69tubed.com/" target="_blank" rel="noopener">https://www.69tubed.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="pxp.cool" data-has-sample="0" data-search="pornxp https://pxp.cool/ catalog, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('pxp.cool', this.checked)"> Otestované</label>
+              <strong>PornXP</strong>
+              <span class="support">Catalog, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://pxp.cool/" target="_blank" rel="noopener">https://pxp.cool/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="redgifs.com" data-has-sample="0" data-search="redgifs https://www.redgifs.com/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('redgifs.com', this.checked)"> Otestované</label>
+              <strong>RedGIFs</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.redgifs.com/" target="_blank" rel="noopener">https://www.redgifs.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="fuq.com" data-has-sample="0" data-search="fuq https://www.fuq.com/ nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('fuq.com', this.checked)"> Otestované</label>
+              <strong>Fuq</strong>
+              <span class="support">Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.fuq.com/" target="_blank" rel="noopener">https://www.fuq.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div></section><section data-section><h2>Leak, Creator, Kemono / Coomer &amp; Cam archívy <span class="cnt">(22)</span></h2>
+        <div class="row" data-key="erome.com" data-has-sample="1" data-search="erome https://www.erome.com/ extraktor, quantum search, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('erome.com', this.checked)"> Otestované</label>
+              <strong>Erome</strong>
+              <span class="support">Extraktor, Quantum Search, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.erome.com/" target="_blank" rel="noopener">https://www.erome.com/ ↗</a>
+              <a class="btn sample" href="https://www.erome.com/a/dNW6eLSu" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.erome.com%2Fa%2FdNW6eLSu" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 359</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="leakporner.com" data-has-sample="1" data-search="leakporner https://leakporner.com/ extraktor, quantum search, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('leakporner.com', this.checked)"> Otestované</label>
+              <strong>LeakPorner</strong>
+              <span class="support">Extraktor, Quantum Search, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://leakporner.com/" target="_blank" rel="noopener">https://leakporner.com/ ↗</a>
+              <a class="btn sample" href="https://tv.leakporner.com/asa-akira-asian-milf-face-fucking-facial-in-shower-bg/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Ftv.leakporner.com%2Fasa-akira-asian-milf-face-fucking-facial-in-shower-bg%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 9</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="mypornerleak.com" data-has-sample="1" data-search="mypornerleak https://mypornerleak.com/ extraktor, quantum search  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('mypornerleak.com', this.checked)"> Otestované</label>
+              <strong>MyPornerLeak</strong>
+              <span class="support">Extraktor, Quantum Search</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://mypornerleak.com/" target="_blank" rel="noopener">https://mypornerleak.com/ ↗</a>
+              <a class="btn sample" href="https://tv.mypornerleak.com/niky-bimbodoll-busty-mommy-wants-cock-in-the-ass/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Ftv.mypornerleak.com%2Fniky-bimbodoll-busty-mommy-wants-cock-in-the-ass%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 4</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="hornysimp.com" data-has-sample="0" data-search="hornysimp https://hornysimp.com/ extraktor, quantum search, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('hornysimp.com', this.checked)"> Otestované</label>
+              <strong>HornySimp</strong>
+              <span class="support">Extraktor, Quantum Search, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://hornysimp.com/" target="_blank" rel="noopener">https://hornysimp.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="internetchicks.com" data-has-sample="1" data-search="internetchicks https://internetchicks.com/ extraktor, quantum search, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('internetchicks.com', this.checked)"> Otestované</label>
+              <strong>InternetChicks</strong>
+              <span class="support">Extraktor, Quantum Search, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://internetchicks.com/" target="_blank" rel="noopener">https://internetchicks.com/ ↗</a>
+              <a class="btn sample" href="https://internetchicks.com/auhneesh-nicole-bbc-fuck-pov-video-leaked" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Finternetchicks.com%2Fauhneesh-nicole-bbc-fuck-pov-video-leaked" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 3</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="leakedzone.com" data-has-sample="0" data-search="leakedzone https://leakedzone.com/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('leakedzone.com', this.checked)"> Otestované</label>
+              <strong>Leakedzone</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://leakedzone.com/" target="_blank" rel="noopener">https://leakedzone.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="cyberleaks.top" data-has-sample="0" data-search="cyberleaks https://cyberleaks.top/ extraktor, quantum search, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('cyberleaks.top', this.checked)"> Otestované</label>
+              <strong>CyberLeaks</strong>
+              <span class="support">Extraktor, Quantum Search, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://cyberleaks.top/" target="_blank" rel="noopener">https://cyberleaks.top/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="nsfw247.to" data-has-sample="1" data-search="nsfw247 https://nsfw247.to/ extraktor, quantum search, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('nsfw247.to', this.checked)"> Otestované</label>
+              <strong>NSFW247</strong>
+              <span class="support">Extraktor, Quantum Search, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://nsfw247.to/" target="_blank" rel="noopener">https://nsfw247.to/ ↗</a>
+              <a class="btn sample" href="https://nsfw247.to/blondeish-pov-short-sextape/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fnsfw247.to%2Fblondeish-pov-short-sextape%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="djav.org" data-has-sample="1" data-search="djav https://djav.org/ extraktor, quantum search, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('djav.org', this.checked)"> Otestované</label>
+              <strong>DJAV</strong>
+              <span class="support">Extraktor, Quantum Search, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://djav.org/" target="_blank" rel="noopener">https://djav.org/ ↗</a>
+              <a class="btn sample" href="https://djav.org/video/i-rub-my-cock-on-my-neighbor%27s-wife%27s-sweet-pussy-until-she-squirts-pussy-juice.-7728.html" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fdjav.org%2Fvideo%2Fi-rub-my-cock-on-my-neighbor%2527s-wife%2527s-sweet-pussy-until-she-squirts-pussy-juice.-7728.html" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 10</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="slutvids.net.lv" data-has-sample="0" data-search="slutvids https://slutvids.net.lv/ extraktor, quantum search  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('slutvids.net.lv', this.checked)"> Otestované</label>
+              <strong>SlutVids</strong>
+              <span class="support">Extraktor, Quantum Search</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://slutvids.net.lv/" target="_blank" rel="noopener">https://slutvids.net.lv/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="thots.tv" data-has-sample="0" data-search="thots.tv https://thots.tv/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('thots.tv', this.checked)"> Otestované</label>
+              <strong>Thots.tv</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://thots.tv/" target="_blank" rel="noopener">https://thots.tv/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="thothub.to" data-has-sample="1" data-search="thothub https://thothub.to/ extraktor, hub  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('thothub.to', this.checked)"> Otestované</label>
+              <strong>Thothub</strong>
+              <span class="support">Extraktor, Hub</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://thothub.to/" target="_blank" rel="noopener">https://thothub.to/ ↗</a>
+              <a class="btn sample" href="https://thothub.to/videos/1271325/reislin-threesome-with-yasmina-khan/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fthothub.to%2Fvideos%2F1271325%2Freislin-threesome-with-yasmina-khan%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 40</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="coomer.st" data-has-sample="0" data-search="coomer https://coomer.st/ extraktor, quantum search  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('coomer.st', this.checked)"> Otestované</label>
+              <strong>Coomer</strong>
+              <span class="support">Extraktor, Quantum Search</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://coomer.st/" target="_blank" rel="noopener">https://coomer.st/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="kemono.cr" data-has-sample="0" data-search="kemono https://kemono.cr/ extraktor, quantum search  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('kemono.cr', this.checked)"> Otestované</label>
+              <strong>Kemono</strong>
+              <span class="support">Extraktor, Quantum Search</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://kemono.cr/" target="_blank" rel="noopener">https://kemono.cr/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="coomerfans.com" data-has-sample="1" data-search="coomerfans https://coomerfans.com/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('coomerfans.com', this.checked)"> Otestované</label>
+              <strong>CoomerFans</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://coomerfans.com/" target="_blank" rel="noopener">https://coomerfans.com/ ↗</a>
+              <a class="btn sample" href="https://coomerfans.com/p/82098891/321769/onlyfans" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fcoomerfans.com%2Fp%2F82098891%2F321769%2Fonlyfans" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 13</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="shareanynudes.com" data-has-sample="0" data-search="shareanynudes https://shareanynudes.com/ extraktor  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('shareanynudes.com', this.checked)"> Otestované</label>
+              <strong>ShareAnyNudes</strong>
+              <span class="support">Extraktor</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://shareanynudes.com/" target="_blank" rel="noopener">https://shareanynudes.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="pornfans.net" data-has-sample="0" data-search="pornfans https://pornfans.net/ extraktor  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('pornfans.net', this.checked)"> Otestované</label>
+              <strong>PornFans</strong>
+              <span class="support">Extraktor</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://pornfans.net/" target="_blank" rel="noopener">https://pornfans.net/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="archivebate.com" data-has-sample="0" data-search="archivebate https://archivebate.live/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('archivebate.com', this.checked)"> Otestované</label>
+              <strong>Archivebate</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://archivebate.live/" target="_blank" rel="noopener">https://archivebate.live/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="rec-ur-bate.com" data-has-sample="1" data-search="recurbate https://rec-ur-bate.com/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('rec-ur-bate.com', this.checked)"> Otestované</label>
+              <strong>Recurbate</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://rec-ur-bate.com/" target="_blank" rel="noopener">https://rec-ur-bate.com/ ↗</a>
+              <a class="btn sample" href="https://rec-ur-bate.com/jackandjill/video/278112572/play" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Frec-ur-bate.com%2Fjackandjill%2Fvideo%2F278112572%2Fplay" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 6</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="civitai.com" data-has-sample="0" data-search="civitai https://civitai.com/ extraktor  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('civitai.com', this.checked)"> Otestované</label>
+              <strong>Civitai</strong>
+              <span class="support">Extraktor</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://civitai.com/" target="_blank" rel="noopener">https://civitai.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="fapfolder.club" data-has-sample="1" data-search="fapfolder https://fapfolder.club/ nexus gallery, db importy  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('fapfolder.club', this.checked)"> Otestované</label>
+              <strong>FapFolder</strong>
+              <span class="support">Nexus Gallery, DB importy</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://fapfolder.club/" target="_blank" rel="noopener">https://fapfolder.club/ ↗</a>
+              <a class="btn sample" href="https://fapfolder.club/posts/191344" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Ffapfolder.club%2Fposts%2F191344" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 15</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="epalovo.com" data-has-sample="0" data-search="epalovo https://epalovo.com/ nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('epalovo.com', this.checked)"> Otestované</label>
+              <strong>Epalovo</strong>
+              <span class="support">Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://epalovo.com/" target="_blank" rel="noopener">https://epalovo.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div></section><section data-section><h2>File Hosting, Albumy &amp; Cloud úložiská <span class="cnt">(21)</span></h2>
+        <div class="row" data-key="bunkr.cr" data-has-sample="1" data-search="bunkr https://bunkr.cr/ extraktor, quantum search, hub, bunkr suite, nexus gallery bunkr album helper bunkr suite — album helper + archive search nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('bunkr.cr', this.checked)"> Otestované</label>
+              <strong>Bunkr</strong>
+              <span class="support">Extraktor, Quantum Search, Hub, Bunkr Suite, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://bunkr.cr/" target="_blank" rel="noopener">https://bunkr.cr/ ↗</a>
+              <a class="btn sample" href="https://bunkr.cr/f/4cXHANR8KhXrH" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fbunkr.cr%2Ff%2F4cXHANR8KhXrH" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 10796</span><span class="badge us">US: Bunkr Album Helper</span><span class="badge us">US: Bunkr Suite — Album Helper + Archive Search</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="balbums.st" data-has-sample="0" data-search="bunkrr pics / findr / balbums https://balbums.st/ userscripty (balbums suite, bunkrr search workbench, findr manager), balbums extension bunkr album helper bunkr albums enhanced with sorting bunkr suite — album helper + archive search bunkrr search workbench for nexus findr nexus manager nexus balbums suite (vault + deep scanner + quick peek) balbums search launcher nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('balbums.st', this.checked)"> Otestované</label>
+              <strong>Bunkrr Pics / Findr / Balbums</strong>
+              <span class="support">Userscripty (Balbums Suite, Bunkrr Search Workbench, Findr Manager), Balbums Extension</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://balbums.st/" target="_blank" rel="noopener">https://balbums.st/ ↗</a>
+              
+            </div>
+            <div class="badges"><span class="badge us">US: Bunkr Album Helper</span><span class="badge us">US: Bunkr Albums Enhanced with Sorting</span><span class="badge us">US: Bunkr Suite — Album Helper + Archive Search</span><span class="badge us">US: Bunkrr Search Workbench for Nexus</span><span class="badge us">US: Findr Nexus Manager</span><span class="badge us">US: Nexus Balbums Suite (Vault + Deep Scanner + Quick Peek)</span><span class="badge ext">Balbums Search Launcher</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="turbo.cr" data-has-sample="1" data-search="turbo.cr https://turbo.cr/ extraktor, hub, nexus gallery, video card selector  nexus pwc fresh 2 nexus video card selector fresh_v3">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('turbo.cr', this.checked)"> Otestované</label>
+              <strong>Turbo.cr</strong>
+              <span class="support">Extraktor, Hub, Nexus Gallery, Video Card Selector</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://turbo.cr/" target="_blank" rel="noopener">https://turbo.cr/ ↗</a>
+              <a class="btn sample" href="https://turbo.cr/v/aqTHjRkT8XU4A" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fturbo.cr%2Fv%2FaqTHjRkT8XU4A" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 406</span><span class="badge ext">Nexus Video Card Selector Fresh_v3</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="filester.me" data-has-sample="1" data-search="filester https://filester.me/ extraktor, filester workspace, filester discovery extension, nexus gallery filester workspace for nexus nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('filester.me', this.checked)"> Otestované</label>
+              <strong>Filester</strong>
+              <span class="support">Extraktor, Filester Workspace, Filester Discovery Extension, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://filester.me/" target="_blank" rel="noopener">https://filester.me/ ↗</a>
+              <a class="btn sample" href="https://filester.me/d/kQYPhDr" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Ffilester.me%2Fd%2FkQYPhDr" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 4991</span><span class="badge us">US: Filester Workspace for Nexus</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="fileditchfiles.st" data-has-sample="1" data-search="fileditch / theditch https://fileditchfiles.st/ extraktor, fileditch workspace, thread intake, nexus gallery fileditch album workspace for nexus nexus pwc fresh 2 nexus thread intake">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('fileditchfiles.st', this.checked)"> Otestované</label>
+              <strong>FileDitch / TheDitch</strong>
+              <span class="support">Extraktor, Fileditch Workspace, Thread Intake, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://fileditchfiles.st/" target="_blank" rel="noopener">https://fileditchfiles.st/ ↗</a>
+              <a class="btn sample" href="https://fileditchfiles.st/alpha17/57de5ea018a369ba53c3/of_soul_suckers.mp4" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Ffileditchfiles.st%2Falpha17%2F57de5ea018a369ba53c3%2Fof_soul_suckers.mp4" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 130</span><span class="badge us">US: Fileditch Album Workspace for Nexus</span><span class="badge ext">Nexus Thread Intake</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="pixeldrain.com" data-has-sample="1" data-search="pixeldrain https://pixeldrain.com/ extraktor, quantum search, pixeldrain nexus gallery pixeldrain nexus gallery ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('pixeldrain.com', this.checked)"> Otestované</label>
+              <strong>Pixeldrain</strong>
+              <span class="support">Extraktor, Quantum Search, Pixeldrain Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://pixeldrain.com/" target="_blank" rel="noopener">https://pixeldrain.com/ ↗</a>
+              <a class="btn sample" href="https://pixeldrain.com/u/BP7ZeyFv" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fpixeldrain.com%2Fu%2FBP7ZeyFv" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 2717</span><span class="badge us">US: Pixeldrain Nexus Gallery</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="gofile.io" data-has-sample="1" data-search="gofile https://gofile.io/ extraktor, quantum search, gofile folder grid, nexus gallery gofile folder grid view &amp; media enhancer nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('gofile.io', this.checked)"> Otestované</label>
+              <strong>GoFile</strong>
+              <span class="support">Extraktor, Quantum Search, Gofile Folder Grid, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://gofile.io/" target="_blank" rel="noopener">https://gofile.io/ ↗</a>
+              <a class="btn sample" href="https://gofile.io/d/aSwNL5iY" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fgofile.io%2Fd%2FaSwNL5iY" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 100</span><span class="badge us">US: Gofile Folder Grid View &amp; Media Enhancer</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="mega.nz" data-has-sample="1" data-search="mega https://mega.nz/ native client, mega folder enhancer, mega hub capture mega folder browser helper ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('mega.nz', this.checked)"> Otestované</label>
+              <strong>MEGA</strong>
+              <span class="support">Native Client, MEGA Folder Enhancer, MEGA Hub Capture</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://mega.nz/" target="_blank" rel="noopener">https://mega.nz/ ↗</a>
+              <a class="btn sample" href="https://mega.nz/file/EmYxnBrL#mlj_pIA_oEk4ot_1vlttO-_YhrwYuyM1Z9xn4PG71wQ" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fmega.nz%2Ffile%2FEmYxnBrL%23mlj_pIA_oEk4ot_1vlttO-_YhrwYuyM1Z9xn4PG71wQ" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 444</span><span class="badge us">US: MEGA Folder Browser Helper</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="cyberfile.me" data-has-sample="1" data-search="cyberfile https://cyberfile.me/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('cyberfile.me', this.checked)"> Otestované</label>
+              <strong>CyberFile</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://cyberfile.me/" target="_blank" rel="noopener">https://cyberfile.me/ ↗</a>
+              <a class="btn sample" href="https://cyberfile.me/c3x8" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fcyberfile.me%2Fc3x8" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 2</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="cyberdrop.cr" data-has-sample="0" data-search="cyberdrop https://cyberdrop.cr/ extraktor  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('cyberdrop.cr', this.checked)"> Otestované</label>
+              <strong>CyberDrop</strong>
+              <span class="support">Extraktor</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://cyberdrop.cr/" target="_blank" rel="noopener">https://cyberdrop.cr/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="krakenfiles.com" data-has-sample="0" data-search="krakenfiles https://krakenfiles.com/ extraktor  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('krakenfiles.com', this.checked)"> Otestované</label>
+              <strong>KrakenFiles</strong>
+              <span class="support">Extraktor</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://krakenfiles.com/" target="_blank" rel="noopener">https://krakenfiles.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="streamtape.com" data-has-sample="1" data-search="streamtape https://streamtape.com/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('streamtape.com', this.checked)"> Otestované</label>
+              <strong>Streamtape</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://streamtape.com/" target="_blank" rel="noopener">https://streamtape.com/ ↗</a>
+              <a class="btn sample" href="https://streamtape.com/v/BvgPM0O6lBUyBJm" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fstreamtape.com%2Fv%2FBvgPM0O6lBUyBJm" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="luluvid.com" data-has-sample="0" data-search="lulustream / luluvids https://luluvid.com/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('luluvid.com', this.checked)"> Otestované</label>
+              <strong>LuluStream / LuluVids</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://luluvid.com/" target="_blank" rel="noopener">https://luluvid.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="bysezoxexe.com" data-has-sample="0" data-search="byse / 398fitus https://bysezoxexe.com/ embed proxy, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('bysezoxexe.com', this.checked)"> Otestované</label>
+              <strong>Byse / 398fitus</strong>
+              <span class="support">Embed Proxy, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://bysezoxexe.com/" target="_blank" rel="noopener">https://bysezoxexe.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="vidara.so" data-has-sample="1" data-search="vidara https://vidara.so/ extraktor  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('vidara.so', this.checked)"> Otestované</label>
+              <strong>Vidara</strong>
+              <span class="support">Extraktor</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://vidara.so/" target="_blank" rel="noopener">https://vidara.so/ ↗</a>
+              <a class="btn sample" href="https://vidara.so/v/ja1Kpdx5Tk3wD" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fvidara.so%2Fv%2Fja1Kpdx5Tk3wD" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 10</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="vtbe.to" data-has-sample="0" data-search="vtube (vtbe.to) https://vtbe.to/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('vtbe.to', this.checked)"> Otestované</label>
+              <strong>vTube (vtbe.to)</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://vtbe.to/" target="_blank" rel="noopener">https://vtbe.to/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="filemoon.sx" data-has-sample="0" data-search="filemoon https://filemoon.sx/ nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('filemoon.sx', this.checked)"> Otestované</label>
+              <strong>Filemoon</strong>
+              <span class="support">Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://filemoon.sx/" target="_blank" rel="noopener">https://filemoon.sx/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="dood.re" data-has-sample="0" data-search="doodstream https://dood.re/ nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('dood.re', this.checked)"> Otestované</label>
+              <strong>DoodStream</strong>
+              <span class="support">Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://dood.re/" target="_blank" rel="noopener">https://dood.re/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="voe.sx" data-has-sample="0" data-search="voe https://voe.sx/ nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('voe.sx', this.checked)"> Otestované</label>
+              <strong>Voe</strong>
+              <span class="support">Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://voe.sx/" target="_blank" rel="noopener">https://voe.sx/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="disk.yandex.com" data-has-sample="1" data-search="yandex disk https://disk.yandex.com/ db import  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('disk.yandex.com', this.checked)"> Otestované</label>
+              <strong>Yandex Disk</strong>
+              <span class="support">DB import</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://disk.yandex.com/" target="_blank" rel="noopener">https://disk.yandex.com/ ↗</a>
+              <a class="btn sample" href="https://disk.yandex.com/i/7tP_BG64BDUzaA" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fdisk.yandex.com%2Fi%2F7tP_BG64BDUzaA" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="goonbox.cr" data-has-sample="1" data-search="goonbox https://goonbox.cr/ db import  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('goonbox.cr', this.checked)"> Otestované</label>
+              <strong>Goonbox</strong>
+              <span class="support">DB import</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://goonbox.cr/" target="_blank" rel="noopener">https://goonbox.cr/ ↗</a>
+              <a class="btn sample" href="https://goonbox.cr/img/lFmS2BwNW9d" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fgoonbox.cr%2Fimg%2FlFmS2BwNW9d" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 3</span></div>
+          </div>
+        </div></section><section data-section><h2>Fóra, Sociálne siete, Vyhľadávače &amp; Nástroje <span class="cnt">(11)</span></h2>
+        <div class="row" data-key="simpcity.cr" data-has-sample="1" data-search="simpcity https://simpcity.cr/ forum scanner, quantum search, nexus thread intake, simpcity search  nexus thread intake">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('simpcity.cr', this.checked)"> Otestované</label>
+              <strong>SimpCity</strong>
+              <span class="support">Forum Scanner, Quantum Search, Nexus Thread Intake, SimpCity Search</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://simpcity.cr/" target="_blank" rel="noopener">https://simpcity.cr/ ↗</a>
+              <a class="btn sample" href="https://simpcity.cr/threads/skylar-mae-skylarmaexo.9028/page-70#post-54140479" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fsimpcity.cr%2Fthreads%2Fskylar-mae-skylarmaexo.9028%2Fpage-70%23post-54140479" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 2</span><span class="badge ext">Nexus Thread Intake</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="forums.socialmediagirls.com" data-has-sample="0" data-search="socialmediagirls https://forums.socialmediagirls.com/ forum scanner (smg)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('forums.socialmediagirls.com', this.checked)"> Otestované</label>
+              <strong>SocialMediaGirls</strong>
+              <span class="support">Forum Scanner (smg)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://forums.socialmediagirls.com/" target="_blank" rel="noopener">https://forums.socialmediagirls.com/ ↗</a>
+              
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+        <div class="row" data-key="t.me" data-has-sample="1" data-search="telegram (web / webk) https://web.telegram.org/ telegram index/stream, quantum search, nexus telegram gallery  nexus telegram gallery">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('t.me', this.checked)"> Otestované</label>
+              <strong>Telegram (Web / WebK)</strong>
+              <span class="support">Telegram Index/Stream, Quantum Search, Nexus Telegram Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://web.telegram.org/" target="_blank" rel="noopener">https://web.telegram.org/ ↗</a>
+              <a class="btn sample" href="https://t.me/cfmsvids/2528" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Ft.me%2Fcfmsvids%2F2528" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 2010</span><span class="badge ext">Nexus Telegram Gallery</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="reddit.com" data-has-sample="0" data-search="reddit https://www.reddit.com/ extraktor, quantum search, extreme searcher v2  nexus extreme searcher v2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('reddit.com', this.checked)"> Otestované</label>
+              <strong>Reddit</strong>
+              <span class="support">Extraktor, Quantum Search, Extreme Searcher v2</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.reddit.com/" target="_blank" rel="noopener">https://www.reddit.com/ ↗</a>
+              
+            </div>
+            <div class="badges"><span class="badge ext">Nexus Extreme Searcher v2</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="vkvideo.ru" data-has-sample="1" data-search="vk / vk video https://vkvideo.ru/ extraktor, nexus gallery  nexus pwc fresh 2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('vkvideo.ru', this.checked)"> Otestované</label>
+              <strong>VK / VK Video</strong>
+              <span class="support">Extraktor, Nexus Gallery</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://vkvideo.ru/" target="_blank" rel="noopener">https://vkvideo.ru/ ↗</a>
+              <a class="btn sample" href="https://vkvideo.ru/video-235976825_456239019" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fvkvideo.ru%2Fvideo-235976825_456239019" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 16</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="pornolab.cc" data-has-sample="0" data-search="pornolab tracker https://pornolab.cc/forum/tracker.php pornolab gallery view userscript pornolab tracker gallery view (video cards) ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('pornolab.cc', this.checked)"> Otestované</label>
+              <strong>PornoLab Tracker</strong>
+              <span class="support">PornoLab Gallery View userscript</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://pornolab.cc/forum/tracker.php" target="_blank" rel="noopener">https://pornolab.cc/forum/tracker.php ↗</a>
+              
+            </div>
+            <div class="badges"><span class="badge us">US: PornoLab Tracker Gallery View (Video Cards)</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="google.com" data-has-sample="0" data-search="google search / lens https://www.google.com/ google collector userscript, nexus lens bridge nexus — google video &amp; playlist collector nexus lens bridge">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('google.com', this.checked)"> Otestované</label>
+              <strong>Google Search / Lens</strong>
+              <span class="support">Google Collector userscript, Nexus Lens Bridge</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.google.com/" target="_blank" rel="noopener">https://www.google.com/ ↗</a>
+              
+            </div>
+            <div class="badges"><span class="badge us">US: Nexus — Google Video &amp; Playlist Collector</span><span class="badge ext">Nexus Lens Bridge</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="duckduckgo.com" data-has-sample="0" data-search="duckduckgo search https://duckduckgo.com/ duckduckgo collector userscript, search engine fallback nexus — duckduckgo video &amp; playlist collector ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('duckduckgo.com', this.checked)"> Otestované</label>
+              <strong>DuckDuckGo Search</strong>
+              <span class="support">DuckDuckGo Collector userscript, Search Engine fallback</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://duckduckgo.com/" target="_blank" rel="noopener">https://duckduckgo.com/ ↗</a>
+              
+            </div>
+            <div class="badges"><span class="badge us">US: Nexus — DuckDuckGo Video &amp; Playlist Collector</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="hotcontainer.co" data-has-sample="0" data-search="hotcontainer https://hotcontainer.co/ hotcontainer profile handoff extension  hotcontainer profile handoff">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('hotcontainer.co', this.checked)"> Otestované</label>
+              <strong>HotContainer</strong>
+              <span class="support">HotContainer Profile Handoff extension</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://hotcontainer.co/" target="_blank" rel="noopener">https://hotcontainer.co/ ↗</a>
+              
+            </div>
+            <div class="badges"><span class="badge ext">HotContainer Profile Handoff</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="api.theporndb.net" data-has-sample="0" data-search="theporndb api https://api.theporndb.net/ extreme searcher v2 metadata  nexus extreme searcher v2">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('api.theporndb.net', this.checked)"> Otestované</label>
+              <strong>ThePornDB API</strong>
+              <span class="support">Extreme Searcher v2 metadata</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://api.theporndb.net/" target="_blank" rel="noopener">https://api.theporndb.net/ ↗</a>
+              
+            </div>
+            <div class="badges"><span class="badge ext">Nexus Extreme Searcher v2</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="imdb.com" data-has-sample="0" data-search="imdb / wmovies https://www.imdb.com/ wmovies imdb ratings userscript wmovies — conservative imdb ratings ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('imdb.com', this.checked)"> Otestované</label>
+              <strong>IMDb / WMovies</strong>
+              <span class="support">WMOVIES IMDb ratings userscript</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.imdb.com/" target="_blank" rel="noopener">https://www.imdb.com/ ↗</a>
+              
+            </div>
+            <div class="badges"><span class="badge us">US: WMOVIES — conservative IMDb ratings</span></div>
+          </div>
+        </div></section><section data-section><h2>Ďalšie reálne weby nájdené v DB (importy / discovery) <span class="cnt">(37)</span></h2>
+        <div class="row" data-key="tyler-brown.com" data-has-sample="1" data-search="tyler-brown.com https://tyler-brown.com/ db import (13x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('tyler-brown.com', this.checked)"> Otestované</label>
+              <strong>tyler-brown.com</strong>
+              <span class="support">DB import (13x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://tyler-brown.com/" target="_blank" rel="noopener">https://tyler-brown.com/ ↗</a>
+              <a class="btn sample" href="https://tyler-brown.com/watch/-174367205_456242751" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Ftyler-brown.com%2Fwatch%2F-174367205_456242751" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 13</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="leakgallery.com" data-has-sample="1" data-search="leakgallery.com https://leakgallery.com/ db import (12x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('leakgallery.com', this.checked)"> Otestované</label>
+              <strong>leakgallery.com</strong>
+              <span class="support">DB import (12x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://leakgallery.com/" target="_blank" rel="noopener">https://leakgallery.com/ ↗</a>
+              <a class="btn sample" href="https://leakgallery.com/mukydza/9301288" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fleakgallery.com%2Fmukydza%2F9301288" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 12</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="img1.coomerfans.com" data-has-sample="1" data-search="img1.coomerfans.com https://img1.coomerfans.com/ db import (11x v source_boards, videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('img1.coomerfans.com', this.checked)"> Otestované</label>
+              <strong>img1.coomerfans.com</strong>
+              <span class="support">DB import (11x v source_boards, videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://img1.coomerfans.com/" target="_blank" rel="noopener">https://img1.coomerfans.com/ ↗</a>
+              <a class="btn sample" href="https://img1.coomerfans.com/storage/5/bn/tk/2892ac-01994142-3ad0-7266-9e93-007492cdddf7.mp4?e=1793960465&amp;hash=obdQb_AFRICssH_5UnlZsQ" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fimg1.coomerfans.com%2Fstorage%2F5%2Fbn%2Ftk%2F2892ac-01994142-3ad0-7266-9e93-007492cdddf7.mp4%3Fe%3D1793960465%26hash%3DobdQb_AFRICssH_5UnlZsQ" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 11</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="img6.coomerfans.com" data-has-sample="1" data-search="img6.coomerfans.com https://img6.coomerfans.com/ db import (10x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('img6.coomerfans.com', this.checked)"> Otestované</label>
+              <strong>img6.coomerfans.com</strong>
+              <span class="support">DB import (10x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://img6.coomerfans.com/" target="_blank" rel="noopener">https://img6.coomerfans.com/ ↗</a>
+              <a class="btn sample" href="https://img6.coomerfans.com/storage/5/mw/mm/2892ac-01994142-3578-746f-a300-96bf48290ef8.mp4?e=1793960465&amp;hash=VwhcFMUfy527HnfQ9_PDiQ" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fimg6.coomerfans.com%2Fstorage%2F5%2Fmw%2Fmm%2F2892ac-01994142-3578-746f-a300-96bf48290ef8.mp4%3Fe%3D1793960465%26hash%3DVwhcFMUfy527HnfQ9_PDiQ" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 10</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="archve.xyz" data-has-sample="1" data-search="archve.xyz https://archve.xyz/ db import (8x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('archve.xyz', this.checked)"> Otestované</label>
+              <strong>archve.xyz</strong>
+              <span class="support">DB import (8x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://archve.xyz/" target="_blank" rel="noopener">https://archve.xyz/ ↗</a>
+              <a class="btn sample" href="https://archve.xyz/watch/b0cb97bc-01e1-4bfc-87e4-fe6ca0655ac1" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Farchve.xyz%2Fwatch%2Fb0cb97bc-01e1-4bfc-87e4-fe6ca0655ac1" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 8</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="vsex.in" data-has-sample="1" data-search="vsex.in https://vsex.in/ db import (5x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('vsex.in', this.checked)"> Otestované</label>
+              <strong>vsex.in</strong>
+              <span class="support">DB import (5x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://vsex.in/" target="_blank" rel="noopener">https://vsex.in/ ↗</a>
+              <a class="btn sample" href="https://vsex.in/95473-solo-toma-mi-maldita-cama.html" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fvsex.in%2F95473-solo-toma-mi-maldita-cama.html" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 5</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="img10.coomerfans.com" data-has-sample="1" data-search="img10.coomerfans.com https://img10.coomerfans.com/ db import (4x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('img10.coomerfans.com', this.checked)"> Otestované</label>
+              <strong>img10.coomerfans.com</strong>
+              <span class="support">DB import (4x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://img10.coomerfans.com/" target="_blank" rel="noopener">https://img10.coomerfans.com/ ↗</a>
+              <a class="btn sample" href="https://img10.coomerfans.com/storage/5/hr/tl/2892ac-0199bd6a-2a04-7360-b68c-dac5f72654df.mp4?e=1793960440&amp;hash=KXn0aFJ2eCdxM_jKTllLiw" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fimg10.coomerfans.com%2Fstorage%2F5%2Fhr%2Ftl%2F2892ac-0199bd6a-2a04-7360-b68c-dac5f72654df.mp4%3Fe%3D1793960440%26hash%3DKXn0aFJ2eCdxM_jKTllLiw" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 4</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="img5.coomerfans.com" data-has-sample="1" data-search="img5.coomerfans.com https://img5.coomerfans.com/ db import (4x v source_boards, videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('img5.coomerfans.com', this.checked)"> Otestované</label>
+              <strong>img5.coomerfans.com</strong>
+              <span class="support">DB import (4x v source_boards, videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://img5.coomerfans.com/" target="_blank" rel="noopener">https://img5.coomerfans.com/ ↗</a>
+              <a class="btn sample" href="https://img5.coomerfans.com/storage/11/zf/uv/2892ac-0199bb20-8574-74da-b3c0-112fe3a0d11b.mp4?e=1793960442&amp;hash=RDjSTIe2wSUWwtsgSH4GoA" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fimg5.coomerfans.com%2Fstorage%2F11%2Fzf%2Fuv%2F2892ac-0199bb20-8574-74da-b3c0-112fe3a0d11b.mp4%3Fe%3D1793960442%26hash%3DRDjSTIe2wSUWwtsgSH4GoA" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 4</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="camsoda.com" data-has-sample="1" data-search="camsoda.com https://www.camsoda.com/ db import (3x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('camsoda.com', this.checked)"> Otestované</label>
+              <strong>camsoda.com</strong>
+              <span class="support">DB import (3x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.camsoda.com/" target="_blank" rel="noopener">https://www.camsoda.com/ ↗</a>
+              <a class="btn sample" href="https://www.camsoda.com/porn/video/madrastra_milf_tatuada_follada_duro_por_una_gran_polla_negra_mientras_su_marido_sale_con_una_bbc" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.camsoda.com%2Fporn%2Fvideo%2Fmadrastra_milf_tatuada_follada_duro_por_una_gran_polla_negra_mientras_su_marido_sale_con_una_bbc" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 3</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="l.clips4sale.com" data-has-sample="1" data-search="l.clips4sale.com https://l.clips4sale.com/ db import (2x v discovered_videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('l.clips4sale.com', this.checked)"> Otestované</label>
+              <strong>l.clips4sale.com</strong>
+              <span class="support">DB import (2x v discovered_videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://l.clips4sale.com/" target="_blank" rel="noopener">https://l.clips4sale.com/ ↗</a>
+              <a class="btn sample" href="https://l.clips4sale.com/clip/33820415/?a=6&amp;o=6&amp;utm_source=pbweb_lander_v1&amp;utm_medium=cpa&amp;utm_campaign=26-05-27" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fl.clips4sale.com%2Fclip%2F33820415%2F%3Fa%3D6%26o%3D6%26utm_source%3Dpbweb_lander_v1%26utm_medium%3Dcpa%26utm_campaign%3D26-05-27" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 2</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="01tube.com" data-has-sample="1" data-search="01tube.com https://01tube.com/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('01tube.com', this.checked)"> Otestované</label>
+              <strong>01tube.com</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://01tube.com/" target="_blank" rel="noopener">https://01tube.com/ ↗</a>
+              <a class="btn sample" href="https://01tube.com/videos/399123/layla-kay-and-eye-candy-incredible-xxx-video-big-tits-new/?campaign=10118" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2F01tube.com%2Fvideos%2F399123%2Flayla-kay-and-eye-candy-incredible-xxx-video-big-tits-new%2F%3Fcampaign%3D10118" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="analrz.com" data-has-sample="1" data-search="analrz.com https://analrz.com/ db import (1x v discovered_videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('analrz.com', this.checked)"> Otestované</label>
+              <strong>analrz.com</strong>
+              <span class="support">DB import (1x v discovered_videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://analrz.com/" target="_blank" rel="noopener">https://analrz.com/ ↗</a>
+              <a class="btn sample" href="https://analrz.com/video/248860/blonde-snowbunny-receives-deepthroated-and-pounded-by-black-bbc/?utm_campaign=tf" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fanalrz.com%2Fvideo%2F248860%2Fblonde-snowbunny-receives-deepthroated-and-pounded-by-black-bbc%2F%3Futm_campaign%3Dtf" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="avexxx.com" data-has-sample="1" data-search="avexxx.com https://avexxx.com/ db import (1x v discovered_videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('avexxx.com', this.checked)"> Otestované</label>
+              <strong>avexxx.com</strong>
+              <span class="support">DB import (1x v discovered_videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://avexxx.com/" target="_blank" rel="noopener">https://avexxx.com/ ↗</a>
+              <a class="btn sample" href="https://avexxx.com/video/312148/blonde-bimbo-teacher-big-fake-tits-facefuck-student-pov-deepthroat/?utm_source=tt" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Favexxx.com%2Fvideo%2F312148%2Fblonde-bimbo-teacher-big-fake-tits-facefuck-student-pov-deepthroat%2F%3Futm_source%3Dtt" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="bravotube.tv" data-has-sample="1" data-search="bravotube.tv https://bravotube.tv/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('bravotube.tv', this.checked)"> Otestované</label>
+              <strong>bravotube.tv</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://bravotube.tv/" target="_blank" rel="noopener">https://bravotube.tv/ ↗</a>
+              <a class="btn sample" href="https://bravotube.tv/xid/85536401/?e=ohvievh6e3c" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fbravotube.tv%2Fxid%2F85536401%2F%3Fe%3Dohvievh6e3c" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="fapvana.com" data-has-sample="1" data-search="fapvana.com https://fapvana.com/ db import (1x v discovered_videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('fapvana.com', this.checked)"> Otestované</label>
+              <strong>fapvana.com</strong>
+              <span class="support">DB import (1x v discovered_videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://fapvana.com/" target="_blank" rel="noopener">https://fapvana.com/ ↗</a>
+              <a class="btn sample" href="https://fapvana.com/video/972621/blonde-snowbunny-sucks-and-rides-bbc-until-creampie/?utm_campaign=tf" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Ffapvana.com%2Fvideo%2F972621%2Fblonde-snowbunny-sucks-and-rides-bbc-until-creampie%2F%3Futm_campaign%3Dtf" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="fig.to" data-has-sample="1" data-search="fig.to https://fig.to/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('fig.to', this.checked)"> Otestované</label>
+              <strong>fig.to</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://fig.to/" target="_blank" rel="noopener">https://fig.to/ ↗</a>
+              <a class="btn sample" href="https://fig.to/big-boobs/onlyfans-leaks/frances-bentley-rubs-her-pussy-until-orgasm-by-the-window/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Ffig.to%2Fbig-boobs%2Fonlyfans-leaks%2Ffrances-bentley-rubs-her-pussy-until-orgasm-by-the-window%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="fukxl.com" data-has-sample="1" data-search="fukxl.com https://fukxl.com/ db import (1x v discovered_videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('fukxl.com', this.checked)"> Otestované</label>
+              <strong>fukxl.com</strong>
+              <span class="support">DB import (1x v discovered_videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://fukxl.com/" target="_blank" rel="noopener">https://fukxl.com/ ↗</a>
+              <a class="btn sample" href="https://fukxl.com/video/248860/blonde-snowbunny-gets-deepthroated-and-pounded-by-black-bbc/?utm_campaign=tf" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Ffukxl.com%2Fvideo%2F248860%2Fblonde-snowbunny-gets-deepthroated-and-pounded-by-black-bbc%2F%3Futm_campaign%3Dtf" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="hdsex.org" data-has-sample="1" data-search="hdsex.org https://hdsex.org/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('hdsex.org', this.checked)"> Otestované</label>
+              <strong>hdsex.org</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://hdsex.org/" target="_blank" rel="noopener">https://hdsex.org/ ↗</a>
+              <a class="btn sample" href="https://hdsex.org/video/767332368" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fhdsex.org%2Fvideo%2F767332368" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="leakhub.vip" data-has-sample="1" data-search="leakhub.vip https://leakhub.vip/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('leakhub.vip', this.checked)"> Otestované</label>
+              <strong>leakhub.vip</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://leakhub.vip/" target="_blank" rel="noopener">https://leakhub.vip/ ↗</a>
+              <a class="btn sample" href="https://leakhub.vip/video/157730/audreyandsadie-share-cock-and-anal-fucking-onlyfans-leaked-12f7e2c/?play=true" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fleakhub.vip%2Fvideo%2F157730%2Faudreyandsadie-share-cock-and-anal-fucking-onlyfans-leaked-12f7e2c%2F%3Fplay%3Dtrue" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="mat6tube.com" data-has-sample="1" data-search="mat6tube.com https://mat6tube.com/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('mat6tube.com', this.checked)"> Otestované</label>
+              <strong>mat6tube.com</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://mat6tube.com/" target="_blank" rel="noopener">https://mat6tube.com/ ↗</a>
+              <a class="btn sample" href="https://mat6tube.com/watch/-225896431_456239965" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fmat6tube.com%2Fwatch%2F-225896431_456239965" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="mojevideo.sk" data-has-sample="1" data-search="mojevideo.sk https://www.mojevideo.sk/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('mojevideo.sk', this.checked)"> Otestované</label>
+              <strong>mojevideo.sk</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.mojevideo.sk/" target="_blank" rel="noopener">https://www.mojevideo.sk/ ↗</a>
+              <a class="btn sample" href="https://www.mojevideo.sk/video/1c851/poulicna_bitka_v_bratislave.html" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.mojevideo.sk%2Fvideo%2F1c851%2Fpoulicna_bitka_v_bratislave.html" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="namethatporn.com" data-has-sample="1" data-search="namethatporn.com https://namethatporn.com/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('namethatporn.com', this.checked)"> Otestované</label>
+              <strong>namethatporn.com</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://namethatporn.com/" target="_blank" rel="noopener">https://namethatporn.com/ ↗</a>
+              <a class="btn sample" href="https://namethatporn.com/search.html" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fnamethatporn.com%2Fsearch.html" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="onlypornv.com" data-has-sample="1" data-search="onlypornv.com https://onlypornv.com/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('onlypornv.com', this.checked)"> Otestované</label>
+              <strong>onlypornv.com</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://onlypornv.com/" target="_blank" rel="noopener">https://onlypornv.com/ ↗</a>
+              <a class="btn sample" href="https://onlypornv.com/video/shaved-pussy-licked-before-a-doggystyle-hair-pull-fuck" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fonlypornv.com%2Fvideo%2Fshaved-pussy-licked-before-a-doggystyle-hair-pull-fuck" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="porntok.io" data-has-sample="1" data-search="porntok.io https://porntok.io/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('porntok.io', this.checked)"> Otestované</label>
+              <strong>porntok.io</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://porntok.io/" target="_blank" rel="noopener">https://porntok.io/ ↗</a>
+              <a class="btn sample" href="https://porntok.io/video/11651" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fporntok.io%2Fvideo%2F11651" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="pornx.to" data-has-sample="1" data-search="pornx.to https://pornx.to/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('pornx.to', this.checked)"> Otestované</label>
+              <strong>pornx.to</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://pornx.to/" target="_blank" rel="noopener">https://pornx.to/ ↗</a>
+              <a class="btn sample" href="https://pornx.to/jennifer-white-fuck-slut-gangbang-part-3-3" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fpornx.to%2Fjennifer-white-fuck-slut-gangbang-part-3-3" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="pornzog.com" data-has-sample="1" data-search="pornzog.com https://pornzog.com/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('pornzog.com', this.checked)"> Otestované</label>
+              <strong>pornzog.com</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://pornzog.com/" target="_blank" rel="noopener">https://pornzog.com/ ↗</a>
+              <a class="btn sample" href="https://pornzog.com/video/14401923/cindy-sun-gets-creampied-twice-by-a-bbc/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fpornzog.com%2Fvideo%2F14401923%2Fcindy-sun-gets-creampied-twice-by-a-bbc%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="prpvid.com" data-has-sample="1" data-search="prpvid.com https://prpvid.com/ db import (1x v discovered_videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('prpvid.com', this.checked)"> Otestované</label>
+              <strong>prpvid.com</strong>
+              <span class="support">DB import (1x v discovered_videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://prpvid.com/" target="_blank" rel="noopener">https://prpvid.com/ ↗</a>
+              <a class="btn sample" href="https://prpvid.com/v/b9VT" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fprpvid.com%2Fv%2Fb9VT" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="puregirl.tv" data-has-sample="1" data-search="puregirl.tv https://puregirl.tv/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('puregirl.tv', this.checked)"> Otestované</label>
+              <strong>puregirl.tv</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://puregirl.tv/" target="_blank" rel="noopener">https://puregirl.tv/ ↗</a>
+              <a class="btn sample" href="https://puregirl.tv/post/anna-mukydza-kinky-bdsm-bondage-dungeon-sex.6494a8e7-310c-4f75-94b4-37559461e8f4" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fpuregirl.tv%2Fpost%2Fanna-mukydza-kinky-bdsm-bondage-dungeon-sex.6494a8e7-310c-4f75-94b4-37559461e8f4" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="reddvideo.tube" data-has-sample="1" data-search="reddvideo.tube https://www.reddvideo.tube/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('reddvideo.tube', this.checked)"> Otestované</label>
+              <strong>reddvideo.tube</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.reddvideo.tube/" target="_blank" rel="noopener">https://www.reddvideo.tube/ ↗</a>
+              <a class="btn sample" href="https://www.reddvideo.tube/video/d73b4563df6fbe75556e097724f6b5817bbaec2f?utm_medium=organic&amp;utm_source=yandexsmartcamera" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.reddvideo.tube%2Fvideo%2Fd73b4563df6fbe75556e097724f6b5817bbaec2f%3Futm_medium%3Dorganic%26utm_source%3Dyandexsmartcamera" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="sorrymother.to" data-has-sample="1" data-search="sorrymother.to https://sorrymother.to/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('sorrymother.to', this.checked)"> Otestované</label>
+              <strong>sorrymother.to</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://sorrymother.to/" target="_blank" rel="noopener">https://sorrymother.to/ ↗</a>
+              <a class="btn sample" href="https://sorrymother.to/pornleaks/anna-mukydza-kinky-bdsm-bondage-dungeon-sex/free-leaks" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fsorrymother.to%2Fpornleaks%2Fanna-mukydza-kinky-bdsm-bondage-dungeon-sex%2Ffree-leaks" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="tube8.fr" data-has-sample="1" data-search="tube8.fr https://www.tube8.fr/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('tube8.fr', this.checked)"> Otestované</label>
+              <strong>tube8.fr</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://www.tube8.fr/" target="_blank" rel="noopener">https://www.tube8.fr/ ↗</a>
+              <a class="btn sample" href="https://www.tube8.fr/porn-video/252537611/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwww.tube8.fr%2Fporn-video%2F252537611%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="viralxxxporn.com" data-has-sample="1" data-search="viralxxxporn.com https://viralxxxporn.com/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('viralxxxporn.com', this.checked)"> Otestované</label>
+              <strong>viralxxxporn.com</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://viralxxxporn.com/" target="_blank" rel="noopener">https://viralxxxporn.com/ ↗</a>
+              <a class="btn sample" href="https://viralxxxporn.com/fr/video/5185/ashtyn-sommer-pussy-fuck-leaked-video-c192465/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fviralxxxporn.com%2Ffr%2Fvideo%2F5185%2Fashtyn-sommer-pussy-fuck-leaked-video-c192465%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="waifubitches.com" data-has-sample="1" data-search="waifubitches.com https://waifubitches.com/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('waifubitches.com', this.checked)"> Otestované</label>
+              <strong>waifubitches.com</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://waifubitches.com/" target="_blank" rel="noopener">https://waifubitches.com/ ↗</a>
+              <a class="btn sample" href="https://waifubitches.com/se/video/1505" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwaifubitches.com%2Fse%2Fvideo%2F1505" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="wankado.com" data-has-sample="1" data-search="wankado.com https://wankado.com/ db import (1x v discovered_videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('wankado.com', this.checked)"> Otestované</label>
+              <strong>wankado.com</strong>
+              <span class="support">DB import (1x v discovered_videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://wankado.com/" target="_blank" rel="noopener">https://wankado.com/ ↗</a>
+              <a class="btn sample" href="https://wankado.com/video/312148/blonde-bimbo-teacher-with-huge-fake-tits-facefuck-pov-deepthroat/?utm_source=tt" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fwankado.com%2Fvideo%2F312148%2Fblonde-bimbo-teacher-with-huge-fake-tits-facefuck-pov-deepthroat%2F%3Futm_source%3Dtt" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="x-x-x.video" data-has-sample="1" data-search="x-x-x.video https://x-x-x.video/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('x-x-x.video', this.checked)"> Otestované</label>
+              <strong>x-x-x.video</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://x-x-x.video/" target="_blank" rel="noopener">https://x-x-x.video/ ↗</a>
+              <a class="btn sample" href="https://x-x-x.video/videos/156134/kristenhancher-onlyfans-ppv-video-002/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fx-x-x.video%2Fvideos%2F156134%2Fkristenhancher-onlyfans-ppv-video-002%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="xtits.xxx" data-has-sample="1" data-search="xtits.xxx https://xtits.xxx/ db import (1x v discovered_videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('xtits.xxx', this.checked)"> Otestované</label>
+              <strong>xtits.xxx</strong>
+              <span class="support">DB import (1x v discovered_videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://xtits.xxx/" target="_blank" rel="noopener">https://xtits.xxx/ ↗</a>
+              <a class="btn sample" href="https://xtits.xxx/videos/197692/blonde-pawg-snowbunny-becky-bbc-pov-sex/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fxtits.xxx%2Fvideos%2F197692%2Fblonde-pawg-snowbunny-becky-bbc-pov-sex%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div>
+        <div class="row" data-key="xxthots.com" data-has-sample="1" data-search="xxthots.com https://xxthots.com/ db import (1x v videos)  ">
+          <div class="main">
+            <div class="title-line">
+              <label class="chk"><input type="checkbox" onchange="toggleDone('xxthots.com', this.checked)"> Otestované</label>
+              <strong>xxthots.com</strong>
+              <span class="support">DB import (1x v videos)</span>
+            </div>
+            <div class="links">
+              <a class="btn web" href="https://xxthots.com/" target="_blank" rel="noopener">https://xxthots.com/ ↗</a>
+              <a class="btn sample" href="https://xxthots.com/video/45013/esperanzagomez-damiondayski-bcf968b/" target="_blank" rel="noopener">Príklad z DB ↗</a><a class="btn tester" href="/tester?url=https%3A%2F%2Fxxthots.com%2Fvideo%2F45013%2Fesperanzagomez-damiondayski-bcf968b%2F" target="_blank" rel="noopener" title="Otvoriť príklad v Link Testeri">Tester ↗</a>
+            </div>
+            <div class="badges"><span class="badge db">DB: 1</span></div>
+          </div>
+        </div></section>
+  </div>
+  <script>
+    const STORE_KEY = 'nexus_v3_checked_sources_v1';
+    let done = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    let mode = 'all';
+
+    function updateCounter() {
+      document.getElementById('progressCount').textContent = Object.keys(done).length;
+    }
+
+    document.querySelectorAll('.row').forEach(el => {
+      const k = el.dataset.key;
+      if (done[k]) {
+        el.classList.add('done');
+        el.querySelector('input[type=checkbox]').checked = true;
+      }
+    });
+    updateCounter();
+
+    function toggleDone(k, val) {
+      if (val) done[k] = 1; else delete done[k];
+      localStorage.setItem(STORE_KEY, JSON.stringify(done));
+      const row = document.querySelector(`.row[data-key="${CSS.escape(k)}"]`);
+      if (row) row.classList.toggle('done', val);
+      updateCounter();
+      if (mode === 'todo') applyFilters();
+    }
+
+    function resetDone() {
+      done = {};
+      localStorage.removeItem(STORE_KEY);
+      document.querySelectorAll('.row').forEach(el => {
+        el.classList.remove('done');
+        el.querySelector('input[type=checkbox]').checked = false;
+      });
+      updateCounter();
+      applyFilters();
+    }
+
+    function setMode(next, btn) {
+      mode = next;
+      document.querySelectorAll('.controls .fbtn[data-mode]').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const needle = (document.getElementById('q').value || '').trim().toLowerCase();
+      document.querySelectorAll('section[data-section]').forEach(sec => {
+        let visible = 0;
+        sec.querySelectorAll('.row').forEach(el => {
+          const matchText = !needle || el.dataset.search.includes(needle);
+          const matchMode = mode === 'all'
+            || (mode === 'sample' && el.dataset.hasSample === '1')
+            || (mode === 'todo' && !done[el.dataset.key]);
+          const show = matchText && matchMode;
+          el.style.display = show ? '' : 'none';
+          if (show) visible++;
+        });
+        sec.style.display = visible > 0 ? '' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>

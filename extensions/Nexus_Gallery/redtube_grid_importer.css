@@ -1,0 +1,361 @@
+.nexus-rt-toolbar {
+    position: fixed;
+    top: 88px;
+    right: 20px;
+    z-index: 2147483647;
+    width: min(390px, calc(100vw - 24px));
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(12, 17, 26, 0.9);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.42);
+    color: #f8fafc;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.nexus-rt-toolbar[data-busy="1"] {
+    opacity: 0.88;
+}
+
+.nexus-rt-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #ef4444;
+}
+
+.nexus-rt-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.nexus-rt-collapse {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.07);
+    color: #f8fafc;
+    font-size: 17px;
+    font-weight: 900;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.nexus-rt-stats {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #cbd5e1;
+}
+
+.nexus-rt-toolbar[data-collapsed="1"] {
+    width: min(245px, calc(100vw - 24px));
+    padding: 10px 12px;
+}
+
+.nexus-rt-toolbar[data-collapsed="1"] .nexus-rt-filter-grid,
+.nexus-rt-toolbar[data-collapsed="1"] .nexus-rt-actions {
+    display: none;
+}
+
+.nexus-rt-toolbar[data-collapsed="1"] .nexus-rt-title {
+    font-size: 13px;
+}
+
+.nexus-rt-toolbar[data-collapsed="1"] .nexus-rt-stats {
+    max-width: 190px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nexus-rt-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+/* Card is tagged in place (not re-parented) — just ensure overlays anchor to it. */
+.nexus-rt-grid-card {
+    position: relative;
+}
+
+.nexus-rt-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.nexus-rt-quality-field {
+    grid-column: span 3;
+}
+
+.nexus-rt-quality-picks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.nexus-rt-quality-picks button {
+    min-width: 54px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 7px 9px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #e2e8f0;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.nexus-rt-quality-picks button[data-active="1"] {
+    border-color: rgba(239, 68, 68, 0.72);
+    background: rgba(239, 68, 68, 0.26);
+    color: #fee2e2;
+}
+
+.nexus-rt-quality-empty {
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 0;
+}
+
+.nexus-rt-filter-grid label {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.nexus-rt-filter-grid input,
+.nexus-rt-filter-grid select,
+.nexus-rt-actions select {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 7px 8px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.nexus-rt-filter-grid input::placeholder {
+    color: rgba(226, 232, 240, 0.45);
+}
+
+.nexus-rt-filter-grid select option,
+.nexus-rt-actions select option {
+    background: #1a1a2e;
+    color: #fff;
+}
+
+.nexus-rt-actions button {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.nexus-rt-actions button.primary {
+    border-color: rgba(239, 68, 68, 0.35);
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.22), rgba(185, 28, 28, 0.32));
+    color: #fee2e2;
+}
+
+.nexus-rt-actions button[data-active="1"] {
+    border-color: rgba(34, 197, 94, 0.5);
+    background: rgba(34, 197, 94, 0.18);
+    color: #dcfce7;
+}
+
+.nexus-rt-actions button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.nexus-rt-load-pages {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.nexus-rt-load-pages input {
+    width: 46px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 7px 6px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    box-sizing: border-box;
+}
+
+.nexus-rt-check {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 2147483645;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nexus-rt-check input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.nexus-rt-check span {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(7, 12, 20, 0.84);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.nexus-rt-check input:checked + span {
+    background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.nexus-rt-selected {
+    outline: 2px solid rgba(239, 68, 68, 0.92);
+    outline-offset: 2px;
+    border-radius: 12px;
+}
+
+.nexus-rt-filter-hidden {
+    display: none !important;
+}
+
+.nexus-rt-meta {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    /* Cover only the thumbnail region (16:9 at the top of the card) so the
+       bottom-anchored chips sit on the thumbnail, not over the title text. */
+    aspect-ratio: 16 / 9;
+    z-index: 2147483645;
+    pointer-events: none;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.nexus-rt-chip {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 22px;
+    max-width: calc(100% - 18px);
+    padding: 4px 8px;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    background: rgba(0, 0, 0, 0.88);
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.75), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nexus-rt-date {
+    left: 7px;
+    bottom: 7px;
+    background: rgba(30, 64, 175, 0.95);
+    border-color: rgba(191, 219, 254, 0.72);
+}
+
+.nexus-rt-size {
+    left: 7px;
+    top: 40px;
+    background: rgba(22, 101, 52, 0.96);
+    border-color: rgba(187, 247, 208, 0.72);
+}
+
+.nexus-rt-duration {
+    left: 50%;
+    bottom: 7px;
+    transform: translateX(-50%);
+    background: rgba(2, 6, 23, 0.94);
+    border-color: rgba(191, 219, 254, 0.72);
+}
+
+.nexus-rt-quality {
+    right: 7px;
+    bottom: 7px;
+    background: rgba(220, 38, 38, 0.96);
+    border-color: rgba(254, 202, 202, 0.78);
+}
+
+.nexus-rt-toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 2147483647;
+    max-width: min(420px, calc(100vw - 24px));
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(12, 17, 26, 0.94);
+    border: 1px solid rgba(239, 68, 68, 0.38);
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.4);
+    color: #fff;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.18s ease;
+    pointer-events: none;
+}
+
+.nexus-rt-toast.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.nexus-rt-toast[data-error="1"] {
+    border-color: rgba(239, 68, 68, 0.65);
+}
+
+@media (max-width: 720px) {
+    .nexus-rt-toolbar {
+        top: auto;
+        right: 12px;
+        left: 12px;
+        bottom: 12px;
+        width: auto;
+    }
+}

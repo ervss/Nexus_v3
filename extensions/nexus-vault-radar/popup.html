@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <title>Nexus Vault Radar</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      width: 360px;
+      margin: 0;
+      padding: 14px;
+      background: radial-gradient(320px 180px at 15% 0%, rgba(168, 85, 247, 0.22), transparent 65%), #070a13;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      font-size: 12.5px;
+    }
+    .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .brand { font-size: 14px; font-weight: 800; background: linear-gradient(90deg, #f8fafc, #c4b5fd, #67e8f9); -webkit-background-clip: text; color: transparent; }
+    .pill { font-size: 10.5px; padding: 2px 8px; border-radius: 999px; background: rgba(34,211,238,0.14); border: 1px solid rgba(34,211,238,0.34); color: #a5f3fc; }
+    .search-row { display: flex; gap: 6px; margin-bottom: 10px; }
+    input {
+      flex: 1; min-width: 0; height: 32px; border-radius: 9px; padding: 0 10px;
+      border: 1px solid rgba(255,255,255,0.14); background: rgba(15,23,42,0.75); color: #fff; outline: none;
+    }
+    .btn {
+      height: 32px; padding: 0 11px; border-radius: 9px; border: 1px solid rgba(168,85,247,0.58);
+      background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff; font-weight: 700; cursor: pointer;
+    }
+    .btn.ghost {
+      border-color: rgba(255,255,255,0.14); background: rgba(255,255,255,0.05); color: #e2e8f0;
+    }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
+    .stat { padding: 8px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); text-align: center; }
+    .stat span { display: block; font-size: 10px; color: #94a3b8; }
+    .stat strong { font-size: 15px; font-weight: 800; }
+    .list { display: flex; flex-direction: column; gap: 6px; max-height: 185px; overflow-y: auto; margin-bottom: 10px; }
+    .item { padding: 7px 9px; border-radius: 9px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; gap: 8px; }
+    .item-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tag { font-size: 10px; font-weight: 700; color: #c4b5fd; flex-shrink: 0; }
+    .actions { display: flex; gap: 6px; margin-bottom: 10px; }
+    .actions .btn { flex: 1; }
+    details { border-top: 1px solid rgba(255,255,255,0.09); padding-top: 8px; font-size: 11px; color: #94a3b8; }
+    details input { margin-top: 6px; width: 100%; height: 28px; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="head">
+    <span class="brand">✦ Nexus Vault Radar</span>
+    <span class="pill" id="connStatus">Pripájam...</span>
+  </div>
+  <form class="search-row" id="probeForm">
+    <input id="queryInput" type="search" placeholder="Meno tvorcu alebo názov...">
+    <button type="submit" class="btn">Hľadať</button>
+  </form>
+  <div class="stats">
+    <div class="stat"><span>V Knižnici</span><strong id="libCount">0</strong></div>
+    <div class="stat"><span>Local</span><strong id="locCount">0</strong></div>
+    <div class="stat"><span>Local Vault</span><strong id="vaultCount">0</strong></div>
+  </div>
+  <div class="list" id="resultsList"></div>
+  <div class="actions">
+    <button type="button" class="btn ghost" id="followBtn">📌 Pripnúť do Radaru</button>
+    <button type="button" class="btn" id="openVaultBtn">Otvoriť Trezor</button>
+  </div>
+  <details>
+    <summary>Nastavenia pripojenia</summary>
+    <input id="baseUrlInput" type="url" placeholder="http://127.0.0.1:8000">
+    <input id="tokenInput" type="password" placeholder="X-Nexus-Token (voliteľné)">
+  </details>
+  <script src="popup.js"></script>
+</body>
+</html>

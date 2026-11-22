@@ -1,0 +1,857 @@
+    <!-- Tnaflix Smart Discovery Modal -->
+
+    <template x-if="showTnaflixDiscoveryModal">
+    <div class="tna-overlay nx-lazy-modal"
+        @keydown.escape.window="showTnaflixDiscoveryModal=false" role="dialog" aria-modal="true" aria-label="Tnaflix Smart Discovery">
+
+        <!-- Top bar -->
+        <div class="tna-topbar">
+            <div class="tna-logo"><span class="material-icons-round">movie_filter</span>Tnaflix Hub</div>
+
+            <!-- URL bar (profile tab only) -->
+            <div class="tna-url-bar" x-show="tnaflixDiscovery.tab==='profile'">
+                <span class="material-icons-round">link</span>
+                <input type="text" x-model="tnaflixDiscovery.profileUrl"
+                    placeholder="https://www.tnaflix.com/profile/username" @keydown.enter="tnaflixScanProfile()">
+            </div>
+
+            <!-- right actions -->
+            <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+                <!-- Grid size -->
+                <div style="display:flex;gap:3px;" x-show="tnaflixDiscovery.results.length > 0">
+                    <template x-for="cols in [3,4,5,6]" :key="cols">
+                        <button class="tna-grid-btn" :class="tnaflixDiscovery.gridCols===cols?'active':''"
+                            @click="tnaflixSetGridCols(cols)" x-text="cols+'×'"></button>
+                    </template>
+                </div>
+                <button class="tna-hbtn tna-hbtn-import" x-show="tnaflixDiscovery.selected.length > 0"
+                    @click="importTnaflixDiscovery()" :disabled="tnaflixDiscovery.importing">
+                    <span class="material-icons-round" :class="tnaflixDiscovery.importing?'tna-spin':''"
+                        x-text="tnaflixDiscovery.importing?'progress_activity':'move_to_inbox'"></span>
+                    <span
+                        x-text="tnaflixDiscovery.importing?'Importujem...':'Import '+tnaflixDiscovery.selected.length+' videí'"></span>
+                </button>
+                <button class="tna-hbtn tna-hbtn-close" @click="showTnaflixDiscoveryModal=false">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tna-tabs">
+            <button class="tna-tab" :class="tnaflixDiscovery.tab==='profile'?'active':''"
+                @click="tnaflixDiscovery.tab='profile'">
+                <span class="material-icons-round">person</span>Profil
+                <span class="tna-tab-count" x-show="tnaflixDiscovery.tab==='profile' && tnaflixDiscovery.results.length"
+                    x-text="tnaflixDiscovery.results.length"></span>
+            </button>
+            <button class="tna-tab" :class="tnaflixDiscovery.tab==='profiles'?'active':''"
+                @click="tnaflixDiscovery.tab='profiles'">
+                <span class="material-icons-round">manage_search</span>Profily
+                <span class="tna-tab-count" x-show="tnaflixDiscovery.profileFinder.profiles.length"
+                    x-text="tnaflixDiscovery.profileFinder.profiles.length"></span>
+            </button>
+            <button class="tna-tab" :class="tnaflixDiscovery.tab==='search'?'active':''"
+                @click="tnaflixDiscovery.tab='search'">
+                <span class="material-icons-round">search</span>Hľadanie
+                <span class="tna-tab-count" x-show="tnaflixDiscovery.tab==='search' && tnaflixDiscovery.results.length"
+                    x-text="tnaflixDiscovery.results.length"></span>
+            </button>
+            <button class="tna-tab" :class="tnaflixDiscovery.tab==='category'?'active':''"
+                @click="tnaflixDiscovery.tab='category'">
+                <span class="material-icons-round">category</span>Kategória
+            </button>
+            <button class="tna-tab" :class="tnaflixDiscovery.tab==='history'?'active':''"
+                @click="tnaflixDiscovery.tab='history'; tnaflixCacheLoadHistory()">
+                <span class="material-icons-round">history</span>História
+                <span class="tna-tab-count"
+                    x-show="(tnaflixDiscovery.cache.profiles.length + tnaflixDiscovery.cache.searches.length) > 0"
+                    x-text="tnaflixDiscovery.cache.profiles.length + tnaflixDiscovery.cache.searches.length"></span>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="tna-body">
+
+            <!-- ── PROFILE TAB ── -->
+            <template x-if="tnaflixDiscovery.tab==='profile'">
+                <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+
+                    <!-- Profile header (shows after scan) -->
+                    <div class="tna-profile-header"
+                        x-show="tnaflixDiscovery.profile && tnaflixDiscovery.profile.username">
+                        <img class="tna-avatar" x-show="tnaflixDiscovery.profile?.avatar"
+                            :src="tnaflixDiscovery.profile?.avatar" @error="$el.style.display='none'">
+                        <div>
+                            <div class="tna-profile-name"
+                                x-text="tnaflixDiscovery.profile?.display_name || tnaflixDiscovery.profile?.username || ''">
+                            </div>
+                            <div class="tna-profile-sub">
+                                <b x-text="tnaflixDiscovery.results.length"></b> videí načítaných
+                                <span x-show="tnaflixDiscovery.profile?.total_str"> · celkom <b
+                                        x-text="tnaflixDiscovery.profile?.total_str || ''"></b></span>
+                            </div>
+                        </div>
+                        <!-- Sub-section tabs -->
+                        <div style="margin-left:auto;display:flex;gap:8px;"
+                            x-show="(tnaflixDiscovery.profile?.tabs || []).length>1">
+                            <template x-for="ptab in (tnaflixDiscovery.profile?.tabs || []).slice(0,5)" :key="ptab.url">
+                                <button class="tna-sel-btn"
+                                    @click="tnaflixDiscovery.profileUrl=ptab.url; tnaflixScanProfile()"
+                                    x-text="ptab.label" style="font-size:11px;"></button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div x-show="tnaflixDiscovery.relatedProfiles.length"
+                        style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid rgba(148,163,184,.12);background:rgba(15,23,42,.55);">
+                        <span
+                            style="font-size:11px;color:#64748b;font-weight:800;text-transform:uppercase;letter-spacing:.08em;">Podobné
+                            profily</span>
+                        <template x-for="profile in tnaflixDiscovery.relatedProfiles.slice(0,24)" :key="profile.url">
+                            <button class="tna-sel-btn" @click="tnaflixOpenProfile(profile)"
+                                :title="'Scan profile: ' + profile.name"
+                                style="font-size:11px;display:inline-flex;gap:5px;align-items:center;">
+                                <span x-text="profile.name"></span>
+                                <b x-show="profile.count" style="color:#38bdf8;" x-text="profile.count"></b>
+                            </button>
+                        </template>
+                    </div>
+
+                    <!-- Empty state / scan prompt -->
+                    <div class="tna-state" x-show="!tnaflixDiscovery.loading && !tnaflixDiscovery.results.length">
+                        <span class="material-icons-round" style="color:#0ea5e9;">person_search</span>
+                        <div class="tna-state-title">Zadaj URL profilu</div>
+                        <div class="tna-state-sub">Vlož https://www.tnaflix.com/profile/... do lišty hore a stlač Scan
+                        </div>
+                        <button class="tna-hbtn tna-hbtn-go" style="margin-top:8px;" @click="tnaflixScanProfile()"
+                            :disabled="!tnaflixDiscovery.profileUrl.trim() || tnaflixDiscovery.loading">
+                            <span class="material-icons-round">travel_explore</span>Scan profil
+                        </button>
+                    </div>
+
+                    <!-- Loading -->
+                    <div class="tna-state" x-show="tnaflixDiscovery.loading && tnaflixDiscovery.tab==='profile'">
+                        <span class="material-icons-round tna-spin"
+                            style="font-size:40px;color:#38bdf8;">progress_activity</span>
+                        <div class="tna-state-title" x-text="tnaflixDiscovery.statusMsg || 'Načítavam profil...'"></div>
+                    </div>
+
+                    <!-- Grid -->
+                    <template x-if="!tnaflixDiscovery.loading && tnaflixDiscovery.results.length > 0">
+                        <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+                            <div class="tna-toolbar">
+                                <span class="tna-count">
+                                    <b x-text="tnaflixSelectedVisible().length"></b> / <b
+                                        x-text="tnaflixVisible().length"></b> vo filtri
+                                    <span x-show="tnaflixDiscovery.selected.length !== tnaflixSelectedVisible().length"
+                                        style="color:#64748b;"
+                                        x-text="' · spolu vybraných '+tnaflixDiscovery.selected.length"></span>
+                                    <span x-show="tnaflixVisible().length !== tnaflixDiscovery.results.length"
+                                        style="color:#64748b;"
+                                        x-text="' (z '+tnaflixDiscovery.results.length+')'"></span>
+                                </span>
+                                <button class="tna-sel-btn" @click="tnaflixSelectVisible('replace')">Označiť
+                                    filter</button>
+                                <button class="tna-sel-btn" @click="tnaflixSelectVisible('add')">Pridať filter</button>
+                                <button class="tna-sel-btn" @click="tnaflixDeselectVisible()">Odobrať filter</button>
+                                <button class="tna-sel-btn" @click="tnaflixDiscovery.selected=[]">Zrušiť všetko</button>
+                                <input type="text" x-model="tnaflixDiscovery.filter.keyword"
+                                    placeholder="Filtrovať názov..." class="tna-filter-input">
+                                <input type="number" min="0" step="1"
+                                    x-model.number="tnaflixDiscovery.filter.minDurMinutes" placeholder="Min min"
+                                    class="tna-filter-num">
+                                <input type="number" min="0" step="1"
+                                    x-model.number="tnaflixDiscovery.filter.maxDurMinutes" placeholder="Max min"
+                                    class="tna-filter-num">
+                                <input type="number" min="0" step="1" x-model.number="tnaflixDiscovery.filter.minSizeMb"
+                                    placeholder="Min MB" class="tna-filter-num">
+                                <input type="number" min="0" step="1" x-model.number="tnaflixDiscovery.filter.maxSizeMb"
+                                    placeholder="Max MB" class="tna-filter-num">
+                                <select class="tna-filter-sel" x-model.number="tnaflixDiscovery.filter.minQuality">
+                                    <option value="0">Kvalita: všetky</option>
+                                    <option value="720">720p+</option>
+                                    <option value="1080">1080p+</option>
+                                    <option value="2160">4K</option>
+                                </select>
+                                <select class="tna-filter-sel" x-model.number="tnaflixDiscovery.filter.maxQuality">
+                                    <option value="0">Max kvalita</option>
+                                    <option value="720">do 720p</option>
+                                    <option value="1080">do 1080p</option>
+                                    <option value="2160">do 4K</option>
+                                </select>
+                                <select class="tna-filter-sel" x-model="tnaflixDiscovery.filter.sortBy">
+                                    <option value="default">Zoradiť: pôvodné</option>
+                                    <option value="duration">Dĺžka</option>
+                                    <option value="quality">Kvalita</option>
+                                    <option value="size">Veľkosť súboru</option>
+                                    <option value="title">Názov A-Z</option>
+                                </select>
+                                <button class="tna-sel-btn"
+                                    @click="tnaflixDiscovery.filter.sortDir = tnaflixDiscovery.filter.sortDir==='asc'?'desc':'asc'"
+                                    :title="tnaflixDiscovery.filter.sortDir==='asc'?'Vzostupne':'Zostupne'">
+                                    <span class="material-icons-round" style="font-size:14px;"
+                                        x-text="tnaflixDiscovery.filter.sortDir==='asc'?'arrow_upward':'arrow_downward'"></span>
+                                </button>
+                                <button class="tna-sel-btn" @click="tnaflixEnrichMeta()"
+                                    :disabled="tnaflixDiscovery.enriching || tnaflixEnrichTargetCount()===0"
+                                    style="background:rgba(56,189,248,.15);border-color:#38bdf8;color:#38bdf8;font-weight:600;"
+                                    :title="'Doplniť meta pre '+tnaflixEnrichTargetCount()+' kariet v aktuálnom filtri alebo výbere'">
+                                    <span class="material-icons-round" style="font-size:13px;"
+                                        x-text="tnaflixDiscovery.enriching?'sync':'bolt'"></span>
+                                    <span
+                                        x-text="tnaflixDiscovery.enriching ? tnaflixDiscovery.enrichMsg : 'Doplniť meta ('+tnaflixEnrichTargetCount()+')'">Doplniť
+                                        meta</span>
+                                </button>
+                                <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+                                    <span style="font-size:11px;color:#334155;"
+                                        x-text="'Max stránok: '+tnaflixDiscovery.maxPages"></span>
+                                    <input type="range" min="1" max="50" x-model.number="tnaflixDiscovery.maxPages"
+                                        style="width:80px;accent-color:#38bdf8;">
+                                    <button class="tna-sel-btn" @click="tnaflixScanProfile()"
+                                        :disabled="tnaflixDiscovery.loading">
+                                        <span class="material-icons-round" style="font-size:14px;">refresh</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="tna-grid-wrap">
+                                <div class="tna-grid"
+                                    :style="`grid-template-columns:repeat(${tnaflixDiscovery.gridCols},1fr);gap:14px;`">
+                                    <template x-for="card in tnaflixVisible()" :key="card.page_url">
+                                        <div class="tna-card"
+                                            :class="{'is-selected':tnaflixDiscovery.selected.includes(card.page_url),'is-imported':card._imported}"
+                                            @click="tnaflixToggleCard(card.page_url)">
+                                            <div class="tna-card-thumb">
+                                                <img :src="card.thumbnail||'/static/placeholder.jpg'" loading="lazy"
+                                                    @error.once="$el.src='/static/placeholder.jpg'">
+                                                <button class="tna-play-btn" @click.stop="tnaflixPreviewVideo(card)">
+                                                    <span class="material-icons-round">play_circle</span>
+                                                </button>
+                                                <div class="tna-card-check"><span
+                                                        class="material-icons-round">check</span></div>
+                                                <span x-show="card.quality" class="tna-badge tna-badge-quality"
+                                                    :class="card.quality>=2160?'q4k':''"
+                                                    x-text="card.quality>=2160?'4K':(card.quality+'p')"></span>
+                                                <span x-show="card.duration" class="tna-badge tna-badge-dur"
+                                                    x-text="formatDuration(card.duration)"></span>
+                                            </div>
+                                            <div class="tna-card-info">
+                                                <div class="tna-card-title" x-text="card.title"></div>
+                                                <div class="tna-card-meta">
+                                                    <span x-show="card.views"><span
+                                                            class="material-icons-round">visibility</span><span
+                                                            x-text="card.views?.toLocaleString()"></span></span>
+                                                    <span x-show="card.uploader"><span
+                                                            class="material-icons-round">person</span><span
+                                                            x-text="card.uploader"></span></span>
+                                                    <span x-show="card.size"
+                                                        style="color:#38bdf8;font-weight:600;"><span
+                                                            class="material-icons-round">save</span><span
+                                                            x-text="card.size"></span></span>
+                                                    <span x-show="card.upload_date" style="color:#94a3b8;"><span
+                                                            class="material-icons-round">calendar_today</span><span
+                                                            x-text="card.upload_date"></span></span>
+                                                </div>
+                                                <div x-show="card.co_profiles && card.co_profiles.length"
+                                                    style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;">
+                                                    <template x-for="profile in (card.co_profiles || []).slice(0,3)"
+                                                        :key="card.page_url + '-' + profile.url">
+                                                        <button class="tna-sel-btn"
+                                                            @click.stop="tnaflixOpenProfile(profile)"
+                                                            style="font-size:10px;padding:3px 6px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                                                            x-text="profile.name"></button>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- ── PROFILES FINDER TAB ── -->
+            <template x-if="tnaflixDiscovery.tab==='profiles'">
+                <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+                    <div
+                        style="display:grid;grid-template-columns:1.2fr .7fr .7fr auto;gap:12px;padding:18px;border-bottom:1px solid rgba(148,163,184,.14);background:rgba(15,23,42,.45);">
+                        <div>
+                            <label
+                                style="font-size:11px;color:#64748b;font-weight:800;text-transform:uppercase;">Režim</label>
+                            <select class="tna-select" x-model="tnaflixDiscovery.profileFinder.mode">
+                                <option value="last_updated">Last updated profiles</option>
+                                <option value="pornstars">Pornstars directory</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label
+                                style="font-size:11px;color:#64748b;font-weight:800;text-transform:uppercase;">Limit</label>
+                            <input class="tna-input" type="number" min="1" max="200"
+                                x-model.number="tnaflixDiscovery.profileFinder.limit">
+                        </div>
+                        <div>
+                            <label
+                                style="font-size:11px;color:#64748b;font-weight:800;text-transform:uppercase;">Pages</label>
+                            <input class="tna-input" type="number" min="1" max="20"
+                                x-model.number="tnaflixDiscovery.profileFinder.pages">
+                        </div>
+                        <button class="tna-btn-scan" style="align-self:end;" @click="tnaflixFindProfiles()"
+                            :disabled="tnaflixDiscovery.profileFinder.loading">
+                            <span class="material-icons-round"
+                                :class="tnaflixDiscovery.profileFinder.loading?'tna-spin':''"
+                                x-text="tnaflixDiscovery.profileFinder.loading?'progress_activity':'travel_explore'"></span>
+                            <span x-text="tnaflixDiscovery.profileFinder.loading?'Hľadám...':'Nájsť profily'"></span>
+                        </button>
+                    </div>
+
+                    <div x-show="tnaflixDiscovery.profileFinder.statusMsg"
+                        x-text="tnaflixDiscovery.profileFinder.statusMsg"
+                        style="padding:10px 18px;color:#38bdf8;font-size:12px;border-bottom:1px solid rgba(148,163,184,.10);">
+                    </div>
+
+                    <div class="tna-state"
+                        x-show="!tnaflixDiscovery.profileFinder.loading && !tnaflixDiscovery.profileFinder.profiles.length">
+                        <span class="material-icons-round" style="color:#0ea5e9;">manage_search</span>
+                        <div class="tna-state-title">Vyhľadávač profilov</div>
+                        <div class="tna-state-sub">Last updated prejde najnovšie videá a vytiahne profily z čerstvých
+                            kariet.</div>
+                    </div>
+
+                    <div class="tna-grid-wrap" x-show="tnaflixDiscovery.profileFinder.profiles.length">
+                        <div class="tna-grid" style="grid-template-columns:repeat(5,1fr);gap:12px;">
+                            <template x-for="profile in tnaflixDiscovery.profileFinder.profiles" :key="profile.url">
+                                <div class="tna-card" @click="tnaflixOpenProfile(profile)" style="min-height:160px;">
+                                    <div class="tna-card-thumb" style="height:92px;">
+                                        <img :src="profile.thumbnail || '/static/placeholder.jpg'" loading="lazy"
+                                            @error.once="$el.src='/static/placeholder.jpg'">
+                                        <span class="tna-badge tna-badge-quality" x-show="profile.count"
+                                            x-text="'x'+profile.count"></span>
+                                        <span class="tna-badge tna-badge-dur" x-show="profile.rank"
+                                            x-text="'#'+profile.rank"></span>
+                                    </div>
+                                    <div class="tna-card-info">
+                                        <div class="tna-card-title" x-text="profile.name"></div>
+                                        <div class="tna-card-meta">
+                                            <span><span class="material-icons-round">person</span><span
+                                                    x-text="profile.slug"></span></span>
+                                        </div>
+                                        <div x-show="profile.latest_title"
+                                            style="font-size:11px;color:#64748b;margin-top:6px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"
+                                            x-text="profile.latest_title"></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ── SEARCH TAB ── -->
+            <template x-if="tnaflixDiscovery.tab==='search'">
+                <div style="display:flex;flex:1;overflow:hidden;">
+                    <!-- Sidebar -->
+                    <div class="tna-sidebar">
+                        <div>
+                            <div class="tna-label">Kľúčové slovo</div>
+                            <input class="tna-input" type="text" x-model="tnaflixDiscovery.keyword"
+                                placeholder="milf, hardcore..." @keydown.enter="searchTnaflixDiscovery()">
+                        </div>
+                        <div>
+                            <div class="tna-label">Kategória</div>
+                            <input class="tna-input" type="text" x-model="tnaflixDiscovery.category"
+                                placeholder="amateur, teen..." @keydown.enter="searchTnaflixDiscovery()">
+                        </div>
+                        <div>
+                            <div class="tna-label">Zoradiť</div>
+                            <select class="tna-select" x-model="tnaflixDiscovery.sortBy">
+                                <option value="new">Najnovšie</option>
+                                <option value="views">Najviac zhliadnutí</option>
+                                <option value="rating">Najlepšie hodnotené</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="tna-label">Min. kvalita</div>
+                            <select class="tna-select" x-model.number="tnaflixDiscovery.minQuality">
+                                <option value="0">Akákoľvek</option>
+                                <option value="480">480p</option>
+                                <option value="720">720p HD</option>
+                                <option value="1080">1080p FHD</option>
+                                <option value="2160">4K</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="tna-label">Min. dĺžka</div>
+                            <select class="tna-select" x-model.number="tnaflixDiscovery.minDuration">
+                                <option value="0">Akákoľvek</option>
+                                <option value="180">3 min</option>
+                                <option value="300">5 min</option>
+                                <option value="600">10 min</option>
+                                <option value="1200">20 min</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="tna-label">Počet stránok</div>
+                            <input class="tna-input" type="number" x-model.number="tnaflixDiscovery.pages" min="1"
+                                max="30">
+                        </div>
+                        <button class="tna-btn-scan" @click="searchTnaflixDiscovery()"
+                            :disabled="tnaflixDiscovery.loading">
+                            <span class="material-icons-round" :class="tnaflixDiscovery.loading?'tna-spin':''"
+                                x-text="tnaflixDiscovery.loading?'progress_activity':'search'"></span>
+                            <span x-text="tnaflixDiscovery.loading?'Hľadám...':'Hľadať'"></span>
+                        </button>
+                        <div x-show="tnaflixDiscovery.statusMsg" x-text="tnaflixDiscovery.statusMsg"
+                            style="font-size:12px;color:#475569;text-align:center;"></div>
+                    </div>
+                    <!-- Results -->
+                    <div class="tna-main">
+                        <div class="tna-state" x-show="!tnaflixDiscovery.loading && !tnaflixDiscovery.results.length">
+                            <span class="material-icons-round" style="color:#334155;">travel_explore</span>
+                            <div class="tna-state-title">Zadaj kľúčové slovo a hľadaj</div>
+                        </div>
+                        <div class="tna-state" x-show="tnaflixDiscovery.loading && tnaflixDiscovery.tab==='search'">
+                            <span class="material-icons-round tna-spin"
+                                style="font-size:40px;color:#38bdf8;">progress_activity</span>
+                            <div class="tna-state-title">Hľadám na Tnaflix...</div>
+                        </div>
+                        <template x-if="!tnaflixDiscovery.loading && tnaflixDiscovery.results.length > 0">
+                            <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+                                <div class="tna-toolbar">
+                                    <span class="tna-count">
+                                        <b x-text="tnaflixSelectedVisible().length"></b> / <b
+                                            x-text="tnaflixVisible().length"></b> vo filtri
+                                        <span
+                                            x-show="tnaflixDiscovery.selected.length !== tnaflixSelectedVisible().length"
+                                            style="color:#64748b;"
+                                            x-text="' · spolu vybraných '+tnaflixDiscovery.selected.length"></span>
+                                        <span x-show="tnaflixVisible().length !== tnaflixDiscovery.results.length"
+                                            style="color:#64748b;"
+                                            x-text="' (z '+tnaflixDiscovery.results.length+')'"></span>
+                                    </span>
+                                    <button class="tna-sel-btn" @click="tnaflixSelectVisible('replace')">Označiť
+                                        filter</button>
+                                    <button class="tna-sel-btn" @click="tnaflixSelectVisible('add')">Pridať
+                                        filter</button>
+                                    <button class="tna-sel-btn" @click="tnaflixDeselectVisible()">Odobrať
+                                        filter</button>
+                                    <button class="tna-sel-btn" @click="tnaflixDiscovery.selected=[]">Zrušiť
+                                        všetko</button>
+                                    <input type="text" x-model="tnaflixDiscovery.filter.keyword"
+                                        placeholder="Filtrovať názov..." class="tna-filter-input">
+                                    <input type="number" min="0" step="1"
+                                        x-model.number="tnaflixDiscovery.filter.minDurMinutes" placeholder="Min min"
+                                        class="tna-filter-num">
+                                    <input type="number" min="0" step="1"
+                                        x-model.number="tnaflixDiscovery.filter.maxDurMinutes" placeholder="Max min"
+                                        class="tna-filter-num">
+                                    <input type="number" min="0" step="1"
+                                        x-model.number="tnaflixDiscovery.filter.minSizeMb" placeholder="Min MB"
+                                        class="tna-filter-num">
+                                    <input type="number" min="0" step="1"
+                                        x-model.number="tnaflixDiscovery.filter.maxSizeMb" placeholder="Max MB"
+                                        class="tna-filter-num">
+                                    <select class="tna-filter-sel" x-model.number="tnaflixDiscovery.filter.minQuality">
+                                        <option value="0">Kvalita: všetky</option>
+                                        <option value="720">720p+</option>
+                                        <option value="1080">1080p+</option>
+                                        <option value="2160">4K</option>
+                                    </select>
+                                    <select class="tna-filter-sel" x-model.number="tnaflixDiscovery.filter.maxQuality">
+                                        <option value="0">Max kvalita</option>
+                                        <option value="720">do 720p</option>
+                                        <option value="1080">do 1080p</option>
+                                        <option value="2160">do 4K</option>
+                                    </select>
+                                    <select class="tna-filter-sel" x-model="tnaflixDiscovery.filter.sortBy">
+                                        <option value="default">Zoradiť: pôvodné</option>
+                                        <option value="duration">Dĺžka</option>
+                                        <option value="quality">Kvalita</option>
+                                        <option value="size">Veľkosť súboru</option>
+                                        <option value="title">Názov</option>
+                                    </select>
+                                    <button class="tna-sel-btn"
+                                        @click="tnaflixDiscovery.filter.sortDir = tnaflixDiscovery.filter.sortDir==='asc'?'desc':'asc'">
+                                        <span class="material-icons-round" style="font-size:14px;"
+                                            x-text="tnaflixDiscovery.filter.sortDir==='asc'?'arrow_upward':'arrow_downward'"></span>
+                                    </button>
+                                    <button class="tna-sel-btn" @click="tnaflixEnrichMeta()"
+                                        :disabled="tnaflixDiscovery.enriching || tnaflixEnrichTargetCount()===0"
+                                        style="background:rgba(56,189,248,.15);border-color:#38bdf8;color:#38bdf8;font-weight:600;">
+                                        <span class="material-icons-round" style="font-size:13px;"
+                                            x-text="tnaflixDiscovery.enriching?'sync':'bolt'"></span>
+                                        <span
+                                            x-text="tnaflixDiscovery.enriching ? tnaflixDiscovery.enrichMsg : 'Doplniť meta ('+tnaflixEnrichTargetCount()+')'">Doplniť
+                                            meta</span>
+                                    </button>
+                                </div>
+                                <div class="tna-grid-wrap">
+                                    <div class="tna-grid"
+                                        :style="`grid-template-columns:repeat(${tnaflixDiscovery.gridCols},1fr);gap:14px;`">
+                                        <template x-for="card in tnaflixVisible()" :key="card.page_url">
+                                            <div class="tna-card"
+                                                :class="{'is-selected':tnaflixDiscovery.selected.includes(card.page_url),'is-imported':card._imported}"
+                                                @click="tnaflixToggleCard(card.page_url)">
+                                                <div class="tna-card-thumb">
+                                                    <img :src="card.thumbnail||'/static/placeholder.jpg'" loading="lazy"
+                                                        @error.once="$el.src='/static/placeholder.jpg'">
+                                                    <button class="tna-play-btn"
+                                                        @click.stop="tnaflixPreviewVideo(card)">
+                                                        <span class="material-icons-round">play_circle</span>
+                                                    </button>
+                                                    <div class="tna-card-check"><span
+                                                            class="material-icons-round">check</span></div>
+                                                    <span x-show="card.quality" class="tna-badge tna-badge-quality"
+                                                        :class="card.quality>=2160?'q4k':''"
+                                                        x-text="card.quality>=2160?'4K':(card.quality+'p')"></span>
+                                                    <span x-show="card.duration" class="tna-badge tna-badge-dur"
+                                                        x-text="formatDuration(card.duration)"></span>
+                                                </div>
+                                                <div class="tna-card-info">
+                                                    <div class="tna-card-title" x-text="card.title"></div>
+                                                    <div class="tna-card-meta">
+                                                        <span x-show="card.views"><span
+                                                                class="material-icons-round">visibility</span><span
+                                                                x-text="card.views?.toLocaleString()"></span></span>
+                                                        <span x-show="card.uploader"><span
+                                                                class="material-icons-round">person</span><span
+                                                                x-text="card.uploader"></span></span>
+                                                        <span x-show="card.size"
+                                                            style="color:#38bdf8;font-weight:600;"><span
+                                                                class="material-icons-round">save</span><span
+                                                                x-text="card.size"></span></span>
+                                                        <span x-show="card.upload_date" style="color:#94a3b8;"><span
+                                                                class="material-icons-round">calendar_today</span><span
+                                                                x-text="card.upload_date"></span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ── CATEGORY TAB ── -->
+            <template x-if="tnaflixDiscovery.tab==='category'">
+                <div style="display:flex;flex:1;overflow:hidden;">
+                    <div class="tna-sidebar">
+                        <div>
+                            <div class="tna-label">Kategória</div>
+                            <input class="tna-input" type="text" x-model="tnaflixDiscovery.category"
+                                placeholder="amateur, teen, milf..." @keydown.enter="tnaflixBrowseCategory()">
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:5px;">
+                            <template
+                                x-for="cat in ['amateur','milf','teen','lesbian','anal','asian','bbw','bdsm','creampie','gangbang','hd','latina','massage','mature','pov','squirt']">
+                                <button class="tna-sel-btn" style="font-size:11px;"
+                                    @click="tnaflixDiscovery.category=cat; tnaflixBrowseCategory()"
+                                    x-text="cat"></button>
+                            </template>
+                        </div>
+                        <div>
+                            <div class="tna-label">Zoradiť</div>
+                            <select class="tna-select" x-model="tnaflixDiscovery.sortBy">
+                                <option value="new">Najnovšie</option>
+                                <option value="views">Najviac zhliadnutí</option>
+                                <option value="rating">Najlepšie hodnotené</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="tna-label">Min. kvalita</div>
+                            <select class="tna-select" x-model.number="tnaflixDiscovery.minQuality">
+                                <option value="0">Akákoľvek</option>
+                                <option value="720">720p HD</option>
+                                <option value="1080">1080p FHD</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="tna-label">Počet stránok</div>
+                            <input class="tna-input" type="number" x-model.number="tnaflixDiscovery.pages" min="1"
+                                max="30">
+                        </div>
+                        <button class="tna-btn-scan" @click="tnaflixBrowseCategory()"
+                            :disabled="tnaflixDiscovery.loading">
+                            <span class="material-icons-round" :class="tnaflixDiscovery.loading?'tna-spin':''"
+                                x-text="tnaflixDiscovery.loading?'progress_activity':'category'"></span>
+                            <span x-text="tnaflixDiscovery.loading?'Načítavam...':'Prehľadať'"></span>
+                        </button>
+                    </div>
+                    <div class="tna-main">
+                        <div class="tna-state" x-show="!tnaflixDiscovery.loading && !tnaflixDiscovery.results.length">
+                            <span class="material-icons-round" style="color:#334155;">category</span>
+                            <div class="tna-state-title">Vyber alebo napíš kategóriu</div>
+                        </div>
+                        <div class="tna-state" x-show="tnaflixDiscovery.loading">
+                            <span class="material-icons-round tna-spin"
+                                style="font-size:40px;color:#38bdf8;">progress_activity</span>
+                            <div class="tna-state-title">Načítavam kategóriu...</div>
+                        </div>
+                        <template x-if="!tnaflixDiscovery.loading && tnaflixDiscovery.results.length > 0">
+                            <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+                                <div class="tna-toolbar">
+                                    <span class="tna-count">
+                                        <b x-text="tnaflixSelectedVisible().length"></b> / <b
+                                            x-text="tnaflixVisible().length"></b> vo filtri
+                                        <span
+                                            x-show="tnaflixDiscovery.selected.length !== tnaflixSelectedVisible().length"
+                                            style="color:#64748b;"
+                                            x-text="' · spolu vybraných '+tnaflixDiscovery.selected.length"></span>
+                                        <span x-show="tnaflixVisible().length !== tnaflixDiscovery.results.length"
+                                            style="color:#64748b;"
+                                            x-text="' (z '+tnaflixDiscovery.results.length+')'"></span>
+                                    </span>
+                                    <button class="tna-sel-btn" @click="tnaflixSelectVisible('replace')">Označiť
+                                        filter</button>
+                                    <button class="tna-sel-btn" @click="tnaflixSelectVisible('add')">Pridať
+                                        filter</button>
+                                    <button class="tna-sel-btn" @click="tnaflixDeselectVisible()">Odobrať
+                                        filter</button>
+                                    <button class="tna-sel-btn" @click="tnaflixDiscovery.selected=[]">Zrušiť
+                                        všetko</button>
+                                    <input type="text" x-model="tnaflixDiscovery.filter.keyword"
+                                        placeholder="Filtrovať názov..." class="tna-filter-input">
+                                    <input type="number" min="0" step="1"
+                                        x-model.number="tnaflixDiscovery.filter.minDurMinutes" placeholder="Min min"
+                                        class="tna-filter-num">
+                                    <input type="number" min="0" step="1"
+                                        x-model.number="tnaflixDiscovery.filter.maxDurMinutes" placeholder="Max min"
+                                        class="tna-filter-num">
+                                    <input type="number" min="0" step="1"
+                                        x-model.number="tnaflixDiscovery.filter.minSizeMb" placeholder="Min MB"
+                                        class="tna-filter-num">
+                                    <input type="number" min="0" step="1"
+                                        x-model.number="tnaflixDiscovery.filter.maxSizeMb" placeholder="Max MB"
+                                        class="tna-filter-num">
+                                    <select class="tna-filter-sel" x-model.number="tnaflixDiscovery.filter.minQuality">
+                                        <option value="0">Kvalita: všetky</option>
+                                        <option value="720">720p+</option>
+                                        <option value="1080">1080p+</option>
+                                        <option value="2160">4K</option>
+                                    </select>
+                                    <select class="tna-filter-sel" x-model.number="tnaflixDiscovery.filter.maxQuality">
+                                        <option value="0">Max kvalita</option>
+                                        <option value="720">do 720p</option>
+                                        <option value="1080">do 1080p</option>
+                                        <option value="2160">do 4K</option>
+                                    </select>
+                                    <select class="tna-filter-sel" x-model="tnaflixDiscovery.filter.sortBy">
+                                        <option value="default">Zoradiť: pôvodné</option>
+                                        <option value="duration">Dĺžka</option>
+                                        <option value="quality">Kvalita</option>
+                                        <option value="size">Veľkosť súboru</option>
+                                        <option value="title">Názov</option>
+                                    </select>
+                                    <button class="tna-sel-btn"
+                                        @click="tnaflixDiscovery.filter.sortDir = tnaflixDiscovery.filter.sortDir==='asc'?'desc':'asc'">
+                                        <span class="material-icons-round" style="font-size:14px;"
+                                            x-text="tnaflixDiscovery.filter.sortDir==='asc'?'arrow_upward':'arrow_downward'"></span>
+                                    </button>
+                                    <button class="tna-sel-btn" @click="tnaflixEnrichMeta()"
+                                        :disabled="tnaflixDiscovery.enriching || tnaflixEnrichTargetCount()===0"
+                                        style="background:rgba(56,189,248,.15);border-color:#38bdf8;color:#38bdf8;font-weight:600;">
+                                        <span class="material-icons-round" style="font-size:13px;"
+                                            x-text="tnaflixDiscovery.enriching?'sync':'bolt'"></span>
+                                        <span
+                                            x-text="tnaflixDiscovery.enriching ? tnaflixDiscovery.enrichMsg : 'Doplniť meta ('+tnaflixEnrichTargetCount()+')'">Doplniť
+                                            meta</span>
+                                    </button>
+                                </div>
+                                <div class="tna-grid-wrap">
+                                    <div class="tna-grid"
+                                        :style="`grid-template-columns:repeat(${tnaflixDiscovery.gridCols},1fr);gap:14px;`">
+                                        <template x-for="card in tnaflixVisible()" :key="card.page_url">
+                                            <div class="tna-card"
+                                                :class="{'is-selected':tnaflixDiscovery.selected.includes(card.page_url),'is-imported':card._imported}"
+                                                @click="tnaflixToggleCard(card.page_url)">
+                                                <div class="tna-card-thumb">
+                                                    <img :src="card.thumbnail||'/static/placeholder.jpg'" loading="lazy"
+                                                        @error.once="$el.src='/static/placeholder.jpg'">
+                                                    <button class="tna-play-btn"
+                                                        @click.stop="tnaflixPreviewVideo(card)">
+                                                        <span class="material-icons-round">play_circle</span>
+                                                    </button>
+                                                    <div class="tna-card-check"><span
+                                                            class="material-icons-round">check</span></div>
+                                                    <span x-show="card.quality" class="tna-badge tna-badge-quality"
+                                                        :class="card.quality>=2160?'q4k':''"
+                                                        x-text="card.quality>=2160?'4K':(card.quality+'p')"></span>
+                                                    <span x-show="card.duration" class="tna-badge tna-badge-dur"
+                                                        x-text="formatDuration(card.duration)"></span>
+                                                </div>
+                                                <div class="tna-card-info">
+                                                    <div class="tna-card-title" x-text="card.title"></div>
+                                                    <div class="tna-card-meta">
+                                                        <span x-show="card.views"><span
+                                                                class="material-icons-round">visibility</span><span
+                                                                x-text="card.views?.toLocaleString()"></span></span>
+                                                        <span x-show="card.uploader"><span
+                                                                class="material-icons-round">person</span><span
+                                                                x-text="card.uploader"></span></span>
+                                                        <span x-show="card.size"
+                                                            style="color:#38bdf8;font-weight:600;"><span
+                                                                class="material-icons-round">save</span><span
+                                                                x-text="card.size"></span></span>
+                                                        <span x-show="card.upload_date" style="color:#94a3b8;"><span
+                                                                class="material-icons-round">calendar_today</span><span
+                                                                x-text="card.upload_date"></span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <!-- ── HISTORY TAB ── -->
+            <template x-if="tnaflixDiscovery.tab==='history'">
+                <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+                    <div
+                        style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.12);flex-shrink:0;">
+                        <span class="material-icons-round" style="color:#38bdf8;font-size:18px;">history</span>
+                        <span style="font-size:13px;color:#94a3b8;">Uložené profily a searche</span>
+                        <button class="tna-sel-btn" style="margin-left:auto;" @click="tnaflixCacheLoadHistory()">
+                            <span class="material-icons-round" style="font-size:14px;">refresh</span>
+                        </button>
+                    </div>
+                    <div style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:20px;">
+                        <!-- Saved Profiles -->
+                        <div>
+                            <div
+                                style="font-size:11px;font-weight:800;text-transform:uppercase;color:#64748b;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                                <span class="material-icons-round" style="font-size:14px;">person</span>
+                                Profily
+                                <span style="color:#334155;"
+                                    x-text="'('+tnaflixDiscovery.cache.profiles.length+')'"></span>
+                            </div>
+                            <div x-show="!tnaflixDiscovery.cache.profiles.length"
+                                style="color:#475569;font-size:12px;padding:8px 0;">Žiadne uložené profily.</div>
+                            <div style="display:flex;flex-direction:column;gap:6px;">
+                                <template x-for="item in tnaflixDiscovery.cache.profiles" :key="item.slug">
+                                    <div
+                                        style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.04);border-radius:8px;border:1px solid rgba(255,255,255,.06);">
+                                        <img :src="item.avatar||'/static/placeholder.jpg'"
+                                            style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;"
+                                            @error.once="$el.src='/static/placeholder.jpg'">
+                                        <div style="flex:1;min-width:0;">
+                                            <div style="font-size:13px;font-weight:600;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                                                x-text="item.username || item.slug"></div>
+                                            <div
+                                                style="font-size:11px;color:#64748b;display:flex;gap:8px;margin-top:2px;">
+                                                <span x-text="item.total_cards+' videí'"></span>
+                                                <span x-show="item.enriched_cards" style="color:#38bdf8;"
+                                                    x-text="item.enriched_cards+' meta'"></span>
+                                                <span
+                                                    x-text="item.updated_at ? new Date(item.updated_at).toLocaleDateString('sk-SK') : ''"></span>
+                                            </div>
+                                        </div>
+                                        <button class="tna-sel-btn" style="flex-shrink:0;"
+                                            @click="tnaflixCacheOpenProfile(item)" title="Otvoriť">
+                                            <span class="material-icons-round"
+                                                style="font-size:14px;">open_in_new</span>
+                                        </button>
+                                        <button class="tna-sel-btn" style="flex-shrink:0;color:#f87171;"
+                                            @click="tnaflixCacheDeleteProfile(item.slug)" title="Vymazať">
+                                            <span class="material-icons-round" style="font-size:14px;">delete</span>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Saved Searches -->
+                        <div>
+                            <div
+                                style="font-size:11px;font-weight:800;text-transform:uppercase;color:#64748b;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+                                <span class="material-icons-round" style="font-size:14px;">search</span>
+                                Hľadania
+                                <span style="color:#334155;"
+                                    x-text="'('+tnaflixDiscovery.cache.searches.length+')'"></span>
+                            </div>
+                            <div x-show="!tnaflixDiscovery.cache.searches.length"
+                                style="color:#475569;font-size:12px;padding:8px 0;">Žiadne uložené hľadania.</div>
+                            <div style="display:flex;flex-direction:column;gap:6px;">
+                                <template x-for="item in tnaflixDiscovery.cache.searches" :key="item.slug+item.type">
+                                    <div
+                                        style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.04);border-radius:8px;border:1px solid rgba(255,255,255,.06);">
+                                        <span class="material-icons-round"
+                                            style="font-size:20px;color:#64748b;flex-shrink:0;"
+                                            x-text="item.type==='category'?'category':'search'"></span>
+                                        <div style="flex:1;min-width:0;">
+                                            <div style="font-size:13px;font-weight:600;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                                                x-text="item.query || item.slug"></div>
+                                            <div
+                                                style="font-size:11px;color:#64748b;display:flex;gap:8px;margin-top:2px;">
+                                                <span x-text="item.type==='category'?'Kategória':'Keyword'"></span>
+                                                <span x-text="item.total_cards+' videí'"></span>
+                                                <span x-show="item.enriched_cards" style="color:#38bdf8;"
+                                                    x-text="item.enriched_cards+' meta'"></span>
+                                                <span
+                                                    x-text="item.updated_at ? new Date(item.updated_at).toLocaleDateString('sk-SK') : ''"></span>
+                                            </div>
+                                        </div>
+                                        <button class="tna-sel-btn" style="flex-shrink:0;"
+                                            @click="tnaflixCacheOpenSearch(item)" title="Otvoriť">
+                                            <span class="material-icons-round"
+                                                style="font-size:14px;">open_in_new</span>
+                                        </button>
+                                        <button class="tna-sel-btn" style="flex-shrink:0;color:#f87171;"
+                                            @click="tnaflixCacheDeleteSearch(item.type, item.slug)" title="Vymazať">
+                                            <span class="material-icons-round" style="font-size:14px;">delete</span>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+        </div>
+
+        <!-- ── VIDEO PLAYER MODAL ── -->
+        <div class="tna-player-overlay" x-show="tnaflixDiscovery.player.visible" style="display:none;"
+            x-transition.opacity @click.self="tnaflixClosePlayer()" @keydown.escape.window="tnaflixClosePlayer()">
+            <div class="tna-player-box">
+                <div class="tna-player-header">
+                    <span class="material-icons-round" style="color:#38bdf8;font-size:18px;">play_circle</span>
+                    <div class="tna-player-title" x-text="tnaflixDiscovery.player.title"></div>
+                    <button class="tna-player-close" @click="tnaflixClosePlayer()">
+                        <span class="material-icons-round" style="font-size:16px;">close</span>
+                    </button>
+                </div>
+                <!-- Loading -->
+                <div x-show="tnaflixDiscovery.player.loading"
+                    style="display:flex;align-items:center;justify-content:center;padding:60px;gap:14px;color:#475569;">
+                    <span class="material-icons-round tna-spin"
+                        style="font-size:36px;color:#38bdf8;">progress_activity</span>
+                    <span style="font-size:14px;">Načítavam stream...</span>
+                </div>
+                <!-- Error -->
+                <div x-show="!tnaflixDiscovery.player.loading && tnaflixDiscovery.player.error"
+                    style="padding:40px;text-align:center;color:#ef4444;font-size:14px;"
+                    x-text="tnaflixDiscovery.player.error"></div>
+                <!-- Video -->
+                <video id="tna-player-video" class="tna-player-video" controls
+                    x-show="!tnaflixDiscovery.player.loading && !tnaflixDiscovery.player.error && tnaflixDiscovery.player.url"
+                    :src="tnaflixDiscovery.player.url" autoplay></video>
+                <!-- Tags footer -->
+                <div class="tna-player-footer" x-show="tnaflixDiscovery.player.tags">
+                    <template x-for="tag in (tnaflixDiscovery.player.tags||'').split(',').filter(t=>t.trim())"
+                        :key="tag">
+                        <span class="tna-tag" x-text="tag.trim()"></span>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</template>

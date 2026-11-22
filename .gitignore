@@ -1,0 +1,154 @@
+# Sensitive local config
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/*.txt
+secrets/*.json
+
+# Cookies / auth dumps
+cookies.txt
+*.cookies.txt
+*_cookies.txt
+*.netscape.txt
+
+# Sessions
+*.session
+*.session-journal
+*.session-wal
+*.session-shm
+
+# Databases
+*.db
+*.db-shm
+*.db-wal
+
+# Downloaded or backup media/archives
+downloads/
+backups/
+
+# Python cache
+__pycache__/
+*.pyc
+.venv/
+.lite-deps/
+.lite-run/
+.pip-cache/
+.uv-cache/
+.venv_fix/
+*.pyo
+
+# IDE and local dev
+.vscode/
+.claude/
+.worktrees/
+.idea/
+*.swp
+*.swo
+*~
+
+# Runtime artifacts
+logs/
+scratch/
+.tmp/
+*.log
+server.err.log
+server.out.log
+server.out
+server.err
+
+# Generated cache
+app/static/previews/
+app/static/thumbnails/
+app/static/thumbnails_cache/
+app/playlist_fetches/
+app/static/*.png
+app/static/local_videos/
+app/static/thumbnails/
+# Nexus Studio artefacts: filmstrip frames, moment covers, exported clips
+app/static/storyboards/
+app/static/moments/
+app/static/clips/
+# MPEG-TS -> MP4 remux cache (regenerated on demand)
+app/static/remux/
+camwh_log_backend
+
+# Test extensions and old copies
+extensions/GALLERY_TEST/
+extensions/NexusGalleryWorkingBig_test*/
+extensions/Nexus_Gallery/backup_before_*/
+extensions/Nexus_Gallery/_metadata/
+extensions/Nexus_Gallery/*.code-workspace
+
+# Node modules (dev dependencies)
+mcp_server/node_modules/
+mcp_server/package-lock.json
+
+# Provider debug files
+provider.json
+provider.ts
+xvideos_debug.png
+
+# Misc backups
+NexusGallery*/
+NexusPokrok_Clean.zip
+*.tar.gz
+*.tar
+*.bak
+extensions/Nexus_Gallery/check_js*.py
+extensions/Nexus_Gallery/dump_*.py
+extensions/Nexus_Gallery/*_backup_*.html
+
+# LeafMarker task system
+.leafmarker/
+
+# Runtime caches + local state (regenerable): bunkr/eporner/tnaflix caches,
+# hub detail cache, mp4 probe cache, follows state
+data/
+videos/
+
+# Backup variants of DBs / cookie dumps (suffix after the extension escaped the
+# *.db / *.netscape.txt rules) + stray API key at repo root
+*.db.bak*
+*.netscape.txt.bak*
+*.netscape.txt.tmp*
+*.cookies.txt.tmp*
+*.bak_*
+filester_api_key.txt
+*api_key*.txt
+*apikey*.txt
+*token*.txt
+*tokken*.txt
+
+# === Local / generated artifacts ===
+.codex-test-tmp/
+.codex-attachments/
+.playwright-mcp/
+output/
+screenshot-*.png
+scripts/*.png
+scripts/*_results.json
+.tools/
+filester-workspace-standalone/
+turbo-workspace-standalone/
+zaloha_Nexus/
+NexusPWC_agent_handoff_*/
+*.zip
+/artifacts/
+
+# Temporary/debug files
+_tmp*
+_pt_img_status.txt
+_qh_poll.txt
+
+# Additional local runtime paths
+node_modules/
+cache/
+tmp/
+.pytest_cache/
+.stream_cache/
+
+# Local Fileditch account token
+/fileditch_token.txt
+/scripts/bin/

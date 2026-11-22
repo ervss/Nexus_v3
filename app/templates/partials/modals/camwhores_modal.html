@@ -1,0 +1,906 @@
+    <!-- Camwhores Album Creation Modal Dialog -->
+    <template x-if="camwhoresDiscovery.albumPromptOpen">
+    <div class="nx-lazy-modal"  style="position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:var(--z-modal, 100);display:flex;align-items:center;justify-content:center;" role="dialog" aria-modal="true" aria-label="Vytvoriť spoločný Camwhores album">
+        <div @click.outside="camwhoresDiscovery.albumPromptOpen = false"
+            style="background:rgba(15,23,42,0.95);border:1px solid rgba(168,85,247,0.3);border-radius:14px;padding:26px;width:480px;max-width:92vw;box-shadow:0 25px 60px rgba(0,0,0,0.7);">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                <span class="material-icons-round" style="color:#a855f7;font-size:26px;">folder_special</span>
+                <h3 style="margin:0;font-size:17px;color:#f1f5f9;font-weight:800;">Vytvoriť spoločný album</h3>
+            </div>
+            <p style="font-size:13px;color:#94a3b8;line-height:1.5;margin:0 0 16px 0;">
+                Do knižnice Nexus sa importuje <strong style="color:#22c55e;" x-text="camwhoresDiscovery.selected.length"></strong> vybraných videí spolu s ich overenými metadátami, rozlíšením a streamami.
+            </p>
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:11px;font-weight:700;color:#cbd5e1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
+                    Názov albumu / kolekcie:
+                </label>
+                <input type="text" x-model="camwhoresDiscovery.albumName"
+                    style="width:100%;padding:11px 14px;background:#0b0f19;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:14px;font-weight:600;box-sizing:border-box;"
+                    @keydown.enter="confirmCwAlbumImport()"
+                    placeholder="Napr. Moja Camwhores Kolekcia">
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;">
+                <button @click="camwhoresDiscovery.albumPromptOpen = false"
+                    style="padding:9px 18px;background:rgba(148,163,184,0.1);border:1px solid rgba(148,163,184,0.2);border-radius:8px;color:#94a3b8;cursor:pointer;font-weight:600;font-size:13px;">
+                    Zrušiť
+                </button>
+                <button @click="confirmCwAlbumImport()"
+                    style="padding:9px 22px;background:linear-gradient(135deg,#a855f7,#7c3aed);border:none;border-radius:8px;color:#fff;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 4px 14px rgba(168,85,247,0.4);">
+                    <span class="material-icons-round" style="font-size:16px;">download_for_offline</span>
+                    Vytvoriť a importovať
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
+    <!-- Camwhores Smart Discovery Modal -->
+    <template x-if="showCamwhoresDiscoveryModal">
+    <div class="modal-wrap nx-lazy-modal"
+        @keydown.escape.window="if(showCamwhoresDiscoveryModal) closeCwDiscovery()" role="dialog" aria-modal="true" aria-label="Camwhores Smart Discovery">
+        <div class="modal-card"
+            style="min-width:90vw;max-width:95vw;max-height:90vh;overflow-y:auto;background:rgba(15,23,42,0.92);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);box-shadow:0 25px 50px -12px rgba(0,0,0,0.6);">
+
+            <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.06);padding:18px 24px;">
+                <h3 style="display:flex;align-items:center;gap:10px;margin:0;font-size:18px;color:#22c55e;">
+                    <span class="material-icons-round" style="font-size:24px;">photo_camera</span>
+                    <span
+                        x-text="cwDiscoveryActiveTab === 'videos' ? 'Smart Camwhores Discovery Search' : '🎬 Camwhores Playlist Discovery'"></span>
+                </h3>
+                <button @click="closeCwDiscovery()"
+                    style="background:none;border:none;color:#94a3b8;cursor:pointer;">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+
+            <!-- TAB BAR -->
+            <div style="display:flex;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.2);">
+                <button @click="cwDiscoveryActiveTab='videos'"
+                    :style="cwDiscoveryActiveTab==='videos' ? 'color:#22c55e;border-bottom:2px solid #22c55e;background:rgba(34,197,94,0.06);' : 'color:#94a3b8;border-bottom:2px solid transparent;'"
+                    style="padding:12px 28px;border:none;background:none;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s;text-transform:uppercase;letter-spacing:0.5px;">
+                    <span class="material-icons-round" style="font-size:16px;">videocam</span>
+                    Videos
+                </button>
+                <button @click="cancelCwMetadata('stopped', true); cwDiscoveryActiveTab='playlists'"
+                    :style="cwDiscoveryActiveTab==='playlists' ? 'color:#a855f7;border-bottom:2px solid #a855f7;background:rgba(168,85,247,0.06);' : 'color:#94a3b8;border-bottom:2px solid transparent;'"
+                    style="padding:12px 28px;border:none;background:none;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s;text-transform:uppercase;letter-spacing:0.5px;">
+                    <span class="material-icons-round" style="font-size:16px;">playlist_play</span>
+                    Playlists
+                </button>
+                <button @click="cancelCwMetadata('stopped', true); cwDiscoveryActiveTab='history'; loadCwPlaylistsHistory()"
+                    :style="cwDiscoveryActiveTab==='history' ? 'color:#fbbf24;border-bottom:2px solid #fbbf24;background:rgba(245,158,11,0.06);' : 'color:#94a3b8;border-bottom:2px solid transparent;'"
+                    style="padding:12px 28px;border:none;background:none;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s;text-transform:uppercase;letter-spacing:0.5px;">
+                    <span class="material-icons-round" style="font-size:16px;">history</span>
+                    História
+                </button>
+            </div>
+
+            <div class="modal-content" style="padding:24px;">
+                <!-- TAB: VIDEOS (existing content) -->
+                <div x-show="cwDiscoveryActiveTab === 'videos'">
+                    <!-- Advanced Search Form -->
+                    <div
+                        style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);padding:20px;border-radius:12px;margin-bottom:24px;">
+                        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:15px;margin-bottom:15px;">
+                            <div>
+                                <label
+                                    style="font-size:12px;color:#22c55e;font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;">Hľadať
+                                    (Meno modelky / tag):</label>
+                                <input type="text" x-model="camwhoresDiscovery.keyword"
+                                    placeholder="e.g., bbc stream, Chaturbate, modelka..."
+                                    style="width:100%;padding:10px;background:#0b0f19;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:14px;"
+                                    @keydown.enter="searchCamwhoresDiscovery()">
+                            </div>
+                            <div>
+                                <label
+                                    style="font-size:12px;color:#22c55e;font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;">Zoradiť
+                                    podľa:</label>
+                                <select x-model="camwhoresDiscovery.sortBy"
+                                    style="width:100%;padding:10px;background:#0b0f19;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:14px;height:40px;">
+                                    <option value="newest" selected>Najnovšie</option>
+                                    <option value="oldest">Najstaršie</option>
+                                    <option value="bitrate">Najvyšší Bitrate (Kvalita)</option>
+                                    <option value="rating">Hodnotenie %</option>
+                                    <option value="popularity">Zobrazenia / Populárne</option>
+                                    <option value="duration">Dĺžka videa</option>
+                                    <option value="size">Najväčší súbor</option>
+                                    <option value="size_asc">Najmenší súbor</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label
+                                    style="font-size:12px;color:#22c55e;font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;">Filter
+                                    v nadpise:</label>
+                                <input type="text" x-model="camwhoresDiscovery.searchTerms"
+                                    placeholder="filter inside results"
+                                    style="width:100%;padding:10px;background:#0b0f19;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:14px;">
+                            </div>
+                            <div>
+                                <label
+                                    style="font-size:12px;color:#22c55e;font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;">Pages
+                                    to scan (1-5):</label>
+                                <input type="number" x-model.number="camwhoresDiscovery.pages" min="1" max="5"
+                                    style="width:100%;padding:10px;background:#0b0f19;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:14px;">
+                            </div>
+                        </div>
+
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;margin-bottom:15px;">
+                            <div>
+                                <label
+                                    style="font-size:12px;color:#22c55e;font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;">Min
+                                    Quality:</label>
+                                <select x-model.number="camwhoresDiscovery.minQuality"
+                                    style="width:100%;padding:10px;background:#0b0f19;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:14px;height:40px;">
+                                    <option value="0">Akákoľvek</option>
+                                    <option value="480">480p</option>
+                                    <option value="720" selected>720p (HD)</option>
+                                    <option value="1080">1080p (Full HD)</option>
+                                    <option value="2160">4K / UHD</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label
+                                    style="font-size:12px;color:#22c55e;font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;">Min
+                                    Dĺžka (v sekundách):</label>
+                                <input type="number" x-model.number="camwhoresDiscovery.minDuration" min="0"
+                                    placeholder="0"
+                                    style="width:100%;padding:10px;background:#0b0f19;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:14px;">
+                            </div>
+                            <div>
+                                <label
+                                    style="font-size:12px;color:#22c55e;font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;">Max
+                                    Dĺžka (v sekundách):</label>
+                                <input type="number" x-model.number="camwhoresDiscovery.maxDuration" min="0"
+                                    placeholder="—"
+                                    style="width:100%;padding:10px;background:#0b0f19;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:14px;">
+                            </div>
+                        </div>
+
+                        <div
+                            style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.04);padding-top:15px;flex-wrap:wrap;gap:12px;">
+                            <div style="display:flex;gap:20px;align-items:center;">
+                                <label
+                                    style="font-size:12px;color:#94a3b8;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                    <input type="checkbox" x-model="camwhoresDiscovery.autoSkipLowQuality"
+                                        style="width:16px;height:16px;cursor:pointer;">
+                                    Auto-skip videos below minimum quality
+                                </label>
+                                <label
+                                    style="font-size:12px;color:#94a3b8;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                    <input type="checkbox" x-model="camwhoresDiscovery.onlyPublic"
+                                        style="width:16px;height:16px;cursor:pointer;">
+                                    Scrape public watch videos only (strict)
+                                </label>
+                            </div>
+                            <button @click="searchCamwhoresDiscovery()"
+                                :disabled="camwhoresDiscovery.loading || !camwhoresDiscovery.keyword.trim()"
+                                style="padding:10px 32px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:8px;color:#fff;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(34,197,94,0.4);transition:all 0.2s;"
+                                :style="camwhoresDiscovery.loading ? 'opacity:0.6;cursor:not-allowed;' : ''"
+                                onmousedown="this.style.transform='scale(0.96)'"
+                                onmouseup="this.style.transform='scale(1)'">
+                                <span class="material-icons-round" x-show="!camwhoresDiscovery.loading">search</span>
+                                <span class="material-icons-round" x-show="camwhoresDiscovery.loading"
+                                    style="animation:spin 1s linear infinite;">refresh</span>
+                                <span
+                                    x-text="camwhoresDiscovery.loading ? (camwhoresDiscovery.results.length ? 'Dopĺňam detaily...' : 'Hľadám videá...') : 'Start Discovery'"></span>
+                            </button>
+                            <button x-show="camwhoresDiscovery.loading" @click="cancelCamwhoresDiscovery()"
+                                style="padding:10px 18px;background:rgba(239,68,68,0.14);border:1px solid rgba(239,68,68,0.4);border-radius:8px;color:#fca5a5;font-weight:700;font-size:13px;cursor:pointer;">
+                                Zastaviť
+                            </button>
+                        </div>
+
+                        <!-- Dopaminergic Smart Quick-Pills & Grid Density Bar -->
+                        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);">
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <span style="font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">Rýchle filtre:</span>
+                                <button @click="cwApplyQuickPill('gems')"
+                                    :style="camwhoresDiscovery.activeQuickPill === 'gems' ? 'background:linear-gradient(135deg,#eab308,#ca8a04);color:#fff;border-color:#facc15;' : 'background:rgba(234,179,8,0.12);color:#facc15;border-color:rgba(234,179,8,0.3);'"
+                                    style="padding:5px 12px;border-radius:20px;border:1px solid;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s;">
+                                    <span>⭐ Klenoty</span>
+                                    <span style="opacity:0.75;font-size:10px;">(1080p+, >15m)</span>
+                                </button>
+                                <button @click="cwApplyQuickPill('massive')"
+                                    :style="camwhoresDiscovery.activeQuickPill === 'massive' ? 'background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff;border-color:#22d3ee;' : 'background:rgba(6,182,212,0.12);color:#22d3ee;border-color:rgba(6,182,212,0.3);'"
+                                    style="padding:5px 12px;border-radius:20px;border:1px solid;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s;">
+                                    <span>💎 Masívne</span>
+                                    <span style="opacity:0.75;font-size:10px;">(najväčšie MB)</span>
+                                </button>
+                                <button @click="cwApplyQuickPill('verified')"
+                                    :style="camwhoresDiscovery.activeQuickPill === 'verified' ? 'background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border-color:#4ade80;' : 'background:rgba(34,197,94,0.12);color:#4ade80;border-color:rgba(34,197,94,0.3);'"
+                                    style="padding:5px 12px;border-radius:20px;border:1px solid;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s;">
+                                    <span>🎯 Iba overené</span>
+                                </button>
+                                <button @click="cwApplyQuickPill('shorts')"
+                                    :style="camwhoresDiscovery.activeQuickPill === 'shorts' ? 'background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff;border-color:#c084fc;' : 'background:rgba(168,85,247,0.12);color:#c084fc;border-color:rgba(168,85,247,0.3);'"
+                                    style="padding:5px 12px;border-radius:20px;border:1px solid;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.2s;">
+                                    <span>⏱ Jednohubky</span>
+                                    <span style="opacity:0.75;font-size:10px;">(&lt;5m)</span>
+                                </button>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <span style="font-size:11px;color:#94a3b8;font-weight:700;">Hustota mriežky:</span>
+                                <button @click="cwSetGridDensity('normal')"
+                                    :style="camwhoresDiscovery.gridDensity === 'normal' ? 'background:rgba(255,255,255,0.18);color:#fff;border-color:rgba(255,255,255,0.3);' : 'background:transparent;color:#94a3b8;border-color:rgba(255,255,255,0.1);'"
+                                    style="padding:4px 9px;border:1px solid;border-radius:6px;font-size:11px;cursor:pointer;font-weight:700;">
+                                    Karty
+                                </button>
+                                <button @click="cwSetGridDensity('compact')"
+                                    :style="camwhoresDiscovery.gridDensity === 'compact' ? 'background:rgba(34,197,94,0.22);color:#4ade80;border-color:rgba(34,197,94,0.45);' : 'background:transparent;color:#94a3b8;border-color:rgba(255,255,255,0.1);'"
+                                    style="padding:4px 9px;border:1px solid;border-radius:6px;font-size:11px;cursor:pointer;font-weight:700;">
+                                    Kompakt
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div x-show="camwhoresDiscovery.results.length > 0" style="margin-top:20px;">
+                        <!-- Results Header / Controls Toolbar -->
+                        <div
+                            style="display:flex;flex-direction:column;gap:14px;margin-bottom:20px;padding:16px 20px;background:rgba(30,41,59,0.7);border-radius:12px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 8px 24px rgba(0,0,0,0.3);">
+
+                            <!-- Top row: Status info & Playlist switch filter -->
+                            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                                <div>
+                                    <h3
+                                        style="margin:0;font-size:16px;color:#22c55e;font-weight:800;display:flex;align-items:center;gap:8px;">
+                                        <span class="material-icons-round" style="color:#22c55e;">collections</span>
+                                        <span x-text="camwhoresDiscovery.originMode === 'playlist_gallery' ? (camwhoresDiscovery.galleryTitle || 'Spoločná galéria playlistov') : 'Nájdené videá'"></span>
+                                        <span style="font-size:13px;font-weight:600;color:#94a3b8;background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:20px;">
+                                            <span x-text="getCamwhoresMatchingResults().length"></span> / <span x-text="camwhoresDiscovery.total"></span> videí
+                                        </span>
+                                    </h3>
+                                    <div style="margin:4px 0 0 0;font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                                        <span x-show="camwhoresDiscovery.keyword">Hľadané: <strong style="color:#22c55e;" x-text="camwhoresDiscovery.keyword"></strong></span>
+                                        <span>Zoradenie: <strong style="color:#38bdf8;" x-text="camwhoresSortLabel()"></strong></span>
+                                        <span x-show="camwhoresDiscovery.selected.length > 0" style="color:#a855f7;font-weight:700;">
+                                            Označenie: <span x-text="camwhoresDiscovery.selected.length"></span> kariet
+                                        </span>
+                                        <span x-show="camwhoresDiscovery.enrichingCards" style="color:#f59e0b;font-weight:700;display:inline-flex;align-items:center;gap:4px;">
+                                            <span class="material-icons-round" style="font-size:14px;animation:spin 1s linear infinite;">refresh</span>
+                                            Overujem metadáta: <span x-text="camwhoresDiscovery.enrichCurrent"></span> / <span x-text="camwhoresDiscovery.enrichTotal"></span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Filter by playlist dropdown if multiple playlists loaded -->
+                                <div x-show="cwPlaylists.loadedPlaylists && cwPlaylists.loadedPlaylists.length > 1" style="display:flex;align-items:center;gap:8px;">
+                                    <label style="font-size:12px;font-weight:700;color:#c084fc;display:flex;align-items:center;gap:4px;">
+                                        <span class="material-icons-round" style="font-size:16px;">filter_list</span>
+                                        Playlist:
+                                    </label>
+                                    <select x-model="camwhoresDiscovery.playlistFilter"
+                                        style="padding:6px 12px;background:#0b0f19;border:1px solid rgba(168,85,247,0.3);border-radius:6px;color:#f1f5f9;font-size:12px;font-weight:600;">
+                                        <option value="all">Všetky načítané playlisty (<span x-text="camwhoresDiscovery.total"></span>)</option>
+                                        <template x-for="pl in cwPlaylists.loadedPlaylists" :key="pl.url">
+                                            <option :value="pl.url" x-text="(pl.title || 'Playlist') + ' (' + pl.count + ')'"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Bottom row: Action buttons (Enrich metadata, Selection helpers, Album creation) -->
+                            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);">
+
+                                <!-- Selection actions -->
+                                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                                    <button @click="selectAllCamwhores()"
+                                        style="padding:7px 12px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.3);border-radius:6px;color:#60a5fa;font-size:12px;cursor:pointer;font-weight:600;">
+                                        Vybrať všetky
+                                    </button>
+                                    <button @click="selectOnlyHdCamwhores()"
+                                        style="padding:7px 12px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.3);border-radius:6px;color:#22d3ee;font-size:12px;cursor:pointer;font-weight:600;"
+                                        title="Vybrať len videá s overeným rozlíšením 720p / 1080p / 4K">
+                                        Iba HD/FHD
+                                    </button>
+                                    <button @click="selectOnlyEnrichedCamwhores()"
+                                        style="padding:7px 12px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);border-radius:6px;color:#4ade80;font-size:12px;cursor:pointer;font-weight:600;"
+                                        title="Vybrať len videá s overenou veľkosťou a streamom">
+                                        Iba overené
+                                    </button>
+                                    <button @click="selectMissingCwMetadata()" title="Označiť viditeľné karty bez úplných metadát"
+                                        style="padding:7px 10px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:6px;color:#fbbf24;font-size:12px;cursor:pointer;">
+                                        Bez metadát
+                                    </button>
+                                    <button @click="clearSelectedCamwhores()" x-show="camwhoresDiscovery.selected.length > 0"
+                                        style="padding:7px 10px;background:rgba(148,163,184,0.1);border:1px solid rgba(148,163,184,0.2);border-radius:6px;color:#94a3b8;font-size:12px;cursor:pointer;">
+                                        Zrušiť výber
+                                    </button>
+                                    <button @click="copySelectedCwUrls()" x-show="camwhoresDiscovery.selected.length > 0"
+                                        style="padding:7px 10px;background:rgba(148,163,184,0.1);border:1px solid rgba(148,163,184,0.25);border-radius:6px;color:#cbd5e1;font-size:12px;cursor:pointer;">
+                                        Kopírovať URL
+                                    </button>
+                                    <label style="font-size:11px;color:#94a3b8;display:inline-flex;align-items:center;gap:5px;cursor:pointer;margin-left:6px;">
+                                        <input type="checkbox" x-model="camwhoresDiscovery.showAllResults" style="width:14px;height:14px;cursor:pointer;">
+                                        Zobraziť všetky bez filtrov
+                                    </label>
+                                </div>
+
+                                <!-- Metadata Enrich & Album creation buttons -->
+                                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+
+                                    <!-- Fetch Metadata Button (Selective or All) -->
+                                    <button @click="enrichSelectedCwCards()"
+                                        :disabled="camwhoresDiscovery.enrichingCards"
+                                        style="padding:8px 16px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(245,158,11,0.3);">
+                                        <span class="material-icons-round" x-show="!camwhoresDiscovery.enrichingCards" style="font-size:16px;">bolt</span>
+                                        <span class="material-icons-round" x-show="camwhoresDiscovery.enrichingCards" style="font-size:16px;animation:spin 1s linear infinite;">refresh</span>
+                                        <span x-text="camwhoresDiscovery.enrichingCards ? 'Overujem...' : (camwhoresDiscovery.selected.length > 0 ? '⚡ Fetch Metadata (' + camwhoresDiscovery.selected.length + ')' : '⚡ Fetch Metadata kariet')"></span>
+                                    </button>
+                                    <button @click="enrichAllCwCards()" :disabled="camwhoresDiscovery.enrichingCards"
+                                        style="padding:8px 11px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);border-radius:6px;color:#fbbf24;font-size:12px;cursor:pointer;">
+                                        Overiť všetky
+                                    </button>
+                                    <button @click="sendSelectedCwToIdm(true)" :disabled="!camwhoresDiscovery.selected.length || camwhoresDiscovery.idmSending || camwhoresDiscovery.enrichingCards"
+                                        :style="!camwhoresDiscovery.selected.length ? 'opacity:0.45;' : ''"
+                                        style="padding:8px 11px;background:rgba(34,197,94,0.14);border:1px solid rgba(34,197,94,0.35);border-radius:6px;color:#4ade80;font-size:12px;cursor:pointer;font-weight:700;">
+                                        IDM stiahnuť výber
+                                    </button>
+                                    <button @click="sendSelectedCwToIdm(false)" :disabled="!camwhoresDiscovery.selected.length || camwhoresDiscovery.idmSending || camwhoresDiscovery.enrichingCards"
+                                        :style="!camwhoresDiscovery.selected.length ? 'opacity:0.45;' : ''"
+                                        title="Pridať označené videá do frontu IDM bez okamžitého štartu"
+                                        style="padding:8px 11px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.22);border-radius:6px;color:#86efac;font-size:12px;cursor:pointer;">
+                                        IDM front
+                                    </button>
+
+                                    <!-- Create Shared Album / Queue Import -->
+                                    <button @click="openCwAlbumModal()"
+                                        :disabled="camwhoresDiscovery.selected.length === 0"
+                                        :style="camwhoresDiscovery.selected.length === 0 ? 'opacity:0.4;cursor:not-allowed;' : ''"
+                                        style="padding:8px 20px;background:linear-gradient(135deg,#a855f7,#7c3aed);border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:6px;box-shadow:0 4px 14px rgba(168,85,247,0.35);">
+                                        <span class="material-icons-round" style="font-size:17px;">folder_special</span>
+                                        <span>Vytvoriť spoločný album (<span x-text="camwhoresDiscovery.selected.length"></span>)</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div x-show="camwhoresDiscovery.enrichStatus !== 'idle'" style="margin:0 0 16px;padding:11px 14px;border:1px solid rgba(245,158,11,0.25);border-radius:9px;background:rgba(15,23,42,0.9);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                            <span class="material-icons-round" style="font-size:18px;color:#fbbf24;" x-text="camwhoresDiscovery.enrichStatus === 'running' ? 'sync' : camwhoresDiscovery.enrichStatus === 'paused' ? 'pause_circle' : 'info'"></span>
+                            <div style="flex:1;min-width:180px;color:#e2e8f0;font-size:12px;">
+                                <strong x-text="camwhoresDiscovery.enrichStatus === 'running' ? 'Overujem aktuálnu galériu' : camwhoresDiscovery.enrichNote"></strong>
+                                <span x-show="camwhoresDiscovery.enrichStatus === 'running'" x-text="' · ' + camwhoresDiscovery.enrichCurrent + '/' + camwhoresDiscovery.enrichTotal + ' · presná veľkosť ' + camwhoresDiscovery.enrichExact + ' · bez dát ' + camwhoresDiscovery.enrichFailed"></span>
+                                <div x-show="camwhoresDiscovery.enrichStatus === 'running'" style="height:4px;margin-top:7px;border-radius:4px;background:rgba(255,255,255,0.1);overflow:hidden;">
+                                    <div style="height:100%;background:#f59e0b;transition:width .2s" :style="'width:' + (camwhoresDiscovery.enrichTotal ? Math.round(100 * camwhoresDiscovery.enrichCurrent / camwhoresDiscovery.enrichTotal) : 0) + '%'"></div>
+                                </div>
+                            </div>
+                            <button x-show="camwhoresDiscovery.enrichStatus === 'running'" @click="pauseCwMetadata()" style="padding:6px 11px;border-radius:6px;border:1px solid #f59e0b;background:rgba(245,158,11,.12);color:#fbbf24;cursor:pointer;">Pauza</button>
+                            <button x-show="camwhoresDiscovery.enrichStatus === 'paused'" @click="resumeCwMetadata()" style="padding:6px 11px;border-radius:6px;border:1px solid #22c55e;background:rgba(34,197,94,.12);color:#86efac;cursor:pointer;">Pokračovať (<span x-text="camwhoresDiscovery.enrichPausedCount"></span>)</button>
+                            <button x-show="camwhoresDiscovery.enrichStatus === 'running' || camwhoresDiscovery.enrichStatus === 'paused'" @click="cancelCwMetadata('stopped')" style="padding:6px 11px;border-radius:6px;border:1px solid #ef4444;background:rgba(239,68,68,.12);color:#fca5a5;cursor:pointer;">Zastaviť</button>
+                        </div>
+
+                        <!-- Dopaminergic Selection Summary Bar (Tachometer) -->
+                        <div x-show="getCwSelectionStats()"
+                            style="position:sticky;top:10px;z-index:90;margin:0 0 16px;padding:12px 18px;border-radius:12px;background:linear-gradient(135deg,rgba(15,23,42,0.96),rgba(30,41,59,0.96));border:1px solid rgba(34,197,94,0.4);box-shadow:0 12px 32px rgba(0,0,0,0.6),0 0 20px rgba(34,197,94,0.18);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+                            <!-- Stats info -->
+                            <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                                <div style="display:flex;align-items:center;gap:9px;">
+                                    <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(34,197,94,0.4);">
+                                        <span class="material-icons-round" style="color:#fff;font-size:18px;">task_alt</span>
+                                    </div>
+                                    <div>
+                                        <div style="font-size:13px;font-weight:800;color:#fff;">
+                                            <span x-text="getCwSelectionStats()?.count"></span> videí označených
+                                        </div>
+                                        <div style="font-size:11px;color:#94a3b8;">
+                                            Čas spolu: <strong style="color:#e2e8f0;" x-text="getCwSelectionStats()?.durationHuman"></strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="height:26px;width:1px;background:rgba(255,255,255,0.1);"></div>
+                                <div style="display:flex;align-items:center;gap:6px;">
+                                    <span class="material-icons-round" style="font-size:16px;color:#4ade80;">save</span>
+                                    <span style="font-size:11px;color:#94a3b8;">Objem dát:</span>
+                                    <span style="font-size:13px;font-weight:800;color:#4ade80;" x-text="getCwSelectionStats()?.totalGb"></span>
+                                </div>
+                                <div style="height:26px;width:1px;background:rgba(255,255,255,0.1);"></div>
+                                <div style="display:flex;align-items:center;gap:8px;font-size:11px;">
+                                    <span x-show="getCwSelectionStats()?.fhdCount > 0" style="padding:2px 7px;border-radius:4px;background:rgba(6,182,212,0.18);border:1px solid rgba(6,182,212,0.4);color:#22d3ee;font-weight:700;">
+                                        <span x-text="getCwSelectionStats()?.fhdCount"></span>x FHD/4K
+                                    </span>
+                                    <span x-show="getCwSelectionStats()?.hdCount > 0" style="padding:2px 7px;border-radius:4px;background:rgba(59,130,246,0.18);border:1px solid rgba(59,130,246,0.4);color:#60a5fa;font-weight:700;">
+                                        <span x-text="getCwSelectionStats()?.hdCount"></span>x HD
+                                    </span>
+                                    <span x-show="getCwSelectionStats()?.verifiedCount > 0" style="padding:2px 7px;border-radius:4px;background:rgba(34,197,94,0.18);border:1px solid rgba(34,197,94,0.4);color:#4ade80;font-weight:700;">
+                                        <span x-text="getCwSelectionStats()?.verifiedCount"></span>x Overené
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Quick actions -->
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <button @click="enrichSelectedCwCards()" :disabled="camwhoresDiscovery.enrichingCards"
+                                    style="padding:7px 13px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 3px 10px rgba(245,158,11,0.3);">
+                                    <span class="material-icons-round" style="font-size:15px;">bolt</span>
+                                    <span>Overiť výber</span>
+                                </button>
+                                <button @click="sendSelectedCwToIdm(true)" :disabled="camwhoresDiscovery.idmSending || camwhoresDiscovery.enrichingCards"
+                                    style="padding:7px 13px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 3px 10px rgba(34,197,94,0.3);">
+                                    <span class="material-icons-round" style="font-size:15px;">download</span>
+                                    <span>IDM Stiahnuť</span>
+                                </button>
+                                <button @click="openCwAlbumModal()"
+                                    style="padding:7px 13px;background:linear-gradient(135deg,#a855f7,#7c3aed);border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 3px 10px rgba(168,85,247,0.35);">
+                                    <span class="material-icons-round" style="font-size:15px;">folder_special</span>
+                                    <span>Spoločný album</span>
+                                </button>
+                                <button @click="clearSelectedCamwhores()"
+                                    style="padding:7px 10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#94a3b8;font-size:12px;cursor:pointer;">
+                                    Zrušiť
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Video Grid -->
+                        <div :class="camwhoresDiscovery.gridDensity === 'compact' ? 'cw-grid-container cw-grid-compact' : 'cw-grid-container'">
+                            <template x-for="video in getCamwhoresVisibleResults()" :key="video.url">
+                                <div @click="toggleCamwhoresSelection(video.url)"
+                                    :class="camwhoresDiscovery.selected.includes(video.url) ? 'cw-card cw-card-selected' : 'cw-card'"
+                                    class="eporner-discovery-card">
+
+                                    <!-- Multi-check overlay indicator -->
+                                    <div style="position:absolute;top:10px;left:10px;z-index:10;">
+                                        <div :style="camwhoresDiscovery.selected.includes(video.url) ? 'background:#22c55e;border-color:#22c55e;' : 'background:rgba(0,0,0,0.6);border-color:rgba(255,255,255,0.35);'"
+                                            style="width:22px;height:22px;border:2px solid;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">
+                                            <span class="material-icons-round"
+                                                x-show="camwhoresDiscovery.selected.includes(video.url)"
+                                                style="font-size:16px;color:#fff;font-weight:900;">check</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Thumbnail & Trailer Hover -->
+                                    <div class="cw-thumb-wrap"
+                                        @mouseenter="cwStartHoverPreview(video, $event)"
+                                        @mouseleave="cwStopHoverPreview(video, $event)">
+                                        <img :src="video.thumbnail || '/static/placeholder.jpg'" :alt="video.title"
+                                            loading="lazy" decoding="async"
+                                            onerror="this.src='/static/placeholder.jpg'">
+
+                                        <!-- Preview Badge if video stream/preview available -->
+                                        <span class="cw-preview-pill" x-show="video.stream_url && /^https?:\/\//i.test(video.stream_url) && !/\/videos\/\d+/i.test(video.stream_url)">
+                                            <span class="material-icons-round" style="font-size:11px;">play_circle</span>
+                                            Preview
+                                        </span>
+
+                                        <!-- Premium Instant Overlay Play Button -->
+                                        <div class="cw-play-overlay" @click.stop="cwQuickPlay(video)"
+                                            title="Prehrať okamžite bez importu">
+                                            <div class="cw-play-btn">
+                                                <span class="material-icons-round"
+                                                    style="font-size:26px;margin-left:2px;">play_arrow</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Content & Badges -->
+                                    <div style="padding:14px;display:flex;flex-direction:column;gap:10px;">
+                                        <!-- Title -->
+                                        <div style="font-size:13px;font-weight:700;color:#f1f5f9;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;min-height:36px;"
+                                            x-text="video.title" :title="video.title"></div>
+
+                                        <!-- Playlist origin badge if from playlist -->
+                                        <div x-show="video.playlist_title"
+                                            style="display:flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:#c084fc;background:rgba(168,85,247,0.12);padding:4px 8px;border-radius:6px;border:1px solid rgba(168,85,247,0.25);width:fit-content;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                                            :title="'Playlist: ' + video.playlist_title">
+                                            <span class="material-icons-round" style="font-size:13px;color:#a855f7;">playlist_play</span>
+                                            <span x-text="video.playlist_title" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                                        </div>
+
+                                        <!-- Model / Uploader Clickable link -->
+                                        <div
+                                            x-show="video.uploader"
+                                            style="display:flex;align-items:center;gap:5px;font-size:11px;color:#94a3b8;background:rgba(0,0,0,0.2);padding:5px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.03);width:fit-content;">
+                                            <span class="material-icons-round"
+                                                style="font-size:14px;color:#22c55e;">account_circle</span>
+                                            Model:
+                                            <span class="cw-uploader-link" x-show="video.uploader"
+                                                @click.stop="cwSearchUploader(video.uploader)" x-text="video.uploader"
+                                                title="Zobraziť všetky videá od tejto modelky"></span>
+                                        </div>
+
+                                        <!-- Added Date -->
+                                        <div x-show="cwDisplayAddedDate(video)"
+                                            style="display:flex;align-items:center;gap:5px;font-size:11px;color:#cbd5e1;background:rgba(59,130,246,0.10);padding:5px 8px;border-radius:6px;border:1px solid rgba(59,130,246,0.18);width:fit-content;">
+                                            <span class="material-icons-round"
+                                                style="font-size:14px;color:#60a5fa;">event</span>
+                                            Pridané:
+                                            <span x-text="cwDisplayAddedDate(video)"></span>
+                                        </div>
+
+                                        <!-- Tags / Badges row -->
+                                        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                                            <!-- Single card detail fetch button -->
+                                            <button x-show="!video.enriched || !video.size_bytes || !video.quality" @click.stop="enrichSingleCwCard(video)"
+                                                :disabled="video.is_enriching || camwhoresDiscovery.enrichingCards"
+                                                title="Zistiť skutočnú kvalitu (1080p/4K), veľkosť v MB a stream"
+                                                style="padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;color:#facc15;background:rgba(234,179,8,0.15);border:1px solid rgba(234,179,8,0.35);cursor:pointer;display:inline-flex;align-items:center;gap:3px;transition:all 0.2s;">
+                                                <span class="material-icons-round" :style="video.is_enriching ? 'animation:spin 1s linear infinite;' : ''" style="font-size:12px;">bolt</span>
+                                                <span x-text="video.is_enriching ? 'Overujem...' : 'Fetch Detail'"></span>
+                                            </button>
+                                            <span x-show="video.resolution > 0" :style="video.resolution >= 2160 ? 'background:linear-gradient(135deg,#eab308,#ca8a04);' :
+                                                    video.resolution >= 1080 ? 'background:linear-gradient(135deg,#06b6d4,#0891b2);' : 
+                                                    video.resolution >= 720 ? 'background:linear-gradient(135deg,#3b82f6,#2563eb);' : 
+                                                    'background:rgba(148,163,184,0.3);'"
+                                                style="padding:3px 8px;border-radius:4px;font-size:10px;font-weight:800;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,0.2);"
+                                                x-text="video.quality"></span>
+
+                                            <!-- Probed Size Badge -->
+                                            <span class="cw-badge" x-show="video.size_bytes > 0"
+                                                style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.2);color:#4ade80;"
+                                                title="Skutočná veľkosť prevereného súboru streamu">
+                                                <span class="material-icons-round"
+                                                    style="font-size:12px;">sd_card</span>
+                                                <span x-text="video.size_human"></span>
+                                            </span>
+                                            <span class="cw-badge" x-show="video.enriched && video.size_status === 'unavailable'"
+                                                style="background:rgba(148,163,184,0.12);border:1px solid rgba(148,163,184,0.25);color:#94a3b8;"
+                                                title="Stránka neposkytuje priamy súbor ani jeho presnú veľkosť">
+                                                <span class="material-icons-round" style="font-size:12px;">sd_card</span>
+                                                Veľkosť nedostupná
+                                            </span>
+
+                                            <!-- Bitrate / Quality density Badge -->
+                                            <span class="cw-badge" x-show="video.bitrate_human"
+                                                style="background:rgba(217,70,239,0.15);border:1px solid rgba(217,70,239,0.3);color:#e879f9;"
+                                                title="Skutočný dátový tok (bitrate kvalita)">
+                                                <span class="material-icons-round" style="font-size:12px;">speed</span>
+                                                <span x-text="video.bitrate_human"></span>
+                                            </span>
+
+                                            <!-- Duration -->
+                                            <span class="cw-badge" x-show="video.duration > 0">
+                                                <span class="material-icons-round"
+                                                    style="font-size:12px;">schedule</span>
+                                                <span x-text="formatDuration(video.duration)"></span>
+                                            </span>
+
+                                            <!-- Views -->
+                                            <span class="cw-badge" x-show="video.views">
+                                                <span class="material-icons-round"
+                                                    style="font-size:12px;">visibility</span>
+                                                <span x-text="formatViews(video.views)"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <div x-show="getCamwhoresFilteredResults().length > (camwhoresDiscovery.visibleResultsLimit || 24)"
+                            style="margin:0 0 20px;text-align:center;">
+                            <button @click="loadMoreCamwhoresResults()"
+                                style="padding:10px 22px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.3);border-radius:8px;color:#4ade80;font-weight:700;cursor:pointer;">
+                                Načítať ďalších 24 videí
+                            </button>
+                        </div>
+
+                        <!-- Load More Playlist Videos (works for both single and multi-playlist shared gallery) -->
+                        <div x-show="cwPlaylists.hasMore && cwPlaylists.selected.length >= 1 && camwhoresDiscovery.results.length > 0"
+                            style="margin-top: 25px; text-align: center; padding-bottom: 20px;">
+                            <button @click="loadMoreCwPlaylistVideosToDiscovery()" :disabled="cwPlaylists.fetching"
+                                style="width: 100%; background: rgba(34, 197, 94, 0.05); border: 1px dashed rgba(34, 197, 94, 0.25); height: 48px; border-radius: 10px; font-weight: 700; color: #22c55e; transition: all 0.3s; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <span x-show="!cwPlaylists.fetching"
+                                    style="display: flex; align-items: center; gap: 6px;">
+                                    <span class="material-icons-round">expand_more</span>
+                                    Načítať ďalšie videá z playlistov (Načítané: <span
+                                        x-text="camwhoresDiscovery.results.length"></span>)
+                                </span>
+                                <span x-show="cwPlaylists.fetching" class="material-icons-round"
+                                    style="animation:spin 1s linear infinite;">refresh</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Empty States -->
+                    <div x-show="!camwhoresDiscovery.loading && camwhoresDiscovery.results.length === 0 && camwhoresDiscovery.keyword"
+                        style="text-align:center;padding:70px 20px;color:#94a3b8;background:rgba(0,0,0,0.15);border-radius:12px;border:1px dashed rgba(255,255,255,0.06);margin-top:20px;">
+                        <span class="material-icons-round"
+                            style="font-size:64px;opacity:0.3;margin-bottom:15px;color:#ef4444;">search_off</span>
+                        <p style="font-size:15px;margin:0;font-weight:600;">No videos found on Camwhores for your search
+                            keyword. Try different terms or broaden your scope.</p>
+                    </div>
+
+                    <div x-show="!camwhoresDiscovery.loading && camwhoresDiscovery.results.length > 0 && getCamwhoresFilteredResults().length === 0 && camwhoresDiscovery.keyword"
+                        style="text-align:center;padding:70px 20px;color:#94a3b8;background:rgba(0,0,0,0.15);border-radius:12px;border:1px dashed rgba(255,255,255,0.06);margin-top:20px;">
+                        <span class="material-icons-round"
+                            style="font-size:64px;opacity:0.3;margin-bottom:15px;color:#eab308;">filter_alt_off</span>
+                        <p style="font-size:15px;margin:0;font-weight:600;">No videos match the active filters. Try
+                            widening the duration slider, lowering the minimum quality, or clearing the title filter.
+                        </p>
+                    </div>
+                </div>
+                <!-- /TAB: VIDEOS -->
+
+                <!-- TAB: PLAYLISTS -->
+                <div x-show="cwDiscoveryActiveTab === 'playlists'">
+
+                    <!-- Playlist Search Form -->
+                    <div
+                        style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);padding:20px;border-radius:12px;margin-bottom:20px;">
+                        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:15px;margin-bottom:15px;">
+                            <div>
+                                <label
+                                    style="font-size:12px;color:#a855f7;font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;">Hladat
+                                    playlist (keyword):</label>
+                                <input type="text" x-model="cwPlaylists.keyword"
+                                    placeholder="napr. couple, bbc, chaturbate..."
+                                    style="width:100%;padding:10px;background:#0b0f19;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:14px;"
+                                    @keydown.enter="searchCwPlaylists()">
+                            </div>
+                            <div>
+                                <label
+                                    style="font-size:12px;color:#a855f7;font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;">Sort
+                                    by:</label>
+                                <select x-model="cwPlaylists.sortBy"
+                                    style="width:100%;padding:10px;background:#0b0f19;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;height:40px;">
+                                    <option value="top_rated">Top Rated</option>
+                                    <option value="most_viewed">Most Viewed</option>
+                                    <option value="most_videos">Most Videos</option>
+                                    <option value="recently_updated">Recently Updated</option>
+                                    <option value="most_commented">Most Commented</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label
+                                    style="font-size:12px;color:#a855f7;font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;">Pages
+                                    to scan:</label>
+                                <input type="number" x-model.number="cwPlaylists.pages" min="1" max="10"
+                                    style="width:100%;padding:10px;background:#0b0f19;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:14px;">
+                            </div>
+                            <div>
+                                <label
+                                    style="font-size:12px;color:#a855f7;font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;">Max
+                                    Results:</label>
+                                <input type="number" x-model.number="cwPlaylists.maxResults" min="10" max="300"
+                                    step="10"
+                                    style="width:100%;padding:10px;background:#0b0f19;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:14px;">
+                            </div>
+                        </div>
+                        <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;">
+                            <span x-show="cwPlaylists.selected.length > 0"
+                                style="font-size:13px;color:#a855f7;font-weight:700;">
+                                <span x-text="cwPlaylists.selected.length"></span> playlists selected
+                            </span>
+                            <button @click="searchCwPlaylists()" :disabled="cwPlaylists.loading"
+                                style="padding:10px 28px;background:linear-gradient(135deg,#a855f7,#7c3aed);border:none;border-radius:8px;color:#fff;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(168,85,247,0.4);">
+                                <span class="material-icons-round" x-show="!cwPlaylists.loading">search</span>
+                                <span class="material-icons-round" x-show="cwPlaylists.loading"
+                                    style="animation:spin 1s linear infinite;">refresh</span>
+                                <span x-text="cwPlaylists.loading ? 'Scanning...' : 'Search Playlists'"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Playlist Cards Grid -->
+                    <div x-show="cwPlaylists.playlists.length > 0">
+                        <div
+                            style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding:14px 16px;background:rgba(168,85,247,0.06);border-radius:10px;border:1px solid rgba(168,85,247,0.15);">
+                            <h3 style="margin:0;font-size:14px;color:#a855f7;font-weight:700;">
+                                Found <span x-text="cwPlaylists.total"></span> playlists
+                                <span x-show="cwPlaylists.selected.length > 0" style="color:#f1f5f9;"> &mdash; <span
+                                        x-text="cwPlaylists.selected.length"></span> selected</span>
+                            </h3>
+                            <div style="display:flex;gap:10px;align-items:center;">
+                                <button @click="selectAllCwPlaylists()"
+                                    style="padding:7px 14px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.3);border-radius:6px;color:#60a5fa;font-size:12px;cursor:pointer;font-weight:600;">Select
+                                    All</button>
+                                <button @click="clearCwPlaylistSelection()" x-show="cwPlaylists.selected.length > 0"
+                                    style="padding:7px 14px;background:rgba(148,163,184,0.08);border:1px solid rgba(148,163,184,0.2);border-radius:6px;color:#94a3b8;font-size:12px;cursor:pointer;font-weight:600;">Clear</button>
+                                <button @click="fetchCwPlaylistVideos()"
+                                    :disabled="cwPlaylists.selected.length === 0 || cwPlaylists.fetching"
+                                    :style="cwPlaylists.selected.length === 0 ? 'opacity:0.4;cursor:not-allowed;' : ''"
+                                    style="padding:8px 22px;background:linear-gradient(135deg,#a855f7,#7c3aed);border:none;border-radius:6px;color:#fff;font-size:13px;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:6px;box-shadow:0 4px 14px rgba(168,85,247,0.35);transition:all 0.2s;">
+                                    <span class="material-icons-round" x-show="!cwPlaylists.fetching"
+                                        style="font-size:18px;">photo_library</span>
+                                    <span class="material-icons-round" x-show="cwPlaylists.fetching"
+                                        style="font-size:18px;animation:spin 1s linear infinite;">refresh</span>
+                                    <span
+                                        x-text="cwPlaylists.fetching ? 'Načítavam galériu...' : (cwPlaylists.selected.length === 1 ? 'Otvoriť galériu playlistu' : '🎬 Otvoriť spoločnú galériu (' + cwPlaylists.selected.length + ')')"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div
+                            style="display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:20px;margin-bottom:20px;">
+                            <template x-for="pl in cwPlaylists.playlists" :key="pl.id">
+                                <div @click="toggleCwPlaylist(pl.url)"
+                                    :style="cwPlaylists.selected.includes(pl.url) ? 'border-color:#a855f7;box-shadow:0 0 18px rgba(168,85,247,0.25);background:rgba(168,85,247,0.07);' : ''"
+                                    style="background:rgba(30,41,59,0.5);border:1px solid rgba(255,255,255,0.07);border-radius:12px;overflow:hidden;cursor:pointer;transition:all 0.25s;">
+                                    <div style="position:relative;">
+                                        <div style="position:absolute;top:8px;left:8px;z-index:10;">
+                                            <div :style="cwPlaylists.selected.includes(pl.url) ? 'background:#a855f7;border-color:#a855f7;' : 'background:rgba(0,0,0,0.6);border-color:rgba(255,255,255,0.3);'"
+                                                style="width:22px;height:22px;border:2px solid;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">
+                                                <span class="material-icons-round"
+                                                    x-show="cwPlaylists.selected.includes(pl.url)"
+                                                    style="font-size:15px;color:#fff;">check</span>
+                                            </div>
+                                        </div>
+                                        <div
+                                            style="height:180px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;background:#000;">
+                                            <template
+                                                x-for="(thumb,i) in (pl.thumbnails||[pl.thumbnail]).filter(Boolean).slice(0,4)"
+                                                :key="i">
+                                                <img :src="thumb" style="width:100%;height:100%;object-fit:cover;"
+                                                    onerror="this.src='/static/placeholder.jpg'">
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <div style="padding:10px;">
+                                        <div style="font-size:13px;font-weight:700;color:#f1f5f9;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                                            x-text="pl.title||'Unnamed Playlist'" :title="pl.title"></div>
+                                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                            <span
+                                                style="background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.25);color:#c4b5fd;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;">
+                                                <span x-text="pl.video_count+' videos'"></span>
+                                            </span>
+                                            <span x-show="pl.rating"
+                                                style="background:rgba(34,197,94,0.12);color:#4ade80;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;"
+                                                x-text="pl.rating"></span>
+                                            <span x-show="pl.views"
+                                                style="color:#64748b;font-size:10px;padding:2px 5px;"
+                                                x-text="pl.views?pl.views.toLocaleString():''"></span>
+                                            <span x-show="pl.age" style="color:#475569;font-size:10px;padding:2px 5px;"
+                                                x-text="pl.age"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Fetch Results Stats + Import -->
+                    <div x-show="cwPlaylists.fetchResults"
+                        style="margin-top:16px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:18px;">
+                        <div
+                            style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+                            <div>
+                                <h4 style="margin:0 0 10px 0;color:#fbbf24;font-size:14px;font-weight:700;">Fetch
+                                    Results</h4>
+                                <div style="display:flex;gap:20px;flex-wrap:wrap;">
+                                    <div style="text-align:center;">
+                                        <div style="font-size:26px;font-weight:900;color:#4ade80;"
+                                            x-text="cwPlaylists.fetchResults?.total_public||cwPlaylists.fetchResults?.playlist?.public_count||0">
+                                        </div>
+                                        <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;">Public</div>
+                                    </div>
+                                    <div style="text-align:center;">
+                                        <div style="font-size:26px;font-weight:900;color:#f87171;"
+                                            x-text="cwPlaylists.fetchResults?.total_private||cwPlaylists.fetchResults?.playlist?.private_count||0">
+                                        </div>
+                                        <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;">Private
+                                        </div>
+                                    </div>
+                                    <div style="text-align:center;">
+                                        <div style="font-size:26px;font-weight:900;color:#fbbf24;"
+                                            x-text="cwPlaylists.allVideoUrls.length"></div>
+                                        <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;">Loaded</div>
+                                    </div>
+                                    <div x-show="cwPlaylists.fetchResults?.playlist?.public_ratio"
+                                        style="text-align:center;">
+                                        <div style="font-size:26px;font-weight:900;color:#a855f7;"
+                                            x-text="cwPlaylists.fetchResults?.playlist?.public_ratio||''"></div>
+                                        <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;">Public %
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                                <button x-show="cwPlaylists.hasMore" @click="loadMoreCwPlaylistVideos()"
+                                    :disabled="cwPlaylists.fetching"
+                                    style="padding:9px 16px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);border-radius:8px;color:#fbbf24;font-size:13px;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:6px;">
+                                    <span class="material-icons-round" x-show="!cwPlaylists.fetching"
+                                        style="font-size:16px;">expand_more</span>
+                                    <span class="material-icons-round" x-show="cwPlaylists.fetching"
+                                        style="font-size:16px;animation:spin 1s linear infinite;">refresh</span>
+                                    Load +<span x-text="cwPlaylists.batchSize"></span>
+                                </button>
+                                <button @click="importCwPlaylistVideos()"
+                                    :disabled="cwPlaylists.allVideoUrls.length===0||cwPlaylists.importing"
+                                    :style="cwPlaylists.allVideoUrls.length===0?'opacity:0.4;cursor:not-allowed;':''"
+                                    style="padding:9px 22px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:8px;color:#fff;font-size:14px;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:6px;box-shadow:0 4px 14px rgba(34,197,94,0.4);">
+                                    <span class="material-icons-round" x-show="!cwPlaylists.importing"
+                                        style="font-size:18px;">download_for_offline</span>
+                                    <span class="material-icons-round" x-show="cwPlaylists.importing"
+                                        style="font-size:18px;animation:spin 1s linear infinite;">refresh</span>
+                                    Import <span x-text="cwPlaylists.allVideoUrls.length"></span> Public Videos
+                                </button>
+                            </div>
+                        </div>
+                        <div x-show="cwPlaylists.allVideoUrls.length>0"
+                            style="margin-top:10px;max-height:100px;overflow-y:auto;background:rgba(0,0,0,0.3);border-radius:6px;padding:8px;">
+                            <div style="font-size:10px;color:#64748b;margin-bottom:4px;font-weight:700;">QUEUE PREVIEW
+                            </div>
+                            <template x-for="url in cwPlaylists.allVideoUrls.slice(0,8)" :key="url">
+                                <div style="font-size:11px;color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                                    x-text="url"></div>
+                            </template>
+                            <div x-show="cwPlaylists.allVideoUrls.length>8"
+                                style="font-size:11px;color:#475569;padding-top:3px;"
+                                x-text="'... and '+(cwPlaylists.allVideoUrls.length-8)+' more'"></div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div x-show="!cwPlaylists.loading&&cwPlaylists.playlists.length===0"
+                        style="text-align:center;padding:60px 20px;color:#94a3b8;border:1px dashed rgba(168,85,247,0.2);border-radius:12px;background:rgba(168,85,247,0.03);margin-top:10px;">
+                        <span class="material-icons-round"
+                            style="font-size:64px;opacity:0.25;color:#a855f7;display:block;margin-bottom:12px;">playlist_add</span>
+                        <p style="font-size:15px;margin:0;font-weight:600;">Search Camwhores playlists above.<br>
+                            <span style="font-size:12px;color:#64748b;font-weight:400;">Tip: Leave keyword empty + sort
+                                by "Most Videos" to browse the biggest playlists.</span>
+                        </p>
+                    </div>
+
+                </div>
+                <!-- /TAB: PLAYLISTS -->
+
+                <!-- TAB: HISTORY -->
+                <div x-show="cwDiscoveryActiveTab === 'history'">
+                    <!-- Playlist Fetches History list -->
+                    <div x-show="cwPlaylistsHistory.length > 0">
+                        <div
+                            style="display:grid;grid-template-columns:repeat(auto-fill,minmax(350px, 1fr));gap:20px;margin-bottom:20px;">
+                            <template x-for="item in cwPlaylistsHistory" :key="item.id">
+                                <div
+                                    style="background:rgba(30,41,59,0.5);border:1px solid rgba(255,255,255,0.07);border-radius:12px;overflow:hidden;transition:all 0.25s;display:flex;flex-direction:column;justify-content:space-between;min-height:140px;padding:16px;">
+                                    <div>
+                                        <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;"
+                                            x-text="item.title||'Nepomenovaný playlist'" :title="item.title"></div>
+                                        <div style="font-size:11px;color:#64748b;margin-bottom:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                                            x-text="item.playlist_urls.join(', ')"
+                                            :title="item.playlist_urls.join(', ')"></div>
+                                    </div>
+                                    <div
+                                        style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,0.05);padding-top:12px;margin-top:auto;">
+                                        <div style="display:flex;flex-direction:column;gap:2px;">
+                                            <span
+                                                style="background:rgba(245,158,11,0.15);color:#f59e0b;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;width:fit-content;">
+                                                <span x-text="item.video_count+' videí'"></span>
+                                            </span>
+                                            <span style="color:#475569;font-size:10px;"
+                                                x-text="new Date(item.timestamp).toLocaleString()"></span>
+                                        </div>
+                                        <div style="display:flex;gap:8px;">
+                                            <button @click="deleteCwPlaylistHistory(item.id)"
+                                                style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#f87171;border-radius:6px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;"
+                                                title="Zmazať z histórie">
+                                                <span class="material-icons-round" style="font-size:16px;">delete</span>
+                                            </button>
+                                            <button @click="loadCwPlaylistFromHistory(item.id)"
+                                                style="padding:6px 14px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:6px;color:#fff;font-size:12px;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:4px;box-shadow:0 3px 8px rgba(245,158,11,0.25);">
+                                                <span class="material-icons-round"
+                                                    style="font-size:14px;">open_in_browser</span>
+                                                Načítať
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Empty State pre Históriu -->
+                    <div x-show="!cwPlaylistsHistoryLoading && cwPlaylistsHistory.length === 0"
+                        style="text-align:center;padding:60px 20px;color:#94a3b8;border:1px dashed rgba(245,158,11,0.2);border-radius:12px;background:rgba(245,158,11,0.03);margin-top:10px;">
+                        <span class="material-icons-round"
+                            style="font-size:64px;opacity:0.25;color:#f59e0b;display:block;margin-bottom:12px;">history</span>
+                        <p style="font-size:15px;margin:0;font-weight:600;">História fetchov je prázdna.<br>
+                            <span style="font-size:12px;color:#64748b;font-weight:400;">Akonáhle stiahnete nejaký
+                                playlist v záložke "Playlists", automaticky sa uloží sem pre rýchle
+                                znovunačítanie.</span>
+                        </p>
+                    </div>
+
+                    <!-- Loader pre Históriu -->
+                    <div x-show="cwPlaylistsHistoryLoading" style="text-align:center;padding:40px 0;">
+                        <span class="material-icons-round"
+                            style="animation:spin 1s linear infinite;color:#f59e0b;font-size:32px;">refresh</span>
+                    </div>
+                </div>
+                <!-- /TAB: HISTORY -->
+
+            </div>
+        </div>
+    </div>
+</template>

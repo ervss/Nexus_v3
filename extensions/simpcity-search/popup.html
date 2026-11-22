@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simpcity Search</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <h1>Hľadať na Simpcity</h1>
+    <form id="search-form">
+      <label for="query">Hľadaný výraz</label>
+      <input id="query" name="query" type="text" placeholder="napr. Nick Morris" autocomplete="off" autofocus>
+      <button type="submit">Hľadať</button>
+      <p id="status" role="status" aria-live="polite"></p>
+    </form>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

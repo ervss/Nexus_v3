@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="sk">
+<head><meta charset="utf-8"><title>Video Play First</title><link rel="stylesheet" href="popup.css"></head>
+<body>
+  <h1>Video Play First</h1>
+  <p>Priame video odkazy na všetkých webových doménach</p>
+  <label for="mode">Pri otvorení odkazu</label>
+  <select id="mode" disabled><option value="play">▶ Prehrávanie (predvolené)</option><option value="download">↓ Sťahovanie</option></select>
+  <p id="status" role="status">Načítavam nastavenie…</p>
+  <p class="hint">Zmena platí pre ďalšie otvorenie odkazu. Prehrávanie začne bez zvuku; zvuk zapni v prehrávači.</p>
+  <p class="hint">MP4, WebM a ďalšie video prípony. Prehrá Chrome len podporované formáty a kodeky.</p>
+  <form id="open-form">
+    <label for="source">Otvoriť priamy odkaz / HLS stream</label>
+    <input id="source" type="url" placeholder="https://…/master.m3u8" required>
+    <button type="submit">Otvoriť v novom tabe</button>
+  </form>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<style>
+body{width:330px;background:#1a1a1a;color:#eee;padding:16px;font-family:system-ui,sans-serif}
+h1{font-size:17px;margin:0 0 16px}.status{padding:10px;background:#292929;border-radius:7px;overflow-wrap:anywhere;font-size:13px}
+button{width:100%;padding:12px;margin-top:12px;border:0;border-radius:7px;background:#6765dd;color:white;cursor:pointer}
+button:disabled{opacity:.5}.ok{color:#8ce3a0}.err{color:#ff9595}
+small{display:block;margin-top:12px;color:#aaa}
+</style>
+</head>
+<body>
+<h1>📖 Article Saver</h1>
+<div id="status" class="status" role="status">Pripravený na uloženie článku.</div>
+<button id="save">Uložiť článok ako Markdown</button>
+<small>Súbory sa ukladajú do Dokumenty\clanky. Iba obsah dostupný na webovej stránke.</small>
+<script src="popup.js"></script>
+</body>
+</html>

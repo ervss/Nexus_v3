@@ -1,0 +1,976 @@
+/* ============================================================
+   NEXUS · VISION GLASS SKIN  (v1)
+   ------------------------------------------------------------
+   visionOS-style frosted-glass layer for the V1 Archive Console.
+   Scoped 100% under body.ui-v1.skin-vision — inert until the
+   ✦ toggle (cycle: default → aurora → vision) adds the class.
+   Original design untouched.
+
+   Concept: the console floats as frosted panes over a blurred
+   "environment" — a heavily blurred thumbnail from the user's
+   own library (.vg-ambient, set by vgSetAmbient in main.js),
+   falling back to a soft room-toned gradient. Pill geometry,
+   hairline borders, quiet shadows. Two tonalities: light
+   (default, frosted white) and dark (body.vision-dark),
+   switched by the ☀/☾ button next to ✦.
+
+   Player stays dark glass in both tonalities — it sits over
+   video, light glass would fight the picture.
+   ============================================================ */
+
+/* ---------- 0 · Tokens ---------- */
+
+body.ui-v1.skin-vision {
+    /* Opt out of browser "force dark" (Chrome/Vivaldi Auto Dark Theme):
+       without this the light glass gets auto-inverted to muddy dark blue. */
+    color-scheme: only light;
+    /* text */
+    --vg-text: #23252e;
+    --vg-dim: rgba(44, 48, 62, 0.6);
+    --vg-faint: rgba(44, 48, 62, 0.38);
+    /* glass fills */
+    --vg-glass: rgba(255, 255, 255, 0.5);
+    --vg-glass-strong: rgba(255, 255, 255, 0.72);
+    --vg-glass-soft: rgba(255, 255, 255, 0.3);
+    --vg-glass-hover: rgba(255, 255, 255, 0.66);
+    /* edges */
+    --vg-hairline: rgba(255, 255, 255, 0.75);
+    --vg-hairline-soft: rgba(255, 255, 255, 0.45);
+    --vg-line: rgba(30, 34, 48, 0.1);
+    /* accent (mint — progress, live states) */
+    --vg-accent: #0fa47d;
+    --vg-accent-bright: #2ee6a8;
+    --vg-accent-soft: rgba(15, 164, 125, 0.14);
+    /* primary action pill: dark pill on light glass */
+    --vg-primary-fill: rgba(28, 30, 40, 0.9);
+    --vg-primary-text: #ffffff;
+    /* geometry */
+    --vg-r-panel: 28px;
+    --vg-r-card: 20px;
+    --vg-r-ctl: 14px;
+    --vg-blur: 24px;
+    --vg-blur-sm: 14px;
+    /* elevation */
+    --vg-shadow: 0 24px 70px rgba(24, 30, 52, 0.16);
+    --vg-shadow-sm: 0 10px 30px rgba(24, 30, 52, 0.1);
+    /* remap V1 tokens so stray consumers follow the skin */
+    --v1-bg: #e9e8e6;
+    --v1-panel: rgba(255, 255, 255, 0.55);
+    --v1-panel-2: rgba(255, 255, 255, 0.68);
+    --v1-border: rgba(30, 34, 48, 0.1);
+    --v1-border-strong: rgba(30, 34, 48, 0.18);
+    --v1-text: var(--vg-text);
+    --v1-dim: var(--vg-dim);
+    --v1-accent: var(--vg-accent);
+    --v1-accent-soft: var(--vg-accent-soft);
+    --v1-shadow: var(--vg-shadow);
+
+    color: var(--vg-text);
+    /* fallback environment (painted beneath .vg-ambient) */
+    background:
+        radial-gradient(ellipse 80% 60% at 20% 0%, rgba(255, 252, 246, 0.9), transparent 60%),
+        radial-gradient(ellipse 70% 55% at 85% 15%, rgba(214, 222, 234, 0.8), transparent 65%),
+        linear-gradient(180deg, #eceae6 0%, #dfe0e4 55%, #d3d6dc 100%);
+}
+
+body.ui-v1.skin-vision.vision-dark {
+    color-scheme: dark;
+    --vg-text: #eef0f6;
+    --vg-dim: rgba(214, 220, 234, 0.6);
+    --vg-faint: rgba(214, 220, 234, 0.36);
+    --vg-glass: rgba(22, 24, 32, 0.52);
+    --vg-glass-strong: rgba(24, 26, 35, 0.74);
+    --vg-glass-soft: rgba(22, 24, 32, 0.32);
+    --vg-glass-hover: rgba(38, 41, 54, 0.66);
+    --vg-hairline: rgba(255, 255, 255, 0.16);
+    --vg-hairline-soft: rgba(255, 255, 255, 0.09);
+    --vg-line: rgba(255, 255, 255, 0.08);
+    --vg-accent: #2ee6a8;
+    --vg-accent-bright: #5df0bf;
+    --vg-accent-soft: rgba(46, 230, 168, 0.14);
+    /* primary action pill: white pill on dark glass (visionOS player style) */
+    --vg-primary-fill: rgba(244, 246, 250, 0.94);
+    --vg-primary-text: #16181f;
+    --vg-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+    --vg-shadow-sm: 0 10px 30px rgba(0, 0, 0, 0.3);
+    --v1-bg: #101218;
+    --v1-panel: rgba(22, 24, 32, 0.55);
+    --v1-panel-2: rgba(30, 33, 44, 0.68);
+    --v1-border: rgba(255, 255, 255, 0.08);
+    --v1-border-strong: rgba(255, 255, 255, 0.16);
+
+    background:
+        radial-gradient(ellipse 80% 60% at 20% 0%, rgba(52, 58, 78, 0.7), transparent 60%),
+        radial-gradient(ellipse 70% 55% at 85% 15%, rgba(38, 46, 64, 0.6), transparent 65%),
+        linear-gradient(180deg, #171922 0%, #12141c 55%, #0e1016 100%);
+}
+
+/* kill the base grid overlay + orbs — the environment carries the scene */
+body.ui-v1.skin-vision::before { content: none; }
+body.ui-v1.skin-vision .bg-orb { display: none; }
+
+/* ---------- 1 · Ambient environment (library-driven) ---------- */
+
+/* Hidden everywhere except under this skin — zero impact on
+   default/aurora. The <img> src is set by vgSetAmbient(). */
+body.ui-v1 .vg-ambient { display: none; }
+
+body.ui-v1.skin-vision .vg-ambient {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+body.ui-v1.skin-vision .vg-ambient img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* over-scale so the blur never reveals hard edges */
+    transform: scale(1.25);
+    filter: blur(44px) saturate(1.45) brightness(1.05);
+    opacity: 0;
+    transition: opacity 900ms ease;
+}
+
+body.ui-v1.skin-vision .vg-ambient img.is-loaded { opacity: 0.85; }
+body.ui-v1.skin-vision.vision-dark .vg-ambient img {
+    filter: blur(44px) saturate(1.3) brightness(0.55);
+}
+body.ui-v1.skin-vision.vision-dark .vg-ambient img.is-loaded { opacity: 0.7; }
+
+/* readability scrim over the environment */
+body.ui-v1.skin-vision .vg-ambient::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+        rgba(242, 242, 245, 0.12) 0%,
+        rgba(238, 239, 243, 0.22) 55%,
+        rgba(230, 232, 238, 0.38) 100%);
+}
+
+body.ui-v1.skin-vision.vision-dark .vg-ambient::after {
+    background: linear-gradient(180deg,
+        rgba(10, 12, 18, 0.22) 0%,
+        rgba(10, 12, 18, 0.35) 55%,
+        rgba(8, 10, 15, 0.5) 100%);
+}
+
+/* content sits above the environment */
+body.ui-v1.skin-vision .v1-shell { position: relative; z-index: 2; }
+
+/* ---------- 2 · Shell: floating dock + transparent stage ---------- */
+
+body.ui-v1.skin-vision .v1-shell {
+    padding: 20px;
+    gap: 20px;
+}
+
+/* the sidebar becomes a floating frosted dock */
+body.ui-v1.skin-vision .v1-sidebar {
+    border-radius: var(--vg-r-panel);
+    border: 1px solid var(--vg-hairline);
+    background: var(--vg-glass);
+    -webkit-backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        var(--vg-shadow);
+    top: 20px;
+    height: calc(100vh - 40px);
+}
+
+body.ui-v1.skin-vision.vision-dark .v1-sidebar {
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        var(--vg-shadow);
+}
+
+/* stage dissolves — its children become individual panes */
+body.ui-v1.skin-vision .v1-stage {
+    border: none;
+    background: none;
+    box-shadow: none;
+    padding: 0;
+    gap: 16px;
+}
+
+/* ---------- 3 · Brand + toggles ---------- */
+
+body.ui-v1.skin-vision .v1-brand {
+    border-bottom: 1px solid var(--vg-line);
+}
+
+body.ui-v1.skin-vision .v1-brand-mark {
+    border-radius: 999px;
+    background: var(--vg-primary-fill);
+    color: var(--vg-primary-text);
+    border: 1px solid transparent;
+    box-shadow: var(--vg-shadow-sm);
+}
+
+body.ui-v1.skin-vision .v1-brand-name { color: var(--vg-text); }
+body.ui-v1.skin-vision .v1-brand-sub,
+body.ui-v1.skin-vision .v1-nav-label { color: var(--vg-faint); }
+
+body.ui-v1.skin-vision .nx-skin-toggle {
+    border-radius: 999px;
+    color: var(--vg-text);
+    border: 1px solid var(--vg-hairline-soft);
+    background: var(--vg-glass-strong);
+    box-shadow: var(--vg-shadow-sm);
+    text-shadow: none;
+}
+
+body.ui-v1.skin-vision .nx-skin-toggle:hover {
+    transform: translateY(-1px) rotate(12deg);
+    border-color: var(--vg-accent);
+    color: var(--vg-accent);
+    box-shadow: 0 0 16px var(--vg-accent-soft);
+}
+
+/* tone switch — only exists visually under this skin */
+body.ui-v1 .vg-tone-toggle { display: none; }
+
+body.ui-v1.skin-vision .vg-tone-toggle {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+    color: var(--vg-text);
+    border: 1px solid var(--vg-hairline-soft);
+    background: var(--vg-glass-strong);
+    box-shadow: var(--vg-shadow-sm);
+    transition: transform 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+body.ui-v1.skin-vision .vg-tone-toggle:hover {
+    transform: translateY(-1px);
+    border-color: var(--vg-accent);
+    color: var(--vg-accent);
+}
+
+body.ui-v1.skin-vision .v1-shell.is-sidebar-collapsed .vg-tone-toggle { display: none; }
+
+body.ui-v1.skin-vision .v1-sidebar-toggle {
+    border-radius: 999px;
+    color: var(--vg-text);
+    border: 1px solid var(--vg-hairline-soft);
+    background: var(--vg-glass-strong);
+}
+
+body.ui-v1.skin-vision .v1-sidebar-toggle:hover {
+    border-color: var(--vg-accent);
+    background: var(--vg-glass-hover);
+}
+
+/* ---------- 4 · Navigation: quiet pills, filled active ---------- */
+
+body.ui-v1.skin-vision .v1-nav-btn,
+body.ui-v1.skin-vision .v1-soft-btn {
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--vg-dim);
+    font-weight: 600;
+}
+
+body.ui-v1.skin-vision .v1-nav-btn:hover,
+body.ui-v1.skin-vision .v1-soft-btn:hover {
+    transform: none;
+    background: var(--vg-glass-soft);
+    border-color: var(--vg-hairline-soft);
+    color: var(--vg-text);
+}
+
+body.ui-v1.skin-vision .v1-nav-btn.active {
+    background: var(--vg-glass-strong);
+    border-color: var(--vg-hairline);
+    color: var(--vg-text);
+    box-shadow: var(--vg-shadow-sm);
+}
+
+body.ui-v1.skin-vision .v1-nav-btn.active .material-icons-round {
+    color: var(--vg-accent);
+}
+
+body.ui-v1.skin-vision .v1-batch-meta {
+    border-radius: var(--vg-r-ctl);
+    background: var(--vg-glass-soft);
+    border: 1px solid var(--vg-hairline-soft);
+}
+
+body.ui-v1.skin-vision .v1-batch-meta span { color: var(--vg-dim); }
+
+body.ui-v1.skin-vision .v1-sidebar-foot { border-top: 1px solid var(--vg-line); }
+
+/* ---------- 5 · Header + command bar: frosted panes ---------- */
+
+body.ui-v1.skin-vision .v1-header,
+body.ui-v1.skin-vision .v1-command {
+    border-radius: var(--vg-r-panel);
+    border: 1px solid var(--vg-hairline);
+    background: var(--vg-glass);
+    -webkit-backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), var(--vg-shadow-sm);
+    padding: 14px 16px;
+}
+
+body.ui-v1.skin-vision.vision-dark .v1-header,
+body.ui-v1.skin-vision.vision-dark .v1-command {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), var(--vg-shadow-sm);
+}
+
+body.ui-v1.skin-vision .v1-search-wrap,
+body.ui-v1.skin-vision .v1-import-wrap {
+    border-radius: 999px;
+    background: var(--vg-glass-strong);
+    border: 1px solid var(--vg-hairline-soft);
+    padding: 10px 16px;
+}
+
+body.ui-v1.skin-vision .v1-search-wrap input,
+body.ui-v1.skin-vision .v1-import-wrap input,
+body.ui-v1.skin-vision .v1-filter-pop input {
+    color: var(--vg-text);
+}
+
+body.ui-v1.skin-vision .v1-search-wrap input::placeholder,
+body.ui-v1.skin-vision .v1-import-wrap input::placeholder {
+    color: var(--vg-faint);
+}
+
+body.ui-v1.skin-vision .v1-search-wrap .material-icons-round,
+body.ui-v1.skin-vision .v1-import-wrap .material-icons-round {
+    color: var(--vg-dim);
+}
+
+body.ui-v1.skin-vision .v1-status-card {
+    border-radius: 999px;
+    background: var(--vg-glass-strong);
+    border: 1px solid var(--vg-hairline-soft);
+}
+
+body.ui-v1.skin-vision .v1-status-dot {
+    background: var(--vg-accent);
+    box-shadow: 0 0 0 5px var(--vg-accent-soft);
+}
+
+body.ui-v1.skin-vision .v1-status-title { color: var(--vg-text); }
+body.ui-v1.skin-vision .v1-status-copy { color: var(--vg-dim); }
+
+body.ui-v1.skin-vision .v1-intake-rail {
+    border-radius: var(--vg-r-card);
+    border: 1px solid var(--vg-hairline-soft);
+    background: var(--vg-glass-soft);
+}
+
+body.ui-v1.skin-vision .v1-intake-title { color: var(--vg-text); }
+body.ui-v1.skin-vision .v1-intake-text { color: var(--vg-dim); }
+
+/* ---------- 6 · Controls: pills everywhere ---------- */
+
+body.ui-v1.skin-vision .v1-chip,
+body.ui-v1.skin-vision .v1-filter-btn,
+body.ui-v1.skin-vision .v1-pill-btn,
+body.ui-v1.skin-vision .v1-icon-btn,
+body.ui-v1.skin-vision .v1-ghost,
+body.ui-v1.skin-vision .v1-select,
+body.ui-v1.skin-vision .v1-date {
+    border-radius: 999px;
+    border: 1px solid var(--vg-hairline-soft);
+    background: var(--vg-glass-strong);
+    color: var(--vg-text);
+}
+
+body.ui-v1.skin-vision .v1-chip:hover,
+body.ui-v1.skin-vision .v1-filter-btn:hover,
+body.ui-v1.skin-vision .v1-pill-btn:hover,
+body.ui-v1.skin-vision .v1-icon-btn:hover,
+body.ui-v1.skin-vision .v1-ghost:hover {
+    border-color: var(--vg-hairline);
+    background: var(--vg-glass-hover);
+    transform: translateY(-1px);
+}
+
+body.ui-v1.skin-vision .v1-icon-btn.active,
+body.ui-v1.skin-vision .v1-chip.active,
+body.ui-v1.skin-vision .v1-pill-btn.active {
+    background: var(--vg-primary-fill);
+    border-color: transparent;
+    color: var(--vg-primary-text);
+    box-shadow: var(--vg-shadow-sm);
+}
+
+body.ui-v1.skin-vision .v1-primary-btn,
+body.ui-v1.skin-vision .v1-import-btn {
+    border-radius: 999px;
+    background: var(--vg-primary-fill);
+    border: 1px solid transparent;
+    color: var(--vg-primary-text);
+    box-shadow: var(--vg-shadow-sm);
+}
+
+body.ui-v1.skin-vision .v1-primary-btn:hover,
+body.ui-v1.skin-vision .v1-import-btn:hover {
+    transform: translateY(-1px);
+    border-color: transparent;
+    filter: brightness(1.12);
+}
+
+body.ui-v1.skin-vision .v1-filter-pop {
+    border-radius: var(--vg-r-card);
+    border: 1px solid var(--vg-hairline);
+    background: var(--vg-glass-strong);
+    -webkit-backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    box-shadow: var(--vg-shadow);
+}
+
+body.ui-v1.skin-vision .v1-filter-actions button {
+    border-radius: 999px;
+    color: var(--vg-text);
+    border: 1px solid var(--vg-hairline-soft);
+    background: var(--vg-glass-soft);
+}
+
+body.ui-v1.skin-vision .v1-filter-list label,
+body.ui-v1.skin-vision .v1-filter-primary { color: var(--vg-text); }
+body.ui-v1.skin-vision .v1-filter-secondary { color: var(--vg-dim); }
+
+/* ---------- 7 · Grid + cards: glass slides ---------- */
+
+body.ui-v1.skin-vision .v1-grid-shell {
+    border-radius: var(--vg-r-panel);
+    border: 1px solid var(--vg-hairline-soft);
+    /* extra sheer so the ambient environment glows through the big pane;
+       no backdrop blur here — it would repaint on every grid scroll */
+    background: rgba(255, 255, 255, 0.18);
+    padding: 16px;
+}
+
+body.ui-v1.skin-vision.vision-dark .v1-grid-shell {
+    background: rgba(18, 20, 28, 0.22);
+}
+
+body.ui-v1.skin-vision .v1-kicker { color: var(--vg-faint); }
+body.ui-v1.skin-vision .v1-grid-head h2 { color: var(--vg-text); }
+
+body.ui-v1.skin-vision .v1-card {
+    border-radius: var(--vg-r-card);
+    border: 1px solid var(--vg-hairline);
+    background: var(--vg-glass);
+    box-shadow: var(--vg-shadow-sm);
+}
+
+body.ui-v1.skin-vision .v1-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--vg-hairline);
+    box-shadow: var(--vg-shadow);
+}
+
+body.ui-v1.skin-vision .v1-card.selected {
+    border-color: var(--vg-accent);
+    box-shadow: 0 0 0 1px var(--vg-accent), var(--vg-shadow);
+}
+
+body.ui-v1.skin-vision .v1-thumb { background: rgba(18, 20, 28, 0.35); }
+
+/* thumb overlay pills stay dark glass in both tonalities —
+   they sit on imagery, not on the page */
+body.ui-v1.skin-vision .v1-source-pill,
+body.ui-v1.skin-vision .v1-quality-pill,
+body.ui-v1.skin-vision .v1-time-pill,
+body.ui-v1.skin-vision .v1-size-pill,
+body.ui-v1.skin-vision .v1-idx-pill,
+body.ui-v1.skin-vision .v1-striper-badge,
+body.ui-v1.skin-vision .v1-selected-badge {
+    background: rgba(16, 18, 26, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: #f4f6fa;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+body.ui-v1.skin-vision .v1-source-pill { color: var(--vg-accent-bright); }
+
+body.ui-v1.skin-vision .v1-selected-badge.active {
+    color: var(--vg-accent-bright);
+    border-color: var(--vg-accent);
+    box-shadow: 0 0 0 1px var(--vg-accent-soft);
+}
+
+body.ui-v1.skin-vision .v1-card-body h3 { color: var(--vg-text); }
+body.ui-v1.skin-vision .v1-card-meta { color: var(--vg-dim); }
+
+body.ui-v1.skin-vision .v1-card-tags span {
+    border-radius: 999px;
+    background: var(--vg-glass-soft);
+    border: 1px solid var(--vg-hairline-soft);
+    color: var(--vg-dim);
+}
+
+body.ui-v1.skin-vision .v1-play {
+    border-radius: 999px;
+    background: var(--vg-primary-fill);
+    border-color: transparent;
+    color: var(--vg-primary-text);
+}
+
+body.ui-v1.skin-vision .v1-play:hover { filter: brightness(1.12); }
+
+body.ui-v1.skin-vision .v1-ghost { border-radius: 999px; }
+
+body.ui-v1.skin-vision .v1-skeleton {
+    background: linear-gradient(90deg,
+        var(--vg-glass-soft),
+        var(--vg-glass-strong),
+        var(--vg-glass-soft));
+    background-size: 200% 100%;
+}
+
+body.ui-v1.skin-vision .v1-empty {
+    border-radius: var(--vg-r-card);
+    border: 1px dashed var(--vg-line);
+    background: var(--vg-glass-soft);
+}
+
+body.ui-v1.skin-vision .v1-empty span { color: var(--vg-faint); }
+
+/* ---------- 8 · Modals: big frosted panes (~90% viewport) ---------- */
+
+body.ui-v1.skin-vision .modal-wrap {
+    background: rgba(20, 24, 34, 0.35);
+    -webkit-backdrop-filter: blur(18px) saturate(1.3);
+    backdrop-filter: blur(18px) saturate(1.3);
+}
+
+body.ui-v1.skin-vision .modal-card {
+    border-radius: var(--vg-r-panel);
+    border: 1px solid var(--vg-hairline);
+    background: var(--vg-glass-strong);
+    -webkit-backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), var(--vg-shadow);
+    width: min(90vw, 760px);
+    max-height: 90vh;
+    overflow-y: auto;
+    color: var(--vg-text);
+}
+
+body.ui-v1.skin-vision.vision-dark .modal-card {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), var(--vg-shadow);
+}
+
+body.ui-v1.skin-vision .modal-card h3,
+body.ui-v1.skin-vision .modal-card h2,
+body.ui-v1.skin-vision .modal-card label {
+    color: var(--vg-text);
+}
+
+body.ui-v1.skin-vision .modal-card p { color: var(--vg-dim); }
+
+body.ui-v1.skin-vision .modal-card input,
+body.ui-v1.skin-vision .modal-card textarea,
+body.ui-v1.skin-vision .modal-card select {
+    background: var(--vg-glass-soft);
+    border: 1px solid var(--vg-hairline-soft);
+    border-radius: var(--vg-r-ctl);
+    color: var(--vg-text);
+}
+
+body.ui-v1.skin-vision .modal-card input::placeholder,
+body.ui-v1.skin-vision .modal-card textarea::placeholder {
+    color: var(--vg-faint);
+}
+
+/* !important matches nexus_refresh.css's pinned .btn-primary */
+body.ui-v1.skin-vision .modal-card .btn-primary,
+body.ui-v1.skin-vision .modal-actions .btn-primary {
+    border-radius: 999px;
+    background: var(--vg-primary-fill) !important;
+    border: 1px solid transparent !important;
+    color: var(--vg-primary-text) !important;
+    box-shadow: var(--vg-shadow-sm) !important;
+}
+
+body.ui-v1.skin-vision .modal-card .btn-ghost,
+body.ui-v1.skin-vision .modal-actions .btn-ghost {
+    border-radius: 999px;
+    background: var(--vg-glass-soft) !important;
+    border: 1px solid var(--vg-hairline-soft) !important;
+    color: var(--vg-text) !important;
+}
+
+/* oversized work surfaces: keep their own layout, adopt the glass */
+body.ui-v1.skin-vision .bt-browser-card,
+body.ui-v1.skin-vision .log-center-card,
+body.ui-v1.skin-vision .settings-card,
+body.ui-v1.skin-vision .command-palette-card {
+    border-radius: var(--vg-r-panel);
+    border: 1px solid var(--vg-hairline);
+    background: var(--vg-glass-strong);
+    -webkit-backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    box-shadow: var(--vg-shadow);
+    color: var(--vg-text);
+}
+
+body.ui-v1.skin-vision .bt-browser-card,
+body.ui-v1.skin-vision .log-center-card {
+    width: min(90vw, 1500px);
+}
+
+/* ---------- 9 · Player: always dark glass ---------- */
+
+body.ui-v1.skin-vision .player-overlay {
+    background: rgba(8, 10, 16, 0.45);
+    -webkit-backdrop-filter: blur(26px) saturate(1.2);
+    backdrop-filter: blur(26px) saturate(1.2);
+}
+
+body.ui-v1.skin-vision .player-box {
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(10, 12, 18, 0.7);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5);
+}
+
+body.ui-v1.skin-vision .player-box.active-focus {
+    border-color: var(--vg-accent);
+    box-shadow: 0 0 0 1px var(--vg-accent-soft), 0 30px 90px rgba(0, 0, 0, 0.5);
+}
+
+body.ui-v1.skin-vision .player-header {
+    background: linear-gradient(to bottom, rgba(6, 8, 12, 0.65) 0%, transparent 100%);
+}
+
+body.ui-v1.skin-vision .video-controls-bar {
+    background: rgba(14, 16, 24, 0.6);
+    -webkit-backdrop-filter: blur(22px) saturate(1.3);
+    backdrop-filter: blur(22px) saturate(1.3);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 26px;
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.45);
+}
+
+body.ui-v1.skin-vision .video-controls-bar input[type="range"] {
+    accent-color: var(--vg-accent-bright);
+}
+
+body.ui-v1.skin-vision .video-controls-bar button {
+    border-radius: 999px;
+}
+
+/* ---------- 10 · Batch bar + toasts ---------- */
+
+body.ui-v1.skin-vision .batch-bar {
+    border-radius: 999px;
+    border: 1px solid var(--vg-hairline);
+    background: var(--vg-glass-strong);
+    -webkit-backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    backdrop-filter: blur(var(--vg-blur)) saturate(1.5);
+    box-shadow: var(--vg-shadow);
+    color: var(--vg-text);
+}
+
+body.ui-v1.skin-vision .batch-bar button { color: var(--vg-text); }
+
+body.ui-v1.skin-vision .batch-selection-chip,
+body.ui-v1.skin-vision .batch-selection-more {
+    background: var(--vg-glass-soft);
+    border: 1px solid var(--vg-hairline-soft);
+    color: var(--vg-dim);
+}
+
+body.ui-v1.skin-vision .toast {
+    border-radius: var(--vg-r-ctl);
+    border: 1px solid var(--vg-hairline);
+    background: var(--vg-glass-strong);
+    -webkit-backdrop-filter: blur(var(--vg-blur-sm));
+    backdrop-filter: blur(var(--vg-blur-sm));
+    color: var(--vg-text);
+    box-shadow: var(--vg-shadow-sm);
+}
+
+/* ---------- 11 · Scrollbars + selection + focus ---------- */
+
+body.ui-v1.skin-vision::-webkit-scrollbar-thumb,
+body.ui-v1.skin-vision .v1-filter-list::-webkit-scrollbar-thumb {
+    background: rgba(60, 66, 84, 0.3);
+}
+
+body.ui-v1.skin-vision.vision-dark::-webkit-scrollbar-thumb,
+body.ui-v1.skin-vision.vision-dark .v1-filter-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+body.ui-v1.skin-vision ::selection {
+    background: var(--vg-accent-soft);
+}
+
+body.ui-v1.skin-vision .v1-nav-btn:focus-visible,
+body.ui-v1.skin-vision .v1-chip:focus-visible,
+body.ui-v1.skin-vision .v1-pill-btn:focus-visible,
+body.ui-v1.skin-vision .v1-primary-btn:focus-visible,
+body.ui-v1.skin-vision .v1-import-btn:focus-visible,
+body.ui-v1.skin-vision .v1-icon-btn:focus-visible,
+body.ui-v1.skin-vision .v1-play:focus-visible,
+body.ui-v1.skin-vision .v1-ghost:focus-visible,
+body.ui-v1.skin-vision .nx-skin-toggle:focus-visible,
+body.ui-v1.skin-vision .vg-tone-toggle:focus-visible {
+    outline: 2px solid var(--vg-accent);
+    outline-offset: 2px;
+}
+
+/* ---------- 12 · Performance + motion ---------- */
+
+/* perf-lite: drop every blur and the ambient image */
+body.ui-v1.skin-vision.perf-lite .v1-sidebar,
+body.ui-v1.skin-vision.perf-lite .v1-header,
+body.ui-v1.skin-vision.perf-lite .v1-command,
+body.ui-v1.skin-vision.perf-lite .v1-filter-pop,
+body.ui-v1.skin-vision.perf-lite .modal-wrap,
+body.ui-v1.skin-vision.perf-lite .modal-card,
+body.ui-v1.skin-vision.perf-lite .bt-browser-card,
+body.ui-v1.skin-vision.perf-lite .log-center-card,
+body.ui-v1.skin-vision.perf-lite .settings-card,
+body.ui-v1.skin-vision.perf-lite .command-palette-card,
+body.ui-v1.skin-vision.perf-lite .player-overlay,
+body.ui-v1.skin-vision.perf-lite .video-controls-bar,
+body.ui-v1.skin-vision.perf-lite .batch-bar,
+body.ui-v1.skin-vision.perf-lite .toast,
+body.ui-v1.skin-vision.perf-lite .v1-source-pill,
+body.ui-v1.skin-vision.perf-lite .v1-quality-pill,
+body.ui-v1.skin-vision.perf-lite .v1-time-pill,
+body.ui-v1.skin-vision.perf-lite .v1-size-pill,
+body.ui-v1.skin-vision.perf-lite .v1-idx-pill,
+body.ui-v1.skin-vision.perf-lite .v1-selected-badge {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+body.ui-v1.skin-vision.perf-lite .vg-ambient img { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    body.ui-v1.skin-vision .vg-ambient img { transition: none; }
+    body.ui-v1.skin-vision .v1-card,
+    body.ui-v1.skin-vision .v1-card:hover {
+        transition: none;
+        transform: none;
+    }
+}
+
+/* ---------- 13 · Reassert over nexus_refresh.css ----------
+   nexus_refresh.css loads AFTER the skins (index.html line ~1087)
+   and pins its "Prism Alloy" chrome with !important on plain
+   body.ui-v1 selectors. Everything it pins must be re-declared
+   here with !important; the extra .skin-vision class then wins
+   on specificity. Values mirror the sections above. */
+
+body.ui-v1.skin-vision {
+    background:
+        radial-gradient(ellipse 80% 60% at 20% 0%, rgba(255, 252, 246, 0.9), transparent 60%),
+        radial-gradient(ellipse 70% 55% at 85% 15%, rgba(214, 222, 234, 0.8), transparent 65%),
+        linear-gradient(180deg, #eceae6 0%, #dfe0e4 55%, #d3d6dc 100%) !important;
+    color: var(--vg-text);
+}
+
+body.ui-v1.skin-vision.vision-dark {
+    background:
+        radial-gradient(ellipse 80% 60% at 20% 0%, rgba(52, 58, 78, 0.7), transparent 60%),
+        radial-gradient(ellipse 70% 55% at 85% 15%, rgba(38, 46, 64, 0.6), transparent 65%),
+        linear-gradient(180deg, #171922 0%, #12141c 55%, #0e1016 100%) !important;
+}
+
+body.ui-v1.skin-vision .v1-sidebar {
+    background: var(--vg-glass) !important;
+    border: 1px solid var(--vg-hairline) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), var(--vg-shadow) !important;
+}
+
+body.ui-v1.skin-vision.vision-dark .v1-sidebar {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), var(--vg-shadow) !important;
+}
+
+body.ui-v1.skin-vision .v1-brand-name {
+    color: var(--vg-text) !important;
+    font-family: 'Manrope', sans-serif;
+    letter-spacing: -0.01em;
+    text-shadow: none;
+}
+
+body.ui-v1.skin-vision .v1-brand-sub,
+body.ui-v1.skin-vision .v1-nav-label {
+    color: var(--vg-faint) !important;
+    font-family: 'Manrope', sans-serif;
+}
+
+body.ui-v1.skin-vision .v1-nav-btn {
+    color: var(--vg-dim) !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+}
+
+body.ui-v1.skin-vision .v1-nav-btn:hover {
+    color: var(--vg-text) !important;
+    border-color: var(--vg-hairline-soft) !important;
+    background: var(--vg-glass-soft) !important;
+    transform: none;
+}
+
+body.ui-v1.skin-vision .v1-nav-btn.active {
+    color: var(--vg-text) !important;
+    border-color: var(--vg-hairline) !important;
+    background: var(--vg-glass-strong) !important;
+    box-shadow: var(--vg-shadow-sm) !important;
+}
+
+body.ui-v1.skin-vision .v1-nav-btn .material-icons-round { color: var(--vg-dim); }
+body.ui-v1.skin-vision .v1-nav-btn.active .material-icons-round { color: var(--vg-accent); }
+
+body.ui-v1.skin-vision .v1-header {
+    background: var(--vg-glass) !important;
+}
+
+body.ui-v1.skin-vision .v1-search-wrap {
+    border: 1px solid var(--vg-hairline-soft) !important;
+    background: var(--vg-glass-strong) !important;
+    box-shadow: none !important;
+}
+
+body.ui-v1.skin-vision .v1-search-wrap:focus-within {
+    box-shadow: 0 0 0 3px var(--vg-accent-soft) !important;
+}
+
+body.ui-v1.skin-vision .v1-search-wrap input {
+    color: var(--vg-text) !important;
+}
+
+body.ui-v1.skin-vision .v1-search-wrap input::placeholder {
+    color: var(--vg-faint) !important;
+}
+
+body.ui-v1.skin-vision .v1-icon-btn {
+    color: var(--vg-text) !important;
+    border: 1px solid var(--vg-hairline-soft) !important;
+    background: var(--vg-glass-strong) !important;
+    box-shadow: var(--vg-shadow-sm) !important;
+}
+
+body.ui-v1.skin-vision .v1-icon-btn:hover {
+    color: var(--vg-text) !important;
+    border-color: var(--vg-hairline) !important;
+    background: var(--vg-glass-hover) !important;
+    box-shadow: var(--vg-shadow-sm) !important;
+}
+
+body.ui-v1.skin-vision .v1-import-wrap {
+    border: 1px solid var(--vg-hairline-soft) !important;
+    background: var(--vg-glass-strong) !important;
+    box-shadow: none !important;
+}
+
+body.ui-v1.skin-vision .v1-import-wrap input {
+    color: var(--vg-text) !important;
+}
+
+body.ui-v1.skin-vision .v1-chip,
+body.ui-v1.skin-vision .v1-filter-btn,
+body.ui-v1.skin-vision .v1-pill-btn {
+    color: var(--vg-text) !important;
+    border: 1px solid var(--vg-hairline-soft) !important;
+    background: var(--vg-glass-strong) !important;
+    border-radius: 999px !important;
+    font-family: 'Manrope', sans-serif;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0;
+    box-shadow: none !important;
+}
+
+body.ui-v1.skin-vision .v1-chip:hover,
+body.ui-v1.skin-vision .v1-filter-btn:hover,
+body.ui-v1.skin-vision .v1-pill-btn:hover {
+    color: var(--vg-text) !important;
+    border-color: var(--vg-hairline) !important;
+    background: var(--vg-glass-hover) !important;
+}
+
+body.ui-v1.skin-vision .v1-chip.active,
+body.ui-v1.skin-vision .v1-pill-btn.active {
+    color: var(--vg-primary-text) !important;
+    border-color: transparent !important;
+    background: var(--vg-primary-fill) !important;
+    box-shadow: var(--vg-shadow-sm) !important;
+}
+
+body.ui-v1.skin-vision .v1-primary-btn,
+body.ui-v1.skin-vision .v1-import-btn {
+    color: var(--vg-primary-text) !important;
+    border: 1px solid transparent !important;
+    background: var(--vg-primary-fill) !important;
+    box-shadow: var(--vg-shadow-sm) !important;
+    font-weight: 700 !important;
+}
+
+body.ui-v1.skin-vision .modal-card,
+body.ui-v1.skin-vision .settings-card {
+    border: 1px solid var(--vg-hairline) !important;
+    background: var(--vg-glass-strong) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), var(--vg-shadow) !important;
+}
+
+body.ui-v1.skin-vision.vision-dark .modal-card,
+body.ui-v1.skin-vision.vision-dark .settings-card {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), var(--vg-shadow) !important;
+}
+
+body.ui-v1.skin-vision .batch-bar,
+body.ui-v1.skin-vision .nexus-empty-state {
+    border: 1px solid var(--vg-hairline) !important;
+    background: var(--vg-glass-strong) !important;
+    box-shadow: var(--vg-shadow) !important;
+}
+
+body.ui-v1.skin-vision ::-webkit-scrollbar-thumb {
+    background: rgba(60, 66, 84, 0.3) !important;
+}
+
+body.ui-v1.skin-vision.vision-dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16) !important;
+}
+
+body.ui-v1.skin-vision button:focus-visible,
+body.ui-v1.skin-vision input:focus-visible,
+body.ui-v1.skin-vision a:focus-visible {
+    outline: 2px solid var(--vg-accent);
+    outline-offset: 2px;
+}
+
+/* ---------- 14 · Responsive ---------- */
+
+@media (max-width: 1024px) {
+    body.ui-v1.skin-vision .v1-shell {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    body.ui-v1.skin-vision .v1-sidebar {
+        height: auto;
+        top: auto;
+    }
+
+    body.ui-v1.skin-vision .modal-card {
+        width: min(94vw, 760px);
+    }
+}

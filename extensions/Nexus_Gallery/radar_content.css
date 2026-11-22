@@ -1,0 +1,61 @@
+/* NEXUS RADAR badges */
+.nx-radar-badge {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    z-index: 2147483600;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    font: 700 12px/1 system-ui, sans-serif;
+    color: #fff;
+    box-shadow: 0 2px 8px rgb(0 0 0 / .5);
+    pointer-events: none;
+    transition: transform .15s cubic-bezier(.22, 1.4, .36, 1);
+}
+
+.nx-radar-slot-right {
+    left: auto;
+    right: 6px;
+}
+
+.nx-radar-slot-right-below {
+    top: 34px;
+}
+
+.nx-radar-library {
+    background: oklch(0.62 0.17 150);
+}
+
+.nx-radar-discovered {
+    background: oklch(0.70 0.15 85);
+}
+
+/* unknown → import affordance, only visible on card hover */
+.nx-radar-import {
+    background: oklch(0.55 0.18 300);
+    opacity: 0;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+a:hover > .nx-radar-import,
+*:hover > .nx-radar-import {
+    opacity: 1;
+}
+
+.nx-radar-import:hover {
+    transform: scale(1.25);
+}
+
+.nx-radar-busy {
+    animation: nx-radar-spin 1s linear infinite;
+}
+
+@keyframes nx-radar-spin {
+    to { transform: rotate(360deg); }
+}

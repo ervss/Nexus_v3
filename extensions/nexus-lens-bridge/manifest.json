@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Nexus Lens Bridge",
+  "version": "1.1.0",
+  "description": "User-initiated Google Lens Browser Assist for the local Nexus dashboard.",
+  "permissions": ["tabs", "storage"],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "http://localhost/*",
+    "https://lens.google.com/*",
+    "https://www.google.com/*",
+    "https://www.google.sk/*"
+  ],
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://127.0.0.1/*", "http://localhost/*"],
+      "js": ["dashboard-bridge.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://lens.google.com/*",
+        "https://www.google.com/*",
+        "https://www.google.sk/*"
+      ],
+      "js": ["lens-assist.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Nexus Lens Bridge"
+  }
+}
