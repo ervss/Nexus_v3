@@ -58,6 +58,9 @@ async def vault_search(
     source: str = Query("", max_length=120),
     sort: str = Query("relevance", max_length=32),
     limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0, le=50000),
+    browse: bool = Query(False),
+    deduplicate: bool = Query(True),
     db: Session = Depends(get_db),
     auth: bool = Depends(check_auth),
 ):
@@ -74,6 +77,9 @@ async def vault_search(
         source_filter=source,
         sort=sort,
         limit_per_bucket=limit,
+        offset=offset,
+        browse=browse,
+        deduplicate=deduplicate,
     )
 
 

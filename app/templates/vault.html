@@ -162,7 +162,12 @@
         <div class="empty-state" id="vaultEmptyState">
           <span class="material-icons-round">local_movies</span>
           <h2>Prehľadaj svoj lokálny trezor</h2>
-          <p>Zadaj meno alebo kľúčové slovo hore. Následne vieš výsledky okamžite filtrovať, prehrávať, odkladať do Stashu alebo hromadne importovať.</p>
+          <p>Zadaj meno alebo kľúčové slovo hore, alebo klikni na trezor / tlačidlo nižšie pre okamžité prehliadanie najnovších záznamov.</p>
+          <div style="margin:12px 0 6px">
+            <button id="browseLatestBtn" class="btn btn-cyan-glass" type="button">
+              <span class="material-icons-round">explore</span> Prehliadať najnovšie v trezoroch
+            </button>
+          </div>
           <div class="nx-vault-recent" id="recentQueriesRow"></div>
           <div class="nx-vault-stats-grid" id="vaultStatsGrid"></div>
         </div>
@@ -243,6 +248,9 @@
   let statsBuckets = [];
   let activeBucket = 'all';
   let lastSearchData = null;
+  let lastFetchedBuckets = 'all';
+  let currentOffset = 0;
+  let inlineFilterTimer = null;
   let visibleItems = [];
   const selectedIds = new Set();
   const stashedIds = new Set();
@@ -390,15 +398,26 @@
 
     for (const b of statsBuckets) {
       const cnt = filteredByBucket ? (filteredByBucket[b.id] ?? 0) : b.count;
+      const hasMoreMark = (filteredByBucket && lastSearchData?.bucket_has_more?.[b.id]) ? '+' : '';
       html += `<button type="button" class="chip ${activeBucket === b.id ? 'active' : ''}" data-bucket="${esc(b.id)}">
         <span class="material-icons-round">${esc(b.icon)}</span> ${esc(b.label)}
-        <span class="n">${Number(cnt || 0).toLocaleString('en-US').replace(/,/g, ' ')}</span>
+        <span class="n">${Number(cnt || 0).toLocaleString('en-US').replace(/,/g, ' ')}${hasMoreMark}</span>
       </button>`;
     }
     chipsEl.innerHTML = html;
     chipsEl.querySelectorAll('.chip').forEach(btn => {
       btn.addEventListener('click', () => {
-        activeBucket = btn.dataset.bucket || 'all';
+        const nextBucket = btn.dataset.bucket || 'all';
+        activeBucket = nextBucket;
+        if (!lastSearchData) {
+          runSearch({ browse: !queryInput.value.trim() });
+          return;
+        }
+        if (lastFetchedBuckets !== 'all' && lastFetchedBuckets !== nextBucket) {
+          runSearch();
+          return;
+        }
+        syncUrlState(Boolean(lastSearchData?.browse));
         renderChips();
         renderResults();
       });
@@ -837,7 +856,14 @@
     visibleItems = visible;
 
     const errCount = Object.keys(lastSearchData.errors || {}).length;
-    statusBar.innerHTML = `<span>Dotaz <strong>"${esc(lastSearchData.query)}"</strong> · zobrazené <strong>${visible.length}</strong> z ${allItems.length} nájdených · čas <strong>${lastSearchData.elapsed_ms} ms</strong> · tip: <strong>Ctrl + klik</strong> označí kartu${errCount ? ` · <span style="color:#fca5a5">${errCount} trezor(y) s chybou</span>` : ''}</span>`;
+    const modeLabel = lastSearchData.browse
+      ? 'Prehliadanie trezorov'
+      : `Dotaz <strong>"${esc(lastSearchData.query)}"</strong>`;
+    const hasMoreCurrent = activeBucket === 'all'
+      ? Boolean(lastSearchData.has_more)
+      : Boolean(lastSearchData.bucket_has_more?.[activeBucket]);
+    const moreHint = hasMoreCurrent ? ' (ďalšie dostupné)' : '';
+    statusBar.innerHTML = `<span>${modeLabel} · zobrazené <strong>${visible.length}</strong> z ${allItems.length} nájdených${moreHint} · čas <strong>${lastSearchData.elapsed_ms} ms</strong> · tip: <strong>Ctrl + klik</strong> označí kartu${errCount ? ` · <span style="color:#fca5a5">${errCount} trezor(y) s chybou</span>` : ''}</span>`;
 
     if (!visible.length) {
       resultsEl.innerHTML = `<div class="empty-state">
@@ -996,37 +1022,128 @@
     });
     resultsEl.innerHTML = '';
     resultsEl.appendChild(grid);
+
+    if (hasMoreCurrent) {
+      const moreWrap = document.createElement('div');
+      moreWrap.style.cssText = 'display:flex;justify-content:center;padding:22px 0 10px';
+      const moreBtn = document.createElement('button');
+      moreBtn.id = 'loadMoreBtn';
+      moreBtn.type = 'button';
+      moreBtn.className = 'btn btn-cyan-glass';
+      moreBtn.innerHTML = '<span class="material-icons-round">expand_more</span> Načítať ďalšie výsledky';
+      moreBtn.addEventListener('click', () => {
+        moreBtn.disabled = true;
+        moreBtn.innerHTML = '<span class="material-icons-round">hourglass_top</span> Načítavam…';
+        runSearch({ append: true });
+      });
+      moreWrap.appendChild(moreBtn);
+      resultsEl.appendChild(moreWrap);
+    }
+
     updateSelectionUI();
   }
 
-  async function runSearch() {
+  function syncUrlState(browseFlag = false) {
+    const nextUrl = new URL(window.location.href);
     const q = queryInput.value.trim();
-    if (!q) return;
-    rememberQuery(q);
+    const setOrDel = (k, val, defVal = '') => {
+      if (val !== undefined && val !== null && String(val) !== '' && String(val) !== String(defVal)) {
+        nextUrl.searchParams.set(k, String(val));
+      } else {
+        nextUrl.searchParams.delete(k);
+      }
+    };
+    setOrDel('q', q, '');
+    setOrDel('browse', browseFlag && !q ? '1' : '', '');
+    setOrDel('bucket', activeBucket, 'all');
+    setOrDel('sort', sortSelect.value, 'relevance');
+    setOrDel('min_h', minHeightSelect.value, '0');
+    setOrDel('min_dur', minDurationSelect.value, '0');
+    setOrDel('min_sz', minSizeSelect.value, '0');
+    setOrDel('state', stateSelect.value, 'all');
+    setOrDel('limit', limitSelect.value, '100');
+    setOrDel('filter', inlineFilterInput.value.trim(), '');
+    window.history.replaceState({}, '', nextUrl.toString());
+  }
+
+  function restoreUrlState() {
+    const sp = new URLSearchParams(window.location.search);
+    const q = sp.get('q') || '';
+    const browse = sp.get('browse') === '1';
+    if (q) queryInput.value = q;
+    if (sp.get('bucket')) activeBucket = sp.get('bucket');
+    if (sp.get('sort')) sortSelect.value = sp.get('sort');
+    if (sp.get('min_h')) minHeightSelect.value = sp.get('min_h');
+    if (sp.get('min_dur')) minDurationSelect.value = sp.get('min_dur');
+    if (sp.get('min_sz')) minSizeSelect.value = sp.get('min_sz');
+    if (sp.get('state')) stateSelect.value = sp.get('state');
+    if (sp.get('limit')) limitSelect.value = sp.get('limit');
+    if (sp.get('filter')) inlineFilterInput.value = sp.get('filter');
+    return { hasInitial: Boolean(q || browse), browse };
+  }
+
+  async function runSearch({ append = false, browse = null } = {}) {
+    const q = queryInput.value.trim();
+    const useBrowse = browse !== null ? Boolean(browse) : !q;
+    if (q) rememberQuery(q);
+
+    const limitVal = Number(limitSelect.value || 100);
+    if (append) {
+      currentOffset += limitVal;
+    } else {
+      currentOffset = 0;
+    }
+
     searchBtn.disabled = true;
-    statusBar.innerHTML = '<span>Prehľadávam lokálne trezory…</span>';
+    if (!append) {
+      statusBar.innerHTML = '<span>Prehľadávam lokálne trezory…</span>';
+    }
     try {
       const url = new URL('/api/vault/search', window.location.origin);
       url.searchParams.set('q', q);
+      if (useBrowse && !q) url.searchParams.set('browse', 'true');
+      if (activeBucket !== 'all') url.searchParams.set('buckets', activeBucket);
       url.searchParams.set('min_height', minHeightSelect.value || '0');
       url.searchParams.set('min_duration', minDurationSelect.value || '0');
       url.searchParams.set('min_size_mb', minSizeSelect.value || '0');
+      if (stateSelect.value === 'playable') url.searchParams.set('only_playable', 'true');
+      if (stateSelect.value === 'importable') url.searchParams.set('only_importable', 'true');
+      const srcFilter = inlineFilterInput.value.trim();
+      if (srcFilter) url.searchParams.set('source', srcFilter);
       url.searchParams.set('sort', sortSelect.value || 'relevance');
-      url.searchParams.set('limit', limitSelect.value || '100');
+      url.searchParams.set('limit', String(limitVal));
+      url.searchParams.set('offset', String(currentOffset));
+
       const res = await fetch(url.toString());
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Vyhľadávanie zlyhalo');
-      if (Array.isArray(data.items)) {
-        data.items.forEach((it, i) => { it._origIndex = i; });
+
+      lastFetchedBuckets = activeBucket;
+      if (append && lastSearchData) {
+        const existingIds = new Set((lastSearchData.items || []).map(it => it.id));
+        const baseIdx = (lastSearchData.items || []).length;
+        const fresh = (Array.isArray(data.items) ? data.items : []).filter(it => !existingIds.has(it.id));
+        fresh.forEach((it, i) => { it._origIndex = baseIdx + i; });
+        lastSearchData.items = [...(lastSearchData.items || []), ...fresh];
+        lastSearchData.has_more = Boolean(data.has_more);
+        lastSearchData.bucket_has_more = {
+          ...(lastSearchData.bucket_has_more || {}),
+          ...(data.bucket_has_more || {}),
+        };
+        lastSearchData.elapsed_ms = data.elapsed_ms;
+        lastSearchData.total = lastSearchData.items.length;
+      } else {
+        if (Array.isArray(data.items)) {
+          data.items.forEach((it, i) => { it._origIndex = i; });
+        }
+        if (lastSearchData && lastSearchData.query !== q) {
+          selectedIds.clear();
+          lastSelectedIdx = -1;
+        }
+        lastSearchData = data;
       }
-      if (lastSearchData && lastSearchData.query !== q) {
-        selectedIds.clear();
-        lastSelectedIdx = -1;
-      }
-      lastSearchData = data;
-      const nextUrl = new URL(window.location.href);
-      nextUrl.searchParams.set('q', q);
-      window.history.replaceState({}, '', nextUrl.toString());
+
+      syncUrlState(useBrowse && !q);
       renderChips();
       renderResults();
     } catch (err) {
@@ -1050,7 +1167,7 @@
     }
   }
 
-  searchBtn.addEventListener('click', runSearch);
+  searchBtn.addEventListener('click', () => runSearch());
   queryInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
 
   topSplitBtn.addEventListener('click', () => {
@@ -1099,16 +1216,27 @@
     }
   });
 
-  sortSelect.addEventListener('change', () => { renderChips(); renderResults(); });
-  minDurationSelect.addEventListener('change', () => { renderChips(); renderResults(); });
-  minSizeSelect.addEventListener('change', () => { renderChips(); renderResults(); });
-  stateSelect.addEventListener('change', () => { renderChips(); renderResults(); });
-  inlineFilterInput.addEventListener('input', () => { renderChips(); renderResults(); });
-  minHeightSelect.addEventListener('change', () => {
-    if (lastSearchData) { renderChips(); renderResults(); }
-    if (queryInput.value.trim()) runSearch();
+  const triggerBackendRefresh = () => {
+    if (lastSearchData || queryInput.value.trim()) {
+      runSearch();
+    }
+  };
+
+  sortSelect.addEventListener('change', triggerBackendRefresh);
+  minDurationSelect.addEventListener('change', triggerBackendRefresh);
+  minSizeSelect.addEventListener('change', triggerBackendRefresh);
+  stateSelect.addEventListener('change', triggerBackendRefresh);
+  minHeightSelect.addEventListener('change', triggerBackendRefresh);
+  limitSelect.addEventListener('change', triggerBackendRefresh);
+
+  inlineFilterInput.addEventListener('input', () => {
+    renderChips();
+    renderResults();
+    clearTimeout(inlineFilterTimer);
+    if (lastSearchData) {
+      inlineFilterTimer = setTimeout(() => runSearch(), 350);
+    }
   });
-  limitSelect.addEventListener('change', () => { if (queryInput.value.trim()) runSearch(); });
   cardSizeSelect.addEventListener('change', () => {
     const px = Number(cardSizeSelect.value || 355);
     document.documentElement.style.setProperty('--card-min', `${px}px`);
@@ -1125,25 +1253,29 @@
   resetFiltersBtn.addEventListener('click', () => {
     activeBucket = 'all';
     sortSelect.value = 'relevance';
-    const prevMinH = minHeightSelect.value;
     minHeightSelect.value = '0';
     minDurationSelect.value = '0';
     minSizeSelect.value = '0';
     stateSelect.value = 'all';
     inlineFilterInput.value = '';
-    if (prevMinH !== '0' && queryInput.value.trim()) {
+    if (lastSearchData || queryInput.value.trim()) {
       runSearch();
     } else {
+      syncUrlState(false);
       renderChips();
       renderResults();
     }
   });
 
+  document.getElementById('browseLatestBtn')?.addEventListener('click', () => {
+    runSearch({ browse: true });
+  });
+
   loadStats().then(() => {
-    const initQ = new URLSearchParams(window.location.search).get('q');
-    if (initQ) {
-      queryInput.value = initQ;
-      runSearch();
+    const initState = restoreUrlState();
+    renderChips();
+    if (initState.hasInitial) {
+      runSearch({ browse: initState.browse });
     }
   });
 })();

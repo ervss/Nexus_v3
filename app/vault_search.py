@@ -20,7 +20,7 @@ import urllib.parse
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
-from sqlalchemy import func, text
+from sqlalchemy import String, cast, func, or_, text
 from sqlalchemy.orm import Session
 
 from .database import (
@@ -174,17 +174,53 @@ def _table_exists(db: Session, table_name: str) -> bool:
         return False
 
 
-def _search_library(db: Session, query: str, min_height: int, limit: int) -> List[Dict[str, Any]]:
-    tokens = _tokenize(query)
-    if not tokens:
-        return []
+def _library_order_sql(sort_key: str, *, use_fts: bool) -> str:
+    if sort_key == "quality_desc":
+        return "COALESCE(v.height, 0) DESC, COALESCE(v.file_size_mb, 0) DESC, v.id DESC"
+    if sort_key == "duration_desc":
+        return "COALESCE(v.duration, 0) DESC, COALESCE(v.height, 0) DESC, v.id DESC"
+    if sort_key == "size_desc":
+        return "COALESCE(v.file_size_mb, 0) DESC, COALESCE(v.height, 0) DESC, v.id DESC"
+    if sort_key == "newest":
+        return "COALESCE(v.created_at, '') DESC, v.id DESC"
+    if sort_key == "title_asc":
+        return "LOWER(COALESCE(v.title, '')) ASC, COALESCE(v.height, 0) DESC, v.id DESC"
+    if use_fts:
+        return "bm25(videos_fts), COALESCE(v.height, 0) DESC, v.id DESC"
+    return "COALESCE(v.height, 0) DESC, v.id DESC"
 
+
+def _search_library(
+    db: Session,
+    query: str,
+    min_height: int,
+    limit: int,
+    *,
+    min_duration: int = 0,
+    min_size_mb: float = 0.0,
+    only_importable: bool = False,
+    source_filter: str = "",
+    sort_key: str = "relevance",
+    offset: int = 0,
+    browse: bool = False,
+) -> Tuple[List[Dict[str, Any]], bool]:
+    if only_importable:
+        return [], False
+    tokens = _tokenize(query)
+    if not tokens and not browse:
+        return [], False
+
+    src_low = (source_filter or "").strip().casefold()
+    src_like = f"%{src_low}%" if src_low else ""
+    fetch_lim = limit + 1
     rows: List[Any] = []
-    if _table_exists(db, "videos_fts"):
+
+    if tokens and _table_exists(db, "videos_fts"):
         fts_expr = _build_fts_prefix_expr(query)
         if fts_expr:
+            order_sql = _library_order_sql(sort_key, use_fts=True)
             sql = text(
-                """
+                f"""
                 SELECT v.id, v.title, v.url, v.source_url, v.thumbnail_path, v.original_thumbnail_url,
                        v.duration, v.height, v.quality, v.file_size_mb, v.tags, v.ai_tags,
                        v.models, v.batch_name, v.storage_type, v.status, v.created_at
@@ -192,13 +228,32 @@ def _search_library(db: Session, query: str, min_height: int, limit: int) -> Lis
                 JOIN videos v ON v.id = f.rowid
                 WHERE videos_fts MATCH :match_expr
                   AND (:min_h <= 0 OR COALESCE(v.height, 0) >= :min_h)
-                ORDER BY bm25(videos_fts), COALESCE(v.height, 0) DESC, v.id DESC
-                LIMIT :lim
+                  AND (:min_dur <= 0 OR COALESCE(v.duration, 0) >= :min_dur)
+                  AND (:min_sz <= 0 OR COALESCE(v.file_size_mb, 0) >= :min_sz)
+                  AND (:src_like = '' OR LOWER(
+                        COALESCE(v.storage_type, '') || ' ' || COALESCE(v.batch_name, '') || ' ' ||
+                        COALESCE(v.models, '') || ' ' || COALESCE(v.tags, '') || ' ' ||
+                        COALESCE(v.url, '') || ' ' || COALESCE(v.source_url, '')
+                  ) LIKE :src_like)
+                ORDER BY {order_sql}
+                LIMIT :lim OFFSET :off
                 """
             )
-            rows = db.execute(sql, {"match_expr": fts_expr, "min_h": min_height, "lim": limit}).mappings().all()
+            rows = db.execute(
+                sql,
+                {
+                    "match_expr": fts_expr,
+                    "min_h": min_height,
+                    "min_dur": min_duration,
+                    "min_sz": min_size_mb,
+                    "src_like": src_like,
+                    "lim": fetch_lim,
+                    "off": offset,
+                },
+            ).mappings().all()
 
-    if not rows:
+    if not rows and (browse or tokens):
+        # Fallback to ORM when FTS table is absent or FTS prefix returned nothing
         q = db.query(Video)
         for tok in tokens:
             like = f"%{tok}%"
@@ -211,8 +266,37 @@ def _search_library(db: Session, query: str, min_height: int, limit: int) -> Lis
                 | (Video.source_url.ilike(like))
             )
         if min_height > 0:
-            q = q.filter(Video.height >= min_height)
-        orm_rows = q.order_by(Video.height.desc(), Video.id.desc()).limit(limit).all()
+            q = q.filter(func.coalesce(Video.height, 0) >= min_height)
+        if min_duration > 0:
+            q = q.filter(func.coalesce(Video.duration, 0) >= min_duration)
+        if min_size_mb > 0:
+            q = q.filter(func.coalesce(Video.file_size_mb, 0) >= min_size_mb)
+        if src_like:
+            q = q.filter(
+                (Video.storage_type.ilike(src_like))
+                | (Video.batch_name.ilike(src_like))
+                | (Video.models.ilike(src_like))
+                | (Video.tags.ilike(src_like))
+                | (Video.url.ilike(src_like))
+                | (Video.source_url.ilike(src_like))
+            )
+
+        if sort_key == "quality_desc":
+            q = q.order_by(func.coalesce(Video.height, 0).desc(), func.coalesce(Video.file_size_mb, 0).desc(), Video.id.desc())
+        elif sort_key == "duration_desc":
+            q = q.order_by(func.coalesce(Video.duration, 0).desc(), func.coalesce(Video.height, 0).desc(), Video.id.desc())
+        elif sort_key == "size_desc":
+            q = q.order_by(func.coalesce(Video.file_size_mb, 0).desc(), func.coalesce(Video.height, 0).desc(), Video.id.desc())
+        elif sort_key == "newest":
+            q = q.order_by(Video.created_at.desc(), Video.id.desc())
+        elif sort_key == "title_asc":
+            q = q.order_by(func.lower(func.coalesce(Video.title, "")).asc(), func.coalesce(Video.height, 0).desc())
+        elif browse and not tokens:
+            q = q.order_by(Video.id.desc())
+        else:
+            q = q.order_by(func.coalesce(Video.height, 0).desc(), Video.id.desc())
+
+        orm_rows = q.offset(offset).limit(fetch_lim).all()
         rows = [
             {
                 "id": v.id,
@@ -234,6 +318,9 @@ def _search_library(db: Session, query: str, min_height: int, limit: int) -> Lis
             }
             for v in orm_rows
         ]
+
+    has_more = len(rows) > limit
+    rows = rows[:limit]
 
     items: List[Dict[str, Any]] = []
     for r in rows:
@@ -274,24 +361,62 @@ def _search_library(db: Session, query: str, min_height: int, limit: int) -> Lis
             "playable_url": playable_url,
             "created_at": _iso_date(r["created_at"]),
         })
-    return items
+    return items, has_more
 
 
-def _search_telegram(db: Session, query: str, min_height: int, limit: int) -> List[Dict[str, Any]]:
+def _search_telegram(
+    db: Session,
+    query: str,
+    min_height: int,
+    limit: int,
+    *,
+    min_duration: int = 0,
+    min_size_mb: float = 0.0,
+    only_importable: bool = False,
+    source_filter: str = "",
+    sort_key: str = "relevance",
+    offset: int = 0,
+    browse: bool = False,
+) -> Tuple[List[Dict[str, Any]], bool]:
     if not _table_exists(db, "telegram_media_index"):
-        return []
+        return [], False
+    tokens = _tokenize(query)
+    if not tokens and not browse:
+        return [], False
+
+    tg_sort = {
+        "quality_desc": "quality",
+        "duration_desc": "duration",
+        "size_desc": "size",
+        "newest": "date",
+    }.get(sort_key, "relevance")
+
+    src_low = (source_filter or "").strip().casefold()
+    if src_low:
+        fetch_lim = min(2000, max(limit + offset + 1, (limit + offset) * 3))
+        fetch_off = 0
+    else:
+        fetch_lim = limit + 1
+        fetch_off = offset
+
     hits = search_telegram_fts(
         db,
-        query=query,
-        limit=limit,
+        query=query if tokens else "",
+        limit=fetch_lim,
+        min_duration=min_duration,
         min_quality=min_height,
-        sort="relevance",
+        min_size_mb=min_size_mb,
+        offset=fetch_off,
+        sort=tg_sort,
         deduplicate=True,
     )
     items: List[Dict[str, Any]] = []
     for row in hits:
         chat_id = row.get("chat_id")
         message_id = row.get("message_id")
+        can_imp = bool(chat_id and message_id)
+        if only_importable and not can_imp:
+            continue
         title = str(row.get("title") or row.get("file_name") or row.get("caption") or "Telegram video").strip()
         h = _infer_height(row.get("effective_res") or row.get("height"), row.get("quality"), title)
         if min_height > 0 and h < min_height:
@@ -299,13 +424,20 @@ def _search_telegram(db: Session, query: str, min_height: int, limit: int) -> Li
         stream_url = row.get("stream_url") or (f"/api/v1/telegram/stream/{chat_id}/{message_id}" if chat_id and message_id else "")
         size_bytes = float(row.get("size_bytes") or 0)
         channel = str(row.get("channel") or row.get("author") or "").strip()
+        source_label = f"Telegram · {channel}" if channel else "Telegram"
+        subtitle = str(row.get("file_name") or row.get("caption") or "")[:120]
+        url_val = row.get("url") or stream_url
+        if src_low:
+            hay = f"{source_label} {subtitle} {url_val}".casefold()
+            if src_low not in hay:
+                continue
         items.append({
             "id": f"telegram:{chat_id}:{message_id}",
             "bucket": "telegram",
-            "source_label": f"Telegram · {channel}" if channel else "Telegram",
+            "source_label": source_label,
             "title": title,
-            "subtitle": str(row.get("file_name") or row.get("caption") or "")[:120],
-            "url": row.get("url") or stream_url,
+            "subtitle": subtitle,
+            "url": url_val,
             "source_url": row.get("url") or "",
             "thumbnail": str(row.get("thumbnail") or ""),
             "duration_sec": int(float(row.get("duration_sec") or 0)),
@@ -314,7 +446,7 @@ def _search_telegram(db: Session, query: str, min_height: int, limit: int) -> Li
             "size_mb": round(size_bytes / 1048576.0, 1) if size_bytes > 0 else None,
             "status": "indexed",
             "video_id": None,
-            "can_import": bool(chat_id and message_id),
+            "can_import": can_imp,
             "playable_url": stream_url,
             "created_at": _iso_date(row.get("date")),
             "telegram_meta": {
@@ -331,15 +463,35 @@ def _search_telegram(db: Session, query: str, min_height: int, limit: int) -> Li
                 "stream_url": stream_url,
             },
         })
-    return items
+
+    if src_low:
+        sliced = items[offset : offset + limit]
+        return sliced, len(items) > (offset + limit)
+
+    has_more = len(items) > limit
+    return items[:limit], has_more
 
 
-def _search_forums(db: Session, query: str, min_height: int, limit: int) -> List[Dict[str, Any]]:
-    if not _table_exists(db, "forum_links"):
-        return []
+def _search_forums(
+    db: Session,
+    query: str,
+    min_height: int,
+    limit: int,
+    *,
+    min_duration: int = 0,
+    min_size_mb: float = 0.0,
+    only_playable: bool = False,
+    only_importable: bool = False,
+    source_filter: str = "",
+    sort_key: str = "relevance",
+    offset: int = 0,
+    browse: bool = False,
+) -> Tuple[List[Dict[str, Any]], bool]:
+    if only_playable or not _table_exists(db, "forum_links"):
+        return [], False
     tokens = _tokenize(query)
-    if not tokens:
-        return []
+    if not tokens and not browse:
+        return [], False
 
     q = (
         db.query(ForumLink, ForumThread, ForumPost)
@@ -359,8 +511,36 @@ def _search_forums(db: Session, query: str, min_height: int, limit: int) -> List
             | (ForumPost.hashtags.ilike(like))
             | (ForumPost.author.ilike(like))
         )
+    if min_duration > 0:
+        q = q.filter(func.coalesce(ForumLink.duration, 0) >= min_duration)
+    if min_size_mb > 0:
+        q = q.filter(func.coalesce(ForumLink.size_bytes, 0) >= min_size_mb * 1048576.0)
+    if only_importable:
+        q = q.filter(or_(ForumLink.status.is_(None), ForumLink.status != "imported"))
+    src_low = (source_filter or "").strip().casefold()
+    if src_low:
+        src_like = f"%{src_low}%"
+        q = q.filter(
+            (ForumLink.platform.ilike(src_like))
+            | (ForumLink.url.ilike(src_like))
+            | (ForumThread.board.ilike(src_like))
+            | (ForumThread.title.ilike(src_like))
+            | (ForumPost.author.ilike(src_like))
+        )
 
-    rows = q.order_by(ForumLink.id.desc()).limit(limit * 2).all()
+    if sort_key == "duration_desc":
+        q = q.order_by(func.coalesce(ForumLink.duration, 0).desc(), ForumLink.id.desc())
+    elif sort_key == "size_desc":
+        q = q.order_by(func.coalesce(ForumLink.size_bytes, 0).desc(), ForumLink.id.desc())
+    elif sort_key == "newest":
+        q = q.order_by(func.coalesce(ForumPost.posted_at, ForumLink.created_at).desc(), ForumLink.id.desc())
+    elif sort_key == "title_asc":
+        q = q.order_by(func.lower(func.coalesce(ForumLink.title, ForumThread.title, ForumLink.url)).asc())
+    else:
+        q = q.order_by(ForumLink.id.desc())
+
+    fetch_mult = 2 if min_height > 0 else 1
+    rows = q.offset(offset * fetch_mult).limit((limit + 1) * fetch_mult).all()
     items: List[Dict[str, Any]] = []
     for link, thread, post in rows:
         raw_title = (link.title or "").strip()
@@ -395,9 +575,9 @@ def _search_forums(db: Session, query: str, min_height: int, limit: int) -> List
             "playable_url": "",
             "created_at": _iso_date((post.posted_at if post and post.posted_at else None) or link.created_at),
         })
-        if len(items) >= limit:
+        if len(items) > limit:
             break
-    return items
+    return items[:limit], len(items) > limit
 
 
 def _search_filester(
@@ -405,15 +585,27 @@ def _search_filester(
     min_height: int,
     limit: int,
     db_paths: Optional[Sequence[Path]] = None,
-) -> List[Dict[str, Any]]:
+    *,
+    min_duration: int = 0,
+    min_size_mb: float = 0.0,
+    only_playable: bool = False,
+    source_filter: str = "",
+    sort_key: str = "relevance",
+    offset: int = 0,
+    browse: bool = False,
+) -> Tuple[List[Dict[str, Any]], bool]:
+    if only_playable or min_duration > 0 or min_size_mb > 0:
+        return [], False
     tokens = _tokenize(query)
-    if not tokens:
-        return []
+    if not tokens and not browse:
+        return [], False
     paths = list(db_paths) if db_paths is not None else default_filester_db_paths()
     if not paths:
-        return []
+        return [], False
 
-    fts_expr = _build_fts_prefix_expr(query)
+    fts_expr = _build_fts_prefix_expr(query) if tokens else ""
+    src_low = (source_filter or "").strip().casefold()
+    target_total = offset + limit + 1
     seen_folders: Set[str] = set()
     items: List[Dict[str, Any]] = []
 
@@ -429,31 +621,64 @@ def _search_filester(
                 "SELECT 1 FROM sqlite_master WHERE type='table' AND name='pages_fts'"
             ).fetchone()
             rows: List[sqlite3.Row] = []
-            if has_fts and fts_expr:
+            fetch_lim = target_total * (2 if min_height > 0 else 1)
+
+            if tokens and has_fts and fts_expr:
                 try:
-                    rows = cur.execute(
-                        """
-                        SELECT p.url, p.folder_id, p.title, p.description, p.file_count,
-                               p.filenames, p.tags, p.source, p.last_seen
-                        FROM pages_fts f
-                        JOIN pages p ON p.rowid = f.rowid
-                        WHERE pages_fts MATCH ?
-                        LIMIT ?
-                        """,
-                        (fts_expr, limit * 2),
-                    ).fetchall()
+                    if src_low:
+                        rows = cur.execute(
+                            """
+                            SELECT p.url, p.folder_id, p.title, p.description, p.file_count,
+                                   p.filenames, p.tags, p.source, p.last_seen
+                            FROM pages_fts f
+                            JOIN pages p ON p.rowid = f.rowid
+                            WHERE pages_fts MATCH ?
+                              AND LOWER(COALESCE(p.source,'') || ' ' || COALESCE(p.url,'')) LIKE ?
+                            LIMIT ?
+                            """,
+                            (fts_expr, f"%{src_low}%", fetch_lim),
+                        ).fetchall()
+                    else:
+                        rows = cur.execute(
+                            """
+                            SELECT p.url, p.folder_id, p.title, p.description, p.file_count,
+                                   p.filenames, p.tags, p.source, p.last_seen
+                            FROM pages_fts f
+                            JOIN pages p ON p.rowid = f.rowid
+                            WHERE pages_fts MATCH ?
+                            LIMIT ?
+                            """,
+                            (fts_expr, fetch_lim),
+                        ).fetchall()
                 except sqlite3.Error:
                     rows = []
 
-            if not rows:
-                where_parts = ["(LOWER(COALESCE(title,'') || ' ' || COALESCE(description,'') || ' ' || COALESCE(filenames,'') || ' ' || COALESCE(tags,'')) LIKE ?)"] * len(tokens)
-                params: List[Any] = [f"%{t}%" for t in tokens] + [limit * 2]
+            if not rows and (browse or tokens):
+                where_parts: List[str] = []
+                params: List[Any] = []
+                for t in tokens:
+                    where_parts.append(
+                        "(LOWER(COALESCE(title,'') || ' ' || COALESCE(description,'') || ' ' || COALESCE(filenames,'') || ' ' || COALESCE(tags,'')) LIKE ?)"
+                    )
+                    params.append(f"%{t}%")
+                if src_low:
+                    where_parts.append("(LOWER(COALESCE(source,'') || ' ' || COALESCE(url,'')) LIKE ?)")
+                    params.append(f"%{src_low}%")
+                where_sql = f"WHERE {' AND '.join(where_parts)}" if where_parts else ""
+                order_sql = (
+                    "LOWER(COALESCE(title, folder_id, '')) ASC"
+                    if sort_key == "title_asc"
+                    else "last_seen DESC, COALESCE(file_count, 0) DESC"
+                    if sort_key == "newest"
+                    else "COALESCE(file_count, 0) DESC, last_seen DESC"
+                )
+                params.append(fetch_lim)
                 rows = cur.execute(
                     f"""
                     SELECT url, folder_id, title, description, file_count, filenames, tags, source, last_seen
                     FROM pages
-                    WHERE {' AND '.join(where_parts)}
-                    ORDER BY COALESCE(file_count, 0) DESC, last_seen DESC
+                    {where_sql}
+                    ORDER BY {order_sql}
                     LIMIT ?
                     """,
                     params,
@@ -473,10 +698,13 @@ def _search_filester(
                 sub = f"{fcount} súborov" if fcount else "Filester priečinok"
                 if filenames:
                     sub = f"{sub} · {filenames[:90]}"
+                source_label = f"Filester ({r['source'] or 'index'})"
+                if src_low and src_low not in f"{source_label} {sub} {r['url'] or ''}".casefold():
+                    continue
                 items.append({
                     "id": f"filester:{folder_key}",
                     "bucket": "filester",
-                    "source_label": f"Filester ({r['source'] or 'index'})",
+                    "source_label": source_label,
                     "title": title,
                     "subtitle": sub,
                     "url": str(r["url"] or ""),
@@ -492,24 +720,60 @@ def _search_filester(
                     "playable_url": "",
                     "created_at": _iso_date(r["last_seen"]),
                 })
-                if len(items) >= limit:
-                    return items
+                if len(items) >= target_total:
+                    break
+            if len(items) >= target_total:
+                break
         except sqlite3.Error as exc:
             logger.debug("[VaultSearch] Filester DB %s skipped: %s", db_path, exc)
         finally:
             if conn is not None:
                 conn.close()
-    return items
+
+    has_more = len(items) > (offset + limit)
+    return items[offset : offset + limit], has_more
 
 
-def _search_mega(db: Session, query: str, min_height: int, limit: int) -> List[Dict[str, Any]]:
-    if not _table_exists(db, "mega_hub_entries"):
-        return []
+def _search_mega(
+    db: Session,
+    query: str,
+    min_height: int,
+    limit: int,
+    *,
+    min_duration: int = 0,
+    min_size_mb: float = 0.0,
+    only_playable: bool = False,
+    only_importable: bool = False,
+    source_filter: str = "",
+    sort_key: str = "relevance",
+    offset: int = 0,
+    browse: bool = False,
+) -> Tuple[List[Dict[str, Any]], bool]:
+    if only_playable or only_importable or not _table_exists(db, "mega_hub_entries"):
+        return [], False
     tokens = _tokenize(query)
-    if not tokens:
-        return []
+    if not tokens and not browse:
+        return [], False
 
-    entries = db.query(MegaHubEntry).order_by(MegaHubEntry.id.desc()).all()
+    q = db.query(MegaHubEntry)
+    for tok in tokens:
+        like = f"%{tok}%"
+        q = q.filter(
+            (MegaHubEntry.title.ilike(like))
+            | (MegaHubEntry.url.ilike(like))
+            | (cast(MegaHubEntry.snapshot, String).ilike(like))
+        )
+    src_low = (source_filter or "").strip().casefold()
+    if src_low:
+        src_like = f"%{src_low}%"
+        q = q.filter(
+            (MegaHubEntry.title.ilike(src_like))
+            | (MegaHubEntry.url.ilike(src_like))
+            | (cast(MegaHubEntry.snapshot, String).ilike(src_like))
+        )
+
+    entries = q.order_by(MegaHubEntry.id.desc()).all()
+    target_total = offset + limit + 1
     items: List[Dict[str, Any]] = []
 
     for entry in entries:
@@ -524,25 +788,34 @@ def _search_mega(db: Session, query: str, min_height: int, limit: int) -> List[D
             vname = str(vid.get("name") or "").strip()
             if not vname:
                 continue
-            if _matches_all_tokens(tokens, root_title, vname):
+            if not tokens or _matches_all_tokens(tokens, root_title, vname):
                 h = _infer_height(0, "", vname)
                 if min_height > 0 and h < min_height:
                     continue
-                ref = str(vid.get("ref") or "").strip()
+                dur = int(float(vid.get("duration") or 0))
+                if min_duration > 0 and dur < min_duration:
+                    continue
                 size_bytes = float(vid.get("size") or 0)
+                size_mb = round(size_bytes / 1048576.0, 1) if size_bytes > 0 else None
+                if min_size_mb > 0 and float(size_mb or 0) < min_size_mb:
+                    continue
+                sub = f"Priečinok: {root_title}"
+                if src_low and src_low not in f"mega súbor {sub} {entry.url}".casefold():
+                    continue
+                ref = str(vid.get("ref") or "").strip()
                 items.append({
                     "id": f"mega:{entry.id}:{ref or vname[:30]}",
                     "bucket": "mega",
                     "source_label": "MEGA Súbor",
                     "title": vname,
-                    "subtitle": f"Priečinok: {root_title}",
+                    "subtitle": sub,
                     "url": entry.url,
                     "source_url": entry.url,
                     "thumbnail": "",
-                    "duration_sec": int(float(vid.get("duration") or 0)),
+                    "duration_sec": dur,
                     "height": h,
                     "quality": _quality_label(h),
-                    "size_mb": round(size_bytes / 1048576.0, 1) if size_bytes > 0 else None,
+                    "size_mb": size_mb,
                     "status": "indexed",
                     "video_id": None,
                     "can_import": False,
@@ -550,44 +823,79 @@ def _search_mega(db: Session, query: str, min_height: int, limit: int) -> List[D
                     "created_at": _iso_date(entry.updated_at or entry.added_at),
                 })
                 matched_nested += 1
-                if len(items) >= limit:
-                    return items
+                if sort_key == "relevance" and len(items) >= target_total:
+                    break
 
         # Also check nested folders & root folder title
-        if matched_nested == 0 and _matches_all_tokens(tokens, root_title, json.dumps(snap.get("folders") or [], ensure_ascii=False)):
+        if matched_nested == 0 and (
+            not tokens or _matches_all_tokens(tokens, root_title, json.dumps(snap.get("folders") or [], ensure_ascii=False))
+        ):
             h = _infer_height(0, "", root_title)
-            if min_height <= 0 or h >= min_height:
+            if (min_height <= 0 or h >= min_height) and min_duration <= 0 and min_size_mb <= 0:
                 video_cnt = len(snap.get("videos") or [])
-                items.append({
-                    "id": f"mega:{entry.id}",
-                    "bucket": "mega",
-                    "source_label": "MEGA Priečinok",
-                    "title": root_title,
-                    "subtitle": f"{video_cnt} videí v snapshote",
-                    "url": entry.url,
-                    "source_url": entry.url,
-                    "thumbnail": "",
-                    "duration_sec": 0,
-                    "height": h,
-                    "quality": _quality_label(h),
-                    "size_mb": None,
-                    "status": "indexed",
-                    "video_id": None,
-                    "can_import": False,
-                    "playable_url": "",
-                    "created_at": _iso_date(entry.updated_at or entry.added_at),
-                })
-                if len(items) >= limit:
-                    return items
+                sub = f"{video_cnt} videí v snapshote"
+                if not src_low or src_low in f"mega priečinok {sub} {entry.url}".casefold():
+                    items.append({
+                        "id": f"mega:{entry.id}",
+                        "bucket": "mega",
+                        "source_label": "MEGA Priečinok",
+                        "title": root_title,
+                        "subtitle": sub,
+                        "url": entry.url,
+                        "source_url": entry.url,
+                        "thumbnail": "",
+                        "duration_sec": 0,
+                        "height": h,
+                        "quality": _quality_label(h),
+                        "size_mb": None,
+                        "status": "indexed",
+                        "video_id": None,
+                        "can_import": False,
+                        "playable_url": "",
+                        "created_at": _iso_date(entry.updated_at or entry.added_at),
+                    })
+        if sort_key == "relevance" and len(items) >= target_total:
+            break
 
-    return items
+    if sort_key == "quality_desc":
+        items.sort(key=lambda it: (int(it.get("height") or 0), float(it.get("size_mb") or 0)), reverse=True)
+    elif sort_key == "duration_desc":
+        items.sort(key=lambda it: (int(it.get("duration_sec") or 0), int(it.get("height") or 0)), reverse=True)
+    elif sort_key == "size_desc":
+        items.sort(key=lambda it: (float(it.get("size_mb") or 0), int(it.get("height") or 0)), reverse=True)
+    elif sort_key == "newest":
+        items.sort(key=lambda it: str(it.get("created_at") or ""), reverse=True)
+    elif sort_key == "title_asc":
+        items.sort(key=lambda it: str(it.get("title") or "").casefold())
+
+    has_more = len(items) > (offset + limit)
+    return items[offset : offset + limit], has_more
 
 
-def _search_queue(db: Session, query: str, min_height: int, limit: int) -> List[Dict[str, Any]]:
+def _search_queue(
+    db: Session,
+    query: str,
+    min_height: int,
+    limit: int,
+    *,
+    min_duration: int = 0,
+    min_size_mb: float = 0.0,
+    only_playable: bool = False,
+    only_importable: bool = False,
+    source_filter: str = "",
+    sort_key: str = "relevance",
+    offset: int = 0,
+    browse: bool = False,
+) -> Tuple[List[Dict[str, Any]], bool]:
+    if only_playable:
+        return [], False
     tokens = _tokenize(query)
-    if not tokens:
-        return []
+    if not tokens and not browse:
+        return [], False
 
+    src_low = (source_filter or "").strip().casefold()
+    src_like = f"%{src_low}%" if src_low else ""
+    target_total = offset + limit + 1
     seen_urls: Set[str] = set()
     items: List[Dict[str, Any]] = []
 
@@ -603,8 +911,34 @@ def _search_queue(db: Session, query: str, min_height: int, limit: int) -> List[
                 | (DiscoveredVideo.categories.ilike(like))
             )
         if min_height > 0:
-            dq = dq.filter(DiscoveredVideo.height >= min_height)
-        for d in dq.order_by(DiscoveredVideo.id.desc()).limit(limit).all():
+            dq = dq.filter(func.coalesce(DiscoveredVideo.height, 0) >= min_height)
+        if min_duration > 0:
+            dq = dq.filter(func.coalesce(DiscoveredVideo.duration, 0) >= min_duration)
+        if min_size_mb > 0:
+            dq = dq.filter(func.coalesce(DiscoveredVideo.file_size_mb, 0) >= min_size_mb)
+        if only_importable:
+            dq = dq.filter(DiscoveredVideo.imported.is_(False))
+        if src_like:
+            dq = dq.filter(
+                (DiscoveredVideo.source.ilike(src_like))
+                | (DiscoveredVideo.profile_name.ilike(src_like))
+                | (DiscoveredVideo.url.ilike(src_like))
+                | (DiscoveredVideo.source_url.ilike(src_like))
+            )
+        if sort_key == "quality_desc":
+            dq = dq.order_by(func.coalesce(DiscoveredVideo.height, 0).desc(), DiscoveredVideo.id.desc())
+        elif sort_key == "duration_desc":
+            dq = dq.order_by(func.coalesce(DiscoveredVideo.duration, 0).desc(), DiscoveredVideo.id.desc())
+        elif sort_key == "size_desc":
+            dq = dq.order_by(func.coalesce(DiscoveredVideo.file_size_mb, 0).desc(), DiscoveredVideo.id.desc())
+        elif sort_key == "newest":
+            dq = dq.order_by(DiscoveredVideo.discovered_at.desc(), DiscoveredVideo.id.desc())
+        elif sort_key == "title_asc":
+            dq = dq.order_by(func.lower(func.coalesce(DiscoveredVideo.title, DiscoveredVideo.url)).asc())
+        else:
+            dq = dq.order_by(DiscoveredVideo.id.desc())
+
+        for d in dq.limit(target_total).all():
             key = (d.source_url or d.url or "").strip()
             if not key or key in seen_urls:
                 continue
@@ -630,7 +964,7 @@ def _search_queue(db: Session, query: str, min_height: int, limit: int) -> List[
                 "created_at": _iso_date(d.discovered_at),
             })
 
-    if _table_exists(db, "import_job_items") and len(items) < limit:
+    if _table_exists(db, "import_job_items"):
         iq = db.query(ImportJobItem)
         for tok in tokens:
             like = f"%{tok}%"
@@ -642,8 +976,38 @@ def _search_queue(db: Session, query: str, min_height: int, limit: int) -> List[
                 | (ImportJobItem.actors.ilike(like))
             )
         if min_height > 0:
-            iq = iq.filter(ImportJobItem.height >= min_height)
-        for it in iq.order_by(ImportJobItem.id.desc()).limit(limit * 2).all():
+            iq = iq.filter(func.coalesce(ImportJobItem.height, 0) >= min_height)
+        if min_duration > 0:
+            iq = iq.filter(func.coalesce(ImportJobItem.duration, 0) >= min_duration)
+        if min_size_mb > 0:
+            iq = iq.filter(func.coalesce(ImportJobItem.file_size_mb, 0) >= min_size_mb)
+        if only_importable:
+            iq = iq.filter(
+                ImportJobItem.video_id.is_(None),
+                or_(ImportJobItem.status.is_(None), ~ImportJobItem.status.in_(["imported", "running", "pending"])),
+            )
+        if src_like:
+            iq = iq.filter(
+                (ImportJobItem.status.ilike(src_like))
+                | (ImportJobItem.actors.ilike(src_like))
+                | (ImportJobItem.tags.ilike(src_like))
+                | (ImportJobItem.url.ilike(src_like))
+                | (ImportJobItem.source_url.ilike(src_like))
+            )
+        if sort_key == "quality_desc":
+            iq = iq.order_by(func.coalesce(ImportJobItem.height, 0).desc(), ImportJobItem.id.desc())
+        elif sort_key == "duration_desc":
+            iq = iq.order_by(func.coalesce(ImportJobItem.duration, 0).desc(), ImportJobItem.id.desc())
+        elif sort_key == "size_desc":
+            iq = iq.order_by(func.coalesce(ImportJobItem.file_size_mb, 0).desc(), ImportJobItem.id.desc())
+        elif sort_key == "newest":
+            iq = iq.order_by(ImportJobItem.created_at.desc(), ImportJobItem.id.desc())
+        elif sort_key == "title_asc":
+            iq = iq.order_by(func.lower(func.coalesce(ImportJobItem.title, ImportJobItem.url)).asc())
+        else:
+            iq = iq.order_by(ImportJobItem.id.desc())
+
+        for it in iq.limit(target_total * 2).all():
             key = (it.source_url or it.url or "").strip()
             if not key or key in seen_urls:
                 continue
@@ -670,10 +1034,20 @@ def _search_queue(db: Session, query: str, min_height: int, limit: int) -> List[
                 "playable_url": "",
                 "created_at": _iso_date(it.created_at),
             })
-            if len(items) >= limit:
-                break
 
-    return items[:limit]
+    if sort_key == "quality_desc":
+        items.sort(key=lambda it: (int(it.get("height") or 0), float(it.get("size_mb") or 0)), reverse=True)
+    elif sort_key == "duration_desc":
+        items.sort(key=lambda it: (int(it.get("duration_sec") or 0), int(it.get("height") or 0)), reverse=True)
+    elif sort_key == "size_desc":
+        items.sort(key=lambda it: (float(it.get("size_mb") or 0), int(it.get("height") or 0)), reverse=True)
+    elif sort_key == "newest":
+        items.sort(key=lambda it: str(it.get("created_at") or ""), reverse=True)
+    elif sort_key == "title_asc":
+        items.sort(key=lambda it: str(it.get("title") or "").casefold())
+
+    has_more = len(items) > (offset + limit)
+    return items[offset : offset + limit], has_more
 
 
 def get_vault_stats(
@@ -736,6 +1110,29 @@ def get_vault_stats(
     }
 
 
+def _dedupe_identity(item: Dict[str, Any]) -> str:
+    """Build canonical identity key for cross-bucket deduplication."""
+    meta = item.get("telegram_meta")
+    if isinstance(meta, dict) and meta.get("chat_id") and meta.get("message_id"):
+        return f"tg:{meta['chat_id']}:{meta['message_id']}"
+
+    raw = str(item.get("source_url") or item.get("url") or "").strip()
+    if raw.startswith(("http://", "https://")):
+        try:
+            parsed = urllib.parse.urlsplit(raw)
+            host = parsed.netloc.lower()
+            if host.startswith("www."):
+                host = host[4:]
+            path = parsed.path.rstrip("/")
+            if host in ("t.me", "telegram.me") and path:
+                return f"tme:{path.lower()}"
+            query = f"?{parsed.query}" if parsed.query else ""
+            return f"url:{host}{path}{query}"
+        except ValueError:
+            pass
+    return ""
+
+
 def search_local_vault(
     db: Session,
     query: str,
@@ -749,6 +1146,9 @@ def search_local_vault(
     source_filter: str = "",
     sort: str = "relevance",
     limit_per_bucket: int = 25,
+    offset: int = 0,
+    browse: bool = False,
+    deduplicate: bool = True,
     filester_db_paths: Optional[Sequence[Path]] = None,
 ) -> Dict[str, Any]:
     """Run unified local search across selected Nexus vault buckets."""
@@ -759,15 +1159,21 @@ def search_local_vault(
         selected = list(VAULT_BUCKETS)
 
     capped_limit = max(1, min(int(limit_per_bucket or 100), 500))
+    safe_offset = max(0, int(offset or 0))
     min_h = max(0, int(min_height or 0))
     min_dur = max(0, int(min_duration or 0))
     min_sz = max(0.0, float(min_size_mb or 0))
     src_sub = (source_filter or "").strip().casefold()
     sort_key = (sort or "relevance").strip().lower()
 
-    if not cleaned:
+    if not cleaned and not browse:
         return {
             "query": "",
+            "browse": False,
+            "offset": safe_offset,
+            "limit": capped_limit,
+            "has_more": False,
+            "bucket_has_more": {b: False for b in selected},
             "elapsed_ms": 0,
             "total": 0,
             "bucket_counts": {b: 0 for b in selected},
@@ -775,22 +1181,46 @@ def search_local_vault(
             "items": [],
         }
 
-    runners: Dict[str, Callable[[], List[Dict[str, Any]]]] = {
-        "library": lambda: _search_library(db, cleaned, min_h, capped_limit),
-        "telegram": lambda: _search_telegram(db, cleaned, min_h, capped_limit),
-        "forum": lambda: _search_forums(db, cleaned, min_h, capped_limit),
-        "filester": lambda: _search_filester(cleaned, min_h, capped_limit, db_paths=filester_db_paths),
-        "mega": lambda: _search_mega(db, cleaned, min_h, capped_limit),
-        "queue": lambda: _search_queue(db, cleaned, min_h, capped_limit),
+    common_kw: Dict[str, Any] = {
+        "min_duration": min_dur,
+        "min_size_mb": min_sz,
+        "only_importable": only_importable,
+        "source_filter": src_sub,
+        "sort_key": sort_key,
+        "offset": safe_offset,
+        "browse": browse,
+    }
+
+    runners: Dict[str, Callable[[], Tuple[List[Dict[str, Any]], bool]]] = {
+        "library": lambda: _search_library(db, cleaned, min_h, capped_limit, **common_kw),
+        "telegram": lambda: _search_telegram(db, cleaned, min_h, capped_limit, **common_kw),
+        "forum": lambda: _search_forums(db, cleaned, min_h, capped_limit, only_playable=only_playable, **common_kw),
+        "filester": lambda: _search_filester(
+            cleaned,
+            min_h,
+            capped_limit,
+            db_paths=filester_db_paths,
+            min_duration=min_dur,
+            min_size_mb=min_sz,
+            only_playable=only_playable,
+            source_filter=src_sub,
+            sort_key=sort_key,
+            offset=safe_offset,
+            browse=browse,
+        ),
+        "mega": lambda: _search_mega(db, cleaned, min_h, capped_limit, only_playable=only_playable, **common_kw),
+        "queue": lambda: _search_queue(db, cleaned, min_h, capped_limit, only_playable=only_playable, **common_kw),
     }
 
     all_items: List[Dict[str, Any]] = []
     bucket_counts: Dict[str, int] = {}
+    bucket_has_more: Dict[str, bool] = {}
     errors: Dict[str, str] = {}
+    seen_identities: Set[str] = set()
 
     for bucket in selected:
         try:
-            hits = runners[bucket]()
+            hits, more = runners[bucket]()
             filtered: List[Dict[str, Any]] = []
             for item in hits:
                 if min_dur > 0 and int(item.get("duration_sec") or 0) < min_dur:
@@ -805,12 +1235,20 @@ def search_local_vault(
                     hay = f"{item.get('source_label', '')} {item.get('subtitle', '')} {item.get('url', '')}".casefold()
                     if src_sub not in hay:
                         continue
+                if deduplicate:
+                    ident = _dedupe_identity(item)
+                    if ident:
+                        if ident in seen_identities:
+                            continue
+                        seen_identities.add(ident)
                 filtered.append(item)
             bucket_counts[bucket] = len(filtered)
+            bucket_has_more[bucket] = bool(more)
             all_items.extend(filtered)
         except Exception as exc:  # noqa: BLE001 — isolate bucket failures
             logger.warning("[VaultSearch] bucket '%s' failed: %s", bucket, exc)
             bucket_counts[bucket] = 0
+            bucket_has_more[bucket] = False
             errors[bucket] = str(exc)[:200]
 
     tokens = _tokenize(cleaned)
@@ -818,7 +1256,7 @@ def search_local_vault(
 
     def _rel_key(item: Dict[str, Any]) -> Tuple[int, int, int, int]:
         title_low = (item.get("title") or "").casefold()
-        exact = int(cleaned.casefold() in title_low)
+        exact = int(bool(cleaned) and cleaned.casefold() in title_low)
         token_hits = sum(1 for t in tokens if t in title_low)
         height = int(item.get("height") or 0)
         prio = -bucket_priority.get(item.get("bucket", ""), 99)
@@ -834,6 +1272,8 @@ def search_local_vault(
         all_items.sort(key=lambda it: (str(it.get("created_at") or ""), _rel_key(it)), reverse=True)
     elif sort_key == "title_asc":
         all_items.sort(key=lambda it: (str(it.get("title") or "").casefold(), -int(it.get("height") or 0)))
+    elif browse and not tokens:
+        all_items.sort(key=lambda it: (str(it.get("created_at") or ""), int(it.get("height") or 0)), reverse=True)
     else:
         all_items.sort(key=_rel_key, reverse=True)
 
@@ -841,6 +1281,11 @@ def search_local_vault(
 
     return {
         "query": cleaned,
+        "browse": bool(browse and not cleaned),
+        "offset": safe_offset,
+        "limit": capped_limit,
+        "has_more": any(bucket_has_more.values()),
+        "bucket_has_more": bucket_has_more,
         "elapsed_ms": elapsed_ms,
         "total": len(all_items),
         "bucket_counts": bucket_counts,

@@ -372,3 +372,121 @@ def test_vault_library_hls_routes_through_hls_proxy(vault_env):
         assert item["is_hls"] is True
         assert item["playable_url"].startswith("/hls_proxy?url=")
         assert "index.m3u8" in item["playable_url"] or "index.m3u8" in item["url"]
+
+
+def test_vault_pushdown_filters_pagination_browse_and_dedupe(vault_env):
+    client, SessionCls, filester_paths = vault_env
+    with SessionCls() as db:
+        # Add 3 videos to library where the longest/largest has the lowest id/rank
+        v_long = Video(
+            title="Pushdown Target Long 4K",
+            url="https://cdn.example.com/pd_long.mp4",
+            source_url="https://cdn.example.com/pd_long",
+            duration=900,
+            height=2160,
+            quality="4K",
+            file_size_mb=850.0,
+            tags="pushdown",
+            storage_type="remote",
+        )
+        v_short1 = Video(
+            title="Pushdown Target Short A",
+            url="https://cdn.example.com/pd_s1.mp4",
+            source_url="https://cdn.example.com/pd_s1",
+            duration=15,
+            height=1080,
+            quality="1080p",
+            file_size_mb=5.0,
+            tags="pushdown",
+            storage_type="remote",
+        )
+        v_short2 = Video(
+            title="Pushdown Target Short B",
+            url="https://cdn.example.com/pd_s2.mp4",
+            source_url="https://cdn.example.com/pd_s2",
+            duration=20,
+            height=1080,
+            quality="1080p",
+            file_size_mb=8.0,
+            tags="pushdown",
+            storage_type="remote",
+        )
+        # Add duplicate discovered video sharing source_url with existing library video
+        dup_disc = DiscoveredVideo(
+            profile_id=1,
+            profile_name="Daily",
+            title="Stella Library Duplicate",
+            url="https://eporner.com/video-123/stella/",
+            source_url="https://eporner.com/video-123/stella/",
+            height=2160,
+            source="eporner",
+            imported=False,
+        )
+        db.add_all([v_long, v_short1, v_short2, dup_disc])
+        db.flush()
+        for v in (v_long, v_short1, v_short2):
+            db.execute(
+                text("INSERT INTO videos_fts(rowid, title, tags, ai_tags, batch_name) VALUES (:id, :t, :tg, '', '')"),
+                {"id": v.id, "t": v.title, "tg": v.tags},
+            )
+        db.commit()
+
+        # 1) Push-down filter: limit=1 must still find the 900s video even when 2 shorter videos exist
+        dur_res = search_local_vault(
+            db,
+            "Pushdown",
+            buckets=["library"],
+            min_duration=300,
+            min_size_mb=500,
+            limit_per_bucket=1,
+            filester_db_paths=filester_paths,
+        )
+        assert dur_res["total"] == 1
+        assert dur_res["items"][0]["title"] == "Pushdown Target Long 4K"
+        assert dur_res["has_more"] is False
+
+        # 2) Pagination: limit=2 on 3 items -> page 0 has_more=True, page 1 has 1 item and has_more=False
+        p0 = search_local_vault(
+            db,
+            "Pushdown",
+            buckets=["library"],
+            sort="duration_desc",
+            limit_per_bucket=2,
+            offset=0,
+            filester_db_paths=filester_paths,
+        )
+        assert p0["total"] == 2
+        assert p0["has_more"] is True
+        assert p0["bucket_has_more"]["library"] is True
+        assert p0["items"][0]["duration_sec"] == 900
+
+        p1 = search_local_vault(
+            db,
+            "Pushdown",
+            buckets=["library"],
+            sort="duration_desc",
+            limit_per_bucket=2,
+            offset=2,
+            filester_db_paths=filester_paths,
+        )
+        assert p1["total"] == 1
+        assert p1["has_more"] is False
+        assert p1["items"][0]["duration_sec"] == 15
+
+        # 3) Cross-bucket deduplication suppresses discovered duplicate of library video
+        deduped = search_local_vault(db, "Stella", buckets=["library", "queue"], deduplicate=True, filester_db_paths=filester_paths)
+        raw = search_local_vault(db, "Stella", buckets=["library", "queue"], deduplicate=False, filester_db_paths=filester_paths)
+        assert deduped["bucket_counts"]["library"] == 1
+        assert deduped["bucket_counts"]["queue"] == 2
+        assert raw["bucket_counts"]["queue"] == 3
+
+    # 4) Browse mode via API with empty query
+    no_browse = client.get("/api/vault/search", params={"q": "", "buckets": "library,telegram"})
+    assert no_browse.status_code == 200
+    assert no_browse.json()["total"] == 0
+
+    browse_resp = client.get("/api/vault/search", params={"q": "", "browse": "true", "buckets": "library,telegram"})
+    assert browse_resp.status_code == 200
+    browse_data = browse_resp.json()
+    assert browse_data["browse"] is True
+    assert browse_data["total"] >= 2
